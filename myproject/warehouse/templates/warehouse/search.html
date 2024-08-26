@@ -1,0 +1,38 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Поиск{% endblock %}
+{% block content %}
+    <h2>Поиск по складам</h2>
+    <form method="get">
+        <input type="text" name="device" placeholder="Устройство">
+        <input type="text" name="brand" placeholder="Марка">
+        <input type="text" name="model" placeholder="Модель">
+        <input type="text" name="part_type" placeholder="Тип запчасти">
+        <input type="text" name="city" placeholder="Город">
+        <button type="submit">Поиск</button>
+    </form>
+    <hr>
+    <table>
+        <tr>
+            <th>Город</th>
+            <th>Номер телефона</th>
+            <th>Устройство</th>
+            <th>Марка</th>
+            <th>Модель</th>
+            <th>Тип запчасти</th>
+            <th>Количество</th>
+            <th>Цена</th>
+        </tr>
+        {% for result in results %}
+        <tr>
+            <td>{{ result.user.profile.city }}</td>
+            <td>{{ result.user.profile.phone }}</td>
+            <td>{{ result.device }}</td>
+            <td>{{ result.brand }}</td>
+            <td>{{ result.model }}</td>
+            <td>{{ result.part_type }}</td>
+            <td>{{ result.quantity }}</td>
+            <td>{{ result.price }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

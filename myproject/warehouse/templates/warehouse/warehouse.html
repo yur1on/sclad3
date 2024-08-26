@@ -1,0 +1,26 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Склад{% endblock %}
+{% block content %}
+    <h2>Мой склад</h2>
+    <table>
+        <tr>
+            <th>Устройство</th>
+            <th>Марка</th>
+            <th>Модель</th>
+            <th>Тип запчасти</th>
+            <th>Количество</th>
+            <th>Цена</th>
+        </tr>
+        {% for part in parts %}
+        <tr>
+            <td>{{ part.device }}</td>
+            <td>{{ part.brand }}</td>
+            <td>{{ part.model }}</td>
+            <td>{{ part.part_type }}</td>
+            <td>{{ part.quantity }}</td>
+            <td>{{ part.price }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'add_part' %}">Добавить запчасть</a>
+{% endblock %}

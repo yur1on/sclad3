@@ -1,0 +1,10 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Добавить запчасть{% endblock %}
+{% block content %}
+    <h2>Добавить запчасть</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Добавить</button>
+    </form>
+{% endblock %}

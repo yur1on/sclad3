@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Склад{% endblock %}</title>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">Главная</a> |
+        <a href="{% url 'profile' %}">Профиль</a> |
+        <a href="{% url 'warehouse' %}">Склад</a> |
+        <a href="{% url 'search' %}">Поиск</a> |
+        {% if user.is_authenticated %}
+            <span>Привет, {{ user.username }}</span>
+        {% else %}
+            <a href="{% url 'login' %}">Вход</a> |
+            <a href="{% url 'register' %}">Регистрация</a>
+        {% endif %}
+    </nav>
+    <hr>
+    {% block content %}{% endblock %}
+</body>
+</html>
+{% if user.is_authenticated %}
+    <a href="{% url 'logout' %}">Выход</a>
+{% else %}
+    <a href="{% url 'login' %}">Вход</a> |
+    <a href="{% url 'register' %}">Регистрация</a>
+{% endif %}
