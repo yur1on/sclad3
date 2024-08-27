@@ -2,9 +2,106 @@
 {% block title %}Добавить запчасть{% endblock %}
 {% block content %}
     <h2>Добавить запчасть</h2>
-    <form method="post">
+    <form method="post" id="part-form" class="form-container">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Добавить</button>
+
+        <div class="form-group">
+            <label for="device">Устройство:</label>
+            <select id="device" name="device" onchange="toggleCustomDevice()" class="form-control">
+                <option value="">Выберите устройство</option>
+                <option value="Телефон">Телефон</option>
+                <option value="Планшет">Планшет</option>
+            </select>
+            <input type="text" id="custom_device" name="custom_device" placeholder="Введите устройство" class="form-control" style="display:none;">
+        </div>
+
+        <div class="form-group">
+            <label for="brand">Бренд:</label>
+            <select id="brand" name="brand" onchange="updateModelOptions()" class="form-control">
+                <option value="">Выберите бренд</option>
+                <option value="Samsung">Samsung</option>
+                <option value="Huawei">Huawei</option>
+                <option value="Xiaomi">Xiaomi</option>
+            </select>
+            <input type="text" id="custom_brand" name="custom_brand" placeholder="Введите бренд" class="form-control" style="display:none;">
+        </div>
+
+        <div class="form-group">
+            <label for="model">Модель:</label>
+            <select id="model" name="model" class="form-control">
+                <option value="">Выберите модель</option>
+            </select>
+            <input type="text" id="custom_model" name="custom_model" placeholder="Введите модель" class="form-control" style="display:none;">
+        </div>
+
+        <div class="form-group">
+            <label for="part_type">Тип запчасти:</label>
+            {{ form.part_type }}
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Количество:</label>
+            {{ form.quantity }}
+        </div>
+
+        <div class="form-group">
+            <label for="price">Цена:</label>
+            {{ form.price }}
+        </div>
+
+        <button type="submit" class="btn-submit">Добавить</button>
     </form>
+
+    <script>
+        function toggleCustomDevice() {
+            var deviceSelect = document.getElementById('device');
+            var customDeviceInput = document.getElementById('custom_device');
+            customDeviceInput.style.display = deviceSelect.value ? 'none' : 'inline';
+            if (deviceSelect.value) {
+                document.getElementById('custom_device').value = deviceSelect.value;
+            }
+        }
+
+        function updateModelOptions() {
+            var brandSelect = document.getElementById('brand');
+            var modelSelect = document.getElementById('model');
+            var customBrandInput = document.getElementById('custom_brand');
+            var customModelInput = document.getElementById('custom_model');
+
+            var samsungModels = ['a10', 'a20', 'a30', 'a40'];
+            var huaweiModels = ['p40', 'p40 lite', 'p50'];
+            var xiaomiModels = ['redmi 5', 'redmi 6', 'redmi 8'];
+
+            modelSelect.innerHTML = '<option value="">Выберите модель</option>';
+
+            if (brandSelect.value === 'Samsung') {
+                samsungModels.forEach(function(model) {
+                    var option = document.createElement('option');
+                    option.value = model;
+                    option.text = model;
+                    modelSelect.appendChild(option);
+                });
+            } else if (brandSelect.value === 'Huawei') {
+                huaweiModels.forEach(function(model) {
+                    var option = document.createElement('option');
+                    option.value = model;
+                    option.text = model;
+                    modelSelect.appendChild(option);
+                });
+            } else if (brandSelect.value === 'Xiaomi') {
+                xiaomiModels.forEach(function(model) {
+                    var option = document.createElement('option');
+                    option.value = model;
+                    option.text = model;
+                    modelSelect.appendChild(option);
+                });
+            }
+
+            customBrandInput.style.display = brandSelect.value ? 'none' : 'inline';
+            customModelInput.style.display = modelSelect.value ? 'none' : 'inline';
+            if (brandSelect.value) {
+                document.getElementById('custom_brand').value = brandSelect.value;
+            }
+        }
+    </script>
 {% endblock %}

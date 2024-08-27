@@ -5,6 +5,10 @@ from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.shortcuts import render
 from .models import Part
+
+from django.shortcuts import render, redirect
+from .forms import PartForm
+
 def home(request):
     return render(request, 'warehouse/home.html')
 
@@ -34,20 +38,19 @@ def warehouse_view(request):
     parts = Part.objects.filter(user=request.user)
     return render(request, 'warehouse/warehouse.html', {'parts': parts})
 
+
+
 def add_part(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
     if request.method == 'POST':
         form = PartForm(request.POST)
         if form.is_valid():
             part = form.save(commit=False)
-            part.user = request.user
+            part.user = request.user  # Устанавливаем текущего пользователя
             part.save()
-            return redirect('warehouse')
+            return redirect('warehouse')  # Перенаправление на страницу склада после сохранения
     else:
         form = PartForm()
     return render(request, 'warehouse/add_part.html', {'form': form})
-
 
 
 
@@ -59,8 +62,7 @@ def logout_view(request):
 
 
 
-from django.shortcuts import render
-from .models import Part
+
 
 def search(request):
     query = request.GET.get('q')
