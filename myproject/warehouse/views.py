@@ -59,14 +59,22 @@ def logout_view(request):
 
 
 
+from django.shortcuts import render
+from .models import Part
+
 def search(request):
     query = request.GET.get('q')
     brand = request.GET.get('brand')
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
     city = request.GET.get('city')
+    global_search = request.GET.get('global_search')  # Получаем значение чекбокса
 
     results = Part.objects.all()
+
+    # Если глобальный поиск не выбран, фильтруем по складу текущего пользователя
+    if not global_search:
+        results = results.filter(user=request.user)
 
     if query:
         results = results.filter(device__icontains=query)
@@ -77,6 +85,6 @@ def search(request):
     if part_type:
         results = results.filter(part_type__icontains=part_type)
     if city:
-        results = results.filter(user__profile__city__icontains=city)  # Добавлен фильтр по городу
+        results = results.filter(user__profile__city__icontains=city)
 
     return render(request, 'warehouse/search.html', {'results': results})

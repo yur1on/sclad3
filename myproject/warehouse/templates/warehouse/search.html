@@ -2,14 +2,21 @@
 {% block title %}Поиск{% endblock %}
 {% block content %}
     <h2>Поиск по складам</h2>
-    <form method="get">
-        <input type="text" name="device" placeholder="Устройство">
-        <input type="text" name="brand" placeholder="Марка">
-        <input type="text" name="model" placeholder="Модель">
-        <input type="text" name="part_type" placeholder="Тип запчасти">
-        <input type="text" name="city" placeholder="Город">
-        <button type="submit">Поиск</button>
-    </form>
+<form method="GET" action="{% url 'search' %}">
+    <input type="text" name="q" placeholder="Поиск по устройству">
+    <input type="text" name="brand" placeholder="Марка">
+    <input type="text" name="model" placeholder="Модель">
+    <input type="text" name="part_type" placeholder="Тип запчасти">
+    <input type="text" name="city" placeholder="Город"> <!-- Поле для ввода города -->
+
+    <!-- Чекбокс для переключения между локальным и глобальным поиском -->
+    <label for="global_search">
+        <input type="checkbox" id="global_search" name="global_search" value="on"> Глобальный поиск
+    </label>
+
+    <button type="submit">Искать</button>
+</form>
+
     <hr>
     <table>
         <tr>
