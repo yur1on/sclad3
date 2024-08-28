@@ -10,8 +10,11 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('warehouse/', views.warehouse_view, name='warehouse'),
     path('add-part/', views.add_part, name='add_part'),
+    path('edit-part/<int:part_id>/', views.edit_part, name='edit_part'),
+    path('delete-part/<int:part_id>/', views.delete_part, name='delete_part'),
     path('logout/', logout_view, name='logout'),
 ]
+
 
 
 

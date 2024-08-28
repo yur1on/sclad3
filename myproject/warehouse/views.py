@@ -1,13 +1,11 @@
-from django.shortcuts import render, redirect
+
 from django.contrib.auth import authenticate, login
 from .forms import UserRegisterForm, PartForm
 from django.contrib.auth import logout
-from django.shortcuts import redirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Part
+from django.contrib.auth.decorators import login_required
 
-from django.shortcuts import render, redirect
-from .forms import PartForm
 
 def home(request):
     return render(request, 'warehouse/home.html')
@@ -32,6 +30,8 @@ def user_login(request):
             return redirect('warehouse')
     return render(request, 'warehouse/login.html')
 
+
+@login_required
 def warehouse_view(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -39,28 +39,24 @@ def warehouse_view(request):
     return render(request, 'warehouse/warehouse.html', {'parts': parts})
 
 
-
+@login_required
 def add_part(request):
     if request.method == 'POST':
         form = PartForm(request.POST)
         if form.is_valid():
             part = form.save(commit=False)
-            part.user = request.user  # Устанавливаем текущего пользователя
+            part.user = request.user
             part.save()
-            return redirect('warehouse')  # Перенаправление на страницу склада после сохранения
+            return redirect('warehouse')
     else:
         form = PartForm()
     return render(request, 'warehouse/add_part.html', {'form': form})
 
 
 
-
-
 def logout_view(request):
     logout(request)
     return redirect('home')  # Перенаправление на главную страницу после выхода
-
-
 
 
 
@@ -90,3 +86,24 @@ def search(request):
         results = results.filter(user__profile__city__icontains=city)
 
     return render(request, 'warehouse/search.html', {'results': results})
+
+
+@login_required
+def edit_part(request, part_id):
+    part = get_object_or_404(Part, id=part_id, user=request.user)
+    if request.method == 'POST':
+        form = PartForm(request.POST, instance=part)
+        if form.is_valid():
+            form.save()
+            return redirect('warehouse')
+    else:
+        form = PartForm(instance=part)
+    return render(request, 'warehouse/edit_part.html', {'form': form})
+
+@login_required
+def delete_part(request, part_id):
+    part = get_object_or_404(Part, id=part_id, user=request.user)
+    if request.method == 'POST':
+        part.delete()
+        return redirect('warehouse')
+    return render(request, 'warehouse/delete_part.html', {'part': part})
