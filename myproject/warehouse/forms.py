@@ -15,3 +15,5 @@ class PartForm(forms.ModelForm):
     class Meta:
         model = Part
         fields = ['device', 'brand', 'model', 'part_type', 'quantity', 'price']
+
+

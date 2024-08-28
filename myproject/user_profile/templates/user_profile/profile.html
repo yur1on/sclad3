@@ -1,11 +1,43 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Профиль{% endblock %}
 {% block content %}
-    <h2>Ваш профиль</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Сохранить изменения</button>
-    </form>
+    <div class="card">
+        <div class="card-header">
+            <h2>Ваш профиль</h2>
+        </div>
+        <div class="card-body">
+            {% if edit_mode %}
+                <!-- Форма редактирования -->
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">Сохранить изменения</button>
+                        <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
+                    </div>
+                </form>
+            {% else %}
+                <!-- Таблица с данными профиля -->
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Поле</th>
+                        <th>Значение</th>
+                    </tr>
+                    <tr>
+                        <td>Имя пользователя</td>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <td>Телефон</td>
+                        <td>{{ user.profile.phone }}</td>
+                    </tr>
+                    <tr>
+                        <td>Город</td>
+                        <td>{{ user.profile.city }}</td>
+                    </tr>
+                </table>
+                <a href="{% url 'profile' %}?edit=true" class="btn btn-primary">Редактировать</a>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
-

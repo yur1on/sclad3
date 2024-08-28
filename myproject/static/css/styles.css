@@ -102,3 +102,24 @@ table tr:nth-child(even) {
 table tr:hover {
     background-color: #f1f1f1;
 }
+
+
+/* Пример пользовательских стилей */
+
+.container {
+    max-width: 800px;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary, .btn-success {
+    width: 150px;
+    margin-top: 15px;
+}
+
+.btn-secondary {
+    margin-top: 15px;
+}
