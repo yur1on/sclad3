@@ -123,3 +123,15 @@ table tr:hover {
 .btn-secondary {
     margin-top: 15px;
 }
+
+/* Пример стиля для формы поиска */
+.form-inline {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    width: auto;
+    margin-right: 0.5rem;
+}

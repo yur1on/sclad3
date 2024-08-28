@@ -2,6 +2,14 @@
 {% block title %}Склад{% endblock %}
 {% block content %}
     <h2>Ваши запчасти</h2>
+
+    <!-- Форма поиска -->
+    <form method="get" class="form-inline mb-3">
+        <input type="text" name="q" class="form-control mr-2" placeholder="Поиск..." value="{{ query }}">
+        <button type="submit" class="btn btn-primary">Поиск</button>
+    </form>
+
+    <!-- Таблица запчастей -->
     <table class="table table-striped">
         <thead>
             <tr>
@@ -28,8 +36,13 @@
                     <a href="{% url 'delete_part' part.id %}" class="btn btn-sm btn-danger">Удалить</a>
                 </td>
             </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">Запчасти не найдены</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
+
     <a href="{% url 'add_part' %}" class="btn btn-primary">Добавить запчасть</a>
 {% endblock %}

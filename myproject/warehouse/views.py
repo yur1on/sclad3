@@ -5,7 +5,11 @@ from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Part
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import Q
+from django.shortcuts import render, redirect
+from .forms import PartForm
+from .models import Part
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     return render(request, 'warehouse/home.html')
@@ -31,12 +35,25 @@ def user_login(request):
     return render(request, 'warehouse/login.html')
 
 
+
+
 @login_required
 def warehouse_view(request):
     if not request.user.is_authenticated:
         return redirect('login')
+
+    query = request.GET.get('q', '')
     parts = Part.objects.filter(user=request.user)
-    return render(request, 'warehouse/warehouse.html', {'parts': parts})
+
+    if query:
+        parts = parts.filter(
+            Q(device__icontains=query) |
+            Q(brand__icontains=query) |
+            Q(model__icontains=query) |
+            Q(part_type__icontains=query)
+        )
+
+    return render(request, 'warehouse/warehouse.html', {'parts': parts, 'query': query})
 
 
 @login_required
@@ -107,3 +124,5 @@ def delete_part(request, part_id):
         part.delete()
         return redirect('warehouse')
     return render(request, 'warehouse/delete_part.html', {'part': part})
+
+
