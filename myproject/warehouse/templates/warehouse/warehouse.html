@@ -3,11 +3,45 @@
 {% block content %}
     <h2>Ваши запчасти</h2>
 
-    <!-- Форма поиска -->
-    <form method="get" class="form-inline mb-3">
-        <input type="text" name="q" class="form-control mr-2" placeholder="Поиск..." value="{{ query }}">
-        <button type="submit" class="btn btn-primary">Поиск</button>
-    </form>
+    <!-- Контейнер для поиска и кнопки добавления -->
+    <div class="d-flex justify-content-between mb-3">
+        <!-- Форма поиска -->
+        <form method="get" class="form-inline mb-0">
+            <input list="brands" name="brand" id="brand" class="form-control mr-2" placeholder="Бренд" value="{{ brand|default_if_none:'' }}">
+            <datalist id="brands">
+                <option value="Samsung">
+                <option value="Huawei">
+                <option value="Xiaomi">
+            </datalist>
+
+            <input list="models" name="model" id="model" class="form-control mr-2" placeholder="Модель" value="{{ model|default_if_none:'' }}">
+            <datalist id="models">
+                <!-- Модели будут обновляться динамически через JavaScript -->
+            </datalist>
+
+            <input list="part_types" name="part_type" class="form-control mr-2" placeholder="Тип запчасти" value="{{ part_type|default_if_none:'' }}">
+            <datalist id="part_types">
+                <option value="Динамик">
+                <option value="Дисплей">
+                <option value="Микрофон">
+                <option value="Стекло">
+                <option value="Шлейф межплатный">
+                <option value="Шлейф дисплея">
+                <option value="Шлейф отпечатка пальца">
+                <option value="Крышка задняя">
+                <option value="рамка дисплея">
+                <option value="корпус">
+                <option value="камера основная">
+                <option value="камера фронтальная">
+
+            </datalist>
+
+            <button type="submit" class="btn btn-primary">Поиск</button>
+        </form>
+
+        <!-- Кнопка добавления запчасти -->
+        <a href="{% url 'add_part' %}" class="btn btn-primary">Добавить запчасть</a>
+    </div>
 
     <!-- Таблица запчастей -->
     <table class="table table-striped">
@@ -44,5 +78,45 @@
         </tbody>
     </table>
 
-    <a href="{% url 'add_part' %}" class="btn btn-primary">Добавить запчасть</a>
+    <script>
+        // Функция для обновления моделей в зависимости от выбранного бренда
+        function updateModels() {
+            var brand = document.getElementById('brand').value.toLowerCase();
+            var modelsDatalist = document.getElementById('models');
+            modelsDatalist.innerHTML = ''; // Очистить предыдущие опции
+
+            if (brand === 'samsung') {
+                var samsungModels = ['a10', 'a20', 'a30', 'a40'];
+                samsungModels.forEach(function(model) {
+                    var option = document.createElement('option');
+                    option.value = model;
+                    modelsDatalist.appendChild(option);
+                });
+            } else if (brand === 'huawei') {
+                var huaweiModels = ['p10', 'p20', 'p30', 'p40'];
+                huaweiModels.forEach(function(model) {
+                    var option = document.createElement('option');
+                    option.value = model;
+                    modelsDatalist.appendChild(option);
+                });
+            } else if (brand === 'xiaomi') {
+                var xiaomiModels = ['redmi 5', 'redmi 6', 'redmi 7', 'redmi 8'];
+                xiaomiModels.forEach(function(model) {
+                    var option = document.createElement('option');
+                    option.value = model;
+                    modelsDatalist.appendChild(option);
+                });
+            }
+        }
+
+        // Обработчик изменения бренда
+        document.getElementById('brand').addEventListener('input', updateModels);
+
+        // Обновление моделей при загрузке страницы, если бренд уже выбран
+        window.onload = function() {
+            if (document.getElementById('brand').value) {
+                updateModels();
+            }
+        }
+    </script>
 {% endblock %}

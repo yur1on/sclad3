@@ -42,18 +42,29 @@ def warehouse_view(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
-    query = request.GET.get('q', '')
+    query = request.GET.get('q')
+    brand = request.GET.get('brand')
+    model = request.GET.get('model')
+    part_type = request.GET.get('part_type')
+
     parts = Part.objects.filter(user=request.user)
 
     if query:
-        parts = parts.filter(
-            Q(device__icontains=query) |
-            Q(brand__icontains=query) |
-            Q(model__icontains=query) |
-            Q(part_type__icontains=query)
-        )
+        parts = parts.filter(device__icontains=query)
+    if brand:
+        parts = parts.filter(brand__icontains=brand)
+    if model:
+        parts = parts.filter(model__icontains=model)
+    if part_type:
+        parts = parts.filter(part_type__icontains=part_type)
 
-    return render(request, 'warehouse/warehouse.html', {'parts': parts, 'query': query})
+    return render(request, 'warehouse/warehouse.html', {
+        'parts': parts,
+        'query': query,
+        'brand': brand,
+        'model': model,
+        'part_type': part_type
+    })
 
 
 @login_required

@@ -7,36 +7,42 @@
 
         <div class="form-group">
             <label for="device">Устройство:</label>
-            <select id="device" name="device" onchange="toggleCustomDevice()" class="form-control">
-                <option value="">Выберите устройство</option>
-                <option value="Телефон">Телефон</option>
-                <option value="Планшет">Планшет</option>
-            </select>
-            <input type="text" id="custom_device" name="custom_device" placeholder="Введите устройство" class="form-control" style="display:none;">
+            <input list="devices" id="id_device" name="device" class="form-control" placeholder="Введите устройство" onchange="updatePartTypeOptions()">
+            <datalist id="devices">
+                <option value="Телефон">
+                <option value="Планшет">
+                <option value="Ноутбук">
+                <option value="Компьютер">
+                <option value="Смарт-часы">
+            </datalist>
         </div>
 
         <div class="form-group">
             <label for="brand">Бренд:</label>
-            <select id="brand" name="brand" onchange="updateModelOptions()" class="form-control">
-                <option value="">Выберите бренд</option>
-                <option value="Samsung">Samsung</option>
-                <option value="Huawei">Huawei</option>
-                <option value="Xiaomi">Xiaomi</option>
-            </select>
-            <input type="text" id="custom_brand" name="custom_brand" placeholder="Введите бренд" class="form-control" style="display:none;">
+            <input list="brands" id="id_brand" name="brand" class="form-control" placeholder="Введите бренд" onchange="updateModelOptions()">
+            <datalist id="brands">
+                <option value="Samsung">
+                <option value="Huawei">
+                <option value="Xiaomi">
+                <option value="Apple">
+                <option value="LG">
+            </datalist>
         </div>
 
         <div class="form-group">
             <label for="model">Модель:</label>
-            <select id="model" name="model" class="form-control">
-                <option value="">Выберите модель</option>
-            </select>
-            <input type="text" id="custom_model" name="custom_model" placeholder="Введите модель" class="form-control" style="display:none;">
+            <input list="models" id="id_model" name="model" class="form-control" placeholder="Введите модель">
+            <datalist id="models">
+                <!-- Модели будут добавляться динамически -->
+            </datalist>
         </div>
 
         <div class="form-group">
             <label for="part_type">Тип запчасти:</label>
-            {{ form.part_type }}
+            <input list="part_types" id="id_part_type" name="part_type" class="form-control" placeholder="Введите тип запчасти">
+            <datalist id="part_types">
+                <!-- Типы запчастей будут добавляться динамически -->
+            </datalist>
         </div>
 
         <div class="form-group">
@@ -53,54 +59,49 @@
     </form>
 
     <script>
-        function toggleCustomDevice() {
-            var deviceSelect = document.getElementById('device');
-            var customDeviceInput = document.getElementById('custom_device');
-            customDeviceInput.style.display = deviceSelect.value ? 'none' : 'inline';
-            if (deviceSelect.value) {
-                document.getElementById('custom_device').value = deviceSelect.value;
+        function updateModelOptions() {
+            var brand = document.getElementById('id_brand').value;
+            var modelSelect = document.getElementById('models');
+            modelSelect.innerHTML = '';  // Очистить предыдущие модели
+
+            var models = {
+                'Samsung': ['Galaxy S21', 'Galaxy S20', 'Galaxy A10', 'Galaxy A20', 'Galaxy A30'],
+                'Huawei': ['P40', 'P40 Lite', 'P50'],
+                'Xiaomi': ['Redmi Note 10', 'Redmi Note 9', 'Mi 11'],
+                'Apple': ['iPhone 13', 'iPhone 12', 'iPhone 11'],
+                'LG': ['LG G7', 'LG V40', 'LG K50']
+            };
+
+            if (models[brand]) {
+                models[brand].forEach(function(model) {
+                    var option = document.createElement('option');
+                    option.value = model;
+                    option.text = model;
+                    modelSelect.appendChild(option);
+                });
             }
         }
 
-        function updateModelOptions() {
-            var brandSelect = document.getElementById('brand');
-            var modelSelect = document.getElementById('model');
-            var customBrandInput = document.getElementById('custom_brand');
-            var customModelInput = document.getElementById('custom_model');
+        function updatePartTypeOptions() {
+            var device = document.getElementById('id_device').value;
+            var partTypeSelect = document.getElementById('part_types');
+            partTypeSelect.innerHTML = '';  // Очистить предыдущие типы запчастей
 
-            var samsungModels = ['a10', 'a20', 'a30', 'a40'];
-            var huaweiModels = ['p40', 'p40 lite', 'p50'];
-            var xiaomiModels = ['redmi 5', 'redmi 6', 'redmi 8'];
+            var partTypes = {
+                'Телефон': ['Динамик', 'Дисплей', 'Шлейф межплатный', 'Основная плата', 'Стекло для переклички', 'Задняя крышка'],
+                'Планшет': ['Динамик', 'Дисплей', 'Шлейф межплатный', 'Основная плата', 'Стекло для переклички', 'Задняя крышка'],
+                'Ноутбук': ['Динамик', 'Дисплей', 'Клавиатура', 'Батарея', 'Жесткий диск', 'Оперативная память'],
+                'Компьютер': ['Процессор', 'Материнская плата', 'Блок питания', 'Оперативная память', 'Жесткий диск', 'Корпус'],
+                'Смарт-часы': ['Динамик', 'Дисплей', 'Батарея', 'Шлейф межплатный', 'Корпус', 'Сенсор']
+            };
 
-            modelSelect.innerHTML = '<option value="">Выберите модель</option>';
-
-            if (brandSelect.value === 'Samsung') {
-                samsungModels.forEach(function(model) {
+            if (partTypes[device]) {
+                partTypes[device].forEach(function(partType) {
                     var option = document.createElement('option');
-                    option.value = model;
-                    option.text = model;
-                    modelSelect.appendChild(option);
+                    option.value = partType;
+                    option.text = partType;
+                    partTypeSelect.appendChild(option);
                 });
-            } else if (brandSelect.value === 'Huawei') {
-                huaweiModels.forEach(function(model) {
-                    var option = document.createElement('option');
-                    option.value = model;
-                    option.text = model;
-                    modelSelect.appendChild(option);
-                });
-            } else if (brandSelect.value === 'Xiaomi') {
-                xiaomiModels.forEach(function(model) {
-                    var option = document.createElement('option');
-                    option.value = model;
-                    option.text = model;
-                    modelSelect.appendChild(option);
-                });
-            }
-
-            customBrandInput.style.display = brandSelect.value ? 'none' : 'inline';
-            customModelInput.style.display = modelSelect.value ? 'none' : 'inline';
-            if (brandSelect.value) {
-                document.getElementById('custom_brand').value = brandSelect.value;
             }
         }
     </script>

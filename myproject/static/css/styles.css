@@ -135,3 +135,15 @@ table tr:hover {
     width: auto;
     margin-right: 0.5rem;
 }
+
+.d-flex {
+    display: flex;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
