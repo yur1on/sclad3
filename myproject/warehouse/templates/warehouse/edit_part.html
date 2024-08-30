@@ -1,11 +1,12 @@
 {% extends 'warehouse/base.html' %}
-{% block title %}Редактировать запчасть{% endblock %}
+{% block title %}Добавить/Редактировать запчасть{% endblock %}
 {% block content %}
-    <h2>Редактировать запчасть</h2>
-    <form method="post" enctype="multipart/form-data">  <!-- Added enctype here -->
+    <h2>{% if form.instance.pk %}Редактировать{% else %}Добавить{% endif %} запчасть</h2>
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Сохранить изменения</button>
-        <a href="{% url 'warehouse' %}" class="btn btn-secondary">Отменить</a>
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>
 {% endblock %}

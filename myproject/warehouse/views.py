@@ -95,13 +95,9 @@ def search(request):
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
     city = request.GET.get('city')
-    global_search = request.GET.get('global_search')  # Получаем значение чекбокса
 
+    # Всегда выполняем глобальный поиск
     results = Part.objects.all()
-
-    # Если глобальный поиск не выбран, фильтруем по складу текущего пользователя
-    if not global_search:
-        results = results.filter(user=request.user)
 
     if query:
         results = results.filter(device__icontains=query)
@@ -115,6 +111,8 @@ def search(request):
         results = results.filter(user__profile__city__icontains=city)
 
     return render(request, 'warehouse/search.html', {'results': results})
+
+
 
 
 @login_required
