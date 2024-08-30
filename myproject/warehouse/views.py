@@ -70,7 +70,7 @@ def warehouse_view(request):
 @login_required
 def add_part(request):
     if request.method == 'POST':
-        form = PartForm(request.POST)
+        form = PartForm(request.POST, request.FILES)  # Добавлено request.FILES
         if form.is_valid():
             part = form.save(commit=False)
             part.user = request.user
@@ -79,6 +79,7 @@ def add_part(request):
     else:
         form = PartForm()
     return render(request, 'warehouse/add_part.html', {'form': form})
+
 
 
 
@@ -120,13 +121,14 @@ def search(request):
 def edit_part(request, part_id):
     part = get_object_or_404(Part, id=part_id, user=request.user)
     if request.method == 'POST':
-        form = PartForm(request.POST, instance=part)
+        form = PartForm(request.POST, request.FILES, instance=part)  # Added request.FILES here
         if form.is_valid():
             form.save()
             return redirect('warehouse')
     else:
         form = PartForm(instance=part)
     return render(request, 'warehouse/edit_part.html', {'form': form})
+
 
 @login_required
 def delete_part(request, part_id):

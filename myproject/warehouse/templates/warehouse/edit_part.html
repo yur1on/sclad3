@@ -2,7 +2,7 @@
 {% block title %}Редактировать запчасть{% endblock %}
 {% block content %}
     <h2>Редактировать запчасть</h2>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">  <!-- Added enctype here -->
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-success">Сохранить изменения</button>

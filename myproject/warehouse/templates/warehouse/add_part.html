@@ -2,7 +2,7 @@
 {% block title %}Добавить запчасть{% endblock %}
 {% block content %}
     <h2>Добавить запчасть</h2>
-    <form method="post" id="part-form" class="form-container">
+    <form method="post" id="part-form" class="form-container" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
@@ -53,6 +53,11 @@
         <div class="form-group">
             <label for="price">Цена:</label>
             {{ form.price }}
+        </div>
+
+        <div class="form-group">
+            <label for="image">Фото:</label>
+            {{ form.image }}  <!-- Поле загрузки изображения -->
         </div>
 
         <button type="submit" class="btn-submit">Добавить</button>

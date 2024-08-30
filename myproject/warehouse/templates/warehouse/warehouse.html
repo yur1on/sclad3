@@ -33,7 +33,6 @@
                 <option value="корпус">
                 <option value="камера основная">
                 <option value="камера фронтальная">
-
             </datalist>
 
             <button type="submit" class="btn btn-primary">Поиск</button>
@@ -53,6 +52,7 @@
                 <th>Тип запчасти</th>
                 <th>Количество</th>
                 <th>Цена</th>
+                <th>Фото</th> <!-- Добавлено: столбец для фото -->
                 <th>Действия</th>
             </tr>
         </thead>
@@ -66,17 +66,42 @@
                 <td>{{ part.quantity }}</td>
                 <td>{{ part.price }}</td>
                 <td>
+                    {% if part.image %}
+                        <!-- Добавлено: обертка для увеличения изображения при клике -->
+                        <a href="{{ part.image.url }}" target="_blank" class="img-link">
+                            <img src="{{ part.image.url }}" alt="{{ part.model }}" style="max-width: 100px; max-height: 100px;">
+                        </a>
+                    {% else %}
+                        Нет фото
+                    {% endif %}
+                </td> <!-- Добавлено: отображение фото -->
+                <td>
                     <a href="{% url 'edit_part' part.id %}" class="btn btn-sm btn-warning">Редактировать</a>
                     <a href="{% url 'delete_part' part.id %}" class="btn btn-sm btn-danger">Удалить</a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7">Запчасти не найдены</td>
+                <td colspan="8">Запчасти не найдены</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <style>
+        /* Стиль для увеличения изображения при наведении */
+        .img-link img {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .img-link img:hover {
+            transform: scale(1.2);
+        }
+
+        .img-link img:active {
+            transform: scale(1.5);
+        }
+    </style>
 
     <script>
         // Функция для обновления моделей в зависимости от выбранного бренда

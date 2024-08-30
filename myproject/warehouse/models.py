@@ -9,6 +9,7 @@ class Part(models.Model):
     part_type = models.CharField(max_length=100)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    image = models.ImageField(upload_to='part_images/', blank=True, null=True)  # Поле для изображения
 
     def __str__(self):
         return f"{self.device} - {self.brand} - {self.model} - {self.part_type}"

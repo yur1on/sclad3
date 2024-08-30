@@ -1,0 +1,21 @@
+{% for part in parts %}
+<tr>
+    <td>{{ part.device }}</td>
+    <td>{{ part.brand }}</td>
+    <td>{{ part.model }}</td>
+    <td>{{ part.part_type }}</td>
+    <td>{{ part.quantity }}</td>
+    <td>{{ part.price }}</td>
+    <td>
+        {% if part.image %}
+            <img src="{{ part.image.url }}" alt="Изображение запчасти" style="max-width: 100px; height: auto;">
+        {% else %}
+            Нет изображения
+        {% endif %}
+    </td>
+    <td>
+        <a href="{% url 'edit_part' part.id %}" class="btn btn-sm btn-warning">Редактировать</a>
+        <a href="{% url 'delete_part' part.id %}" class="btn btn-sm btn-danger">Удалить</a>
+    </td>
+</tr>
+{% endfor %}
