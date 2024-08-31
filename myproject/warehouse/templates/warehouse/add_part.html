@@ -35,9 +35,18 @@
 
         <div class="form-group">
             <label for="part_type">Тип запчасти:</label>
-            <input list="part_types" id="id_part_type" name="part_type" class="form-control" placeholder="Введите тип запчасти">
+            <input list="part_types" id="id_part_type" name="part_type" class="form-control" placeholder="Введите тип запчасти" onchange="handlePartTypeChange();">
             <datalist id="part_types">
                 <!-- Типы запчастей будут добавляться динамически -->
+            </datalist>
+        </div>
+
+        <!-- Поле для выбора цвета (показывается только при необходимости) -->
+        <div class="form-group" id="color-group" style="display: none;">
+            <label for="color">Цвет:</label>
+            <input list="colors" id="id_color" name="color" class="form-control" placeholder="Выберите цвет">
+            <datalist id="colors">
+                <!-- Цвета будут добавляться динамически -->
             </datalist>
         </div>
 
@@ -72,11 +81,13 @@
             document.getElementById('id_brand').value = '';
             document.getElementById('id_model').value = '';
             document.getElementById('id_part_type').value = '';
+            document.getElementById('id_color').value = '';
 
             // Очистить списки datalist для "Бренд", "Модель" и "Тип запчасти"
             document.getElementById('brands').innerHTML = '';
             document.getElementById('models').innerHTML = '';
             document.getElementById('part_types').innerHTML = '';
+            document.getElementById('colors').innerHTML = '';
         }
 
         function updateBrandOptions() {
@@ -172,6 +183,30 @@
                     option.text = partType;
                     partTypeSelect.appendChild(option);
                 });
+            }
+        }
+
+        function handlePartTypeChange() {
+            var partType = document.getElementById('id_part_type').value;
+            var colorGroup = document.getElementById('color-group');
+            var colorSelect = document.getElementById('colors');
+            colorSelect.innerHTML = '';  // Очистить предыдущие цвета
+
+            var colors = {
+                'Дисплей': ['Черный', 'Белый', 'Серый', 'Синий'],
+                'Задняя крышка': ['Черный', 'Белый', 'Красный', 'Зеленый']
+            };
+
+            if (colors[partType]) {
+                colorGroup.style.display = 'block'; // Показать поле выбора цвета
+                colors[partType].forEach(function(color) {
+                    var option = document.createElement('option');
+                    option.value = color;
+                    option.text = color;
+                    colorSelect.appendChild(option);
+                });
+            } else {
+                colorGroup.style.display = 'none'; // Скрыть поле выбора цвета
             }
         }
     </script>

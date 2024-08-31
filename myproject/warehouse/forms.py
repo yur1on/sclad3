@@ -14,10 +14,8 @@ class UserRegisterForm(UserCreationForm):
 
 
 
+
 class PartForm(forms.ModelForm):
     class Meta:
         model = Part
-        fields = ['device', 'brand', 'model', 'part_type', 'quantity', 'price', 'image']  # Добавлено поле image
-
-
-
+        fields = ['device', 'brand', 'model', 'part_type', 'color', 'quantity', 'price', 'image']

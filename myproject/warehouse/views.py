@@ -70,7 +70,7 @@ def warehouse_view(request):
 @login_required
 def add_part(request):
     if request.method == 'POST':
-        form = PartForm(request.POST, request.FILES)  # Добавлено request.FILES
+        form = PartForm(request.POST, request.FILES)
         if form.is_valid():
             part = form.save(commit=False)
             part.user = request.user
@@ -89,14 +89,17 @@ def logout_view(request):
 
 
 
+from django.shortcuts import render
+from .models import Part
+
 def search(request):
     query = request.GET.get('q')
     brand = request.GET.get('brand')
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
+    color = request.GET.get('color')  # Добавлен цвет
     city = request.GET.get('city')
 
-    # Всегда выполняем глобальный поиск
     results = Part.objects.all()
 
     if query:
@@ -107,6 +110,8 @@ def search(request):
         results = results.filter(model__icontains=model)
     if part_type:
         results = results.filter(part_type__icontains=part_type)
+    if color:
+        results = results.filter(color__icontains=color)  # Фильтрация по цвету
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
@@ -114,12 +119,11 @@ def search(request):
 
 
 
-
 @login_required
 def edit_part(request, part_id):
     part = get_object_or_404(Part, id=part_id, user=request.user)
     if request.method == 'POST':
-        form = PartForm(request.POST, request.FILES, instance=part)  # Added request.FILES here
+        form = PartForm(request.POST, request.FILES, instance=part)
         if form.is_valid():
             form.save()
             return redirect('warehouse')

@@ -3,11 +3,11 @@
 {% block content %}
     <h2>Поиск по складам</h2>
     <form method="GET" action="{% url 'search' %}">
-        <input type="text" name="q" placeholder="Поиск по устройству">
-        <input type="text" name="brand" placeholder="Марка">
-        <input type="text" name="model" placeholder="Модель">
-        <input type="text" name="part_type" placeholder="Тип запчасти">
-        <input type="text" name="city" placeholder="Город">
+        <input type="text" name="q" placeholder="Поиск по устройству" value="{{ request.GET.q }}">
+        <input type="text" name="brand" placeholder="Марка" value="{{ request.GET.brand }}">
+        <input type="text" name="model" placeholder="Модель" value="{{ request.GET.model }}">
+        <input type="text" name="part_type" placeholder="Тип запчасти" value="{{ request.GET.part_type }}">
+        <input type="text" name="city" placeholder="Город" value="{{ request.GET.city }}">
         <button type="submit">Искать</button>
     </form>
 
@@ -22,8 +22,8 @@
 
         th, td {
             padding: 10px;
-            text-align: center;  /* Выровнять текст и изображения по центру */
-            border: 1px solid #ddd;  /* Добавить границы ячеек */
+            text-align: center;
+            border: 1px solid #ddd;
         }
 
         th {
@@ -32,39 +32,40 @@
         }
 
         img {
-            max-width: 100px;  /* Ограничить максимальную ширину изображения */
+            max-width: 100px;
             height: auto;
         }
 
         tr:nth-child(even) {
-            background-color: #f9f9f9;  /* Добавить чередующиеся цвета строк для лучшей читаемости */
+            background-color: #f9f9f9;
         }
 
         tr:hover {
-            background-color: #f1f1f1;  /* Добавить эффект при наведении на строку */
+            background-color: #f1f1f1;
         }
     </style>
 
     <table>
         <tr>
-            <th>Город</th>
-            <th>Номер телефона</th>
             <th>Устройство</th>
             <th>Марка</th>
             <th>Модель</th>
             <th>Тип запчасти</th>
+            <th>Цвет</th> <!-- Добавлен столбец для цвета -->
             <th>Количество</th>
             <th>Цена</th>
             <th>Изображение</th>
+            <th>Город</th>
+            <th>Номер телефона</th>
         </tr>
         {% for result in results %}
         <tr>
-            <td>{{ result.user.profile.city }}</td>
-            <td>{{ result.user.profile.phone }}</td>
+
             <td>{{ result.device }}</td>
             <td>{{ result.brand }}</td>
             <td>{{ result.model }}</td>
             <td>{{ result.part_type }}</td>
+            <td>{{ result.color|default:"Не указан" }}</td> <!-- Отображение цвета -->
             <td>{{ result.quantity }}</td>
             <td>{{ result.price }}</td>
             <td>
@@ -74,6 +75,8 @@
                     Нет изображения
                 {% endif %}
             </td>
+            <td>{{ result.user.profile.city }}</td>
+            <td>{{ result.user.profile.phone }}</td>
         </tr>
         {% endfor %}
     </table>

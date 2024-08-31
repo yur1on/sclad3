@@ -18,3 +18,32 @@ img.img-thumbnail {
 form {
     margin-top: 20px;
 }
+<style>
+    .img-link img {
+        transition: transform 0.2s ease-in-out;
+        max-width: 100px;
+        max-height: 100px;
+    }
+
+    .img-link img:hover {
+        transform: scale(1.2);
+    }
+
+    .img-link img:active {
+        transform: scale(1.5);
+    }
+
+    /* Убедитесь, что таблица занимает всю доступную ширину и выглядит хорошо на разных экранах */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    /* Можно добавить отступы и стили для кнопок */
+    .btn {
+        margin-right: 5px;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+</style>
