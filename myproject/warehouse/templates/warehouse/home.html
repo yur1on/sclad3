@@ -1,6 +1,9 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Главная{% endblock %}
 {% block content %}
-    <h1>Сайт б/у запчастей мобильной техники!</h1>
-    <p>Это система управления складом запчастей для телефонов, планшетов, и другой техники.</p>
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Добро пожаловать на склад!</h1>
+        <p class="lead">Управляйте своим складом и находите запчасти легко и быстро.</p>
+        <a class="btn btn-primary btn-lg" href="{% url 'warehouse' %}" role="button">Перейти в склад</a>
+    </div>
 {% endblock %}

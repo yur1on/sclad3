@@ -13,3 +13,5 @@ class Part(models.Model):
 
     def __str__(self):
         return f"{self.device} - {self.brand} - {self.model} - {self.part_type}"
+
+
