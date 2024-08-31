@@ -7,7 +7,7 @@
 
         <div class="form-group">
             <label for="device">Устройство:</label>
-            <input list="devices" id="id_device" name="device" class="form-control" placeholder="Введите устройство" onchange="updatePartTypeOptions()">
+            <input list="devices" id="id_device" name="device" class="form-control" placeholder="Введите устройство" onchange="updateBrandOptions(); updatePartTypeOptions();">
             <datalist id="devices">
                 <option value="Телефон">
                 <option value="Планшет">
@@ -21,11 +21,7 @@
             <label for="brand">Бренд:</label>
             <input list="brands" id="id_brand" name="brand" class="form-control" placeholder="Введите бренд" onchange="updateModelOptions()">
             <datalist id="brands">
-                <option value="Samsung">
-                <option value="Huawei">
-                <option value="Xiaomi">
-                <option value="Apple">
-                <option value="LG">
+                <!-- Бренды будут добавляться динамически -->
             </datalist>
         </div>
 
@@ -57,13 +53,37 @@
 
         <div class="form-group">
             <label for="image">Фото:</label>
-            {{ form.image }}  <!-- Поле загрузки изображения -->
+            {{ form.image }}
         </div>
 
         <button type="submit" class="btn-submit">Добавить</button>
     </form>
 
     <script>
+        function updateBrandOptions() {
+            var device = document.getElementById('id_device').value;
+            var brandSelect = document.getElementById('brands');
+            brandSelect.innerHTML = '';  // Очистить предыдущие бренды
+
+            var brands = {
+                'Телефон': ['Samsung', 'Huawei', 'Xiaomi', 'Apple', 'LG'],
+                'Ноутбук': ['Asus', 'Acer'],
+                // Добавьте другие устройства и бренды по мере необходимости
+            };
+
+            if (brands[device]) {
+                brands[device].forEach(function(brand) {
+                    var option = document.createElement('option');
+                    option.value = brand;
+                    option.text = brand;
+                    brandSelect.appendChild(option);
+                });
+            }
+
+            // Очистить список моделей при изменении устройства
+            document.getElementById('models').innerHTML = '';
+        }
+
         function updateModelOptions() {
             var brand = document.getElementById('id_brand').value;
             var modelSelect = document.getElementById('models');
@@ -74,7 +94,10 @@
                 'Huawei': ['P40', 'P40 Lite', 'P50'],
                 'Xiaomi': ['Redmi Note 10', 'Redmi Note 9', 'Mi 11'],
                 'Apple': ['iPhone 13', 'iPhone 12', 'iPhone 11'],
-                'LG': ['LG G7', 'LG V40', 'LG K50']
+                'LG': ['LG G7', 'LG V40', 'LG K50'],
+                'Asus': ['ZenBook 14', 'ROG Strix G15', 'VivoBook S15'],
+                'Acer': ['Aspire 7', 'Nitro 5', 'Swift 3']
+                // Добавьте другие бренды и модели по мере необходимости
             };
 
             if (models[brand]) {
@@ -93,8 +116,8 @@
             partTypeSelect.innerHTML = '';  // Очистить предыдущие типы запчастей
 
             var partTypes = {
-                'Телефон': ['Динамик', 'Дисплей', 'Шлейф межплатный', 'Основная плата', 'Стекло для переклички', 'Задняя крышка'],
-                'Планшет': ['Динамик', 'Дисплей', 'Шлейф межплатный', 'Основная плата', 'Стекло для переклички', 'Задняя крышка'],
+                'Телефон': ['Динамик', 'Дисплей', 'Шлейф межплатный', 'Основная плата', 'Стекло для переклейки', 'Задняя крышка'],
+                'Планшет': ['Динамик', 'Дисплей', 'Шлейф межплатный', 'Основная плата', 'Стекло для переклейки', 'Задняя крышка'],
                 'Ноутбук': ['Динамик', 'Дисплей', 'Клавиатура', 'Батарея', 'Жесткий диск', 'Оперативная память'],
                 'Компьютер': ['Процессор', 'Материнская плата', 'Блок питания', 'Оперативная память', 'Жесткий диск', 'Корпус'],
                 'Смарт-часы': ['Динамик', 'Дисплей', 'Батарея', 'Шлейф межплатный', 'Корпус', 'Сенсор']
