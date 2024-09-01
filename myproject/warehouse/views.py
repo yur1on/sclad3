@@ -47,14 +47,22 @@ def warehouse_view(request):
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
 
+    # Фильтруем запчасти по пользователю
     parts = Part.objects.filter(user=request.user)
 
+    # Фильтрация по устройству
     if query:
         parts = parts.filter(device__icontains=query)
+
+    # Фильтрация по бренду
     if brand:
         parts = parts.filter(brand__icontains=brand)
+
+    # Фильтрация по модели
     if model:
         parts = parts.filter(model__icontains=model)
+
+    # Фильтрация по типу запчасти
     if part_type:
         parts = parts.filter(part_type__icontains=part_type)
 
