@@ -1,83 +1,132 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Поиск{% endblock %}
 {% block content %}
-    <h2>Поиск по складам</h2>
-    <form method="GET" action="{% url 'search' %}">
-        <input type="text" name="q" placeholder="Поиск по устройству" value="{{ request.GET.q }}">
-        <input type="text" name="brand" placeholder="Марка" value="{{ request.GET.brand }}">
-        <input type="text" name="model" placeholder="Модель" value="{{ request.GET.model }}">
-        <input type="text" name="part_type" placeholder="Тип запчасти" value="{{ request.GET.part_type }}">
-        <input type="text" name="city" placeholder="Город" value="{{ request.GET.city }}">
-        <button type="submit">Искать</button>
-    </form>
+    <div class="container">
+        <h2 class="my-4 text-center text-dark">Поиск по складам</h2>
+        <form method="GET" action="{% url 'search' %}" class="mb-4">
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <input type="text" name="q" class="form-control border-dark" placeholder="Устройство" value="{{ request.GET.q }}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <input type="text" name="brand" class="form-control border-dark" placeholder="Марка" value="{{ request.GET.brand }}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <input type="text" name="model" class="form-control border-dark" placeholder="Модель" value="{{ request.GET.model }}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <input type="text" name="part_type" class="form-control border-dark" placeholder="Тип запчасти" value="{{ request.GET.part_type }}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <input type="text" name="city" class="form-control border-dark" placeholder="Город" value="{{ request.GET.city }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end mb-3">
+                    <button type="submit" class="btn btn-dark btn-block text-white">Искать</button>
+                </div>
+            </div>
+        </form>
 
-    <hr>
+        <hr>
 
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
 
-        th, td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
+            th, td {
+                padding: 12px;
+                text-align: center;
+                border: 1px solid #dee2e6;
+                vertical-align: middle;
+            }
 
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
+            th {
+                background-color: #343a40; /* Темный цвет заголовка */
+                color: white;
+                font-weight: bold;
+                font-size: 14px; /* Уменьшение размера шрифта заголовка */
+            }
 
-        img {
-            max-width: 100px;
-            height: auto;
-        }
+            tr:nth-child(even) {
+                background-color: #f8f9fa;
+            }
 
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+            tr:hover {
+                background-color: #e2e6ea;
+            }
 
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-    </style>
+            img {
+                max-width: 100px;
+                height: auto;
+                border-radius: 5px;
+                border: 1px solid #dee2e6;
+            }
 
-    <table>
-        <tr>
-            <th>Устройство</th>
-            <th>Марка</th>
-            <th>Модель</th>
-            <th>Тип запчасти</th>
-            <th>Цвет</th> <!-- Добавлен столбец для цвета -->
-            <th>Количество</th>
-            <th>Цена</th>
-            <th>Изображение</th>
-            <th>Город</th>
-            <th>Номер телефона</th>
-        </tr>
-        {% for result in results %}
-        <tr>
+            .container {
+                max-width: 1200px;
+                margin: auto;
+            }
 
-            <td>{{ result.device }}</td>
-            <td>{{ result.brand }}</td>
-            <td>{{ result.model }}</td>
-            <td>{{ result.part_type }}</td>
-            <td>{{ result.color|default:"Не указан" }}</td> <!-- Отображение цвета -->
-            <td>{{ result.quantity }}</td>
-            <td>{{ result.price }}</td>
-            <td>
-                {% if result.image %}
-                    <img src="{{ result.image.url }}" alt="Изображение запчасти">
-                {% else %}
-                    Нет изображения
-                {% endif %}
-            </td>
-            <td>{{ result.user.profile.city }}</td>
-            <td>{{ result.user.profile.phone }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+            .form-control {
+                border-radius: 0.375rem;
+                box-shadow: none;
+                transition: border-color 0.2s ease;
+            }
+
+            .form-control:focus {
+                border-color: #343a40; /* Темный цвет бордюра при фокусе */
+                box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.25);
+            }
+
+            .btn-dark {
+                border-radius: 0.375rem;
+                padding: 10px 15px;
+                font-size: 16px;
+                background-color: #343a40;
+                border-color: #343a40;
+            }
+
+            .btn-dark:hover {
+                background-color: #23272b;
+                border-color: #1d2124;
+            }
+        </style>
+
+        <table>
+            <tr>
+                <th>Устройство</th>
+                <th>Марка</th>
+                <th>Модель</th>
+                <th>Тип запчасти</th>
+                <th>Цвет</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th>Изображение</th>
+                <th>Город</th>
+                <th>Номер телефона</th>
+            </tr>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.device }}</td>
+                <td>{{ result.brand }}</td>
+                <td>{{ result.model }}</td>
+                <td>{{ result.part_type }}</td>
+                <td>{{ result.color|default:"Не указан" }}</td>
+                <td>{{ result.quantity }}</td>
+                <td>{{ result.price }}</td>
+                <td>
+                    {% if result.image %}
+                        <img src="{{ result.image.url }}" alt="Изображение запчасти">
+                    {% else %}
+                        Нет изображения
+                    {% endif %}
+                </td>
+                <td>{{ result.user.profile.city }}</td>
+                <td>{{ result.user.profile.phone }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 {% endblock %}
