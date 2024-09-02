@@ -1,3 +1,5 @@
+
+
 {% extends 'warehouse/base.html' %}
 {% block title %}Поиск{% endblock %}
 {% block content %}
@@ -6,16 +8,25 @@
         <form method="GET" action="{% url 'search' %}" class="mb-4">
             <div class="row">
                 <div class="col-md-2 mb-3">
-                    <input type="text" name="q" class="form-control border-dark" placeholder="Устройство" value="{{ request.GET.q }}">
+                    <input type="text" name="q" id="device" class="form-control border-dark" placeholder="Устройство" value="{{ request.GET.q }}" list="device-list">
+                    <datalist id="device-list">
+                        <option value="Телефон">
+                        <option value="Планшет">
+                        <option value="Ноутбук">
+                        <option value="Смарт-часы">
+                    </datalist>
                 </div>
                 <div class="col-md-2 mb-3">
-                    <input type="text" name="brand" class="form-control border-dark" placeholder="Марка" value="{{ request.GET.brand }}">
+                    <input type="text" name="brand" id="brand" class="form-control border-dark" placeholder="Бренд" value="{{ request.GET.brand }}" list="brand-list">
+                    <datalist id="brand-list"></datalist>
                 </div>
                 <div class="col-md-2 mb-3">
-                    <input type="text" name="model" class="form-control border-dark" placeholder="Модель" value="{{ request.GET.model }}">
+                    <input type="text" name="model" id="model" class="form-control border-dark" placeholder="Модель" value="{{ request.GET.model }}" list="model-list">
+                    <datalist id="model-list"></datalist>
                 </div>
                 <div class="col-md-2 mb-3">
-                    <input type="text" name="part_type" class="form-control border-dark" placeholder="Тип запчасти" value="{{ request.GET.part_type }}">
+                    <input type="text" name="part_type" id="part_type" class="form-control border-dark" placeholder="Тип запчасти" value="{{ request.GET.part_type }}" list="part-type-list">
+                    <datalist id="part-type-list"></datalist>
                 </div>
                 <div class="col-md-2 mb-3">
                     <input type="text" name="city" class="form-control border-dark" placeholder="Город" value="{{ request.GET.city }}">
@@ -92,12 +103,13 @@
                 background-color: #23272b;
                 border-color: #1d2124;
             }
+
         </style>
 
         <table>
-            <tr>
+             <tr>
                 <th>Устройство</th>
-                <th>Марка</th>
+                <th>Бренд</th>
                 <th>Модель</th>
                 <th>Тип запчасти</th>
                 <th>Цвет</th>
@@ -129,4 +141,110 @@
             {% endfor %}
         </table>
     </div>
+
+    <script>
+        const deviceBrandMap = {
+            'Телефон': ['Iphone','Samsung', 'Huawei', 'Xiaomi', 'Realme', 'Tecno', 'Infinix', 'Vivo', 'Oppo', 'Lenovo','Sony','Tcl'],
+            'Планшет': ['Samsung', 'Huawei', 'Xiaomi'],
+            'Ноутбук': ['Lenovo', 'Asus', 'Acer'],
+            'Смарт-часы': ['Samsung', 'Huawei', 'Xiaomi']
+        };
+
+        const brandModelMap = {
+            'Телефон': {
+                'Samsung': ['a10', 'a20', 'a30', 's10'],
+                'Huawei': ['p10', 'p20', 'honor 50'],
+                'Xiaomi': ['redmi 5', 'redmi 6', 'redmi 7']
+            },
+            'Планшет': {
+                'Samsung': ['t500', 't725'],
+                'Huawei': ['t10', 'x8'],
+                'Xiaomi': ['mi pad 5', 'mi pad 6']
+            },
+            'Ноутбук': {
+                'Lenovo': ['ideapad 3', 'ideapad 5'],
+                'Asus': ['zenbook 14', 'rog strix'],
+                'Acer': ['aspire 5', 'nitro 5']
+            },
+            'Смарт-часы': {
+                'Samsung': ['galaxy watch 3', 'galaxy watch 4'],
+                'Huawei': ['watch gt 2', 'watch gt 3'],
+                'Xiaomi': ['mi watch', 'mi watch lite']
+            }
+        };
+
+        const modelPartTypeMap = {
+            'a10': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
+            'a20': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
+            'p10': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
+            // Добавьте другие модели и соответствующие им типы запчастей
+        };
+
+document.getElementById('device').addEventListener('input', function() {
+    const device = this.value;
+    const brandInput = document.getElementById('brand');
+    const modelInput = document.getElementById('model');
+    const partTypeInput = document.getElementById('part_type');
+
+    // Очистка значений и списков брендов, моделей и типов запчастей
+    brandInput.value = '';
+    modelInput.value = '';
+    partTypeInput.value = '';
+    document.getElementById('brand-list').innerHTML = '';
+    document.getElementById('model-list').innerHTML = '';
+    document.getElementById('part-type-list').innerHTML = '';
+
+    if (deviceBrandMap[device]) {
+        const brandOptions = deviceBrandMap[device].map(brand => `<option value="${brand}">`).join('');
+        document.getElementById('brand-list').innerHTML = brandOptions;
+    }
+});
+
+document.getElementById('brand').addEventListener('input', function() {
+    const brand = this.value;
+    const device = document.getElementById('device').value;
+    const modelInput = document.getElementById('model');
+    const partTypeInput = document.getElementById('part_type');
+
+    // Очистка значений и списков моделей и типов запчастей
+    modelInput.value = '';
+    partTypeInput.value = '';
+    document.getElementById('model-list').innerHTML = '';
+    document.getElementById('part-type-list').innerHTML = '';
+
+    if (brandModelMap[device] && brandModelMap[device][brand]) {
+        const modelOptions = brandModelMap[device][brand].map(model => `<option value="${model}">`).join('');
+        document.getElementById('model-list').innerHTML = modelOptions;
+    }
+});
+
+document.getElementById('model').addEventListener('input', function() {
+    const model = this.value;
+    const partTypeInput = document.getElementById('part_type');
+
+    // Очистка значений и списков типов запчастей
+    partTypeInput.value = '';
+    document.getElementById('part-type-list').innerHTML = '';
+
+    if (modelPartTypeMap[model]) {
+        const partTypeOptions = modelPartTypeMap[model].map(partType => `<option value="${partType}">`).join('');
+        document.getElementById('part-type-list').innerHTML = partTypeOptions;
+    }
+});
+
+
+        document.getElementById('model').addEventListener('input', function() {
+            const model = this.value;
+            const partTypeInput = document.getElementById('part_type');
+
+            // Очистка списка типов запчастей
+            partTypeInput.value = '';
+            document.getElementById('part-type-list').innerHTML = '';
+
+            if (modelPartTypeMap[model]) {
+                const partTypeOptions = modelPartTypeMap[model].map(partType => `<option value="${partType}">`).join('');
+                document.getElementById('part-type-list').innerHTML = partTypeOptions;
+            }
+        });
+    </script>
 {% endblock %}
