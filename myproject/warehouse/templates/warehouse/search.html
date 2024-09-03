@@ -20,6 +20,10 @@
                     <input type="text" name="brand" id="brand" class="form-control border-dark" placeholder="Бренд" value="{{ request.GET.brand }}" list="brand-list">
                     <datalist id="brand-list"></datalist>
                 </div>
+                <div class="col-md-2 mb-3" id="series-container" style="display: none;">
+                    <input type="text" name="series" id="series" class="form-control border-dark" placeholder="Серия" value="{{ request.GET.series }}" list="series-list">
+                    <datalist id="series-list"></datalist>
+                </div>
                 <div class="col-md-2 mb-3">
                     <input type="text" name="model" id="model" class="form-control border-dark" placeholder="Модель" value="{{ request.GET.model }}" list="model-list">
                     <datalist id="model-list"></datalist>
@@ -40,7 +44,7 @@
         <hr>
 
         <style>
-            table {
+               table {
                 width: 100%;
                 border-collapse: collapse;
                 margin-top: 20px;
@@ -103,11 +107,10 @@
                 background-color: #23272b;
                 border-color: #1d2124;
             }
-
         </style>
 
         <table>
-             <tr>
+            <tr>
                 <th>Устройство</th>
                 <th>Бренд</th>
                 <th>Модель</th>
@@ -144,33 +147,22 @@
 
     <script>
         const deviceBrandMap = {
-            'Телефон': ['Iphone','Samsung', 'Huawei', 'Xiaomi', 'Realme', 'Tecno', 'Infinix', 'Vivo', 'Oppo', 'Lenovo','Sony','Tcl'],
+            'Телефон': ['Samsung', 'Huawei', 'Xiaomi'],
             'Планшет': ['Samsung', 'Huawei', 'Xiaomi'],
             'Ноутбук': ['Lenovo', 'Asus', 'Acer'],
             'Смарт-часы': ['Samsung', 'Huawei', 'Xiaomi']
         };
 
-        const brandModelMap = {
-            'Телефон': {
-                'Samsung': ['a10', 'a20', 'a30', 's10'],
-                'Huawei': ['p10', 'p20', 'honor 50'],
-                'Xiaomi': ['redmi 5', 'redmi 6', 'redmi 7']
-            },
-            'Планшет': {
-                'Samsung': ['t500', 't725'],
-                'Huawei': ['t10', 'x8'],
-                'Xiaomi': ['mi pad 5', 'mi pad 6']
-            },
-            'Ноутбук': {
-                'Lenovo': ['ideapad 3', 'ideapad 5'],
-                'Asus': ['zenbook 14', 'rog strix'],
-                'Acer': ['aspire 5', 'nitro 5']
-            },
-            'Смарт-часы': {
-                'Samsung': ['galaxy watch 3', 'galaxy watch 4'],
-                'Huawei': ['watch gt 2', 'watch gt 3'],
-                'Xiaomi': ['mi watch', 'mi watch lite']
-            }
+        const brandSeriesMap = {
+            'Samsung': ['A', 'M', 'S', 'Note'],
+            // Можно добавить серии для других брендов
+        };
+
+        const seriesModelMap = {
+            'A': ['a10', 'a20', 'a30'],
+            'M': ['m21', 'm31s'],
+            'S': ['s10', 's20'],
+            'Note': ['note 10', 'note 20']
         };
 
         const modelPartTypeMap = {
@@ -180,58 +172,71 @@
             // Добавьте другие модели и соответствующие им типы запчастей
         };
 
-document.getElementById('device').addEventListener('input', function() {
-    const device = this.value;
-    const brandInput = document.getElementById('brand');
-    const modelInput = document.getElementById('model');
-    const partTypeInput = document.getElementById('part_type');
+       function resetAndHideSeries() {
+            const seriesInput = document.getElementById('series');
+            seriesInput.value = '';
+            document.getElementById('series-list').innerHTML = '';
+            document.getElementById('series-container').style.display = 'none';
+        }
 
-    // Очистка значений и списков брендов, моделей и типов запчастей
-    brandInput.value = '';
-    modelInput.value = '';
-    partTypeInput.value = '';
-    document.getElementById('brand-list').innerHTML = '';
-    document.getElementById('model-list').innerHTML = '';
-    document.getElementById('part-type-list').innerHTML = '';
+        document.getElementById('device').addEventListener('input', function() {
+            const device = this.value;
+            const brandInput = document.getElementById('brand');
+            const modelInput = document.getElementById('model');
+            const partTypeInput = document.getElementById('part_type');
 
-    if (deviceBrandMap[device]) {
-        const brandOptions = deviceBrandMap[device].map(brand => `<option value="${brand}">`).join('');
-        document.getElementById('brand-list').innerHTML = brandOptions;
-    }
-});
+            // Очистка всех связанных полей и списков
+            brandInput.value = '';
+            modelInput.value = '';
+            partTypeInput.value = '';
+            resetAndHideSeries();
+            document.getElementById('brand-list').innerHTML = '';
+            document.getElementById('model-list').innerHTML = '';
+            document.getElementById('part-type-list').innerHTML = '';
 
-document.getElementById('brand').addEventListener('input', function() {
-    const brand = this.value;
-    const device = document.getElementById('device').value;
-    const modelInput = document.getElementById('model');
-    const partTypeInput = document.getElementById('part_type');
+            if (deviceBrandMap[device]) {
+                const brandOptions = deviceBrandMap[device].map(brand => `<option value="${brand}">`).join('');
+                document.getElementById('brand-list').innerHTML = brandOptions;
+            }
+        });
 
-    // Очистка значений и списков моделей и типов запчастей
-    modelInput.value = '';
-    partTypeInput.value = '';
-    document.getElementById('model-list').innerHTML = '';
-    document.getElementById('part-type-list').innerHTML = '';
+        document.getElementById('brand').addEventListener('input', function() {
+            const brand = this.value;
+            const modelInput = document.getElementById('model');
+            const partTypeInput = document.getElementById('part_type');
 
-    if (brandModelMap[device] && brandModelMap[device][brand]) {
-        const modelOptions = brandModelMap[device][brand].map(model => `<option value="${model}">`).join('');
-        document.getElementById('model-list').innerHTML = modelOptions;
-    }
-});
+            // Очистка связанных полей и списков
+            modelInput.value = '';
+            partTypeInput.value = '';
+            resetAndHideSeries();
+            document.getElementById('model-list').innerHTML = '';
+            document.getElementById('part-type-list').innerHTML = '';
 
-document.getElementById('model').addEventListener('input', function() {
-    const model = this.value;
-    const partTypeInput = document.getElementById('part_type');
+            if (brandSeriesMap[brand]) {
+                const seriesOptions = brandSeriesMap[brand].map(series => `<option value="${series}">`).join('');
+                document.getElementById('series-list').innerHTML = seriesOptions;
+                document.getElementById('series-container').style.display = 'block';
+            } else {
+                document.getElementById('series-container').style.display = 'none';
+            }
+        });
 
-    // Очистка значений и списков типов запчастей
-    partTypeInput.value = '';
-    document.getElementById('part-type-list').innerHTML = '';
+        document.getElementById('series').addEventListener('input', function() {
+            const series = this.value;
+            const modelInput = document.getElementById('model');
+            const partTypeInput = document.getElementById('part_type');
 
-    if (modelPartTypeMap[model]) {
-        const partTypeOptions = modelPartTypeMap[model].map(partType => `<option value="${partType}">`).join('');
-        document.getElementById('part-type-list').innerHTML = partTypeOptions;
-    }
-});
+            // Очистка связанных полей и списков
+            modelInput.value = '';
+            partTypeInput.value = '';
+            document.getElementById('model-list').innerHTML = '';
+            document.getElementById('part-type-list').innerHTML = '';
 
+            if (seriesModelMap[series]) {
+                const modelOptions = seriesModelMap[series].map(model => `<option value="${model}">`).join('');
+                document.getElementById('model-list').innerHTML = modelOptions;
+            }
+        });
 
         document.getElementById('model').addEventListener('input', function() {
             const model = this.value;
