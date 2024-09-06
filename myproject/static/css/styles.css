@@ -1,0 +1,51 @@
+/* Основной стиль для страницы */
+body {
+    padding-top: 56px; /* Высота navbar для предотвращения перекрытия контента */
+}
+
+/* Стили для таблиц */
+table {
+    margin-top: 20px;
+}
+
+/* Стиль для изображений в таблицах */
+img.img-thumbnail {
+    border: 1px solid #ddd;
+    border-radius: .25rem;
+}
+
+/* Добавление отступов для форм */
+form {
+    margin-top: 20px;
+}
+<style>
+    .img-link img {
+        transition: transform 0.2s ease-in-out;
+        max-width: 100px;
+        max-height: 100px;
+    }
+
+    .img-link img:hover {
+        transform: scale(1.2);
+    }
+
+    .img-link img:active {
+        transform: scale(1.5);
+    }
+
+    /* Убедитесь, что таблица занимает всю доступную ширину и выглядит хорошо на разных экранах */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    /* Можно добавить отступы и стили для кнопок */
+    .btn {
+        margin-right: 5px;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+</style>
+
+

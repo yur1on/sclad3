@@ -1,0 +1,58 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h2>Ваш профиль</h2>
+        </div>
+        <div class="card-body">
+            {% if edit_mode %}
+                <!-- Форма редактирования -->
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="phone">Телефон:</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="form-group">
+                        <label for="city">Город:</label>
+                        <input list="cities" id="id_city" name="city" class="form-control" value="{{ form.city.value }}">
+                        <datalist id="cities">
+                            <option value="Бобруйск">
+                            <option value="Брест">
+                            <option value="Гомель">
+                            <option value="Минск">
+                            <option value="Добруш">
+                            <option value="Жлобин">
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">Сохранить изменения</button>
+                        <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
+                    </div>
+                </form>
+            {% else %}
+                <!-- Таблица с данными профиля -->
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Поле</th>
+                        <th>Значение</th>
+                    </tr>
+                    <tr>
+                        <td>Имя пользователя</td>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <td>Телефон</td>
+                        <td>{{ user.profile.phone }}</td>
+                    </tr>
+                    <tr>
+                        <td>Город</td>
+                        <td>{{ user.profile.city }}</td>
+                    </tr>
+                </table>
+                <a href="{% url 'profile' %}?edit=true" class="btn btn-primary">Редактировать</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

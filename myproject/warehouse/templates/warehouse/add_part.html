@@ -1,0 +1,213 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Добавить запчасть{% endblock %}
+{% block content %}
+    <h2>Добавить запчасть</h2>
+    <form method="post" id="part-form" class="form-container" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="device">Устройство:</label>
+            <input list="devices" id="id_device" name="device" class="form-control" placeholder="Введите устройство" onchange="handleDeviceChange();">
+            <datalist id="devices">
+                <option value="Телефон">
+                <option value="Планшет">
+                <option value="Ноутбук">
+                <option value="Компьютер">
+                <option value="Смарт-часы">
+            </datalist>
+        </div>
+
+        <div class="form-group">
+            <label for="brand">Бренд:</label>
+            <input list="brands" id="id_brand" name="brand" class="form-control" placeholder="Введите бренд" onchange="updateModelOptions();">
+            <datalist id="brands">
+                <!-- Бренды будут добавляться динамически -->
+            </datalist>
+        </div>
+
+        <div class="form-group">
+            <label for="model">Модель:</label>
+            <input list="models" id="id_model" name="model" class="form-control" placeholder="Введите модель">
+            <datalist id="models">
+                <!-- Модели будут добавляться динамически -->
+            </datalist>
+        </div>
+
+        <div class="form-group">
+            <label for="part_type">Тип запчасти:</label>
+            <input list="part_types" id="id_part_type" name="part_type" class="form-control" placeholder="Введите тип запчасти" onchange="handlePartTypeChange();">
+            <datalist id="part_types">
+                <!-- Типы запчастей будут добавляться динамически -->
+            </datalist>
+        </div>
+
+        <!-- Поле для выбора цвета (показывается только при необходимости) -->
+        <div class="form-group" id="color-group" style="display: none;">
+            <label for="color">Цвет:</label>
+            <input list="colors" id="id_color" name="color" class="form-control" placeholder="Выберите цвет">
+            <datalist id="colors">
+                <!-- Цвета будут добавляться динамически -->
+            </datalist>
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Количество:</label>
+            {{ form.quantity }}
+        </div>
+
+        <div class="form-group">
+            <label for="price">Цена:</label>
+            {{ form.price }}
+        </div>
+
+        <div class="form-group">
+            <label for="image">Фото:</label>
+            {{ form.image }}
+        </div>
+
+        <button type="submit" class="btn-submit">Добавить</button>
+    </form>
+
+    <script>
+        function handleDeviceChange() {
+            // Сбросить значения в полях "Бренд", "Модель" и "Тип запчасти"
+            resetBrandModelAndPartType();
+
+            // Обновить списки брендов, моделей и типов запчастей
+            updateBrandOptions();
+        }
+
+        function resetBrandModelAndPartType() {
+            document.getElementById('id_brand').value = '';
+            document.getElementById('id_model').value = '';
+            document.getElementById('id_part_type').value = '';
+            document.getElementById('id_color').value = '';
+
+            // Очистить списки datalist для "Бренд", "Модель" и "Тип запчасти"
+            document.getElementById('brands').innerHTML = '';
+            document.getElementById('models').innerHTML = '';
+            document.getElementById('part_types').innerHTML = '';
+            document.getElementById('colors').innerHTML = '';
+        }
+
+        function updateBrandOptions() {
+            var device = document.getElementById('id_device').value;
+            var brandSelect = document.getElementById('brands');
+            brandSelect.innerHTML = '';  // Очистить предыдущие бренды
+
+            var brands = {
+                'Телефон': ['Samsung', 'Huawei', 'Xiaomi', 'Apple', 'LG'],
+                'Планшет': ['Samsung', 'Huawei'],
+                'Ноутбук': ['Asus', 'Acer'],
+                'Компьютер': ['Dell', 'HP', 'Lenovo'],
+                'Смарт-часы': ['Apple', 'Samsung', 'Garmin', 'Huawei']
+                // Добавьте другие устройства и бренды по мере необходимости
+            };
+
+            if (brands[device]) {
+                brands[device].forEach(function(brand) {
+                    var option = document.createElement('option');
+                    option.value = brand;
+                    option.text = brand;
+                    brandSelect.appendChild(option);
+                });
+            }
+
+            // После обновления брендов, нужно обновить типы запчастей
+            updatePartTypeOptions();
+        }
+
+        function updateModelOptions() {
+            var device = document.getElementById('id_device').value;
+            var brand = document.getElementById('id_brand').value;
+            var modelSelect = document.getElementById('models');
+            modelSelect.innerHTML = '';  // Очистить предыдущие модели
+
+            var models = {
+                'Телефон': {
+                    'Samsung': ['Galaxy S21', 'Galaxy S20', 'Galaxy A10', 'Galaxy A20', 'Galaxy A30'],
+                    'Huawei': ['P40', 'P40 Lite', 'P50'],
+                    'Xiaomi': ['Redmi Note 10', 'Redmi Note 9', 'Mi 11'],
+                    'Apple': ['iPhone 13', 'iPhone 12', 'iPhone 11'],
+                    'LG': ['LG G7', 'LG V40', 'LG K50']
+                },
+                'Планшет': {
+                    'Samsung': ['T500', 'T735'],
+                    'Huawei': ['MatePad 10.4', 'Pad 8']
+                },
+                'Ноутбук': {
+                    'Asus': ['ZenBook 14', 'ROG Strix G15', 'VivoBook S15'],
+                    'Acer': ['Aspire 7', 'Nitro 5', 'Swift 3']
+                },
+                'Компьютер': {
+                    'Dell': ['Inspiron 15', 'XPS 13', 'Alienware m15'],
+                    'HP': ['Pavilion 15', 'Spectre x360', 'Omen 17'],
+                    'Lenovo': ['ThinkPad X1', 'Legion 5', 'Yoga 7']
+                },
+                'Смарт-часы': {
+                    'Apple': ['Apple Watch Series 8', 'Apple Watch SE', 'Apple Watch Ultra'],
+                    'Samsung': ['Galaxy Watch 5', 'Galaxy Watch 4', 'Galaxy Watch Active 2'],
+                    'Garmin': ['Forerunner 945', 'Fenix 7', 'Venu 2'],
+                    'Huawei': ['Watch GT 3', 'Watch Fit', 'Watch 3']
+                }
+                // Добавьте другие бренды и модели по мере необходимости
+            };
+
+            if (device in models && brand in models[device]) {
+                models[device][brand].forEach(function(model) {
+                    var option = document.createElement('option');
+                    option.value = model;
+                    option.text = model;
+                    modelSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updatePartTypeOptions() {
+            var device = document.getElementById('id_device').value;
+            var partTypeSelect = document.getElementById('part_types');
+            partTypeSelect.innerHTML = '';  // Очистить предыдущие типы запчастей
+
+            var partTypes = {
+                'Телефон': ['Динамик', 'Дисплей', 'Шлейф межплатный', 'Основная плата', 'Стекло для переклейки', 'Задняя крышка'],
+                'Планшет': ['Динамик', 'Дисплей', 'Шлейф межплатный', 'Основная плата', 'Стекло для переклейки', 'Задняя крышка'],
+                'Ноутбук': ['Динамик', 'Дисплей', 'Клавиатура', 'Батарея', 'Жесткий диск', 'Оперативная память'],
+                'Компьютер': ['Процессор', 'Материнская плата', 'Блок питания', 'Оперативная память', 'Жесткий диск', 'Корпус'],
+                'Смарт-часы': ['Динамик', 'Дисплей', 'Батарея', 'Шлейф межплатный', 'Корпус', 'Сенсор']
+            };
+
+            if (partTypes[device]) {
+                partTypes[device].forEach(function(partType) {
+                    var option = document.createElement('option');
+                    option.value = partType;
+                    option.text = partType;
+                    partTypeSelect.appendChild(option);
+                });
+            }
+        }
+
+        function handlePartTypeChange() {
+            var partType = document.getElementById('id_part_type').value;
+            var colorGroup = document.getElementById('color-group');
+            var colorSelect = document.getElementById('colors');
+            colorSelect.innerHTML = '';  // Очистить предыдущие цвета
+
+            var colors = {
+                'Дисплей': ['Черный', 'Белый', 'Серый', 'Синий'],
+                'Задняя крышка': ['Черный', 'Белый', 'Красный', 'Зеленый']
+            };
+
+            if (colors[partType]) {
+                colorGroup.style.display = 'block'; // Показать поле выбора цвета
+                colors[partType].forEach(function(color) {
+                    var option = document.createElement('option');
+                    option.value = color;
+                    option.text = color;
+                    colorSelect.appendChild(option);
+                });
+            } else {
+                colorGroup.style.display = 'none'; // Скрыть поле выбора цвета
+            }
+        }
+    </script>
+{% endblock %}
