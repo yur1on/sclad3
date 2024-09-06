@@ -1,0 +1,215 @@
+ {% extends 'warehouse/base.html' %}
+{% block title %}Склад{% endblock %}
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Ваши запчасти</h2>
+        <a href="{% url 'add_part' %}" class="btn btn-success">Добавить запчасть</a>
+    </div>
+
+    <!-- Контейнер для поиска -->
+    <div class="mb-4">
+        <form method="get" class="form-row">
+            <!-- Устройство -->
+            <div class="form-group col-md-3">
+                <label for="device">Устройство</label>
+                <div class="input-group">
+                    <input type="text" list="devices" name="q" id="device" class="form-control" placeholder="Устройство" value="{{ query|default_if_none:'' }}">
+                    <datalist id="devices">
+                        <option value="Телефон">
+                        <option value="Планшет">
+                        <option value="Ноутбук">
+                        <option value="Смарт-часы">
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Бренд -->
+            <div class="form-group col-md-2">
+                <label for="brand">Бренд</label>
+                <div class="input-group">
+                    <input list="brands" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ brand|default_if_none:'' }}">
+                    <datalist id="brands">
+                        <!-- Бренды будут обновляться динамически через JavaScript -->
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Модель -->
+            <div class="form-group col-md-2">
+                <label for="model">Модель</label>
+                <div class="input-group">
+                    <input list="models" name="model" id="model" class="form-control" placeholder="Модель" value="{{ model|default_if_none:'' }}">
+                    <datalist id="models">
+                        <!-- Модели будут обновляться динамически через JavaScript -->
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Тип запчасти -->
+            <div class="form-group col-md-3">
+                <label for="part_type">Тип запчасти</label>
+                <div class="input-group">
+                    <input list="part_types" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ part_type|default_if_none:'' }}">
+                    <datalist id="part_types">
+                        <!-- Типы запчастей будут обновляться динамически через JavaScript -->
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Кнопка поиска -->
+            <div class="form-group col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary btn-block">Поиск</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Таблица запчастей -->
+    <div class="table-responsive">
+        <table id="parts-table" class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th onclick="sortTable(0)">Устройство</th>
+                    <th onclick="sortTable(1)">Бренд</th>
+                    <th onclick="sortTable(2)">Модель</th>
+                    <th onclick="sortTable(3)">Тип запчасти</th>
+                    <th onclick="sortTable(4)">Цвет</th>
+                    <th onclick="sortTable(5)">Количество</th>
+                    <th onclick="sortTable(6)">Цена</th>
+                    <th>Фото</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for part in parts %}
+                <tr>
+                    <td>{{ part.device }}</td>
+                    <td>{{ part.brand }}</td>
+                    <td>{{ part.model }}</td>
+                    <td>{{ part.part_type }}</td>
+                    <td>{{ part.color|default:"Не указан" }}</td>
+                    <td>{{ part.quantity }}</td>
+                    <td>{{ part.price }}</td>
+                    <td>
+                        {% if part.image %}
+                            <a href="{{ part.image.url }}" target="_blank" class="img-link">
+                                <img src="{{ part.image.url }}" alt="{{ part.model }}" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                            </a>
+                        {% else %}
+                            Нет фото
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'edit_part' part.id %}" class="btn btn-sm btn-warning mb-1" data-toggle="tooltip" data-placement="top" title="Редактировать">✏️</a>
+                        <a href="{% url 'delete_part' part.id %}" class="btn btn-sm btn-danger" data-toggle="tooltip" data-placement="top" title="Удалить">🗑️</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">Запчасти не найдены</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Карта устройств и брендов
+        const deviceBrandMap = {
+            'Телефон': ['Samsung', 'Huawei', 'Xiaomi'],
+            'Планшет': ['Samsung', 'Huawei', 'Xiaomi'],
+            'Ноутбук': ['Lenovo', 'Asus', 'Acer'],
+            'Смарт-часы': ['Samsung', 'Huawei', 'Xiaomi']
+        };
+
+        // Карта брендов и моделей
+const brandModelMap = {
+    'Телефон': {
+        'Samsung': ['a10', 'a20', 'a30', 's10'],
+        'Huawei': ['p10', 'p20', 'honor 50'],
+        'Xiaomi': ['redmi 5', 'redmi 6', 'redmi 7']
+    },
+    'Планшет': {
+        'Samsung': ['t500', 't725'],
+        'Huawei': ['t10', 'x8'],
+        'Xiaomi': ['mi pad 5', 'mi pad 6']
+    },
+    'Ноутбук': {
+        'Lenovo': ['ideapad 3', 'ideapad 5'],
+        'Asus': ['zenbook 14', 'rog strix'],
+        'Acer': ['aspire 5', 'nitro 5']
+    },
+    'Смарт-часы': {
+        'Samsung': ['galaxy watch 3', 'galaxy watch 4'],
+        'Huawei': ['watch gt 2', 'watch gt 3'],
+        'Xiaomi': ['mi watch', 'mi watch lite']
+    }
+};
+
+
+        // Карта моделей и типов запчастей
+        const modelPartTypeMap = {
+            'a10': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
+            'a20': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
+            'a30': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
+            's10': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
+            'p10': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
+            't500': ['Динамик', 'Дисплей'],
+            // Добавьте другие модели и соответствующие им типы запчастей
+        };
+
+        document.getElementById('device').addEventListener('input', function() {
+            const device = this.value;
+            const brandInput = document.getElementById('brand');
+            const modelInput = document.getElementById('model');
+            const partTypeInput = document.getElementById('part_type');
+
+            // Очистка значений и списков брендов, моделей и типов запчастей
+            brandInput.value = '';
+            modelInput.value = '';
+            partTypeInput.value = '';
+            document.getElementById('brands').innerHTML = '';
+            document.getElementById('models').innerHTML = '';
+            document.getElementById('part_types').innerHTML = '';
+
+            // Обновление списка брендов
+            if (deviceBrandMap[device]) {
+                const brandOptions = deviceBrandMap[device].map(brand => `<option value="${brand}">`).join('');
+                document.getElementById('brands').innerHTML = brandOptions;
+            }
+        });
+
+ document.getElementById('brand').addEventListener('input', function() {
+    const device = document.getElementById('device').value;
+    const brand = this.value;
+    const modelInput = document.getElementById('model');
+    const partTypeInput = document.getElementById('part_type');
+
+    modelInput.value = '';
+    partTypeInput.value = '';
+
+    document.getElementById('models').innerHTML = '';
+    document.getElementById('part_types').innerHTML = '';
+
+    if (brandModelMap[device] && brandModelMap[device][brand]) {
+        const modelOptions = brandModelMap[device][brand].map(model => `<option value="${model}">`).join('');
+        document.getElementById('models').innerHTML = modelOptions;
+    }
+});
+
+
+        document.getElementById('model').addEventListener('input', function() {
+            const model = this.value;
+
+            //```javascript
+            // Очистка значения и списка типов запчастей
+            document.getElementById('part_type').value = '';
+            document.getElementById('part_types').innerHTML = '';
+
+            // Обновление списка типов запчастей
+            if (modelPartTypeMap[model]) {
+                const partTypeOptions = modelPartTypeMap[model].map(partType => `<option value="${partType}">`).join('');
+                document.getElementById('part_types').innerHTML = partTypeOptions;
+            }
+        });
+    </script>
+{% endblock %}
