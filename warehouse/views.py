@@ -24,10 +24,6 @@ def register(request):
     return render(request, 'warehouse/register.html', {'form': form})
 
 
-
-
-
-
 def user_login(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -37,8 +33,6 @@ def user_login(request):
             login(request, user)
             return redirect('warehouse')
     return render(request, 'warehouse/login.html')
-
-
 
 
 @login_required
@@ -79,9 +73,10 @@ def warehouse_view(request):
     })
 
 
+
 @login_required
 def add_part(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = PartForm(request.POST, request.FILES)
         if form.is_valid():
             part = form.save(commit=False)
@@ -161,3 +156,32 @@ def profile(request):
 @login_required(login_url='login')
 def warehouse(request):
     return render(request, 'warehouse/warehouse.html')
+
+
+
+import openpyxl
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from .models import Part  # Ваша модель для запчастей
+
+@login_required
+def export_excel(request):
+    # Создаем новый Excel файл
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Запчасти"
+
+    # Заголовки для таблицы
+    ws.append(["Устройство", "Бренд", "Модель", "Тип запчасти", "Цвет", "Количество", "Цена"])
+
+    # Данные из модели, принадлежащие текущему пользователю
+    parts = Part.objects.filter(user=request.user)  # Фильтрация по текущему пользователю
+    for part in parts:
+        ws.append([part.device, part.brand, part.model, part.part_type, part.color, part.quantity, part.price])
+
+    # Создаем HTTP ответ с Excel файлом
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=parts.xlsx'
+    wb.save(response)
+
+    return response

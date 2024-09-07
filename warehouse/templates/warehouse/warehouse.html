@@ -1,9 +1,14 @@
- {% extends 'warehouse/base.html' %}
+{% extends 'warehouse/base.html' %}
 {% block title %}Склад{% endblock %}
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Ваши запчасти</h2>
-        <a href="{% url 'add_part' %}" class="btn btn-success">Добавить запчасть</a>
+    <div class="d-flex flex-column align-items-start mb-4">
+        <div class="d-flex justify-content-between align-items-center w-100 mb-4">
+            <h2 class="mb-0">Ваши запчасти</h2>
+            <div class="d-flex">
+                <a href="{% url 'add_part' %}" class="btn btn-success mr-2">Добавить запчасть</a>
+                <a href="{% url 'export_excel' %}" class="btn btn-info">Экспорт в Excel</a>
+            </div>
+        </div>
     </div>
 
     <!-- Контейнер для поиска -->
@@ -122,29 +127,28 @@
         };
 
         // Карта брендов и моделей
-const brandModelMap = {
-    'Телефон': {
-        'Samsung': ['a10', 'a20', 'a30', 's10'],
-        'Huawei': ['p10', 'p20', 'honor 50'],
-        'Xiaomi': ['redmi 5', 'redmi 6', 'redmi 7']
-    },
-    'Планшет': {
-        'Samsung': ['t500', 't725'],
-        'Huawei': ['t10', 'x8'],
-        'Xiaomi': ['mi pad 5', 'mi pad 6']
-    },
-    'Ноутбук': {
-        'Lenovo': ['ideapad 3', 'ideapad 5'],
-        'Asus': ['zenbook 14', 'rog strix'],
-        'Acer': ['aspire 5', 'nitro 5']
-    },
-    'Смарт-часы': {
-        'Samsung': ['galaxy watch 3', 'galaxy watch 4'],
-        'Huawei': ['watch gt 2', 'watch gt 3'],
-        'Xiaomi': ['mi watch', 'mi watch lite']
-    }
-};
-
+        const brandModelMap = {
+            'Телефон': {
+                'Samsung': ['a10', 'a20', 'a30', 's10'],
+                'Huawei': ['p10', 'p20', 'honor 50'],
+                'Xiaomi': ['redmi 5', 'redmi 6', 'redmi 7']
+            },
+            'Планшет': {
+                'Samsung': ['t500', 't725'],
+                'Huawei': ['t10', 'x8'],
+                'Xiaomi': ['mi pad 5', 'mi pad 6']
+            },
+            'Ноутбук': {
+                'Lenovo': ['ideapad 3', 'ideapad 5'],
+                'Asus': ['zenbook 14', 'rog strix'],
+                'Acer': ['aspire 5', 'nitro 5']
+            },
+            'Смарт-часы': {
+                'Samsung': ['galaxy watch 3', 'galaxy watch 4'],
+                'Huawei': ['watch gt 2', 'watch gt 3'],
+                'Xiaomi': ['mi watch', 'mi watch lite']
+            }
+        };
 
         // Карта моделей и типов запчастей
         const modelPartTypeMap = {
@@ -178,29 +182,27 @@ const brandModelMap = {
             }
         });
 
- document.getElementById('brand').addEventListener('input', function() {
-    const device = document.getElementById('device').value;
-    const brand = this.value;
-    const modelInput = document.getElementById('model');
-    const partTypeInput = document.getElementById('part_type');
+        document.getElementById('brand').addEventListener('input', function() {
+            const device = document.getElementById('device').value;
+            const brand = this.value;
+            const modelInput = document.getElementById('model');
+            const partTypeInput = document.getElementById('part_type');
 
-    modelInput.value = '';
-    partTypeInput.value = '';
+            modelInput.value = '';
+            partTypeInput.value = '';
 
-    document.getElementById('models').innerHTML = '';
-    document.getElementById('part_types').innerHTML = '';
+            document.getElementById('models').innerHTML = '';
+            document.getElementById('part_types').innerHTML = '';
 
-    if (brandModelMap[device] && brandModelMap[device][brand]) {
-        const modelOptions = brandModelMap[device][brand].map(model => `<option value="${model}">`).join('');
-        document.getElementById('models').innerHTML = modelOptions;
-    }
-});
-
+            if (brandModelMap[device] && brandModelMap[device][brand]) {
+                const modelOptions = brandModelMap[device][brand].map(model => `<option value="${model}">`).join('');
+                document.getElementById('models').innerHTML = modelOptions;
+            }
+        });
 
         document.getElementById('model').addEventListener('input', function() {
             const model = this.value;
 
-            //```javascript
             // Очистка значения и списка типов запчастей
             document.getElementById('part_type').value = '';
             document.getElementById('part_types').innerHTML = '';

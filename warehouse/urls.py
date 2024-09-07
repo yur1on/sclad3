@@ -13,6 +13,7 @@ urlpatterns = [
     path('edit-part/<int:part_id>/', views.edit_part, name='edit_part'),
     path('delete-part/<int:part_id>/', views.delete_part, name='delete_part'),
     path('logout/', logout_view, name='logout'),
+    path('export_excel/', views.export_excel, name='export_excel'),
 ]
 
 
