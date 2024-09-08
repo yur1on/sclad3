@@ -11,65 +11,17 @@
         </div>
     </div>
 
-    <!-- Контейнер для поиска -->
-    <div class="mb-4">
-        <form method="get" class="form-row">
-            <!-- Устройство -->
-            <div class="form-group col-md-3">
-                <label for="device">Устройство</label>
-                <div class="input-group">
-                    <input type="text" list="devices" name="q" id="device" class="form-control" placeholder="Устройство" value="{{ query|default_if_none:'' }}">
-                    <datalist id="devices">
-                        <option value="Телефон">
-                        <option value="Планшет">
-                        <option value="Ноутбук">
-                        <option value="Смарт-часы">
-                    </datalist>
-                </div>
-            </div>
+    <!-- Кнопка "Показать устройства" -->
+    <button id="show-devices-btn" class="btn btn-primary mb-4">Показать устройства</button>
 
-            <!-- Бренд -->
-            <div class="form-group col-md-2">
-                <label for="brand">Бренд</label>
-                <div class="input-group">
-                    <input list="brands" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ brand|default_if_none:'' }}">
-                    <datalist id="brands">
-                        <!-- Бренды будут обновляться динамически через JavaScript -->
-                    </datalist>
-                </div>
-            </div>
-
-            <!-- Модель -->
-            <div class="form-group col-md-2">
-                <label for="model">Модель</label>
-                <div class="input-group">
-                    <input list="models" name="model" id="model" class="form-control" placeholder="Модель" value="{{ model|default_if_none:'' }}">
-                    <datalist id="models">
-                        <!-- Модели будут обновляться динамически через JavaScript -->
-                    </datalist>
-                </div>
-            </div>
-
-            <!-- Тип запчасти -->
-            <div class="form-group col-md-3">
-                <label for="part_type">Тип запчасти</label>
-                <div class="input-group">
-                    <input list="part_types" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ part_type|default_if_none:'' }}">
-                    <datalist id="part_types">
-                        <!-- Типы запчастей будут обновляться динамически через JavaScript -->
-                    </datalist>
-                </div>
-            </div>
-
-            <!-- Кнопка поиска -->
-            <div class="form-group col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary btn-block">Поиск</button>
-            </div>
-        </form>
+    <!-- Контейнер для кнопок устройств и брендов -->
+    <div id="device-buttons-container" style="display: none;">
+        <div id="device-buttons" class="mb-4"></div>
+        <div id="brand-buttons" class="mb-4"></div>
     </div>
 
-    <!-- Таблица запчастей -->
-    <div class="table-responsive">
+    <!-- Контейнер для таблицы запчастей -->
+    <div id="parts-table-container" class="table-responsive">
         <table id="parts-table" class="table table-striped table-bordered">
             <thead class="thead-dark">
                 <tr>
@@ -118,100 +70,103 @@
     </div>
 
     <script>
-        // Карта устройств и брендов
-        const deviceBrandMap = {
-            'Телефон': ['Samsung', 'Huawei', 'Xiaomi'],
-            'Планшет': ['Samsung', 'Huawei', 'Xiaomi'],
-            'Ноутбук': ['Lenovo', 'Asus', 'Acer'],
-            'Смарт-часы': ['Samsung', 'Huawei', 'Xiaomi']
-        };
+// Связь между устройствами, брендами и моделями
+const deviceBrandModelMap = {
+    'Телефон': {
+        'Samsung': ['a10', 'a20', 'a30', 's10'],
+        'Huawei': ['p10', 'p20', 'honor 50'],
+        'Xiaomi': ['redmi 5', 'redmi 6', 'redmi 7'],
+        // Добавляем бренд Realme с его моделями
+        'Realme': ['realme 8', 'realme 6', 'realme 7', 'realme x2'],
+        'LG': ['LG G7', 'LG V40', 'LG K50']
 
-        // Карта брендов и моделей
-        const brandModelMap = {
-            'Телефон': {
-                'Samsung': ['a10', 'a20', 'a30', 's10'],
-                'Huawei': ['p10', 'p20', 'honor 50'],
-                'Xiaomi': ['redmi 5', 'redmi 6', 'redmi 7']
-            },
-            'Планшет': {
-                'Samsung': ['t500', 't725'],
-                'Huawei': ['t10', 'x8'],
-                'Xiaomi': ['mi pad 5', 'mi pad 6']
-            },
-            'Ноутбук': {
-                'Lenovo': ['ideapad 3', 'ideapad 5'],
-                'Asus': ['zenbook 14', 'rog strix'],
-                'Acer': ['aspire 5', 'nitro 5']
-            },
-            'Смарт-часы': {
-                'Samsung': ['galaxy watch 3', 'galaxy watch 4'],
-                'Huawei': ['watch gt 2', 'watch gt 3'],
-                'Xiaomi': ['mi watch', 'mi watch lite']
-            }
-        };
+    },
+    'Планшет': {
+        'Samsung': ['tab s3', 'tab s4', 'tab a'],
+        'Huawei': ['mediapad t5', 'mediapad m5'],
+        'Xiaomi': ['mi pad 4', 'mi pad 5'],
+        'Apple': ['iPad Air', 'iPad Pro', 'iPad Mini']
+    },
+    'Ноутбук': {
+        'Lenovo': ['thinkpad x1', 'ideapad 320'],
+        'Asus': ['zenbook 14', 'vivobook s14'],
+        'Acer': ['aspire 5', 'nitro 5']
+    },
+    'Смарт-часы': {
+        'Samsung': ['galaxy watch', 'galaxy fit'],
+        'Huawei': ['watch gt', 'watch fit'],
+        'Xiaomi': ['mi band 4', 'mi band 5']
+    }
+};
 
-        // Карта моделей и типов запчастей
-        const modelPartTypeMap = {
-            'a10': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
-            'a20': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
-            'a30': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
-            's10': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
-            'p10': ['Динамик', 'Дисплей', 'Разъем', 'Шлейф'],
-            't500': ['Динамик', 'Дисплей'],
-            // Добавьте другие модели и соответствующие им типы запчастей
-        };
+// Функция для отображения устройств
+document.getElementById('show-devices-btn').addEventListener('click', function() {
+    const tableContainer = document.getElementById('parts-table-container');
+    const deviceButtonsContainer = document.getElementById('device-buttons-container');
+    const deviceButtonsDiv = document.getElementById('device-buttons');
 
-        document.getElementById('device').addEventListener('input', function() {
-            const device = this.value;
-            const brandInput = document.getElementById('brand');
-            const modelInput = document.getElementById('model');
-            const partTypeInput = document.getElementById('part_type');
+    if (tableContainer.style.display === 'none') {
+        tableContainer.style.display = '';
+        deviceButtonsContainer.style.display = 'none';
+    } else {
+        tableContainer.style.display = 'none';
+        deviceButtonsContainer.style.display = 'block';
 
-            // Очистка значений и списков брендов, моделей и типов запчастей
-            brandInput.value = '';
-            modelInput.value = '';
-            partTypeInput.value = '';
-            document.getElementById('brands').innerHTML = '';
-            document.getElementById('models').innerHTML = '';
-            document.getElementById('part_types').innerHTML = '';
+        // Очищаем контейнер с кнопками устройств
+        deviceButtonsDiv.innerHTML = '';
 
-            // Обновление списка брендов
-            if (deviceBrandMap[device]) {
-                const brandOptions = deviceBrandMap[device].map(brand => `<option value="${brand}">`).join('');
-                document.getElementById('brands').innerHTML = brandOptions;
-            }
+        // Динамически создаем кнопки для каждого устройства
+        Object.keys(deviceBrandModelMap).forEach(device => {
+            const button = document.createElement('button');
+            button.className = 'btn btn-info mr-2 mb-2';
+            button.textContent = device;
+            button.onclick = function() {
+                showBrands(device);
+            };
+            deviceButtonsDiv.appendChild(button);
         });
+    }
+});
 
-        document.getElementById('brand').addEventListener('input', function() {
-            const device = document.getElementById('device').value;
-            const brand = this.value;
-            const modelInput = document.getElementById('model');
-            const partTypeInput = document.getElementById('part_type');
+// Функция для отображения брендов устройства
+function showBrands(device) {
+    const brandButtonsDiv = document.getElementById('brand-buttons');
+    brandButtonsDiv.innerHTML = '';
 
-            modelInput.value = '';
-            partTypeInput.value = '';
-
-            document.getElementById('models').innerHTML = '';
-            document.getElementById('part_types').innerHTML = '';
-
-            if (brandModelMap[device] && brandModelMap[device][brand]) {
-                const modelOptions = brandModelMap[device][brand].map(model => `<option value="${model}">`).join('');
-                document.getElementById('models').innerHTML = modelOptions;
-            }
+    // Проверяем наличие брендов для выбранного устройства
+    if (deviceBrandModelMap[device]) {
+        Object.keys(deviceBrandModelMap[device]).forEach(brand => {
+            const button = document.createElement('button');
+            button.className = 'btn btn-secondary mr-2 mb-2';
+            button.textContent = brand;
+            button.onclick = function() {
+                showPartsTable(device, brand);
+            };
+            brandButtonsDiv.appendChild(button);
         });
+    }
+}
 
-        document.getElementById('model').addEventListener('input', function() {
-            const model = this.value;
+// Функция для отображения таблицы запчастей для выбранного бренда
+function showPartsTable(device, brand) {
+    const tableRows = document.querySelectorAll('#parts-table tbody tr');
 
-            // Очистка значения и списка типов запчастей
-            document.getElementById('part_type').value = '';
-            document.getElementById('part_types').innerHTML = '';
+    tableRows.forEach(row => {
+        const deviceCell = row.cells[0].textContent.trim();
+        const brandCell = row.cells[1].textContent.trim();
 
-            // Обновление списка типов запчастей
-            if (modelPartTypeMap[model]) {
-                const partTypeOptions = modelPartTypeMap[model].map(partType => `<option value="${partType}">`).join('');
-                document.getElementById('part_types').innerHTML = partTypeOptions;
-            }
-        });
+        // Отображаем только те строки, которые соответствуют выбранному устройству и бренду
+        if (deviceCell === device && brandCell === brand) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Скрываем кнопки после выбора бренда
+    document.getElementById('device-buttons-container').style.display = 'none';
+    document.getElementById('parts-table-container').style.display = 'block';
+}
+
     </script>
 {% endblock %}

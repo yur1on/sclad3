@@ -7,8 +7,10 @@ from django.shortcuts import render, redirect
 from .forms import PartForm
 from .forms import UserRegisterForm
 from django.contrib.auth.decorators import login_required
-
-
+from django.http import JsonResponse
+from django.http import JsonResponse
+from .models import Part
+from django.contrib.auth.decorators import login_required
 def home(request):
     return render(request, 'warehouse/home.html')
 
@@ -64,14 +66,19 @@ def warehouse_view(request):
     if part_type:
         parts = parts.filter(part_type__icontains=part_type)
 
+    # Получаем уникальные устройства и бренды для отображения кнопок
+    devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
+    brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct()
+
     return render(request, 'warehouse/warehouse.html', {
         'parts': parts,
         'query': query,
         'brand': brand,
         'model': model,
-        'part_type': part_type
+        'part_type': part_type,
+        'devices': devices,  # Добавляем список устройств
+        'brands': brands      # Добавляем список брендов
     })
-
 
 
 @login_required
@@ -185,3 +192,45 @@ def export_excel(request):
     wb.save(response)
 
     return response
+
+
+@login_required
+def get_brands_for_device(request):
+    device = request.GET.get('device')
+    brands = Part.objects.filter(user=request.user, device=device).values_list('brand', flat=True).distinct()
+    return JsonResponse({'brands': list(brands)})
+
+
+
+
+@login_required
+def filter_parts(request):
+    device = request.GET.get('device')
+    brand = request.GET.get('brand')
+    model = request.GET.get('model')  # Добавлено
+    part_type = request.GET.get('part_type')  # Добавлено
+
+    # Фильтрация запчастей по устройству, бренду, модели и типу
+    parts = Part.objects.filter(user=request.user, device=device, brand=brand)
+    if model:
+        parts = parts.filter(model__icontains=model)
+    if part_type:
+        parts = parts.filter(part_type__icontains=part_type)
+
+    # Подготовка данных для ответа
+    parts_data = [
+        {
+            'id': part.id,
+            'device': part.device,
+            'brand': part.brand,
+            'model': part.model,
+            'part_type': part.part_type,
+            'color': part.color,
+            'quantity': part.quantity,
+            'price': part.price,
+            'image': part.image.url if part.image else None
+        }
+        for part in parts
+    ]
+
+    return JsonResponse({'parts': parts_data})

@@ -1,0 +1,4 @@
+<h3>Бренды для устройства {{ selected_device }}</h3>
+{% for brand in brands %}
+    <button class="btn btn-secondary" onclick="showParts('{{ brand }}')">{{ brand }}</button>
+{% endfor %}
