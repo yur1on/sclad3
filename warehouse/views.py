@@ -166,10 +166,12 @@ def warehouse(request):
 
 
 
+
+
 import openpyxl
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import Part  # Ваша модель для запчастей
+from .models import Part
 
 @login_required
 def export_excel(request):
@@ -182,7 +184,7 @@ def export_excel(request):
     ws.append(["Устройство", "Бренд", "Модель", "Тип запчасти", "Цвет", "Количество", "Цена"])
 
     # Данные из модели, принадлежащие текущему пользователю
-    parts = Part.objects.filter(user=request.user)  # Фильтрация по текущему пользователю
+    parts = Part.objects.filter(user=request.user).order_by('device', 'brand', 'model')  # Сортировка по устройству, бренду и модели
     for part in parts:
         ws.append([part.device, part.brand, part.model, part.part_type, part.color, part.quantity, part.price])
 

@@ -69,7 +69,6 @@
         </form>
     </div>
 
-
     <!-- Кнопка "Показать устройства" -->
     <button id="show-devices-btn" class="btn btn-primary mb-4">Показать устройства</button>
 
@@ -133,6 +132,54 @@
 
 
     <script>
+// Переменная для хранения направлений сортировки для каждого столбца
+let sortDirections = {};
+
+// Функция для сортировки таблицы по указанному столбцу
+function sortTable(columnIndex) {
+    const table = document.getElementById("parts-table");
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    // Определяем текущее направление сортировки для этого столбца
+    if (!sortDirections[columnIndex]) {
+        sortDirections[columnIndex] = 'asc';
+    } else {
+        sortDirections[columnIndex] = sortDirections[columnIndex] === 'asc' ? 'desc' : 'asc';
+    }
+
+    // Сортируем строки
+    rows.sort((a, b) => {
+        const aText = a.cells[columnIndex].textContent.trim().toLowerCase();
+        const bText = b.cells[columnIndex].textContent.trim().toLowerCase();
+
+        if (aText < bText) return sortDirections[columnIndex] === 'asc' ? -1 : 1;
+        if (aText > bText) return sortDirections[columnIndex] === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    // Очищаем tbody и добавляем отсортированные строки
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Обновляем индикаторы сортировки
+    updateSortIndicators(columnIndex);
+}
+
+// Функция для обновления визуальных индикаторов сортировки
+function updateSortIndicators(activeColumnIndex) {
+    const headers = document.querySelectorAll("#parts-table thead th");
+    headers.forEach((th, index) => {
+        // Удаляем предыдущие индикаторы
+        th.innerHTML = th.textContent.replace(' ▲', '').replace(' ▼', '');
+
+        // Добавляем новый индикатор для активного столбца
+        if (index === activeColumnIndex) {
+            th.innerHTML += sortDirections[activeColumnIndex] === 'asc' ? ' ▲' : ' ▼';
+        }
+    });
+}
+
 // Связь между устройствами, брендами и моделями
 const deviceBrandModelMap = {
     'Телефон': {
