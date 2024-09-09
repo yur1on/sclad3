@@ -1,6 +1,7 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Склад{% endblock %}
 {% block content %}
+{% load static %}
     <div class="d-flex flex-column align-items-start mb-4">
         <div class="d-flex justify-content-between align-items-center w-100 mb-4">
             <h2 class="mb-0">Ваши запчасти</h2>
@@ -11,8 +12,69 @@
         </div>
     </div>
 
+    <!-- Контейнер для поиска -->
+    <div class="mb-4">
+        <form method="get" class="form-row">
+            <!-- Устройство -->
+            <div class="form-group col-md-3">
+                <label for="device">Устройство</label>
+                <div class="input-group">
+                    <input type="text" list="devices" name="q" id="device" class="form-control" placeholder="Устройство" value="{{ query|default_if_none:'' }}">
+                    <datalist id="devices">
+                        <option value="Телефон">
+                        <option value="Планшет">
+                        <option value="Ноутбук">
+                        <option value="Смарт-часы">
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Бренд -->
+            <div class="form-group col-md-2">
+                <label for="brand">Бренд</label>
+                <div class="input-group">
+                    <input list="brands" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ brand|default_if_none:'' }}">
+                    <datalist id="brands">
+                        <!-- Бренды будут обновляться динамически через JavaScript -->
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Модель -->
+            <div class="form-group col-md-2">
+                <label for="model">Модель</label>
+                <div class="input-group">
+                    <input list="models" name="model" id="model" class="form-control" placeholder="Модель" value="{{ model|default_if_none:'' }}">
+                    <datalist id="models">
+                        <!-- Модели будут обновляться динамически через JavaScript -->
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Тип запчасти -->
+            <div class="form-group col-md-3">
+                <label for="part_type">Тип запчасти</label>
+                <div class="input-group">
+                    <input list="part_types" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ part_type|default_if_none:'' }}">
+                    <datalist id="part_types">
+                        <!-- Типы запчастей будут обновляться динамически через JavaScript -->
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Кнопка поиска -->
+            <div class="form-group col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary btn-block">Поиск</button>
+            </div>
+        </form>
+    </div>
+
+
     <!-- Кнопка "Показать устройства" -->
     <button id="show-devices-btn" class="btn btn-primary mb-4">Показать устройства</button>
+
+    <!-- Кнопка "Назад" -->
+    <button id="back-btn" class="btn btn-secondary mb-4" style="display: none;">Назад</button>
 
     <!-- Контейнер для кнопок устройств и брендов -->
     <div id="device-buttons-container" style="display: none;">
@@ -69,6 +131,7 @@
         </table>
     </div>
 
+
     <script>
 // Связь между устройствами, брендами и моделями
 const deviceBrandModelMap = {
@@ -76,10 +139,8 @@ const deviceBrandModelMap = {
         'Samsung': ['a10', 'a20', 'a30', 's10'],
         'Huawei': ['p10', 'p20', 'honor 50'],
         'Xiaomi': ['redmi 5', 'redmi 6', 'redmi 7'],
-        // Добавляем бренд Realme с его моделями
         'Realme': ['realme 8', 'realme 6', 'realme 7', 'realme x2'],
         'LG': ['LG G7', 'LG V40', 'LG K50']
-
     },
     'Планшет': {
         'Samsung': ['tab s3', 'tab s4', 'tab a'],
@@ -99,74 +160,112 @@ const deviceBrandModelMap = {
     }
 };
 
+// Переменная для хранения текущей активной кнопки устройства
+let activeDeviceButton = null;
+
 // Функция для отображения устройств
 document.getElementById('show-devices-btn').addEventListener('click', function() {
     const tableContainer = document.getElementById('parts-table-container');
     const deviceButtonsContainer = document.getElementById('device-buttons-container');
     const deviceButtonsDiv = document.getElementById('device-buttons');
+    const backButton = document.getElementById('back-btn');
 
     if (tableContainer.style.display === 'none') {
         tableContainer.style.display = '';
         deviceButtonsContainer.style.display = 'none';
+        backButton.style.display = 'none';
     } else {
         tableContainer.style.display = 'none';
         deviceButtonsContainer.style.display = 'block';
+        backButton.style.display = 'block';
 
         // Очищаем контейнер с кнопками устройств
         deviceButtonsDiv.innerHTML = '';
 
-        // Динамически создаем кнопки для каждого устройства
-        Object.keys(deviceBrandModelMap).forEach(device => {
+        // Массив устройств с соответствующими путями к их изображениям
+        const devices = {
+            'Телефон': "{% static 'images/phone.jpg' %}",
+            'Планшет': "{% static 'images/tablet.jpeg' %}",
+            'Ноутбук': "{% static 'images/laptop.png' %}",
+            'Смарт-часы': "{% static 'images/smartwatch.png' %}"
+        };
+
+        // Создаем кнопки устройств с изображениями
+        for (let device in devices) {
             const button = document.createElement('button');
-            button.className = 'btn btn-info mr-2 mb-2';
-            button.textContent = device;
-            button.onclick = function() {
+            button.classList.add('btn', 'btn-outline-primary', 'mr-2', 'mb-2');
+            button.innerHTML = `<img src="${devices[device]}" alt="${device}" style="max-width: 50px; max-height: 50px;" class="mr-2">${device}`;
+            button.onclick = () => {
+                // Изменяем цвет активной кнопки
+                if (activeDeviceButton) {
+                    activeDeviceButton.classList.remove('btn-primary');
+                    activeDeviceButton.classList.add('btn-outline-primary');
+                }
+
+                // Устанавливаем текущую кнопку как активную
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-primary');
+                activeDeviceButton = button;
+
+                // Показать бренды
                 showBrands(device);
             };
             deviceButtonsDiv.appendChild(button);
-        });
+        }
     }
 });
 
-// Функция для отображения брендов устройства
+// Функция для отображения брендов
 function showBrands(device) {
     const brandButtonsDiv = document.getElementById('brand-buttons');
     brandButtonsDiv.innerHTML = '';
 
-    // Проверяем наличие брендов для выбранного устройства
-    if (deviceBrandModelMap[device]) {
-        Object.keys(deviceBrandModelMap[device]).forEach(brand => {
-            const button = document.createElement('button');
-            button.className = 'btn btn-secondary mr-2 mb-2';
-            button.textContent = brand;
-            button.onclick = function() {
-                showPartsTable(device, brand);
-            };
-            brandButtonsDiv.appendChild(button);
-        });
+    const brands = deviceBrandModelMap[device];
+
+    for (let brand in brands) {
+        const button = document.createElement('button');
+        button.classList.add('btn', 'btn-outline-secondary', 'mr-2', 'mb-2');
+        button.textContent = brand;
+        button.onclick = () => showParts(device, brand);
+        brandButtonsDiv.appendChild(button);
     }
 }
 
-// Функция для отображения таблицы запчастей для выбранного бренда
-function showPartsTable(device, brand) {
-    const tableRows = document.querySelectorAll('#parts-table tbody tr');
+// Функция для отображения таблицы запчастей
+function showParts(device, brand) {
+    const table = document.getElementById('parts-table');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
-    tableRows.forEach(row => {
-        const deviceCell = row.cells[0].textContent.trim();
-        const brandCell = row.cells[1].textContent.trim();
+    for (let row of rows) {
+        const deviceCell = row.cells[0];
+        const brandCell = row.cells[1];
 
-        // Отображаем только те строки, которые соответствуют выбранному устройству и бренду
-        if (deviceCell === device && brandCell === brand) {
+        if (deviceCell.textContent === device && brandCell.textContent === brand) {
             row.style.display = '';
         } else {
             row.style.display = 'none';
         }
-    });
+    }
 
-    // Скрываем кнопки после выбора бренда
     document.getElementById('device-buttons-container').style.display = 'none';
-    document.getElementById('parts-table-container').style.display = 'block';
+    document.getElementById('parts-table-container').style.display = '';
 }
 
+// Кнопка "Назад" возвращает на предыдущий экран
+document.getElementById('back-btn').addEventListener('click', function() {
+    const tableContainer = document.getElementById('parts-table-container');
+    const deviceButtonsContainer = document.getElementById('device-buttons-container');
+    const backButton = document.getElementById('back-btn');
+
+    if (deviceButtonsContainer.style.display === 'none') {
+        deviceButtonsContainer.style.display = 'block';
+        tableContainer.style.display = 'none';
+        backButton.style.display = 'block';
+    } else {
+        deviceButtonsContainer.style.display = 'none';
+        tableContainer.style.display = 'block';
+        backButton.style.display = 'none';
+    }
+});
     </script>
 {% endblock %}

@@ -49,3 +49,21 @@ form {
 </style>
 
 
+.device-button {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+}
+
+.device-icon {
+    width: 50px; /* Настройте размер значка */
+    height: 50px;
+    vertical-align: middle;
+}
+<style>
+    .active-device-btn {
+        background-color: #007bff; /* Синий цвет */
+        color: white;
+        border-color: #007bff;
+    }
+</style>
