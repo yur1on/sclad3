@@ -1,0 +1,80 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Информация о запчасти{% endblock %}
+{% block content %}
+<div class="container">
+    <a href="{% url 'search' %}" class="btn btn-dark mb-4">Назад</a>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Детали запчасти</h5>
+                </div>
+                <div class="card-body">
+                    {% if part.image %}
+                        <div class="text-center mb-3">
+                            <img src="{{ part.image.url }}" alt="Изображение запчасти" class="img-fluid" style="max-width: 300px; height: auto;">
+                        </div>
+                    {% endif %}
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Устройство</th>
+                            <td>{{ part.device }}</td>
+                        </tr>
+                        <tr>
+                            <th>Бренд</th>
+                            <td>{{ part.brand }}</td>
+                        </tr>
+                        <tr>
+                            <th>Модель</th>
+                            <td>{{ part.model }}</td>
+                        </tr>
+                        <tr>
+                            <th>Тип запчасти</th>
+                            <td>{{ part.part_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Цвет</th>
+                            <td>{{ part.color }}</td>
+                        </tr>
+                        <tr>
+                            <th>Количество</th>
+                            <td>{{ part.quantity }}</td>
+                        </tr>
+                        <tr>
+                            <th>Цена</th>
+                            <td>{{ part.price }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Информация о пользователе</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Имя пользователя</th>
+                            <td>{{ part.user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Электронная почта</th>
+                            <td>{{ part.user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Город</th>
+                            <td>{{ part.user.profile.city }}</td>
+                        </tr>
+                        <tr>
+                            <th>Телефон</th>
+                            <td>{{ part.user.profile.phone }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

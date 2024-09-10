@@ -7,12 +7,11 @@ class Part(models.Model):
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     part_type = models.CharField(max_length=100)
-    color = models.CharField(max_length=50, blank=True, null=True)  # Поле для цвета
+    color = models.CharField(max_length=50, blank=True, null=True)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to='part_images/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Установи auto_now_add=True
 
     def __str__(self):
         return f"{self.device} - {self.brand} - {self.model} - {self.part_type}"
-
-

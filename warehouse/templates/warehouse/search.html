@@ -106,42 +106,43 @@
 
         </style>
 
-        <table>
-            <tr>
-                <th>Устройство</th>
-                <th>Бренд</th>
-                <th>Модель</th>
-                <th>Тип запчасти</th>
-                <th>Цвет</th>
-                <th>Количество</th>
-                <th>Цена</th>
-                <th>Изображение</th>
-                <th>Город</th>
-                <th>Номер телефона</th>
-            </tr>
-            {% for result in results %}
-            <tr>
-                <td>{{ result.device }}</td>
-                <td>{{ result.brand }}</td>
-                <td>{{ result.model }}</td>
-                <td>{{ result.part_type }}</td>
-                <td>{{ result.color|default:"Не указан" }}</td>
-                <td>{{ result.quantity }}</td>
-                <td>{{ result.price }}</td>
-                <td>
-                    {% if result.image %}
-                        <a href="{{ result.image.url }}" target="_blank" class="img-link">
-                            <img src="{{ result.image.url }}" alt="Изображение запчасти" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
-                        </a>
-                    {% else %}
-                        Нет изображения
-                    {% endif %}
-                </td>
-                <td>{{ result.user.profile.city }}</td>
-                <td>{{ result.user.profile.phone }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+<table>
+    <tr>
+        <th>Устройство</th>
+        <th>Бренд</th>
+        <th>Модель</th>
+        <th>Тип запчасти</th>
+        <th>Цвет</th>
+        <th>Количество</th>
+        <th>Цена</th>
+        <th>Изображение</th>
+        <th>Город</th>
+        <th>Номер телефона</th>
+    </tr>
+    {% for result in results %}
+    <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
+        <td>{{ result.device }}</td>
+        <td>{{ result.brand }}</td>
+        <td>{{ result.model }}</td>
+        <td>{{ result.part_type }}</td>
+        <td>{{ result.color|default:"Не указан" }}</td>
+        <td>{{ result.quantity }}</td>
+        <td>{{ result.price }}</td>
+        <td>
+            {% if result.image %}
+                <a href="{{ result.image.url }}" target="_blank" class="img-link">
+                    <img src="{{ result.image.url }}" alt="Изображение запчасти" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                </a>
+            {% else %}
+                Нет изображения
+            {% endif %}
+        </td>
+        <td>{{ result.user.profile.city }}</td>
+        <td>{{ result.user.profile.phone }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
     </div>
 
     <script>

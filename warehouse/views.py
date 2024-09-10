@@ -2,15 +2,13 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
 from django.shortcuts import render, redirect
 from .forms import PartForm
 from .forms import UserRegisterForm
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
 from .models import Part
-from django.contrib.auth.decorators import login_required
 def home(request):
     return render(request, 'warehouse/home.html')
 
@@ -111,10 +109,10 @@ def search(request):
     brand = request.GET.get('brand')
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
-    color = request.GET.get('color')  # Добавлен цвет
+    color = request.GET.get('color')
     city = request.GET.get('city')
 
-    results = Part.objects.all()
+    results = Part.objects.all().order_by('-created_at')  # Ordering by creation time
 
     if query:
         results = results.filter(device__icontains=query)
@@ -125,7 +123,7 @@ def search(request):
     if part_type:
         results = results.filter(part_type__icontains=part_type)
     if color:
-        results = results.filter(color__icontains=color)  # Фильтрация по цвету
+        results = results.filter(color__icontains=color)
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
@@ -236,3 +234,11 @@ def filter_parts(request):
     ]
 
     return JsonResponse({'parts': parts_data})
+
+
+
+
+@login_required
+def part_detail(request, part_id):
+    part = get_object_or_404(Part, id=part_id)
+    return render(request, 'warehouse/part_detail.html', {'part': part})

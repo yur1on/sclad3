@@ -15,8 +15,8 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('export_excel/', views.export_excel, name='export_excel'),
     path('filter_parts/', views.filter_parts, name='filter_parts'),
+    path('part/<int:part_id>/', views.part_detail, name='part_detail'),
 ]
-
 
 
 
