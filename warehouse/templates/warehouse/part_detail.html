@@ -60,6 +60,10 @@
                             <td>{{ part.user.username }}</td>
                         </tr>
                         <tr>
+                            <th>Средний рейтинг</th>
+                            <td>{{ part.user.profile.average_rating }} / 5</td>
+                        </tr>
+                        <tr>
                             <th>Электронная почта</th>
                             <td>{{ part.user.email }}</td>
                         </tr>
@@ -72,6 +76,11 @@
                             <td>{{ part.user.profile.phone }}</td>
                         </tr>
                     </table>
+
+                    <!-- Кнопки для отзывов -->
+                    <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
+                    <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary ml-2">Посмотреть отзывы</a>
+
                 </div>
             </div>
         </div>

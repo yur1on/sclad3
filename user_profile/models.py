@@ -8,3 +8,26 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.city} - {self.phone}"
+
+    @property
+    def average_rating(self):
+        reviews = self.user.received_reviews.all()
+        if reviews.exists():
+            return sum(review.rating for review in reviews) / reviews.count()
+        return 5  # Возвращаем 5, если нет отзывов
+
+
+
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_reviews')
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='given_reviews')
+    rating = models.PositiveSmallIntegerField()  # Рейтинг от 1 до 5
+    comment = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review from {self.reviewer} to {self.user} - {self.rating} stars"
+
+
+

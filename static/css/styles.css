@@ -67,3 +67,27 @@ form {
         border-color: #007bff;
     }
 </style>
+.rating-container {
+    position: relative;
+    display: inline-block;
+    font-size: 1.5rem; /* Увеличиваем размер шрифта для звезд */
+}
+
+.rating {
+    display: flex;
+}
+
+.rating-star {
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+.rating-star:hover,
+.rating-star.selected {
+    color: #f0ad4e; /* Цвет для выделенной оценки */
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}

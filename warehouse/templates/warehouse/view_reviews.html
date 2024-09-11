@@ -1,0 +1,41 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Отзывы пользователя{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Отзывы пользователя {{ user.username }}</h2>
+
+    {% if reviews %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Отзывы</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Оценка</th>
+                            <th>Комментарий</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in reviews %}
+                        <tr>
+                            <td>
+                                <span class="badge badge-success">{{ review.rating }} / 5</span>
+                            </td>
+                            <td>{{ review.comment }}</td>
+                            <td>{{ review.created_at|date:"d M Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-4" role="alert">
+            У этого пользователя пока нет отзывов.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,14 +1,15 @@
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
-from django.shortcuts import render, redirect, get_object_or_404
 from django.shortcuts import render, redirect
 from .forms import PartForm
 from .forms import UserRegisterForm
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
-from .models import Part
+import openpyxl
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+
 def home(request):
     return render(request, 'warehouse/home.html')
 
@@ -162,14 +163,6 @@ def profile(request):
 def warehouse(request):
     return render(request, 'warehouse/warehouse.html')
 
-
-
-
-
-import openpyxl
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from .models import Part
 
 @login_required
 def export_excel(request):
