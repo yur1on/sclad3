@@ -40,7 +40,11 @@ INSTALLED_APPS = [
     'warehouse',
     'user_profile',
     'crispy_forms',
+    'user_registration',
 ]
+
+
+
 
 LOGIN_URL = 'login'
 
