@@ -2,6 +2,8 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from django.urls import path
+from django.contrib.auth import views as auth_views
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -21,3 +23,20 @@ class UserRegisterForm(UserCreationForm):
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError('Такое имя пользователя уже занято.')
         return username
+
+
+
+
+urlpatterns = [
+    # URL для начала процесса восстановления пароля (ввод email)
+    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='user_registration/password_reset_form.html'), name='password_reset'),
+
+    # URL для успешной отправки email
+    path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_name='user_registration/password_reset_done.html'), name='password_reset_done'),
+
+    # URL для ввода нового пароля по токену из email
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='user_registration/password_reset_confirm.html'), name='password_reset_confirm'),
+
+    # URL для успешного сброса пароля
+    path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(template_name='user_registration/password_reset_complete.html'), name='password_reset_complete'),
+]
