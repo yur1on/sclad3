@@ -10,8 +10,9 @@
                 <label for="rating">Оценка (от 1 до 5):</label>
                 <div class="rating-container">
                     <div class="rating">
-                        {% for i in 5|to %}
-                            <span class="rating-star" data-value="{{ i }}">{{ i }}</span>
+                        <!-- Отображаем звездочки вместо чисел -->
+                        {% for i in "12345" %}
+                            <span class="rating-star" data-value="{{ i }}">&#9733;</span>  <!-- HTML-код для звезды -->
                         {% endfor %}
                     </div>
                     <input type="hidden" name="rating" id="rating-input" value="{{ form.rating.value }}">
@@ -33,5 +34,37 @@
                 </ul>
             </div>
         {% endif %}
+
+        <!-- Кнопка назад -->
+        <a href="javascript:history.back()" class="btn btn-secondary mt-3">Назад</a>
     </div>
+
+    <!-- Подключаем JavaScript для выбора звезды -->
+    <script>
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.addEventListener('click', function() {
+                const ratingValue = this.getAttribute('data-value');
+                document.getElementById('rating-input').value = ratingValue;
+
+                // Обновляем вид выделенных звезд
+                document.querySelectorAll('.rating-star').forEach(star => {
+                    if (star.getAttribute('data-value') <= ratingValue) {
+                        star.style.color = 'gold';  // Подсвечиваем звезды золотым цветом
+                    } else {
+                        star.style.color = 'grey';  // Оставляем остальные серыми
+                    }
+                });
+            });
+        });
+
+        // Если рейтинг был ранее задан (например, при ошибке валидации формы)
+        const initialRating = document.getElementById('rating-input').value;
+        document.querySelectorAll('.rating-star').forEach(star => {
+            if (star.getAttribute('data-value') <= initialRating) {
+                star.style.color = 'gold';  // Подсвечиваем звезды золотым цветом
+            } else {
+                star.style.color = 'grey';  // Оставляем остальные серыми
+            }
+        });
+    </script>
 {% endblock %}

@@ -31,7 +31,7 @@ def add_review(request, user_id):
             review.reviewer = request.user
             review.user = user
             review.save()
-            return redirect('profile', user_id=user.id)  # Перенаправляем на профиль после успешного отзыва
+            return redirect('profile')  # Перенаправляем на профиль после успешного отзыва
     else:
         form = ReviewForm(reviewer=request.user, user=user)
 

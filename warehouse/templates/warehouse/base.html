@@ -22,7 +22,9 @@
                 <li class="nav-item"><a class="nav-link" href="{% url 'search' %}">Поиск</a></li>
             </ul>
             {% if user.is_authenticated %}
-                <span class="navbar-text">Привет, {{ user.username }}</span>
+                {% if not request.path|slice:":12" == '/add_review/' %}
+                    <span class="navbar-text">Привет, {{ user.username }}</span>
+                {% endif %}
                 <a class="btn btn-outline-danger ml-2" href="{% url 'logout' %}">Выход</a>
             {% else %}
                 <a class="btn btn-outline-primary ml-2" href="{% url 'login' %}">Вход</a>
