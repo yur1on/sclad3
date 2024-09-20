@@ -107,15 +107,18 @@
                     <td>{{ part.color|default:"Не указан" }}</td>
                     <td>{{ part.quantity }}</td>
                     <td>{{ part.price }}</td>
-                    <td>
-                        {% if part.image %}
-                            <a href="{{ part.image.url }}" target="_blank" class="img-link">
-                                <img src="{{ part.image.url }}" alt="{{ part.model }}" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
-                            </a>
-                        {% else %}
-                            Нет фото
-                        {% endif %}
-                    </td>
+<td>
+    {% if part.images.all %}
+        {% for image in part.images.all %}
+            <a href="{{ image.image.url }}" target="_blank" class="img-link">
+                <img src="{{ image.image.url }}" alt="{{ part.model }}" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+            </a>
+        {% endfor %}
+    {% else %}
+        Нет фото
+    {% endif %}
+</td>
+
                     <td>
                         <a href="{% url 'edit_part' part.id %}" class="btn btn-sm btn-warning mb-1" data-toggle="tooltip" data-placement="top" title="Редактировать">✏️</a>
                         <a href="{% url 'delete_part' part.id %}" class="btn btn-sm btn-danger" data-toggle="tooltip" data-placement="top" title="Удалить">🗑️</a>
@@ -129,7 +132,6 @@
             </tbody>
         </table>
     </div>
-
 
     <script>
 // Переменная для хранения направлений сортировки для каждого столбца
@@ -196,123 +198,90 @@ const deviceBrandModelMap = {
         'Apple': ['iPad Air', 'iPad Pro', 'iPad Mini']
     },
     'Ноутбук': {
-        'Lenovo': ['thinkpad x1', 'ideapad 320'],
-        'Asus': ['zenbook 14', 'vivobook s14'],
-        'Acer': ['aspire 5', 'nitro 5']
+        'Dell': ['XPS 13', 'XPS 15', 'Inspiron'],
+        'HP': ['Spectre x360', 'Envy 13', 'Pavilion 15'],
+        'Lenovo': ['ThinkPad X1', 'Yoga C930', 'Legion Y540'],
+        'Asus': ['ZenBook', 'ROG Strix', 'VivoBook']
     },
     'Смарт-часы': {
-        'Samsung': ['galaxy watch', 'galaxy fit'],
-        'Huawei': ['watch gt', 'watch fit'],
-        'Xiaomi': ['mi band 4', 'mi band 5']
+        'Apple': ['Series 3', 'Series 4', 'Series 5'],
+        'Samsung': ['Galaxy Watch', 'Galaxy Watch Active', 'Gear S3'],
+        'Xiaomi': ['Amazfit', 'Mi Band 4', 'Mi Band 5']
     }
 };
 
-// Переменная для хранения текущей активной кнопки устройства
-let activeDeviceButton = null;
+// Функция для показа кнопок устройств и скрытия таблицы
+document.getElementById("show-devices-btn").addEventListener("click", function() {
+    const deviceButtonsContainer = document.getElementById("device-buttons-container");
+    const partsTableContainer = document.getElementById("parts-table-container");
+    const deviceButtons = document.getElementById("device-buttons");
+    const backButton = document.getElementById("back-btn");
 
-// Функция для отображения устройств
-document.getElementById('show-devices-btn').addEventListener('click', function() {
-    const tableContainer = document.getElementById('parts-table-container');
-    const deviceButtonsContainer = document.getElementById('device-buttons-container');
-    const deviceButtonsDiv = document.getElementById('device-buttons');
-    const backButton = document.getElementById('back-btn');
+    // Очистить контейнер с кнопками устройств
+    deviceButtons.innerHTML = '';
 
-    if (tableContainer.style.display === 'none') {
-        tableContainer.style.display = '';
-        deviceButtonsContainer.style.display = 'none';
-        backButton.style.display = 'none';
-    } else {
-        tableContainer.style.display = 'none';
-        deviceButtonsContainer.style.display = 'block';
-        backButton.style.display = 'block';
+    // Скрыть таблицу и показать кнопки устройств
+    partsTableContainer.style.display = "none";
+    deviceButtonsContainer.style.display = "block";
+    backButton.style.display = "block";
 
-        // Очищаем контейнер с кнопками устройств
-        deviceButtonsDiv.innerHTML = '';
-
-        // Массив устройств с соответствующими путями к их изображениям
-        const devices = {
-            'Телефон': "{% static 'images/phone.jpg' %}",
-            'Планшет': "{% static 'images/tablet.jpeg' %}",
-            'Ноутбук': "{% static 'images/laptop.png' %}",
-            'Смарт-часы': "{% static 'images/smartwatch.png' %}"
-        };
-
-        // Создаем кнопки устройств с изображениями
-        for (let device in devices) {
-            const button = document.createElement('button');
-            button.classList.add('btn', 'btn-outline-primary', 'mr-2', 'mb-2');
-            button.innerHTML = `<img src="${devices[device]}" alt="${device}" style="max-width: 50px; max-height: 50px;" class="mr-2">${device}`;
-            button.onclick = () => {
-                // Изменяем цвет активной кнопки
-                if (activeDeviceButton) {
-                    activeDeviceButton.classList.remove('btn-primary');
-                    activeDeviceButton.classList.add('btn-outline-primary');
-                }
-
-                // Устанавливаем текущую кнопку как активную
-                button.classList.remove('btn-outline-primary');
-                button.classList.add('btn-primary');
-                activeDeviceButton = button;
-
-                // Показать бренды
-                showBrands(device);
-            };
-            deviceButtonsDiv.appendChild(button);
-        }
+    // Добавить кнопки устройств
+    for (const device in deviceBrandModelMap) {
+        const button = document.createElement("button");
+        button.className = "btn btn-outline-primary mr-2 mb-2";
+        button.innerText = device;
+        button.addEventListener("click", function() {
+            showBrands(device);
+        });
+        deviceButtons.appendChild(button);
     }
 });
 
-// Функция для отображения брендов
+// Функция для показа кнопок брендов для выбранного устройства
 function showBrands(device) {
-    const brandButtonsDiv = document.getElementById('brand-buttons');
-    brandButtonsDiv.innerHTML = '';
+    const brandButtons = document.getElementById("brand-buttons");
+    brandButtons.innerHTML = ''; // Очистить контейнер с кнопками брендов
 
     const brands = deviceBrandModelMap[device];
-
-    for (let brand in brands) {
-        const button = document.createElement('button');
-        button.classList.add('btn', 'btn-outline-secondary', 'mr-2', 'mb-2');
-        button.textContent = brand;
-        button.onclick = () => showParts(device, brand);
-        brandButtonsDiv.appendChild(button);
+    for (const brand in brands) {
+        const button = document.createElement("button");
+        button.className = "btn btn-outline-secondary mr-2 mb-2";
+        button.innerText = brand;
+        button.addEventListener("click", function() {
+            showParts(device, brand);
+        });
+        brandButtons.appendChild(button);
     }
 }
 
-// Функция для отображения таблицы запчастей
+// Функция для показа таблицы запчастей для выбранного устройства и бренда
 function showParts(device, brand) {
-    const table = document.getElementById('parts-table');
-    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    const tableRows = document.querySelectorAll("#parts-table tbody tr");
 
-    for (let row of rows) {
-        const deviceCell = row.cells[0];
-        const brandCell = row.cells[1];
-
-        if (deviceCell.textContent === device && brandCell.textContent === brand) {
-            row.style.display = '';
+    tableRows.forEach(function(row) {
+        const rowDevice = row.cells[0].innerText.trim();
+        const rowBrand = row.cells[1].innerText.trim();
+        if (rowDevice === device && rowBrand === brand) {
+            row.style.display = ""; // Показываем строку
         } else {
-            row.style.display = 'none';
+            row.style.display = "none"; // Скрываем строку
         }
-    }
+    });
 
-    document.getElementById('device-buttons-container').style.display = 'none';
-    document.getElementById('parts-table-container').style.display = '';
+    // Скрываем кнопки и показываем таблицу
+    document.getElementById("device-buttons-container").style.display = "none";
+    document.getElementById("parts-table-container").style.display = "block";
 }
 
-// Кнопка "Назад" возвращает на предыдущий экран
-document.getElementById('back-btn').addEventListener('click', function() {
-    const tableContainer = document.getElementById('parts-table-container');
-    const deviceButtonsContainer = document.getElementById('device-buttons-container');
-    const backButton = document.getElementById('back-btn');
+// Обработчик кнопки "Назад"
+document.getElementById("back-btn").addEventListener("click", function() {
+    const deviceButtonsContainer = document.getElementById("device-buttons-container");
+    const partsTableContainer = document.getElementById("parts-table-container");
 
-    if (deviceButtonsContainer.style.display === 'none') {
-        deviceButtonsContainer.style.display = 'block';
-        tableContainer.style.display = 'none';
-        backButton.style.display = 'block';
-    } else {
-        deviceButtonsContainer.style.display = 'none';
-        tableContainer.style.display = 'block';
-        backButton.style.display = 'none';
-    }
+    // Скрыть кнопки и показать таблицу
+    deviceButtonsContainer.style.display = "none";
+    partsTableContainer.style.display = "block";
+    this.style.display = "none"; // Скрыть кнопку "Назад"
 });
     </script>
 {% endblock %}

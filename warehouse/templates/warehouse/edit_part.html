@@ -1,12 +1,90 @@
 {% extends 'warehouse/base.html' %}
-{% block title %}Добавить/Редактировать запчасть{% endblock %}
+{% block title %}Редактировать запчасть{% endblock %}
 {% block content %}
-    <h2>{% if form.instance.pk %}Редактировать{% else %}Добавить{% endif %} запчасть</h2>
-    <form method="POST" enctype="multipart/form-data">
+{% load static %}
+<style>
+    .image-item {
+        display: inline-block;
+        margin: 5px;
+    }
+    .image-item img {
+        max-width: 100px;
+    }
+</style>
+
+<div class="container">
+    <h2>Редактировать запчасть</h2>
+
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group">
-            {{ form.as_p }}
+            <label for="device">Устройство</label>
+            <input type="text" name="device" id="device" class="form-control" value="{{ part.device }}" required>
         </div>
-        <button type="submit" class="btn btn-primary">Сохранить</button>
+
+        <div class="form-group">
+            <label for="brand">Бренд</label>
+            <input type="text" name="brand" id="brand" class="form-control" value="{{ part.brand }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="model">Модель</label>
+            <input type="text" name="model" id="model" class="form-control" value="{{ part.model }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="part_type">Тип запчасти</label>
+            <input type="text" name="part_type" id="part_type" class="form-control" value="{{ part.part_type }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="color">Цвет</label>
+            <input type="text" name="color" id="color" class="form-control" value="{{ part.color }}">
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Количество</label>
+            <input type="number" name="quantity" id="quantity" class="form-control" value="{{ part.quantity }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Цена</label>
+            <input type="number" name="price" id="price" class="form-control" value="{{ part.price }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="images">Изображения (можно загрузить до 5)</label>
+            <input type="file" name="images" id="images" class="form-control" multiple>
+            {% for image in part.images.all %}
+                <div class="image-item">
+                    <img src="{{ image.image.url }}" alt="Image">
+                    <button type="button" class="btn btn-danger btn-sm delete-image" data-image-id="{{ image.id }}">Удалить</button>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        <a href="{% url 'warehouse' %}" class="btn btn-secondary">Назад</a>
     </form>
+</div>
+
+<script>
+    $(document).on('click', '.delete-image', function () {
+        const imageId = $(this).data('image-id');
+        const imageItem = $(this).closest('.image-item');
+
+        if (confirm('Вы уверены, что хотите удалить это изображение?')) {
+            $.ajax({
+                url: '{% url "delete_image" 0 %}'.replace('0', imageId),
+                type: 'DELETE',
+                success: function () {
+                    imageItem.remove(); // Удаляем элемент из DOM
+                },
+                error: function () {
+                    alert('Ошибка при удалении изображения.');
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

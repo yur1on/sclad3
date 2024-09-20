@@ -1,11 +1,9 @@
 
-
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect
-from .forms import PartForm
-
-
-
+from .models import PartImage
+from .forms import PartForm, PartImageFormSet  # Добавляем форму для изображений
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 import openpyxl
@@ -14,9 +12,6 @@ from django.contrib.auth.decorators import login_required
 
 def home(request):
     return render(request, 'warehouse/home.html')
-
-
-
 
 
 @login_required
@@ -52,31 +47,44 @@ def warehouse_view(request):
     devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
     brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct()
 
+    # Добавляем список URL изображений для каждого запчасти
+    for part in parts:
+        part.image_urls = [image.image.url for image in part.images.all()]
+
     return render(request, 'warehouse/warehouse.html', {
         'parts': parts,
         'query': query,
         'brand': brand,
         'model': model,
         'part_type': part_type,
-        'devices': devices,  # Добавляем список устройств
-        'brands': brands      # Добавляем список брендов
+        'devices': devices,
+        'brands': brands
     })
 
 
 @login_required
 def add_part(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         form = PartForm(request.POST, request.FILES)
-        if form.is_valid():
+        formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
+
+        if form.is_valid() and formset.is_valid():
             part = form.save(commit=False)
-            part.user = request.user
+            part.user = request.user  # если нужно сохранить пользователя
             part.save()
-            return redirect('warehouse')
+
+            for image_form in formset:
+                if image_form.cleaned_data:
+                    image = image_form.save(commit=False)
+                    image.part = part  # присвоить запчасть каждому изображению
+                    image.save()
+
+            return redirect('add_part_success')  # Редирект на страницу успеха
     else:
         form = PartForm()
-    return render(request, 'warehouse/add_part.html', {'form': form})
+        formset = PartImageFormSet(queryset=PartImage.objects.none())
 
-
+    return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
 
 
 def logout_view(request):
@@ -117,15 +125,27 @@ def search(request):
 
 @login_required
 def edit_part(request, part_id):
-    part = get_object_or_404(Part, id=part_id, user=request.user)
+    part = get_object_or_404(Part, id=part_id)
+
     if request.method == 'POST':
-        form = PartForm(request.POST, request.FILES, instance=part)
-        if form.is_valid():
-            form.save()
-            return redirect('warehouse')
-    else:
-        form = PartForm(instance=part)
-    return render(request, 'warehouse/edit_part.html', {'form': form})
+        # Обновление остальных полей
+        part.device = request.POST['device']
+        part.brand = request.POST['brand']
+        part.model = request.POST['model']
+        part.part_type = request.POST['part_type']
+        part.color = request.POST['color']
+        part.quantity = request.POST['quantity']
+        part.price = request.POST['price']
+
+        # Обработка загрузки изображений
+        if request.FILES.getlist('images'):
+            for img in request.FILES.getlist('images'):
+                part.images.create(image=img)
+
+        part.save()
+        return redirect('warehouse')
+
+    return render(request, 'warehouse/edit_part.html', {'part': part})
 
 
 @login_required
@@ -218,3 +238,21 @@ def filter_parts(request):
 def part_detail(request, part_id):
     part = get_object_or_404(Part, id=part_id)
     return render(request, 'warehouse/part_detail.html', {'part': part})
+
+
+
+def add_part_success(request):
+    return render(request, 'warehouse/add_part_success.html')
+
+
+
+@require_http_methods(["DELETE"])
+def delete_image(request, image_id):
+    try:
+        image = PartImage.objects.get(id=image_id)
+        image.delete()
+        return JsonResponse({'status': 'success'})
+    except PartImage.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Image not found.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

@@ -1,6 +1,3 @@
-
-
-
 {% extends 'warehouse/base.html' %}
 {% block title %}Добавить запчасть{% endblock %}
 {% block content %}
@@ -8,6 +5,7 @@
     <form method="post" id="part-form" class="form-container" enctype="multipart/form-data">
         {% csrf_token %}
 
+        <!-- Поля для выбора устройства, бренда, модели и других данных -->
         <div class="form-group">
             <label for="device">Устройство:</label>
             <input list="devices" id="id_device" name="device" class="form-control" placeholder="Введите устройство" onchange="handleDeviceChange();">
@@ -63,9 +61,15 @@
             {{ form.price }}
         </div>
 
+        <!-- Поддержка formset для загрузки до 5 изображений -->
         <div class="form-group">
-            <label for="image">Фото:</label>
-            {{ form.image }}
+            <label for="image">Фото (до 5 изображений):</label>
+            {{ formset.management_form }}
+            {% for form in formset %}
+                <div class="form-group">
+                    {{ form.image.label_tag }} {{ form.image }}
+                </div>
+            {% endfor %}
         </div>
 
         <button type="submit" class="btn-submit">Добавить</button>

@@ -1,6 +1,5 @@
 
 
-
 {% extends 'warehouse/base.html' %}
 {% block title %}Поиск{% endblock %}
 {% block content %}
@@ -9,6 +8,7 @@
         <form method="GET" action="{% url 'search' %}" class="mb-4">
             <div class="row">
                 <div class="col-md-2 mb-3">
+                    <label for="device">Устройство</label>
                     <input type="text" name="q" id="device" class="form-control border-dark" placeholder="Устройство" value="{{ request.GET.q }}" list="device-list">
                     <datalist id="device-list">
                         <option value="Телефон">
@@ -18,18 +18,22 @@
                     </datalist>
                 </div>
                 <div class="col-md-2 mb-3">
+                    <label for="brand">Бренд</label>
                     <input type="text" name="brand" id="brand" class="form-control border-dark" placeholder="Бренд" value="{{ request.GET.brand }}" list="brand-list">
                     <datalist id="brand-list"></datalist>
                 </div>
                 <div class="col-md-2 mb-3">
+                    <label for="model">Модель</label>
                     <input type="text" name="model" id="model" class="form-control border-dark" placeholder="Модель" value="{{ request.GET.model }}" list="model-list">
                     <datalist id="model-list"></datalist>
                 </div>
                 <div class="col-md-2 mb-3">
+                    <label for="part_type">Тип запчасти</label>
                     <input type="text" name="part_type" id="part_type" class="form-control border-dark" placeholder="Тип запчасти" value="{{ request.GET.part_type }}" list="part-type-list">
                     <datalist id="part-type-list"></datalist>
                 </div>
                 <div class="col-md-2 mb-3">
+                    <label for="city">Город</label>
                     <input type="text" name="city" class="form-control border-dark" placeholder="Город" value="{{ request.GET.city }}">
                 </div>
                 <div class="col-md-2 d-flex align-items-end mb-3">
@@ -39,6 +43,7 @@
         </form>
 
         <hr>
+
         <style>
             table {
                 width: 100%;
@@ -54,10 +59,10 @@
             }
 
             th {
-                background-color: #343a40; /* Темный цвет заголовка */
+                background-color: #343a40;
                 color: white;
                 font-weight: bold;
-                font-size: 14px; /* Уменьшение размера шрифта заголовка */
+                font-size: 14px;
             }
 
             tr:nth-child(even) {
@@ -68,12 +73,14 @@
                 background-color: #e2e6ea;
             }
 
-            img {
-                max-width: 100px;
-                height: auto;
-                border-radius: 5px;
-                border: 1px solid #dee2e6;
-            }
+
+    img {
+        max-width: 100px; /* Ограничиваем ширину */
+        max-height: 100px; /* Ограничиваем высоту */
+        height: auto;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
 
             .container {
                 max-width: 1200px;
@@ -87,7 +94,7 @@
             }
 
             .form-control:focus {
-                border-color: #343a40; /* Темный цвет бордюра при фокусе */
+                border-color: #343a40;
                 box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.25);
             }
 
@@ -106,44 +113,56 @@
 
         </style>
 
-<table>
-    <tr>
-        <th>Устройство</th>
-        <th>Бренд</th>
-        <th>Модель</th>
-        <th>Тип запчасти</th>
-        <th>Цвет</th>
-        <th>Количество</th>
-        <th>Цена</th>
-        <th>Изображение</th>
-        <th>Город</th>
-        <th>Номер телефона</th>
-    </tr>
-    {% for result in results %}
-    <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
-        <td>{{ result.device }}</td>
-        <td>{{ result.brand }}</td>
-        <td>{{ result.model }}</td>
-        <td>{{ result.part_type }}</td>
-        <td>{{ result.color|default:"Не указан" }}</td>
-        <td>{{ result.quantity }}</td>
-        <td>{{ result.price }}</td>
-        <td>
-            {% if result.image %}
-                <a href="{{ result.image.url }}" target="_blank" class="img-link">
-                    <img src="{{ result.image.url }}" alt="Изображение запчасти" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
-                </a>
-            {% else %}
-                Нет изображения
-            {% endif %}
-        </td>
-        <td>{{ result.user.profile.city }}</td>
-        <td>{{ result.user.profile.phone }}</td>
-    </tr>
-    {% endfor %}
-</table>
+        <div class="table-responsive">
+            {% if results %}
+                <table>
+                    <tr>
+                        <th>Устройство</th>
+                        <th>Бренд</th>
+                        <th>Модель</th>
+                        <th>Тип запчасти</th>
+                        <th>Цвет</th>
+                        <th>Количество</th>
+                        <th>Цена</th>
+                        <th>Изображение</th>
+                        <th>Город</th>
+                        <th>Номер телефона</th>
+                    </tr>
+                    {% for result in results %}
+                    <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
+                        <td>{{ result.device }}</td>
+                        <td>{{ result.brand }}</td>
+                        <td>{{ result.model }}</td>
+                        <td>{{ result.part_type }}</td>
+                        <td>{{ result.color|default:"Не указан" }}</td>
+                        <td>{{ result.quantity }}</td>
+                        <td>{{ result.price }}</td>
+<td>
+    {% if result.images.all %}
+        <a href="{{ result.images.first.image.url }}" target="_blank" class="img-link">
+            <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail">
+        </a>
+        {% if result.images.count > 1 %}
+            <br>
+            <small>+{{ result.images.count|add:"-1" }} еще</small>
+        {% endif %}
+    {% else %}
+        Нет изображений
+    {% endif %}
+</td>
 
+
+                        <td>{{ result.user.profile.city }}</td>
+                        <td>{{ result.user.profile.phone }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p class="text-center">Нет результатов для поиска.</p>
+            {% endif %}
+        </div>
     </div>
+
 
     <script>
         const deviceBrandMap = {

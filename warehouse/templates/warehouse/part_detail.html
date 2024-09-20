@@ -1,6 +1,23 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Информация о запчасти{% endblock %}
 {% block content %}
+<style>
+    /* Ограничение размеров изображения в карусели */
+    .carousel-item img {
+        max-width: 400px; /* Максимальная ширина */
+        max-height: 300px; /* Максимальная высота */
+        object-fit: contain; /* Сохранение пропорций */
+        margin: 0 auto; /* Центрирование */
+    }
+
+    /* Ограничение размеров миниатюр */
+    .img-thumbnail {
+        width: 60px;
+        height: 60px;
+        object-fit: cover; /* Обрезка изображения для заполнения миниатюры */
+    }
+</style>
+
 <div class="container">
     <a href="{% url 'search' %}" class="btn btn-dark mb-4">Назад</a>
     <div class="row">
@@ -10,12 +27,41 @@
                     <h5 class="mb-0">Детали запчасти</h5>
                 </div>
                 <div class="card-body">
-                    {% if part.image %}
+                    {% if part.images.all %}
                         <div class="text-center mb-3">
-                            <img src="{{ part.image.url }}" alt="Изображение запчасти" class="img-fluid" style="max-width: 300px; height: auto;">
+                            <!-- Основное изображение -->
+                            <div id="partImagesCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    {% for image in part.images.all %}
+                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                            <img src="{{ image.image.url }}" alt="Изображение запчасти" class="img-fluid" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="openModal({{ forloop.counter0 }})">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <!-- Навигация влево/вправо -->
+                                <button class="carousel-control-prev" type="button" data-bs-target="#partImagesCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#partImagesCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- Миниатюры -->
+                        <div class="d-flex justify-content-center">
+                            {% for image in part.images.all %}
+                                <img src="{{ image.image.url }}" alt="Изображение запчасти" class="img-thumbnail mx-1" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="openModal({{ forloop.counter0 }})">
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>Нет изображений для этой запчасти.</p>
                     {% endif %}
-                    <table class="table table-striped">
+
+                    <!-- Таблица с деталями запчасти -->
+                    <table class="table table-striped mt-3">
                         <tr>
                             <th>Устройство</th>
                             <td>{{ part.device }}</td>
@@ -48,6 +94,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Информация о пользователе -->
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-success text-white">
@@ -80,10 +128,58 @@
                     <!-- Кнопки для отзывов -->
                     <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
                     <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary ml-2">Посмотреть отзывы</a>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Модальное окно для изображения -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Изображение запчасти</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center position-relative">
+                <img id="modalImage" src="" alt="Изображение запчасти" class="img-fluid">
+                <!-- Стрелка влево -->
+                <button type="button" class="btn btn-secondary position-absolute top-50 start-0 translate-middle-y" onclick="changeImage(-1)">
+                    <span aria-hidden="true">&lt;</span>
+                </button>
+                <!-- Стрелка вправо -->
+                <button type="button" class="btn btn-secondary position-absolute top-50 end-0 translate-middle-y" onclick="changeImage(1)">
+                    <span aria-hidden="true">&gt;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let currentImageIndex = 0;
+    const imageUrls = [
+        {% for image in part.images.all %}
+            "{{ image.image.url }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    function openModal(index) {
+        currentImageIndex = index;
+        document.getElementById('modalImage').src = imageUrls[currentImageIndex];
+    }
+
+    function changeImage(direction) {
+        currentImageIndex += direction;
+        if (currentImageIndex < 0) {
+            currentImageIndex = imageUrls.length - 1; // Перейти на последнее изображение
+        } else if (currentImageIndex >= imageUrls.length) {
+            currentImageIndex = 0; // Перейти на первое изображение
+        }
+        document.getElementById('modalImage').src = imageUrls[currentImageIndex];
+    }
+</script>
+
 {% endblock %}
