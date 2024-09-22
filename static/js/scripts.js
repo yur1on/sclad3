@@ -2,6 +2,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const stars = document.querySelectorAll('.rating-star');
     const ratingInput = document.getElementById('rating-input');
 
+    // Убедитесь, что ratingInput существует
+    if (!ratingInput) {
+        console.error('Элемент с id "rating-input" не найден.');
+        return;
+    }
+
     stars.forEach(star => {
         star.addEventListener('mouseover', function () {
             const value = this.getAttribute('data-value');

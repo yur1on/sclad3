@@ -10,12 +10,20 @@
     .image-item img {
         max-width: 100px;
     }
+    .add-image {
+        display: inline-block;
+        margin: 5px;
+        border: 1px dashed #ccc;
+        padding: 10px;
+        text-align: center;
+        cursor: pointer;
+    }
 </style>
 
 <div class="container">
     <h2>Редактировать запчасть</h2>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="edit-part-form">
         {% csrf_token %}
         <div class="form-group">
             <label for="device">Устройство</label>
@@ -53,14 +61,18 @@
         </div>
 
         <div class="form-group">
-            <label for="images">Изображения (можно загрузить до 5)</label>
-            <input type="file" name="images" id="images" class="form-control" multiple>
-            {% for image in part.images.all %}
-                <div class="image-item">
-                    <img src="{{ image.image.url }}" alt="Image">
-                    <button type="button" class="btn btn-danger btn-sm delete-image" data-image-id="{{ image.id }}">Удалить</button>
-                </div>
-            {% endfor %}
+            <label>Изображения (можно загрузить до 5)</label>
+            <div class="image-container" id="image-container">
+                {% for image in part.images.all %}
+                    <div class="image-item" data-image-id="{{ image.id }}">
+                        <img src="{{ image.image.url }}" alt="Image">
+                        <button type="button" class="btn btn-danger btn-sm delete-image" data-image-id="{{ image.id }}">
+                            Удалить
+                        </button>
+                    </div>
+                {% endfor %}
+                <!-- Кнопка добавления фото будет динамически генерироваться через JS -->
+            </div>
         </div>
 
         <button type="submit" class="btn btn-primary">Сохранить изменения</button>
@@ -68,23 +80,104 @@
     </form>
 </div>
 
-<script>
-    $(document).on('click', '.delete-image', function () {
-        const imageId = $(this).data('image-id');
-        const imageItem = $(this).closest('.image-item');
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-        if (confirm('Вы уверены, что хотите удалить это изображение?')) {
-            $.ajax({
-                url: '{% url "delete_image" 0 %}'.replace('0', imageId),
-                type: 'DELETE',
-                success: function () {
-                    imageItem.remove(); // Удаляем элемент из DOM
-                },
-                error: function () {
-                    alert('Ошибка при удалении изображения.');
-                }
-            });
+<script>
+const maxImages = 5;
+
+function updateAddImageButton() {
+    const currentImagesCount = $('#image-container .image-item').length;
+    $('.add-image').remove(); // Удаляем все кнопки перед обновлением
+
+    if (currentImagesCount < maxImages) {
+        const remainingSlots = maxImages - currentImagesCount;
+
+        for (let i = 1; i <= remainingSlots; i++) {
+            const buttonId = currentImagesCount + i;
+            $('#image-container').append(`
+                <div class="add-image" onclick="document.getElementById('images-${buttonId}').click();">
+                    <input type="file" name="images" id="images-${buttonId}" class="d-none" onchange="uploadImage(this);">
+                    Добавить фото
+                </div>
+            `);
+        }
+    }
+}
+
+function uploadImage(input) {
+    const currentImagesCount = $('#image-container .image-item').length;
+
+    if (currentImagesCount >= maxImages) {
+        alert('Вы можете загрузить не более 5 изображений.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', input.files[0]);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    formData.append('part_id', {{ part.id }});
+
+    $.ajax({
+        url: '/add-image/',
+        method: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            if (response.status === 'success') {
+                response.images.forEach(image => {
+                    const newImageItem = `
+                        <div class="image-item" data-image-id="${image.id}">
+                            <img src="${image.url}" alt="Image">
+                            <button type="button" class="btn btn-danger btn-sm delete-image" data-image-id="${image.id}">
+                                Удалить
+                            </button>
+                        </div>
+                    `;
+                    $('#image-container').append(newImageItem);
+                });
+                updateAddImageButton();
+            } else {
+                alert('Ошибка при добавлении изображения: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Ошибка AJAX запроса:', error);
+            alert('Произошла ошибка при выполнении запроса. Пожалуйста, попробуйте снова.');
         }
     });
+}
+
+$(document).on('click', '.delete-image', function () {
+    const imageId = $(this).data('image-id');
+    const imageItem = $(this).closest('.image-item');
+
+    if (confirm('Вы уверены, что хотите удалить это изображение?')) {
+        $.ajax({
+            url: '/delete-image/' + imageId + '/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    imageItem.remove();
+                    updateAddImageButton();
+                } else {
+                    alert('Ошибка при удалении изображения: ' + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Ошибка AJAX запроса:', error);
+                alert('Произошла ошибка при выполнении запроса. Пожалуйста, попробуйте снова.');
+            }
+        });
+    }
+});
+
+$(document).ready(function() {
+    updateAddImageButton(); // Инициализация кнопок при загрузке страницы
+});
 </script>
+
 {% endblock %}

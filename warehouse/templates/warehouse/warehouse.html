@@ -2,89 +2,71 @@
 {% block title %}Склад{% endblock %}
 {% block content %}
 {% load static %}
-    <div class="d-flex flex-column align-items-start mb-4">
-        <div class="d-flex justify-content-between align-items-center w-100 mb-4">
-            <h2 class="mb-0">Ваши запчасти</h2>
-            <div class="d-flex">
-                <a href="{% url 'add_part' %}" class="btn btn-success mr-2">Добавить запчасть</a>
-                <a href="{% url 'export_excel' %}" class="btn btn-info">Экспорт в Excel</a>
-            </div>
+<div class="container my-4">
+
+    <!-- Заголовок и кнопки действий -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Ваши запчасти</h2>
+        <div>
+            <a href="{% url 'add_part' %}" class="btn btn-success me-2">Добавить запчасть</a>
+            <a href="{% url 'export_excel' %}" class="btn btn-info">Экспорт в Excel</a>
         </div>
     </div>
 
-    <!-- Контейнер для поиска -->
+    <!-- Форма поиска -->
     <div class="mb-4">
-        <form method="get" class="form-row">
-            <!-- Устройство -->
-            <div class="form-group col-md-3">
-                <label for="device">Устройство</label>
-                <div class="input-group">
-                    <input type="text" list="devices" name="q" id="device" class="form-control" placeholder="Устройство" value="{{ query|default_if_none:'' }}">
-                    <datalist id="devices">
-                        <option value="Телефон">
-                        <option value="Планшет">
-                        <option value="Ноутбук">
-                        <option value="Смарт-часы">
-                    </datalist>
-                </div>
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="device" class="form-label">Устройство</label>
+                <input type="text" list="devices" name="q" id="device" class="form-control" placeholder="Устройство" value="{{ query|default_if_none:'' }}">
+                <datalist id="devices">
+                    <option value="Телефон">
+                    <option value="Планшет">
+                    <option value="Ноутбук">
+                    <option value="Смарт-часы">
+                </datalist>
             </div>
 
-            <!-- Бренд -->
-            <div class="form-group col-md-2">
-                <label for="brand">Бренд</label>
-                <div class="input-group">
-                    <input list="brands" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ brand|default_if_none:'' }}">
-                    <datalist id="brands">
-                        <!-- Бренды будут обновляться динамически через JavaScript -->
-                    </datalist>
-                </div>
+            <div class="col-md-2">
+                <label for="brand" class="form-label">Бренд</label>
+                <input list="brands" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ brand|default_if_none:'' }}">
+                <datalist id="brands"></datalist>
             </div>
 
-            <!-- Модель -->
-            <div class="form-group col-md-2">
-                <label for="model">Модель</label>
-                <div class="input-group">
-                    <input list="models" name="model" id="model" class="form-control" placeholder="Модель" value="{{ model|default_if_none:'' }}">
-                    <datalist id="models">
-                        <!-- Модели будут обновляться динамически через JavaScript -->
-                    </datalist>
-                </div>
+            <div class="col-md-2">
+                <label for="model" class="form-label">Модель</label>
+                <input list="models" name="model" id="model" class="form-control" placeholder="Модель" value="{{ model|default_if_none:'' }}">
+                <datalist id="models"></datalist>
             </div>
 
-            <!-- Тип запчасти -->
-            <div class="form-group col-md-3">
-                <label for="part_type">Тип запчасти</label>
-                <div class="input-group">
-                    <input list="part_types" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ part_type|default_if_none:'' }}">
-                    <datalist id="part_types">
-                        <!-- Типы запчастей будут обновляться динамически через JavaScript -->
-                    </datalist>
-                </div>
+            <div class="col-md-3">
+                <label for="part_type" class="form-label">Тип запчасти</label>
+                <input list="part_types" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ part_type|default_if_none:'' }}">
+                <datalist id="part_types"></datalist>
             </div>
 
-            <!-- Кнопка поиска -->
-            <div class="form-group col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary btn-block">Поиск</button>
+            <div class="col-md-2 d-grid align-items-end">
+                <button type="submit" class="btn btn-primary">Поиск</button>
             </div>
         </form>
     </div>
 
     <!-- Кнопка "Показать устройства" -->
-    <button id="show-devices-btn" class="btn btn-primary mb-4">Показать устройства</button>
+    <button id="show-devices-btn" class="btn btn-outline-primary mb-4">Показать устройства</button>
 
     <!-- Кнопка "Назад" -->
     <button id="back-btn" class="btn btn-secondary mb-4" style="display: none;">Назад</button>
 
     <!-- Контейнер для кнопок устройств и брендов -->
-    <div id="device-buttons-container" style="display: none;">
-        <div id="device-buttons" class="mb-4"></div>
-        <div id="brand-buttons" class="mb-4"></div>
+    <div id="device-buttons-container" class="mb-4" style="display: none;">
+        <div id="device-buttons" class="mb-3"></div>
+        <div id="brand-buttons"></div>
     </div>
 
-    <!-- Контейнер для таблицы запчастей -->
+    <!-- Таблица запчастей -->
     <div id="parts-table-container" class="table-responsive">
-        <table id="parts-table" class="table table-striped table-bordered">
-            <thead class="thead-dark">
+        <table id="parts-table" class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
                 <tr>
                     <th onclick="sortTable(0)">Устройство</th>
                     <th onclick="sortTable(1)">Бренд</th>
@@ -107,21 +89,22 @@
                     <td>{{ part.color|default:"Не указан" }}</td>
                     <td>{{ part.quantity }}</td>
                     <td>{{ part.price }}</td>
-<td>
-    {% if part.images.all %}
-        {% for image in part.images.all %}
-            <a href="{{ image.image.url }}" target="_blank" class="img-link">
-                <img src="{{ image.image.url }}" alt="{{ part.model }}" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
-            </a>
-        {% endfor %}
-    {% else %}
-        Нет фото
-    {% endif %}
-</td>
-
                     <td>
-                        <a href="{% url 'edit_part' part.id %}" class="btn btn-sm btn-warning mb-1" data-toggle="tooltip" data-placement="top" title="Редактировать">✏️</a>
-                        <a href="{% url 'delete_part' part.id %}" class="btn btn-sm btn-danger" data-toggle="tooltip" data-placement="top" title="Удалить">🗑️</a>
+                        {% if part.images.all %}
+                        <div class="d-flex">
+                            {% for image in part.images.all %}
+                            <a href="{{ image.image.url }}" target="_blank" class="img-link">
+                                <img src="{{ image.image.url }}" alt="{{ part.model }}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        Нет фото
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Редактировать">✏️</a>
+                        <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Удалить">🗑️</a>
                     </td>
                 </tr>
                 {% empty %}
@@ -133,49 +116,40 @@
         </table>
     </div>
 
-    <script>
+</div>
+
+<script>
 // Переменная для хранения направлений сортировки для каждого столбца
 let sortDirections = {};
 
-// Функция для сортировки таблицы по указанному столбцу
+// Функция сортировки таблицы
 function sortTable(columnIndex) {
     const table = document.getElementById("parts-table");
     const tbody = table.tBodies[0];
     const rows = Array.from(tbody.querySelectorAll("tr"));
 
-    // Определяем текущее направление сортировки для этого столбца
     if (!sortDirections[columnIndex]) {
         sortDirections[columnIndex] = 'asc';
     } else {
         sortDirections[columnIndex] = sortDirections[columnIndex] === 'asc' ? 'desc' : 'asc';
     }
 
-    // Сортируем строки
     rows.sort((a, b) => {
         const aText = a.cells[columnIndex].textContent.trim().toLowerCase();
         const bText = b.cells[columnIndex].textContent.trim().toLowerCase();
-
-        if (aText < bText) return sortDirections[columnIndex] === 'asc' ? -1 : 1;
-        if (aText > bText) return sortDirections[columnIndex] === 'asc' ? 1 : -1;
-        return 0;
+        return (aText < bText ? -1 : aText > bText ? 1 : 0) * (sortDirections[columnIndex] === 'asc' ? 1 : -1);
     });
 
-    // Очищаем tbody и добавляем отсортированные строки
     tbody.innerHTML = '';
     rows.forEach(row => tbody.appendChild(row));
-
-    // Обновляем индикаторы сортировки
     updateSortIndicators(columnIndex);
 }
 
-// Функция для обновления визуальных индикаторов сортировки
+// Обновление индикаторов сортировки
 function updateSortIndicators(activeColumnIndex) {
     const headers = document.querySelectorAll("#parts-table thead th");
     headers.forEach((th, index) => {
-        // Удаляем предыдущие индикаторы
         th.innerHTML = th.textContent.replace(' ▲', '').replace(' ▼', '');
-
-        // Добавляем новый индикатор для активного столбца
         if (index === activeColumnIndex) {
             th.innerHTML += sortDirections[activeColumnIndex] === 'asc' ? ' ▲' : ' ▼';
         }
@@ -210,78 +184,91 @@ const deviceBrandModelMap = {
     }
 };
 
-// Функция для показа кнопок устройств и скрытия таблицы
+// Функция для отображения кнопок устройств
 document.getElementById("show-devices-btn").addEventListener("click", function() {
     const deviceButtonsContainer = document.getElementById("device-buttons-container");
-    const partsTableContainer = document.getElementById("parts-table-container");
-    const deviceButtons = document.getElementById("device-buttons");
-    const backButton = document.getElementById("back-btn");
+    deviceButtonsContainer.style.display = "block";
+    this.style.display = "none";
+    document.getElementById("back-btn").style.display = "inline-block";
 
-    // Очистить контейнер с кнопками устройств
+    const deviceButtons = document.getElementById("device-buttons");
     deviceButtons.innerHTML = '';
 
-    // Скрыть таблицу и показать кнопки устройств
-    partsTableContainer.style.display = "none";
-    deviceButtonsContainer.style.display = "block";
-    backButton.style.display = "block";
-
-    // Добавить кнопки устройств
-    for (const device in deviceBrandModelMap) {
+    Object.keys(deviceBrandModelMap).forEach(device => {
         const button = document.createElement("button");
-        button.className = "btn btn-outline-primary mr-2 mb-2";
-        button.innerText = device;
-        button.addEventListener("click", function() {
-            showBrands(device);
-        });
+        button.textContent = device;
+        button.className = "btn btn-outline-primary me-2 mb-2 device-btn";
+        button.addEventListener("click", () => showBrandButtons(device));
         deviceButtons.appendChild(button);
-    }
+    });
 });
 
-// Функция для показа кнопок брендов для выбранного устройства
-function showBrands(device) {
-    const brandButtons = document.getElementById("brand-buttons");
-    brandButtons.innerHTML = ''; // Очистить контейнер с кнопками брендов
-
+// Функция для отображения кнопок брендов
+function showBrandButtons(device) {
+    const brandButtonsContainer = document.getElementById("brand-buttons");
+    brandButtonsContainer.innerHTML = '';
     const brands = deviceBrandModelMap[device];
-    for (const brand in brands) {
+
+    Object.keys(brands).forEach(brand => {
         const button = document.createElement("button");
-        button.className = "btn btn-outline-secondary mr-2 mb-2";
-        button.innerText = brand;
-        button.addEventListener("click", function() {
-            showParts(device, brand);
-        });
-        brandButtons.appendChild(button);
-    }
+        button.textContent = brand;
+        button.className = "btn btn-outline-primary me-2 mb-2 brand-btn";
+        button.addEventListener("click", () => showPartsTable(device, brand));
+        brandButtonsContainer.appendChild(button);
+    });
+
+    // Подсветить выбранное устройство
+    highlightSelectedButton('.device-btn', device);
 }
 
-// Функция для показа таблицы запчастей для выбранного устройства и бренда
-function showParts(device, brand) {
-    const tableRows = document.querySelectorAll("#parts-table tbody tr");
-
-    tableRows.forEach(function(row) {
-        const rowDevice = row.cells[0].innerText.trim();
-        const rowBrand = row.cells[1].innerText.trim();
-        if (rowDevice === device && rowBrand === brand) {
-            row.style.display = ""; // Показываем строку
+// Функция для подсветки выбранной кнопки
+function highlightSelectedButton(selector, text) {
+    const buttons = document.querySelectorAll(selector);
+    buttons.forEach(button => {
+        if (button.textContent === text) {
+            button.classList.add('btn-primary');
+            button.classList.remove('btn-outline-primary');
         } else {
-            row.style.display = "none"; // Скрываем строку
+            button.classList.add('btn-outline-primary');
+            button.classList.remove('btn-primary');
+        }
+    });
+}
+
+// Функция для отображения таблицы с запчастями для выбранных устройства и бренда
+function showPartsTable(device, brand) {
+    const partsTableContainer = document.getElementById("parts-table-container");
+    const rows = partsTableContainer.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+        const deviceCell = row.cells[0].textContent.trim();
+        const brandCell = row.cells[1].textContent.trim();
+        if (deviceCell === device && brandCell === brand) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
         }
     });
 
-    // Скрываем кнопки и показываем таблицу
-    document.getElementById("device-buttons-container").style.display = "none";
-    document.getElementById("parts-table-container").style.display = "block";
+    // Подсветить выбранный бренд
+    highlightSelectedButton('.brand-btn', brand);
 }
 
-// Обработчик кнопки "Назад"
+// Функция для возврата к выбору устройств
 document.getElementById("back-btn").addEventListener("click", function() {
-    const deviceButtonsContainer = document.getElementById("device-buttons-container");
-    const partsTableContainer = document.getElementById("parts-table-container");
-
-    // Скрыть кнопки и показать таблицу
-    deviceButtonsContainer.style.display = "none";
-    partsTableContainer.style.display = "block";
-    this.style.display = "none"; // Скрыть кнопку "Назад"
+    document.getElementById("device-buttons-container").style.display = "none";
+    document.getElementById("show-devices-btn").style.display = "inline-block";
+    this.style.display = "none";
 });
-    </script>
+</script>
+
+<style>
+/* Добавляем синий цвет для выбранных кнопок */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+</style>
+
 {% endblock %}

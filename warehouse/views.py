@@ -1,15 +1,21 @@
 
-from django.views.decorators.http import require_http_methods
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect
 from .models import PartImage
 from .forms import PartForm, PartImageFormSet  # Добавляем форму для изображений
-from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 import openpyxl
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Part, PartImage  # Adjust according to your actual models
 
+from django.shortcuts import get_object_or_404
+from .models import PartImage
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from .models import PartImage
 def home(request):
     return render(request, 'warehouse/home.html')
 
@@ -128,22 +134,25 @@ def edit_part(request, part_id):
     part = get_object_or_404(Part, id=part_id)
 
     if request.method == 'POST':
-        # Обновление остальных полей
-        part.device = request.POST['device']
-        part.brand = request.POST['brand']
-        part.model = request.POST['model']
-        part.part_type = request.POST['part_type']
-        part.color = request.POST['color']
-        part.quantity = request.POST['quantity']
-        part.price = request.POST['price']
-
-        # Обработка загрузки изображений
-        if request.FILES.getlist('images'):
-            for img in request.FILES.getlist('images'):
-                part.images.create(image=img)
-
+        # Обновляем поля запчасти
+        part.device = request.POST.get('device')
+        part.brand = request.POST.get('brand')
+        part.model = request.POST.get('model')
+        part.part_type = request.POST.get('part_type')
+        part.color = request.POST.get('color')
+        part.quantity = request.POST.get('quantity')
+        part.price = request.POST.get('price')
         part.save()
-        return redirect('warehouse')
+
+        # Обрабатываем изображения
+        if 'images' in request.FILES:
+            images = request.FILES.getlist('images')  # Получаем список загруженных изображений
+            for image in images:
+                # Проверьте, что не больше 5 изображений
+                if part.images.count() < 5:
+                    part.images.create(image=image)  # Создаем объект изображения
+
+        return redirect('warehouse')  # Перенаправляем после успешного сохранения
 
     return render(request, 'warehouse/edit_part.html', {'part': part})
 
@@ -246,13 +255,46 @@ def add_part_success(request):
 
 
 
-@require_http_methods(["DELETE"])
+
+
 def delete_image(request, image_id):
-    try:
-        image = PartImage.objects.get(id=image_id)
+    if request.method == 'POST' and request.user.is_authenticated:
+        # Получаем изображение по ID
+        image = get_object_or_404(PartImage, id=image_id)
+
+        # Проверяем, принадлежит ли изображение текущему пользователю (если нужно)
+        # if image.part.user != request.user:
+        #     return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
+
+        # Удаляем изображение
         image.delete()
+
+        # Возвращаем ответ
         return JsonResponse({'status': 'success'})
-    except PartImage.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Image not found.'}, status=404)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+
+
+def add_image(request):
+    if request.method == 'POST':
+        part_id = request.POST.get('part_id')
+        images = request.FILES.getlist('image')
+
+        part = get_object_or_404(Part, id=part_id)
+
+        if part.images.count() + len(images) > 5:
+            return JsonResponse({'status': 'error', 'message': 'Максимальное количество изображений — 5.'})
+
+        image_responses = []
+        for image in images:
+            part_image = PartImage(part=part, image=image)  # Adjust according to your image model
+            part_image.save()
+            image_responses.append({
+                'id': part_image.id,
+                'url': part_image.image.url,  # Adjust according to your image field
+            })
+
+        return JsonResponse({'status': 'success', 'images': image_responses})
+    return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса.'})
