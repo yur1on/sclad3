@@ -40,8 +40,8 @@
                     <tr>
                         <th>Рейтинг</th>
                         <td>
-                            {% if user.profile.rating %}
-                                {{ user.profile.rating }} / 5 ({{ user.profile.review_count }} отзывов)
+                            {% if user.profile.average_rating %}
+                                {{ user.profile.average_rating|floatformat:1 }} / 5 ({{ user.profile.received_reviews.count }} отзывов)
                             {% else %}
                                 0 / 5 (0 отзывов)
                             {% endif %}
@@ -57,6 +57,7 @@
                         <p>Рейтинг: {{ review.rating }} / 5</p>
                         <p>Комментарий: {{ review.comment }}</p>
                         <p>Оставил: {{ review.reviewer.username }}</p>
+                        <p>Дата: {{ review.created_at|date:"d M Y" }}</p>
                     </div>
                 {% empty %}
                     <p>Нет отзывов</p>

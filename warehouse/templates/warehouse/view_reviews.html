@@ -16,6 +16,7 @@
                             <th>Оценка</th>
                             <th>Комментарий</th>
                             <th>Дата</th>
+                            <th>Автор</th> <!-- Добавили столбец для автора -->
                         </tr>
                     </thead>
                     <tbody>
@@ -26,6 +27,7 @@
                             </td>
                             <td>{{ review.comment }}</td>
                             <td>{{ review.created_at|date:"d M Y" }}</td>
+                            <td>{{ review.reviewer.username }}</td> <!-- Отображаем автора отзыва -->
                         </tr>
                         {% endfor %}
                     </tbody>

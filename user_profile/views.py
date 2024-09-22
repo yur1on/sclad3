@@ -4,9 +4,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import User, Review
 from .forms import ReviewForm
+
 @login_required
 def profile(request):
     edit_mode = request.GET.get('edit') == 'true'
+
+    # Получаем отзывы, оставленные пользователю
+    reviews = Review.objects.filter(user=request.user).order_by('-created_at')
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=request.user.profile)
@@ -16,7 +20,11 @@ def profile(request):
     else:
         form = ProfileForm(instance=request.user.profile)
 
-    return render(request, 'user_profile/profile.html', {'form': form, 'edit_mode': edit_mode})
+    return render(request, 'user_profile/profile.html', {
+        'form': form,
+        'edit_mode': edit_mode,
+        'reviews': reviews,  # Передаем отзывы в шаблон
+    })
 
 
 
