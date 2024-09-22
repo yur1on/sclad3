@@ -53,11 +53,13 @@
 
                 <h3>Отзывы пользователей</h3>
                 {% for review in reviews %}
-                    <div class="review">
-                        <p>Рейтинг: {{ review.rating }} / 5</p>
-                        <p>Комментарий: {{ review.comment }}</p>
-                        <p>Оставил: {{ review.reviewer.username }}</p>
-                        <p>Дата: {{ review.created_at|date:"d M Y" }}</p>
+                    <div class="review card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Рейтинг: {{ review.rating }} / 5</h5>
+                            <p class="card-text">Комментарий: {{ review.comment }}</p>
+                            <p class="card-text"><small class="text-muted">Оставил: {{ review.reviewer.username }}</small></p>
+                            <p class="card-text"><small class="text-muted">Дата: {{ review.created_at|date:"d M Y" }}</small></p>
+                        </div>
                     </div>
                 {% empty %}
                     <p>Нет отзывов</p>
