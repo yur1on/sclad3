@@ -3,14 +3,9 @@ from django.contrib.auth import logout
 from django.shortcuts import render, redirect
 from .models import PartImage
 from .forms import PartForm, PartImageFormSet  # Добавляем форму для изображений
-from django.shortcuts import render, get_object_or_404
 import openpyxl
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from .models import Part, PartImage  # Adjust according to your actual models
-
 from django.shortcuts import get_object_or_404
 from .models import PartImage
 from django.http import JsonResponse
