@@ -1,11 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Успех</title>
+    <!-- Подключаем стили для этой страницы -->
+    <link rel="stylesheet" href="{% static 'css/success.css' %}">
 </head>
 <body>
-    <h1>Запчасть успешно добавлена!</h1>
-    <a href="{% url 'add_part' %}">Добавить еще одну запчасть</a>
-    <a href="{% url 'warehouse' %}">Вернуться на склад</a>
+    <div class="container">
+        <div class="success-message">
+            <h1>Запчасть успешно добавлена!</h1>
+        </div>
+        <div class="button-group">
+            <a class="btn btn-primary" href="{% url 'add_part' %}">Добавить еще одну запчасть</a>
+            <a class="btn btn-secondary" href="{% url 'warehouse' %}">Вернуться на склад</a>
+        </div>
+    </div>
 </body>
 </html>

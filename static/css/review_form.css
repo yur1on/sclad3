@@ -1,0 +1,115 @@
+
+/* Заголовок формы */
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 26px;
+    font-weight: 700;
+    color: #333;
+    letter-spacing: 0.5px;
+}
+
+/* Стили для формы */
+.form-group {
+    margin-bottom: 25px;
+}
+
+label {
+    font-size: 16px;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+    background-color: #f8f8f8;
+}
+
+input:focus, textarea:focus {
+    border-color: #1e90ff;
+    outline: none;
+}
+
+/* Стили для кнопок */
+.btn {
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    display: inline-block;
+    font-weight: 600;
+}
+
+.btn-success {
+    background-color: #1e90ff;
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.4);
+}
+
+.btn-success:hover {
+    background-color: #007bff;
+    box-shadow: 0 6px 15px rgba(30, 144, 255, 0.6);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Стили для звезд рейтинга */
+.rating-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.rating {
+    display: inline-block;
+}
+
+.rating-star {
+    font-size: 30px;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.rating-star:hover, .rating-star.selected {
+    color: #ffcc00;
+}
+
+.rating-star:hover ~ .rating-star {
+    color: #ddd;
+}
+
+/* Стили для ошибок */
+.alert-danger {
+    background-color: #ffe6e6;
+    color: #d9534f;
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-danger ul {
+    padding-left: 20px;
+}
+
+.alert-danger li {
+    margin-bottom: 5px;
+}
