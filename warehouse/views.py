@@ -303,18 +303,60 @@ def get_brands(request):
     return JsonResponse({'brands': list(brands)})
 
 
-def get_models(request):
-    device = request.GET.get('device')
-    brand = request.GET.get('brand')
+# def get_models(request):
+#     device = request.GET.get('device')
+#     brand = request.GET.get('brand')
+#
+#     # Фильтруем модели по устройству и бренду
+#     models = Part.objects.filter(device=device, brand=brand).values_list('model', flat=True).distinct()
+#     return JsonResponse({'models': list(models)})
+#
+#
+# def get_part_types(request):
+#     model = request.GET.get('model')
+#     part_types = Part.objects.filter(model=model).values_list('part_type', flat=True).distinct()
+#     return JsonResponse({'part_types': list(part_types)})
 
-    # Фильтруем модели по устройству и бренду
+
+from django.http import JsonResponse
+from .models import Part
+
+def get_devices(request):
+    devices = Part.objects.values_list('device', flat=True).distinct()
+    return JsonResponse({'devices': list(devices)})
+
+def get_brands(request):
+    device = request.GET.get('device')
+    brands = Part.objects.filter(device=device).values_list('brand', flat=True).distinct()
+    return JsonResponse({'brands': list(brands)})
+
+def get_models(request):
+    device = request.GET.get('device')  # Учитываем устройство
+    brand = request.GET.get('brand')    # Учитываем бренд
     models = Part.objects.filter(device=device, brand=brand).values_list('model', flat=True).distinct()
     return JsonResponse({'models': list(models)})
 
-
 def get_part_types(request):
-    model = request.GET.get('model')
-    part_types = Part.objects.filter(model=model).values_list('part_type', flat=True).distinct()
+    device = request.GET.get('device')  # Учитываем устройство
+    brand = request.GET.get('brand')    # Учитываем бренд
+    model = request.GET.get('model')    # Учитываем модель
+    part_types = Part.objects.filter(device=device, brand=brand, model=model).values_list('part_type', flat=True).distinct()
     return JsonResponse({'part_types': list(part_types)})
 
-
+def get_parts(request):
+    device = request.GET.get('device')  # Учитываем устройство
+    brand = request.GET.get('brand')    # Учитываем бренд
+    model = request.GET.get('model')    # Учитываем модель
+    part_type = request.GET.get('part_type')  # Учитываем тип запчасти
+    parts = Part.objects.filter(device=device, brand=brand, model=model, part_type=part_type)
+    parts_data = [{
+        'device': part.device,
+        'brand': part.brand,
+        'model': part.model,
+        'part_type': part.part_type,
+        'color': part.color,
+        'quantity': part.quantity,
+        'price': part.price,
+        'images': [{'image_url': image.image.url} for image in part.images.all()]
+    } for part in parts]
+    return JsonResponse({'parts': parts_data})
