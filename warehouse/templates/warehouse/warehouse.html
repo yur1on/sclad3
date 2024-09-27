@@ -54,11 +54,9 @@
     <!-- Кнопка "Показать устройства" -->
     <button id="show-devices-btn" class="btn btn-outline-primary mb-4">Показать устройства</button>
 
-    <!-- Кнопка "Назад" -->
-    <button id="back-btn" class="btn btn-secondary mb-4" style="display: none;">Назад</button>
-
     <!-- Контейнер для кнопок устройств и брендов -->
     <div id="device-buttons-container" class="mb-4" style="display: none;">
+        <h4>Выберите устройство</h4>
         <div id="device-buttons" class="mb-3"></div>
         <div id="brand-buttons"></div>
     </div>
@@ -118,8 +116,7 @@
 
 </div>
 
-<script src="{% static 'js/warehouse.js' %}" ></script>
-
+<script src="{% static 'js/warehouse.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/warehouse.css' %}">
 
 {% endblock %}

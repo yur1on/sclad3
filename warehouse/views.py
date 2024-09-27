@@ -1,16 +1,15 @@
 
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect
-from .models import PartImage
-from .forms import PartForm, PartImageFormSet  # Добавляем форму для изображений
+from .forms import PartForm, PartImageFormSet
 import openpyxl
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 from .models import PartImage
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from .models import PartImage
+from .models import Part
 def home(request):
     return render(request, 'warehouse/home.html')
 
@@ -293,3 +292,29 @@ def add_image(request):
 
         return JsonResponse({'status': 'success', 'images': image_responses})
     return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса.'})
+
+
+
+
+
+def get_brands(request):
+    device = request.GET.get('device')
+    brands = Part.objects.filter(device=device).values_list('brand', flat=True).distinct()
+    return JsonResponse({'brands': list(brands)})
+
+
+def get_models(request):
+    device = request.GET.get('device')
+    brand = request.GET.get('brand')
+
+    # Фильтруем модели по устройству и бренду
+    models = Part.objects.filter(device=device, brand=brand).values_list('model', flat=True).distinct()
+    return JsonResponse({'models': list(models)})
+
+
+def get_part_types(request):
+    model = request.GET.get('model')
+    part_types = Part.objects.filter(model=model).values_list('part_type', flat=True).distinct()
+    return JsonResponse({'part_types': list(part_types)})
+
+

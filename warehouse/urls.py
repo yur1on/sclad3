@@ -1,7 +1,6 @@
 from .views import logout_view
 from . import views
 from django.urls import path
-from django.urls import path
 from .views import add_image
 urlpatterns = [
     path('', views.home, name='home'),
@@ -20,8 +19,11 @@ urlpatterns = [
     # Новый URL для страницы успеха
     path('add-part/success/', views.add_part_success, name='add_part_success'),
     path('delete-image/<int:image_id>/', views.delete_image, name='delete_image'),
+    path('get-brands/', views.get_brands, name='get_brands'),
+    path('get-models/', views.get_models, name='get_models'),
 
 ]
+
 
 
 
