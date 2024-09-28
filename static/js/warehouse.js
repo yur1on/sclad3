@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const modelButtons = document.getElementById('model-buttons');
     const partTypeButtons = document.getElementById('part-type-buttons');
 
-    let selectedDevice = '';  // Для хранения выбранного устройства
-    let selectedBrand = '';   // Для хранения выбранного бренда
-    let selectedModel = '';   // Для хранения выбранной модели
+    let selectedDevice = '';
+    let selectedBrand = '';
+    let selectedModel = '';
 
     // Загрузка кнопок для устройств при загрузке страницы
     fetch('/get-devices/')
@@ -74,55 +74,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обработка нажатия на устройство
     function handleDeviceClick(device) {
-        selectedDevice = device;  // Сохраняем выбранное устройство
+        selectedDevice = device;
         brandButtons.innerHTML = '';  // Очищаем старые кнопки брендов
         modelButtonsContainer.style.display = 'none';
         partTypeButtonsContainer.style.display = 'none';
 
-        fetch(`/get-brands/?device=${device}`)  // Передаем устройство в запрос
+        fetch(`/get-brands/?device=${device}`)
             .then(response => response.json())
             .then(data => {
                 brandButtonsContainer.style.display = 'block';
                 populateButtons(brandButtons, data.brands, handleBrandClick);
             });
+
+        setActiveButton(deviceButtons, device);
     }
 
     // Обработка нажатия на бренд
     function handleBrandClick(brand) {
-        selectedBrand = brand;  // Сохраняем выбранный бренд
+        selectedBrand = brand;
         modelButtons.innerHTML = '';  // Очищаем старые кнопки моделей
 
-        fetch(`/get-models/?device=${selectedDevice}&brand=${brand}`)  // Учитываем и устройство, и бренд
+        fetch(`/get-models/?device=${selectedDevice}&brand=${brand}`)
             .then(response => response.json())
             .then(data => {
                 modelButtonsContainer.style.display = 'block';
                 populateButtons(modelButtons, data.models, handleModelClick);
             });
+
+        setActiveButton(brandButtons, brand);
     }
 
     // Обработка нажатия на модель
     function handleModelClick(model) {
-        selectedModel = model;  // Сохраняем выбранную модель
+        selectedModel = model;
         partTypeButtons.innerHTML = '';  // Очищаем старые кнопки типов запчастей
 
-        // Передаем устройство, бренд и модель в запрос для получения типов запчастей
         fetch(`/get-part-types/?device=${selectedDevice}&brand=${selectedBrand}&model=${model}`)
             .then(response => response.json())
             .then(data => {
                 partTypeButtonsContainer.style.display = 'block';
                 populateButtons(partTypeButtons, data.part_types, handlePartTypeClick);
             });
+
+        setActiveButton(modelButtons, model);
     }
 
     // Обработка нажатия на тип запчасти
     function handlePartTypeClick(partType) {
-        // Отправляем запрос для получения запчастей по устройству, модели, бренду и типу запчасти
         fetch(`/get-parts/?device=${selectedDevice}&brand=${selectedBrand}&model=${selectedModel}&part_type=${partType}`)
             .then(response => response.json())
             .then(data => {
-                // Функция для отображения запчастей в таблице
-                displayParts(data.parts);
+                displayParts(data.parts);  // Отображаем только таблицу запчастей
             });
+
+        setActiveButton(partTypeButtons, partType);
     }
 
     // Функция для отображения кнопок
@@ -137,10 +142,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Функция для отображения запчастей в таблице
+    // Функция для изменения активной кнопки (подсвечивание)
+    function setActiveButton(container, selectedItem) {
+        Array.from(container.children).forEach(button => {
+            button.classList.remove('btn-active');
+            button.classList.add('btn-primary');
+        });
+
+        const selectedButton = Array.from(container.children).find(button => button.textContent === selectedItem);
+        if (selectedButton) {
+            selectedButton.classList.remove('btn-primary');
+            selectedButton.classList.add('btn-active');  // Используем кастомный класс
+        }
+    }
+
+    // Функция для отображения запчастей в таблице (не трогаем кнопки)
     function displayParts(parts) {
         const tbody = document.querySelector('#parts-table tbody');
-        tbody.innerHTML = '';  // Очищаем старые данные
+        tbody.innerHTML = '';  // Очищаем старые данные таблицы
 
         parts.forEach(part => {
             const row = document.createElement('tr');

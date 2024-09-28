@@ -343,13 +343,19 @@ def get_part_types(request):
     part_types = Part.objects.filter(device=device, brand=brand, model=model).values_list('part_type', flat=True).distinct()
     return JsonResponse({'part_types': list(part_types)})
 
+
 def get_parts(request):
-    device = request.GET.get('device')  # Учитываем устройство
-    brand = request.GET.get('brand')    # Учитываем бренд
-    model = request.GET.get('model')    # Учитываем модель
-    part_type = request.GET.get('part_type')  # Учитываем тип запчасти
+    device = request.GET.get('device')
+    brand = request.GET.get('brand')
+    model = request.GET.get('model')
+    part_type = request.GET.get('part_type')
+
+    # Фильтруем запчасти по устройству, бренду, модели и типу запчасти
     parts = Part.objects.filter(device=device, brand=brand, model=model, part_type=part_type)
+
+    # Формируем данные для ответа
     parts_data = [{
+        'id': part.id,  # Убедитесь, что ID передается
         'device': part.device,
         'brand': part.brand,
         'model': part.model,
@@ -359,4 +365,5 @@ def get_parts(request):
         'price': part.price,
         'images': [{'image_url': image.image.url} for image in part.images.all()]
     } for part in parts]
+
     return JsonResponse({'parts': parts_data})
