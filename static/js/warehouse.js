@@ -144,15 +144,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Функция для изменения активной кнопки (подсвечивание)
     function setActiveButton(container, selectedItem) {
+        // Удаляем класс "btn-active" у всех кнопок
         Array.from(container.children).forEach(button => {
             button.classList.remove('btn-active');
             button.classList.add('btn-primary');
         });
 
+        // Добавляем "btn-active" только на выбранную кнопку
         const selectedButton = Array.from(container.children).find(button => button.textContent === selectedItem);
         if (selectedButton) {
             selectedButton.classList.remove('btn-primary');
-            selectedButton.classList.add('btn-active');  // Используем кастомный класс
+            selectedButton.classList.add('btn-active');  // Используем кастомный зеленый класс
         }
     }
 

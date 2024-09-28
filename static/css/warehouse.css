@@ -1,0 +1,12 @@
+/* Кастомный класс для активной зеленой кнопки */
+.btn-active {
+    background-color: #28a745; /* Ярко-зеленый цвет */
+    border-color: #28a745;
+    color: white;
+    font-weight: bold;
+    transition: background-color 0.3s ease; /* Плавный переход цвета */
+}
+
+.btn-active:hover {
+    background-color: #218838; /* Немного темнее при наведении */
+}
