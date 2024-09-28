@@ -1,15 +1,15 @@
-
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Part
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect
 from .forms import PartForm, PartImageFormSet
-import openpyxl
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
 from .models import PartImage
-from django.http import JsonResponse
-from .models import Part
+from django.http import HttpResponse
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from django.contrib.auth.decorators import login_required
 def home(request):
     return render(request, 'warehouse/home.html')
 
@@ -170,20 +170,41 @@ def warehouse(request):
     return render(request, 'warehouse/warehouse.html')
 
 
+
+
 @login_required
 def export_excel(request):
     # Создаем новый Excel файл
-    wb = openpyxl.Workbook()
+    wb = Workbook()
     ws = wb.active
     ws.title = "Запчасти"
 
     # Заголовки для таблицы
-    ws.append(["Устройство", "Бренд", "Модель", "Тип запчасти", "Цвет", "Количество", "Цена"])
+    headers = ["Устройство", "Бренд", "Модель", "Тип запчасти", "Цвет", "Количество", "Цена"]
+    ws.append(headers)
+
+    # Применяем жирный шрифт к заголовкам
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.font = Font(bold=True)
 
     # Данные из модели, принадлежащие текущему пользователю
     parts = Part.objects.filter(user=request.user).order_by('device', 'brand', 'model')  # Сортировка по устройству, бренду и модели
     for part in parts:
         ws.append([part.device, part.brand, part.model, part.part_type, part.color, part.quantity, part.price])
+
+    # Настройка ширины столбцов в зависимости от самого длинного значения в столбце
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter  # Получаем букву столбца
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2)  # Добавляем небольшой запас к ширине
+        ws.column_dimensions[column].width = adjusted_width
 
     # Создаем HTTP ответ с Excel файлом
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -318,44 +339,51 @@ def get_brands(request):
 #     return JsonResponse({'part_types': list(part_types)})
 
 
-from django.http import JsonResponse
-from .models import Part
 
+
+@login_required
 def get_devices(request):
-    devices = Part.objects.values_list('device', flat=True).distinct()
+    # Фильтруем устройства по текущему пользователю
+    devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
     return JsonResponse({'devices': list(devices)})
 
+@login_required
 def get_brands(request):
     device = request.GET.get('device')
-    brands = Part.objects.filter(device=device).values_list('brand', flat=True).distinct()
+    # Фильтруем бренды по устройству и пользователю
+    brands = Part.objects.filter(user=request.user, device=device).values_list('brand', flat=True).distinct()
     return JsonResponse({'brands': list(brands)})
 
+@login_required
 def get_models(request):
     device = request.GET.get('device')  # Учитываем устройство
     brand = request.GET.get('brand')    # Учитываем бренд
-    models = Part.objects.filter(device=device, brand=brand).values_list('model', flat=True).distinct()
+    # Фильтруем модели по устройству, бренду и пользователю
+    models = Part.objects.filter(user=request.user, device=device, brand=brand).values_list('model', flat=True).distinct()
     return JsonResponse({'models': list(models)})
 
+@login_required
 def get_part_types(request):
     device = request.GET.get('device')  # Учитываем устройство
     brand = request.GET.get('brand')    # Учитываем бренд
     model = request.GET.get('model')    # Учитываем модель
-    part_types = Part.objects.filter(device=device, brand=brand, model=model).values_list('part_type', flat=True).distinct()
+    # Фильтруем типы запчастей по устройству, бренду, модели и пользователю
+    part_types = Part.objects.filter(user=request.user, device=device, brand=brand, model=model).values_list('part_type', flat=True).distinct()
     return JsonResponse({'part_types': list(part_types)})
 
-
+@login_required
 def get_parts(request):
     device = request.GET.get('device')
     brand = request.GET.get('brand')
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
 
-    # Фильтруем запчасти по устройству, бренду, модели и типу запчасти
-    parts = Part.objects.filter(device=device, brand=brand, model=model, part_type=part_type)
+    # Фильтруем запчасти по устройству, бренду, модели, типу запчасти и пользователю
+    parts = Part.objects.filter(user=request.user, device=device, brand=brand, model=model, part_type=part_type)
 
     # Формируем данные для ответа
     parts_data = [{
-        'id': part.id,  # Убедитесь, что ID передается
+        'id': part.id,
         'device': part.device,
         'brand': part.brand,
         'model': part.model,
