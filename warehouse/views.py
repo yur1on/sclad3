@@ -343,33 +343,37 @@ def get_brands(request):
 
 @login_required
 def get_devices(request):
-    # Фильтруем устройства по текущему пользователю
-    devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
+    # Фильтруем и сортируем устройства по текущему пользователю
+    devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct().order_by('device')
     return JsonResponse({'devices': list(devices)})
+
 
 @login_required
 def get_brands(request):
     device = request.GET.get('device')
-    # Фильтруем бренды по устройству и пользователю
-    brands = Part.objects.filter(user=request.user, device=device).values_list('brand', flat=True).distinct()
+    # Фильтруем и сортируем бренды по устройству и пользователю
+    brands = Part.objects.filter(user=request.user, device=device).values_list('brand', flat=True).distinct().order_by('brand')
     return JsonResponse({'brands': list(brands)})
+
 
 @login_required
 def get_models(request):
-    device = request.GET.get('device')  # Учитываем устройство
-    brand = request.GET.get('brand')    # Учитываем бренд
-    # Фильтруем модели по устройству, бренду и пользователю
-    models = Part.objects.filter(user=request.user, device=device, brand=brand).values_list('model', flat=True).distinct()
+    device = request.GET.get('device')
+    brand = request.GET.get('brand')
+    # Фильтруем и сортируем модели по устройству, бренду и пользователю
+    models = Part.objects.filter(user=request.user, device=device, brand=brand).values_list('model', flat=True).distinct().order_by('model')
     return JsonResponse({'models': list(models)})
+
 
 @login_required
 def get_part_types(request):
-    device = request.GET.get('device')  # Учитываем устройство
-    brand = request.GET.get('brand')    # Учитываем бренд
-    model = request.GET.get('model')    # Учитываем модель
-    # Фильтруем типы запчастей по устройству, бренду, модели и пользователю
-    part_types = Part.objects.filter(user=request.user, device=device, brand=brand, model=model).values_list('part_type', flat=True).distinct()
+    device = request.GET.get('device')
+    brand = request.GET.get('brand')
+    model = request.GET.get('model')
+    # Фильтруем и сортируем типы запчастей по устройству, бренду, модели и пользователю
+    part_types = Part.objects.filter(user=request.user, device=device, brand=brand, model=model).values_list('part_type', flat=True).distinct().order_by('part_type')
     return JsonResponse({'part_types': list(part_types)})
+
 
 @login_required
 def get_parts(request):
@@ -378,8 +382,8 @@ def get_parts(request):
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
 
-    # Фильтруем запчасти по устройству, бренду, модели, типу запчасти и пользователю
-    parts = Part.objects.filter(user=request.user, device=device, brand=brand, model=model, part_type=part_type)
+    # Фильтруем и сортируем запчасти по полю (например, по устройству)
+    parts = Part.objects.filter(user=request.user, device=device, brand=brand, model=model, part_type=part_type).order_by('device')
 
     # Формируем данные для ответа
     parts_data = [{

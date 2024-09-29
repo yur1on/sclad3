@@ -89,35 +89,37 @@ document.addEventListener('DOMContentLoaded', function() {
         setActiveButton(deviceButtons, device);
     }
 
-    // Обработка нажатия на бренд
-    function handleBrandClick(brand) {
-        selectedBrand = brand;
-        modelButtons.innerHTML = '';  // Очищаем старые кнопки моделей
+// Обработка нажатия на бренд
+function handleBrandClick(brand) {
+    selectedBrand = brand;
+    modelButtons.innerHTML = '';  // Очищаем старые кнопки моделей
 
-        fetch(`/get-models/?device=${selectedDevice}&brand=${brand}`)
-            .then(response => response.json())
-            .then(data => {
-                modelButtonsContainer.style.display = 'block';
-                populateButtons(modelButtons, data.models, handleModelClick);
-            });
+    fetch(`/get-models/?device=${selectedDevice}&brand=${brand}`)
+        .then(response => response.json())
+        .then(data => {
+            modelButtonsContainer.style.display = 'block';
+            populateButtons(modelButtons, data.models, handleModelClick, true);  // Компактные кнопки для моделей
+        });
 
-        setActiveButton(brandButtons, brand);
-    }
+    setActiveButton(brandButtons, brand);
+}
 
-    // Обработка нажатия на модель
-    function handleModelClick(model) {
-        selectedModel = model;
-        partTypeButtons.innerHTML = '';  // Очищаем старые кнопки типов запчастей
 
-        fetch(`/get-part-types/?device=${selectedDevice}&brand=${selectedBrand}&model=${model}`)
-            .then(response => response.json())
-            .then(data => {
-                partTypeButtonsContainer.style.display = 'block';
-                populateButtons(partTypeButtons, data.part_types, handlePartTypeClick);
-            });
+// Обработка нажатия на модель
+function handleModelClick(model) {
+    selectedModel = model;
+    partTypeButtons.innerHTML = '';  // Очищаем старые кнопки типов запчастей
 
-        setActiveButton(modelButtons, model);
-    }
+    fetch(`/get-part-types/?device=${selectedDevice}&brand=${selectedBrand}&model=${model}`)
+        .then(response => response.json())
+        .then(data => {
+            partTypeButtonsContainer.style.display = 'block';
+            populateButtons(partTypeButtons, data.part_types, handlePartTypeClick, true);  // Компактные кнопки для типов запчастей
+        });
+
+    setActiveButton(modelButtons, model);
+}
+
 
     // Обработка нажатия на тип запчасти
     function handlePartTypeClick(partType) {
@@ -130,17 +132,28 @@ document.addEventListener('DOMContentLoaded', function() {
         setActiveButton(partTypeButtons, partType);
     }
 
-    // Функция для отображения кнопок
-    function populateButtons(container, items, clickHandler) {
-        container.innerHTML = '';  // Очищаем контейнер от старых кнопок
-        items.forEach(item => {
-            const button = document.createElement('button');
-            button.classList.add('btn', 'btn-primary', 'me-2', 'mb-2');
-            button.textContent = item;
-            button.addEventListener('click', () => clickHandler(item));
-            container.appendChild(button);
-        });
-    }
+// Функция для отображения кнопок
+function populateButtons(container, items, clickHandler, isCompact = false) {
+    container.innerHTML = '';  // Очищаем контейнер от старых кнопок
+
+    // Сортируем элементы по алфавиту
+    items.sort((a, b) => a.localeCompare(b));
+
+    items.forEach(item => {
+        const button = document.createElement('button');
+        button.classList.add('btn', 'btn-primary', 'me-2', 'mb-2');  // Стандартные классы для всех кнопок
+
+        if (isCompact) {
+            button.classList.add('btn-compact');  // Добавляем 'btn-compact' для кнопок моделей и типов запчастей
+        }
+
+        button.textContent = item;
+        button.addEventListener('click', () => clickHandler(item));
+        container.appendChild(button);
+    });
+}
+
+
 
     // Функция для изменения активной кнопки (подсвечивание)
     function setActiveButton(container, selectedItem) {
