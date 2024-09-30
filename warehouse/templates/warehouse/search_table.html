@@ -22,7 +22,7 @@
                 <td>{{ result.part_type }}</td>
                 <td>{{ result.color|default:"Не указан" }}</td>
                 <td>{{ result.quantity }}</td>
-                <td>{{ result.price }}</td>
+                <td>{{ result.price|floatformat:0 }} руб.</td>
                 <td>
                     {% if result.images.all %}
                         <a href="{{ result.images.first.image.url }}" target="_blank">

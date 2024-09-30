@@ -15,15 +15,31 @@
                         <label for="phone">Телефон:</label>
                         {{ form.phone }}
                     </div>
+
+                    <div class="form-group">
+                        <label for="region">Область:</label>
+                        <select id="id_region" name="region" class="form-control">
+                            <option value="">Выберите область</option>
+                            {% for region in form.region.field.choices %}
+                                <option value="{{ region.0 }}">{{ region.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label for="city">Город:</label>
-                        {{ form.city }}
+                        <select id="id_city" name="city" class="form-control">
+                            <option value="">Выберите город</option>
+                            <!-- Города будут подгружаться динамически -->
+                        </select>
                     </div>
+
                     <div class="form-group">
                         <button type="submit" class="btn btn-success">Сохранить изменения</button>
                         <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
                     </div>
                 </form>
+
             {% else %}
                 <table class="table table-bordered">
                     <tr>
@@ -68,4 +84,6 @@
             {% endif %}
         </div>
     </div>
+
+<script src="{% static 'js/profile.js' %}"></script> <!-- Ссылка на ваш JS файл -->
 {% endblock %}

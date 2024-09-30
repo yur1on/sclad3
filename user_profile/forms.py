@@ -3,12 +3,24 @@ from .models import Profile
 from django import forms
 from .models import Review
 
+# Полный список областей и городов Беларуси
+BELARUS_REGIONS = [
+    ('Минская область', 'Минская область'),
+    ('Гомельская область', 'Гомельская область'),
+    ('Гродненская область', 'Гродненская область'),
+    ('Витебская область', 'Витебская область'),
+    ('Брестская область', 'Брестская область'),
+    ('Могилёвская область', 'Могилёвская область'),
+]
+
+
 class ProfileForm(forms.ModelForm):
+    region = forms.ChoiceField(choices=BELARUS_REGIONS, label="Область", required=True)
+    city = forms.CharField(label="Город", required=True)
+
     class Meta:
         model = Profile
-        fields = ['phone', 'city']
-
-
+        fields = ['phone', 'region', 'city']
 
 
 class ReviewForm(forms.ModelForm):
