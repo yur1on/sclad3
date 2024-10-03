@@ -28,6 +28,10 @@
                         <a href="{{ result.images.first.image.url }}" target="_blank">
                             <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
                         </a>
+                        {% if result.images.count > 1 %}
+                            <br>
+                            <small>+{{ result.images.count|add:"-1" }} еще</small> <!-- Показываем сколько еще изображений есть -->
+                        {% endif %}
                     {% else %}
                         Нет изображения
                     {% endif %}

@@ -56,3 +56,35 @@ document.getElementById('device').addEventListener('input', function() {
 });
 
 // Обработчики событий для брендов и моделей...
+document.addEventListener('DOMContentLoaded', function () {
+    const regionSelect = document.getElementById('id_region');
+    const citySelect = document.getElementById('id_city');
+
+    const citiesByRegion = {
+        'Минская область': ['Минск', 'Борисов', 'Солигорск', 'Слуцк', 'Жодино'],
+        'Гомельская область': ['Гомель', 'Мозырь', 'Жлобин', 'Речица', 'Светлогорск'],
+        'Гродненская область': ['Гродно', 'Лида', 'Слоним', 'Волковыск', 'Сморгонь'],
+        'Витебская область': ['Витебск', 'Орша', 'Полоцк', 'Новополоцк', 'Глубокое'],
+        'Брестская область': ['Брест', 'Барановичи', 'Пинск', 'Кобрин', 'Ивацевичи'],
+        'Могилёвская область': ['Могилёв', 'Бобруйск', 'Горки', 'Кричев', 'Шклов']
+    };
+
+    regionSelect.addEventListener('change', function () {
+        const selectedRegion = regionSelect.value;
+        citySelect.innerHTML = '';  // Очищаем предыдущие города
+
+        if (citiesByRegion[selectedRegion]) {
+            citiesByRegion[selectedRegion].forEach(function (city) {
+                const option = document.createElement('option');
+                option.value = city;
+                option.text = city;
+                citySelect.appendChild(option);
+            });
+        } else {
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.text = 'Выберите город';
+            citySelect.appendChild(defaultOption);
+        }
+    });
+});
