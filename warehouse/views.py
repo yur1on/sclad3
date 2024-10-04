@@ -443,3 +443,74 @@ def get_parts(request):
     } for part in parts]
 
     return JsonResponse({'parts': parts_data})
+
+
+import openpyxl
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Part
+from django.contrib.auth.decorators import login_required
+
+import openpyxl
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Part
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def import_excel(request):
+    if request.method == 'POST':
+        file = request.FILES.get('file')
+
+        # Проверяем, является ли файл формата .xlsx
+        if not file.name.endswith('.xlsx'):
+            messages.error(request, 'Неверный формат файла. Пожалуйста, загрузите файл Excel с расширением .xlsx.')
+            return redirect('import_excel')
+
+        try:
+            wb = openpyxl.load_workbook(file)
+            ws = wb.active
+
+            current_device = None
+            current_brand = None
+            current_model = None
+
+            for row in ws.iter_rows(min_row=2, values_only=True):  # Пропускаем заголовок
+                device, brand, model, part_type, color, quantity, price = row
+
+                # Если в строке указаны устройство, бренд, модель, обновляем их
+                if device and brand and model:
+                    current_device = device
+                    current_brand = brand
+                    current_model = model
+
+                # Если не указаны устройство, бренд или модель, используем последние известные значения
+                if not current_device or not current_brand or not current_model:
+                    messages.error(request, 'Ошибка: строка содержит незаполненные поля для устройства, бренда или модели.')
+                    continue  # Пропускаем строку с ошибкой
+
+                # Проверяем, чтобы обязательные поля запчасти были заполнены
+                if not all([part_type, quantity, price]):
+                    messages.error(request, f'Не удалось импортировать строку: некоторые обязательные поля отсутствуют. ({device} {brand} {model})')
+                    continue
+
+                # Создаем или обновляем запись о запчасти
+                Part.objects.create(
+                    user=request.user,
+                    device=current_device,
+                    brand=current_brand,
+                    model=current_model,
+                    part_type=part_type,
+                    color=color if color else "Не указан",  # Обрабатываем пустой цвет
+                    quantity=int(quantity),  # Количество запчастей
+                    price=float(price)  # Цена запчастей
+                )
+
+            messages.success(request, 'Данные успешно импортированы!')
+            return redirect('warehouse')  # Перенаправляем на склад
+
+        except Exception as e:
+            messages.error(request, f'Ошибка при импорте данных: {str(e)}')
+            return redirect('import_excel')
+
+    return render(request, 'warehouse/import_parts.html')

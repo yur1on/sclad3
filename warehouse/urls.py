@@ -2,6 +2,8 @@ from .views import logout_view
 from . import views
 from django.urls import path
 from .views import add_image
+from django.urls import path
+from .views import import_excel
 urlpatterns = [
     path('', views.home, name='home'),
     path('search/', views.search, name='search'),
@@ -24,8 +26,11 @@ urlpatterns = [
     path('get-models/', views.get_models, name='get_models'),
     path('get-part-types/', views.get_part_types, name='get_part_types'),
     path('get-parts/', views.get_parts, name='get_parts'),
+    path('import-excel/', import_excel, name='import_parts'),
 
 ]
+
+
 
 
 

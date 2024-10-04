@@ -5,13 +5,14 @@
 <div class="container my-4">
 
     <!-- Заголовок и кнопки действий -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Ваши запчасти</h2>
-        <div>
-            <a href="{% url 'add_part' %}" class="btn btn-success me-2">Добавить запчасть</a>
-            <a href="{% url 'export_excel' %}" class="btn btn-info">Экспорт в Excel</a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Ваши запчасти</h2>
+            <div>
+                <a href="{% url 'add_part' %}" class="btn btn-success me-2">Добавить запчасть</a>
+                <a href="{% url 'export_excel' %}" class="btn btn-info me-2">Экспорт в Excel</a>
+                <a href="{% url 'import_parts' %}" class="btn btn-warning">Импорт Excel</a>  <!-- Добавляем кнопку импорта -->
+            </div>
         </div>
-    </div>
 
     <!-- Форма поиска -->
     <div class="mb-4">
