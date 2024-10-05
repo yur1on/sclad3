@@ -1,19 +1,24 @@
 
 from django.http import JsonResponse
 from django.contrib.auth import logout
-from django.shortcuts import render, redirect
-from .forms import PartForm, PartImageFormSet
 from django.shortcuts import get_object_or_404
-from .models import PartImage
-from django.http import HttpResponse
+from .models import Part, PartImage
+from .forms import PartForm, PartImageFormSet
 from openpyxl import Workbook
-from openpyxl.styles import Font
-from django.contrib.auth.decorators import login_required
+from openpyxl.styles import PatternFill, Font
 from itertools import groupby
 from operator import itemgetter
+from django.http import HttpResponse
+import openpyxl
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Part
+from django.contrib.auth.decorators import login_required
+
+
+
 def home(request):
     return render(request, 'warehouse/home.html')
-
 
 @login_required
 def warehouse_view(request):
@@ -63,6 +68,7 @@ def warehouse_view(request):
     })
 
 
+
 @login_required
 def add_part(request):
     if request.method == 'POST':
@@ -70,17 +76,53 @@ def add_part(request):
         formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
 
         if form.is_valid() and formset.is_valid():
+            device = form.cleaned_data.get('device')
+            brand = form.cleaned_data.get('brand')
+            model = form.cleaned_data.get('model')
+            part_type = form.cleaned_data.get('part_type')
+
+            existing_part = Part.objects.filter(
+                user=request.user,
+                device=device,
+                brand=brand,
+                model=model,
+                part_type=part_type
+            ).first()
+
+            if existing_part and 'confirm_add' in request.POST:
+                new_part = form.save(commit=False)
+                new_part.user = request.user
+                new_part.save()
+
+                for image_form in formset:
+                    if image_form.cleaned_data:
+                        image = image_form.save(commit=False)
+                        image.part = new_part
+                        image.save()
+
+                messages.success(request, 'Запчасть успешно добавлена повторно!')
+                return render(request, 'warehouse/success.html')  # Страница успеха
+
+            if existing_part:
+                return render(request, 'warehouse/confirm_add_part.html', {
+                    'form': form,
+                    'formset': formset,
+                    'existing_part': existing_part
+                })
+
             part = form.save(commit=False)
-            part.user = request.user  # если нужно сохранить пользователя
+            part.user = request.user
             part.save()
 
             for image_form in formset:
                 if image_form.cleaned_data:
                     image = image_form.save(commit=False)
-                    image.part = part  # присвоить запчасть каждому изображению
+                    image.part = part
                     image.save()
 
-            return redirect('add_part_success')  # Редирект на страницу успеха
+            messages.success(request, 'Запчасть успешно добавлена!')
+            return render(request, 'warehouse/success.html')  # Страница успеха
+
     else:
         form = PartForm()
         formset = PartImageFormSet(queryset=PartImage.objects.none())
@@ -88,14 +130,12 @@ def add_part(request):
     return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
 
 
+
 def logout_view(request):
     logout(request)
     return redirect('home')  # Перенаправление на главную страницу после выхода
 
 
-
-from django.shortcuts import render
-from .models import Part
 
 def search(request):
     query = request.GET.get('q')
@@ -171,16 +211,6 @@ def warehouse(request):
     return render(request, 'warehouse/warehouse.html')
 
 
-
-
-
-
-from openpyxl import Workbook
-from openpyxl.styles import PatternFill, Font
-from itertools import groupby
-from operator import itemgetter
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def export_excel(request):
@@ -445,17 +475,6 @@ def get_parts(request):
     return JsonResponse({'parts': parts_data})
 
 
-import openpyxl
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Part
-from django.contrib.auth.decorators import login_required
-
-import openpyxl
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Part
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def import_excel(request):
