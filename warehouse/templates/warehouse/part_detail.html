@@ -108,6 +108,10 @@
                             <td>{{ part.user.username }}</td>
                         </tr>
                         <tr>
+                    <th>Название мастерской</th>
+                    <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td> <!-- Отображаем название мастерской -->
+                        </tr>
+                        <tr>
                             <th>Средний рейтинг</th>
                             <td>{{ part.user.profile.average_rating }} / 5</td>
                         </tr>

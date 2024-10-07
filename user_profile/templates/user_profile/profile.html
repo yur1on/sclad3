@@ -2,6 +2,8 @@
 {% block title %}Профиль{% endblock %}
 {% block content %}
 {% load static %}
+{% load widget_tweaks %}
+
 <div class="container profile-page my-4">
     <div class="card mb-4 shadow-sm">
         <div class="card-header bg-primary text-white">
@@ -12,25 +14,40 @@
                 <!-- Форма редактирования -->
                 <form method="post" class="form">
                     {% csrf_token %}
+
+                    <!-- Поле телефона -->
                     <div class="form-group mb-3">
-                        <label for="phone">Телефон:</label>
-                        {{ form.phone }} <!-- Удален фильтр add_class -->
+                        <label for="phone" class="form-label">Телефон:</label>
+                        {{ form.phone|add_class:"form-control" }}
                     </div>
+
+                    <!-- Поле для выбора области -->
                     <div class="form-group mb-3">
-                        <label for="region">Область:</label>
+                        <label for="region" class="form-label">Область:</label>
                         <select id="id_region" name="region" class="form-control">
                             <option value="">Выберите область</option>
                             {% for region in form.region.field.choices %}
-                                <option value="{{ region.0 }}">{{ region.1 }}</option>
+                                <option value="{{ region.0 }}" {% if region.0 == form.region.value %}selected{% endif %}>
+                                    {{ region.1 }}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
+
+                    <!-- Поле для выбора города -->
                     <div class="form-group mb-3">
-                        <label for="city">Город:</label>
+                        <label for="city" class="form-label">Город:</label>
                         <select id="id_city" name="city" class="form-control">
                             <option value="">Выберите город</option>
                         </select>
                     </div>
+
+                    <!-- Поле для названия мастерской -->
+                    <div class="form-group mb-3">
+                        <label for="workshop_name" class="form-label">Название мастерской:</label>
+                        {{ form.workshop_name|add_class:"form-control" }}
+                    </div>
+
                     <div class="d-flex justify-content-between">
                         <button type="submit" class="btn btn-success">Сохранить изменения</button>
                         <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
@@ -49,6 +66,11 @@
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Город:</span> <span>{{ user.profile.city }}</span>
                             </li>
+
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Название мастерской:</span> <span>{{ user.profile.workshop_name|default:"Не указано" }}</span>
+                            </li>
+
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Рейтинг:</span>
                                 <span>
@@ -69,23 +91,25 @@
         </div>
     </div>
 
-    <!-- Отзывы -->
-    <div class="reviews-section">
-        <h4 class="mb-3">Отзывы пользователей</h4>
-        <div class="list-group">
-            {% for review in reviews %}
-                <div class="list-group-item list-group-item-action mb-2 shadow-sm">
-                    <div class="d-flex justify-content-between">
-                        <strong>Рейтинг: {{ review.rating }} / 5</strong>
-                        <small class="text-muted">Оставил: {{ review.reviewer.username }} | Дата: {{ review.created_at|date:"d M Y" }}</small>
+    <!-- Отзывы (отображаются только если не редактируется профиль) -->
+    {% if not edit_mode %}
+        <div class="reviews-section">
+            <h4 class="mb-3">Отзывы пользователей</h4>
+            <div class="list-group">
+                {% for review in reviews %}
+                    <div class="list-group-item list-group-item-action mb-2 shadow-sm">
+                        <div class="d-flex justify-content-between">
+                            <strong>Рейтинг: {{ review.rating }} / 5</strong>
+                            <small class="text-muted">Оставил: {{ review.reviewer.username }} | Дата: {{ review.created_at|date:"d M Y" }}</small>
+                        </div>
+                        <p class="mb-1 text-truncate" title="{{ review.comment }}">{{ review.comment }}</p>
                     </div>
-                    <p class="mb-1 text-truncate" title="{{ review.comment }}">{{ review.comment }}</p>
-                </div>
-            {% empty %}
-                <p class="text-muted">Нет отзывов</p>
-            {% endfor %}
+                {% empty %}
+                    <p class="text-muted">Нет отзывов</p>
+                {% endfor %}
+            </div>
         </div>
-    </div>
+    {% endif %}
 </div>
 
 <script src="{% static 'js/profile.js' %}"></script>
