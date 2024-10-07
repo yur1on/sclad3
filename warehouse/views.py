@@ -513,7 +513,21 @@ def import_excel(request):
                     messages.error(request, f'Не удалось импортировать строку: некоторые обязательные поля отсутствуют. ({device} {brand} {model})')
                     continue
 
-                # Создаем или обновляем запись о запчасти
+                # Проверяем, существует ли запчасть с такими же параметрами в базе данных
+                existing_part = Part.objects.filter(
+                    user=request.user,
+                    device=current_device,
+                    brand=current_brand,
+                    model=current_model,
+                    part_type=part_type
+                ).exists()
+
+                if existing_part:
+                    # Сообщаем, что запчасть уже существует, и не добавляем ее повторно
+                    messages.info(request, f'Запчасть {current_device} {current_brand} {current_model} ({part_type}) уже существует в базе.')
+                    continue
+
+                # Создаем новую запись о запчасти, если ее нет в базе
                 Part.objects.create(
                     user=request.user,
                     device=current_device,

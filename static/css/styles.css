@@ -1,0 +1,19 @@
+/* Компактные кнопки для моделей и типов запчастей */
+.btn-compact {
+    padding: 5px 10px;
+    font-size: 0.85rem;  /* Немного меньше по размеру */
+    border-radius: 4px;
+}
+
+/* Активная кнопка после нажатия */
+.btn-active {
+    background-color: #28a745; /* Зеленый фон для активной кнопки */
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+    color: white;
+}

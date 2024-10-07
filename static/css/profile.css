@@ -1,150 +1,45 @@
-/* Общие стили для карточек */
-.card {
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
-    color: #333;
-    margin: 30px auto;
+/* Компактная форма и таблица */
+.profile-page {
     max-width: 900px;
-    padding: 20px;
-    border: 1px solid #e0e0e0;
+    margin: 0 auto;
 }
 
-/* Стили для заголовка карточки */
-.card-header {
-    background-color: #f1f1f1;
-    color: #333;
-    padding: 15px;
-    text-align: center;
-    font-size: 26px;
-    font-weight: 600;
-    border-bottom: 1px solid #ddd;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
+/* Карточка профиля */
+.card {
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-/* Стили для основного контента карточки */
-.card-body {
-    padding: 25px;
-    font-size: 16px;
-    line-height: 1.6;
+/* Компактные списки */
+.list-group-item {
+    padding: 10px 15px;
 }
 
-/* Стили для таблицы */
-.table {
-    width: 100%;
-    margin-top: 20px;
-    background-color: #fff;
-    color: #333;
-    border-collapse: collapse;
-    border: 1px solid #e0e0e0;
-}
-
-.table th {
-    background-color: #f5f5f5;
-    color: #333;
-    padding: 12px;
-    text-align: left;
-    font-weight: bold;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.table td {
-    padding: 12px;
-    text-align: left;
-    border-top: 1px solid #e0e0e0;
-}
-
-/* Стили для формы */
+/* Кнопки и форма */
 .form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    font-size: 16px;
-    color: #555;
-    margin-bottom: 8px;
-    display: block;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    color: #333;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
-}
-
-.form-group input:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-/* Кнопки */
-.btn {
-    padding: 12px 20px;
-    font-size: 16px;
-    border-radius: 8px;
-    text-decoration: none;
-    display: inline-block;
-    margin-top: 15px;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-    color: #fff;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    color: #fff;
-}
-
-.btn-secondary:hover {
-    background-color: #5a6268;
-}
-
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
+    margin-bottom: 15px;
 }
 
 /* Отзывы */
-.review {
-    background-color: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
+.reviews-section h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
-.review .card-title {
-    font-size: 20px;
-    color: #333;
-    margin-bottom: 10px;
+.list-group-item-action {
+    display: flex;
+    flex-direction: column;
 }
 
-.review .card-text {
-    font-size: 16px;
-    color: #555;
+.list-group-item .text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
-.review small.text-muted {
-    color: #777;
-    font-size: 14px;
+/* Стили для кнопок */
+.btn {
+    padding: 6px 12px;
 }
+
