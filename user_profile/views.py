@@ -16,8 +16,9 @@ def profile(request):
     # Получаем отзывы, оставленные пользователю
     reviews = Review.objects.filter(user=request.user).order_by('-created_at')
 
-    # Получаем закладки текущего пользователя
+    # Получаем закладки текущего пользователя и количество закладок
     bookmarks = request.user.bookmarks.all()
+    bookmarks_count = bookmarks.count()  # Подсчитываем количество закладок
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=request.user.profile)
@@ -32,6 +33,7 @@ def profile(request):
         'edit_mode': edit_mode,
         'reviews': reviews,  # Передаем отзывы в шаблон
         'bookmarks': bookmarks,  # Передаем закладки в шаблон
+        'bookmarks_count': bookmarks_count  # Передаем количество закладок в шаблон
     })
 
 
@@ -39,20 +41,21 @@ def profile(request):
 
 @login_required
 def add_review(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+    reviewed_user = get_object_or_404(User, id=user_id)
 
     if request.method == 'POST':
-        form = ReviewForm(request.POST, reviewer=request.user, user=user)
+        form = ReviewForm(request.POST, reviewer=request.user, user=reviewed_user)
         if form.is_valid():
             review = form.save(commit=False)
             review.reviewer = request.user
-            review.user = user
+            review.user = reviewed_user
             review.save()
             return redirect('profile')  # Перенаправляем на профиль после успешного отзыва
     else:
-        form = ReviewForm(reviewer=request.user, user=user)
+        form = ReviewForm(reviewer=request.user, user=reviewed_user)
 
-    return render(request, 'user_profile/add_review.html', {'form': form, 'user': user})
+    return render(request, 'user_profile/add_review.html', {'form': form, 'reviewed_user': reviewed_user})
+
 
 
 @login_required
@@ -86,7 +89,9 @@ def toggle_bookmark(request, part_id):
     return redirect('part_detail', part_id=part.id)
 
 
+
 @login_required
 def bookmarks(request):
-    user_bookmarks = request.user.bookmarks.all()
+    user_bookmarks = Bookmark.objects.filter(user=request.user).select_related('part')
     return render(request, 'user_profile/bookmarks.html', {'bookmarks': user_bookmarks})
+

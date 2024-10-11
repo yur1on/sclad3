@@ -1,0 +1,28 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Мои закладки{% endblock %}
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4">Мои закладки</h2>
+    <div class="row">
+        {% for bookmark in bookmarks %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <img src="{{ bookmark.part.images.first.image.url }}" class="card-img-top" alt="Фото запчасти">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ bookmark.part.device }} {{ bookmark.part.brand }} {{ bookmark.part.model }}</h5>
+                        <p class="card-text">
+                            Тип: {{ bookmark.part.part_type }}<br>
+                            Цена: {{ bookmark.part.price }}<br>
+                            Кол-во: {{ bookmark.part.quantity }}
+                        </p>
+                        <a href="{% url 'part_detail' bookmark.part.id %}" class="btn btn-primary">Подробнее</a>
+                        <a href="{% url 'toggle_bookmark' bookmark.part.id %}?next={% url 'bookmarks' %}" class="btn btn-danger">Удалить закладку</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>У вас пока нет закладок.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

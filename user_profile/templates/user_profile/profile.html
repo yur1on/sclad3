@@ -74,6 +74,10 @@
                     </div>
                     <div class="col-md-6 text-end">
                         <a href="?edit=true" class="btn btn-primary">Редактировать профиль</a>
+                                <a href="{% url 'bookmarks' %}" class="btn btn-info">
+            Мои закладки
+            <span class="badge bg-secondary">{{ bookmarks_count }}</span>  <!-- Количество закладок внутри кнопки -->
+        </a>
                     </div>
                 </div>
             {% endif %}
@@ -98,38 +102,6 @@
                 {% endfor %}
             </div>
         </div>
-
-        <!-- Закладки -->
-        <!-- Закладки -->
-        <div class="bookmarks-section">
-            <h4 class="mb-3">Мои закладки</h4>
-            <div class="row">
-                {% for bookmark in bookmarks %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <img src="{{ bookmark.part.images.first.image.url }}" class="card-img-top" alt="Фото запчасти">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ bookmark.part.device }} {{ bookmark.part.brand }} {{ bookmark.part.model }}</h5>
-                                <p class="card-text">
-                                    Тип: {{ bookmark.part.part_type }}<br>
-                                    Цена: {{ bookmark.part.price }}<br>
-                                    Кол-во: {{ bookmark.part.quantity }}
-                                </p>
-                                <div class="d-flex justify-content-between">
-                                    <a href="{% url 'part_detail' bookmark.part.id %}" class="btn btn-primary">Подробнее</a>
-                                    <!-- Кнопка для удаления закладки -->
-              <a href="{% url 'toggle_bookmark' bookmark.part.id %}?next={% url 'profile' %}" class="btn btn-danger">Удалить закладку</a>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% empty %}
-                    <p>У вас пока нет закладок.</p>
-                {% endfor %}
-            </div>
-        </div>
-
     {% endif %}
 </div>
 
