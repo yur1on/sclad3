@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+from django.contrib.auth.models import User
+from warehouse.models import Part
 
 # Список областей Беларуси для выбора в профиле
 BELARUS_REGIONS = [
@@ -38,3 +41,14 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review from {self.reviewer} to {self.user} - {self.rating} stars"
+
+
+
+
+class Bookmark(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarks')
+    part = models.ForeignKey(Part, on_delete=models.CASCADE, related_name='bookmarked_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.part}"

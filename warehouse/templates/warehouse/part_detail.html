@@ -91,52 +91,63 @@
                             <td>{{ part.price }}</td>
                         </tr>
                     </table>
+                    <!-- Кнопка для добавления/удаления из закладок -->
+<a href="{% url 'toggle_bookmark' part.id %}" class="btn {% if is_bookmarked %}btn-danger{% else %}btn-outline-success{% endif %}">
+    {% if is_bookmarked %}
+        Удалить из закладок
+    {% else %}
+        Добавить в закладки
+    {% endif %}
+</a>
                 </div>
             </div>
         </div>
 
-        <!-- Информация о пользователе -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Информация о пользователе</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-striped">
-                        <tr>
-                            <th>Имя пользователя</th>
-                            <td>{{ part.user.username }}</td>
-                        </tr>
-                        <tr>
-                    <th>Название мастерской</th>
-                    <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td> <!-- Отображаем название мастерской -->
-                        </tr>
-                        <tr>
-                            <th>Средний рейтинг</th>
-                            <td>{{ part.user.profile.average_rating }} / 5</td>
-                        </tr>
-                        <tr>
-                            <th>Электронная почта</th>
-                            <td>{{ part.user.email }}</td>
-                        </tr>
-                        <tr>
-                            <th>Город</th>
-                            <td>{{ part.user.profile.city }}</td>
-                        </tr>
-                        <tr>
-                            <th>Телефон</th>
-                            <td>{{ part.user.profile.phone }}</td>
-                        </tr>
-                    </table>
 
-                    <!-- Кнопки для отзывов -->
-                    <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
-                    <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary ml-2">Посмотреть отзывы</a>
-                </div>
+
+<!-- Информация о пользователе -->
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Информация о пользователе</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <tr>
+                    <th>Имя пользователя</th>
+                    <td>{{ part.user.username }}</td>
+                </tr>
+                <tr>
+                    <th>Название мастерской</th>
+                    <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td>
+                </tr>
+                <tr>
+                    <th>Средний рейтинг</th>
+                    <td>{{ part.user.profile.average_rating }} / 5</td>
+                </tr>
+                <tr>
+                    <th>Электронная почта</th>
+                    <td>{{ part.user.email }}</td>
+                </tr>
+                <tr>
+                    <th>Город</th>
+                    <td>{{ part.user.profile.city }}</td>
+                </tr>
+                <tr>
+                    <th>Телефон</th>
+                    <td>{{ part.user.profile.phone }}</td>
+                </tr>
+            </table>
+
+            <!-- Кнопки для отзывов и закладок -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
+                <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary ml-2">Посмотреть отзывы</a>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Модальное окно для изображения -->
 <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">

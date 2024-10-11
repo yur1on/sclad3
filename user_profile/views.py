@@ -1,9 +1,13 @@
 
 from .forms import ProfileForm
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from .models import User, Review
 from .forms import ReviewForm
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from warehouse.models import Part
+from django.contrib import messages
+from .models import Bookmark  # Импортируем модель закладок
 
 @login_required
 def profile(request):
@@ -11,6 +15,9 @@ def profile(request):
 
     # Получаем отзывы, оставленные пользователю
     reviews = Review.objects.filter(user=request.user).order_by('-created_at')
+
+    # Получаем закладки текущего пользователя
+    bookmarks = request.user.bookmarks.all()
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=request.user.profile)
@@ -24,7 +31,9 @@ def profile(request):
         'form': form,
         'edit_mode': edit_mode,
         'reviews': reviews,  # Передаем отзывы в шаблон
+        'bookmarks': bookmarks,  # Передаем закладки в шаблон
     })
+
 
 
 
@@ -53,3 +62,31 @@ def view_reviews(request, user_id):
     return render(request, 'warehouse/view_reviews.html', {'user': user, 'reviews': reviews})
 
 
+
+
+
+@login_required
+def toggle_bookmark(request, part_id):
+    part = get_object_or_404(Part, id=part_id)
+    bookmark, created = Bookmark.objects.get_or_create(user=request.user, part=part)
+
+    if not created:
+        # Если закладка уже существует, удаляем её
+        bookmark.delete()
+        messages.success(request, f'Запчасть "{part.device} {part.brand} {part.model}" удалена из закладок.')
+    else:
+        messages.success(request, f'Запчасть "{part.device} {part.brand} {part.model}" добавлена в закладки.')
+
+    # Проверяем, откуда пришел запрос: из профиля или с деталей запчасти
+    next_page = request.GET.get('next')  # Попытаемся получить параметр next из URL
+    if next_page:
+        return redirect(next_page)  # Если есть next, перенаправляем на указанный путь
+
+    # Если next не указан, перенаправляем на страницу деталей запчасти
+    return redirect('part_detail', part_id=part.id)
+
+
+@login_required
+def bookmarks(request):
+    user_bookmarks = request.user.bookmarks.all()
+    return render(request, 'user_profile/bookmarks.html', {'bookmarks': user_bookmarks})

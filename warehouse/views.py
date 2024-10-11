@@ -351,11 +351,24 @@ def filter_parts(request):
 
 
 
+
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Part
+
+
 @login_required
 def part_detail(request, part_id):
     part = get_object_or_404(Part, id=part_id)
-    return render(request, 'warehouse/part_detail.html', {'part': part})
 
+    # Проверяем, есть ли эта запчасть в закладках у текущего пользователя
+    is_bookmarked = request.user.bookmarks.filter(part=part).exists()
+
+    return render(request, 'warehouse/part_detail.html', {
+        'part': part,
+        'is_bookmarked': is_bookmarked
+    })
 
 
 def add_part_success(request):
