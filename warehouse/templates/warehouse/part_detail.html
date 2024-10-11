@@ -1,25 +1,8 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Информация о запчасти{% endblock %}
 {% block content %}
-<style>
-    /* Ограничение размеров изображения в карусели */
-    .carousel-item img {
-        max-width: 400px; /* Максимальная ширина */
-        max-height: 300px; /* Максимальная высота */
-        object-fit: contain; /* Сохранение пропорций */
-        margin: 0 auto; /* Центрирование */
-    }
-
-    /* Ограничение размеров миниатюр */
-    .img-thumbnail {
-        width: 60px;
-        height: 60px;
-        object-fit: cover; /* Обрезка изображения для заполнения миниатюры */
-    }
-</style>
 
 <div class="container">
-    <a href="{% url 'search' %}" class="btn btn-dark mb-4">Назад</a>
     <div class="row">
         <div class="col-md-6">
             <div class="card">

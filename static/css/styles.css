@@ -1,13 +1,13 @@
-/* Компактные кнопки для моделей и типов запчастей */
+/* Немного увеличенные компактные кнопки для моделей и типов запчастей */
 .btn-compact {
-    padding: 5px 10px;
-    font-size: 0.85rem;  /* Немного меньше по размеру */
-    border-radius: 4px;
+    padding: 6px 12px; /* Увеличение padding */
+    font-size: 0.9rem;  /* Увеличение шрифта */
+    border-radius: 5px; /* Немного больше скругление */
 }
 
 /* Активная кнопка после нажатия */
 .btn-active {
-    background-color: #28a745; /* Зеленый фон для активной кнопки */
+    background-color: #28a745;
     border-color: #28a745;
     color: white;
 }
@@ -17,3 +17,86 @@
     border-color: #004085;
     color: white;
 }
+
+body {
+    margin: 0;
+    padding: 0;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    line-height: 21px;
+    position: relative;
+}
+
+/* Увеличенные кнопки */
+.btn {
+    padding: 6px 12px;  /* Значение padding */
+    font-size: 13px;    /* Значение размера шрифта */
+    line-height: 20px;  /* Значение высоты строки */
+    border-radius: 5px; /* Значение скругление */
+    text-align: center;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: 1px solid #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border: 1px solid #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #565e64;
+    border-color: #565e64;
+}
+
+.btn-outline-success {
+    background-color: transparent;
+    border: 1px solid #28a745;
+    color: #28a745;
+}
+
+.btn-outline-success:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Звезды для отзыва */
+.rating-star {
+    font-size: 2.2rem; /* Немного увеличен размер звезды */
+    color: grey;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+    margin: 0 5px;
+}
+
+.rating-star:hover {
+    color: gold;
+    transform: scale(1.35); /* Чуть большее увеличение при наведении */
+}
+
+    /* Ограничение размеров изображения в карусели */
+    .carousel-item img {
+        max-width: 400px; /* Максимальная ширина */
+        max-height: 300px; /* Максимальная высота */
+        object-fit: contain; /* Сохранение пропорций */
+        margin: 0 auto; /* Центрирование */
+    }
+
+    /* Ограничение размеров миниатюр */
+    .img-thumbnail {
+        width: 60px;
+        height: 60px;
+        object-fit: cover; /* Обрезка изображения для заполнения миниатюры */
+    }
