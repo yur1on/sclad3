@@ -2,12 +2,10 @@
     <table class="table table-striped table-bordered table-hover">
         <thead class="table-dark">
             <tr>
+                <th>Тип запчасти</th>
                 <th>Устройство</th>
                 <th>Бренд</th>
                 <th>Модель</th>
-                <th>Тип запчасти</th>
-                <th>Цвет</th>
-                <th>Кол-во</th>
                 <th>Цена</th>
                 <th>Изображение</th>
                 <th>Город</th>
@@ -16,12 +14,10 @@
         <tbody>
             {% for result in results %}
             <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
+                <td>{{ result.part_type }}</td>
                 <td>{{ result.device }}</td>
                 <td>{{ result.brand }}</td>
                 <td>{{ result.model }}</td>
-                <td>{{ result.part_type }}</td>
-                <td>{{ result.color|default:"Не указан" }}</td>
-                <td>{{ result.quantity }}</td>
                 <td>{{ result.price|floatformat:0 }} руб.</td>
                 <td>
                     {% if result.images.all %}
