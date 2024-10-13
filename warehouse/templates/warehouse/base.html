@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     {% load static %}
     <meta charset="UTF-8">
@@ -7,8 +7,34 @@
     <title>{% block title %}Склад{% endblock %}</title>
     <!-- Подключаем Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Подключаем Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Подключаем пользовательские стили -->
-    <link rel="stylesheet" href="{% static '/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        .counter {
+            border: 1px solid #007bff; /* Цвет рамки */
+            border-radius: 7px; /* Скругление углов */
+            padding: 2px; /* Внутренние отступы */
+            margin: 0 6px; /* Отступы между счетчиками */
+            display: flex; /* Используем flexbox для выравнивания иконок и текста */
+            align-items: center; /* Центрируем по вертикали */
+            background-color: #f8f9fa; /* Цвет фона */
+        }
+
+        .counter i {
+            font-size: 1rem; /* Размер иконок */
+            margin-right: 6px; /* Отступ между иконкой и текстом */
+            color: #007bff; /* Цвет иконок */
+        }
+
+        .footer .counter-group {
+            display: flex;
+            justify-content: center; /* Центрирование элементов */
+            gap: 20px; /* Отступы между элементами */
+            margin-bottom: 10px; /* Отступ снизу */
+        }
+    </style>
 </head>
 <body>
 
@@ -17,16 +43,19 @@
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-light">
                 <a class="navbar-brand" href="{% url 'home' %}">Склад</a>
-                <div class="collapse navbar-collapse">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         {% if user.is_authenticated %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Профиль</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'warehouse' %}">Склад</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'warehouse' %}">Мой склад</a></li>
                         {% endif %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'search' %}">Поиск</a></li>
                     </ul>
                     {% if user.is_authenticated %}
-                        <span class="navbar-text">Привет, {{ user.username }}</span>
+                        <span class="navbar-text ms-3">Привет, {{ user.username }}</span>
                         <a class="btn btn-outline-danger ms-2" href="{% url 'logout' %}">Выход</a>
                     {% else %}
                         <a class="btn btn-outline-primary ms-2" href="{% url 'login' %}">Вход</a>
@@ -44,8 +73,18 @@
 
     <!-- Нижний колонтитул -->
     <footer class="footer bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <p>&copy; 2024 Склад. Все права защищены.</p>
+        <div class="container">
+            <div class="counter-group">
+                <div class="counter">
+                    <i class="fas fa-cogs"></i>
+                    <span class="navbar-text text-success fw-bold">Запчастей: <strong class="text-danger">{{ part_count }}</strong></span>
+                </div>
+                <div class="counter">
+                    <i class="fas fa-users"></i>
+                    <span class="navbar-text text-info fw-bold">Пользователей: <strong class="text-danger">{{ user_count }}</strong></span>
+                </div>
+            </div>
+            <p class="text-center">&copy; 2024 Склад. Все права защищены.</p>
         </div>
     </footer>
 

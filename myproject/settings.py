@@ -77,10 +77,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'warehouse.context_processors.counts',  # Обратите внимание на имя функции
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 

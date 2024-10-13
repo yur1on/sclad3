@@ -1,9 +1,10 @@
 from .views import logout_view
+
 from . import views
-from django.urls import path
 from .views import add_image
 from django.urls import path
 from .views import import_excel
+
 urlpatterns = [
     path('', views.home, name='home'),
     path('search/', views.search, name='search'),
@@ -16,9 +17,6 @@ urlpatterns = [
     path('filter_parts/', views.filter_parts, name='filter_parts'),
     path('part/<int:part_id>/', views.part_detail, name='part_detail'),
     path('add-image/', add_image, name='add_image'),
-
-
-    # Новый URL для страницы успеха
     path('add-part/success/', views.add_part_success, name='add_part_success'),
     path('delete-image/<int:image_id>/', views.delete_image, name='delete_image'),
     path('get-devices/', views.get_devices, name='get_devices'),
@@ -27,9 +25,9 @@ urlpatterns = [
     path('get-part-types/', views.get_part_types, name='get_part_types'),
     path('get-parts/', views.get_parts, name='get_parts'),
     path('import-excel/', import_excel, name='import_parts'),
+    path('', views.base_view, name='home'),
 
 ]
-
 
 
 

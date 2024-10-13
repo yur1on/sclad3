@@ -20,6 +20,8 @@ from django.contrib.auth.decorators import login_required
 def home(request):
     return render(request, 'warehouse/home.html')
 
+from django.core.paginator import Paginator
+
 @login_required
 def warehouse_view(request):
     if not request.user.is_authenticated:
@@ -49,16 +51,17 @@ def warehouse_view(request):
     if part_type:
         parts = parts.filter(part_type__icontains=part_type)
 
+    # Пагинация: 30 запчастей на странице
+    paginator = Paginator(parts, 30)  # Отображаем 30 запчастей на одной странице
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     # Получаем уникальные устройства и бренды для отображения кнопок
     devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
     brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct()
 
-    # Добавляем список URL изображений для каждого запчасти
-    for part in parts:
-        part.image_urls = [image.image.url for image in part.images.all()]
-
     return render(request, 'warehouse/warehouse.html', {
-        'parts': parts,
+        'page_obj': page_obj,
         'query': query,
         'brand': brand,
         'model': model,
@@ -137,16 +140,18 @@ def logout_view(request):
 
 
 
+from django.core.paginator import Paginator
+
 def search(request):
     query = request.GET.get('q')
     brand = request.GET.get('brand')
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
-    color = request.GET.get('color')
     city = request.GET.get('city')
 
-    results = Part.objects.all().order_by('-created_at')  # Ordering by creation time
+    results = Part.objects.all().order_by('-created_at')
 
+    # Применение фильтров
     if query:
         results = results.filter(device__icontains=query)
     if brand:
@@ -155,12 +160,15 @@ def search(request):
         results = results.filter(model__icontains=model)
     if part_type:
         results = results.filter(part_type__icontains=part_type)
-    if color:
-        results = results.filter(color__icontains=color)
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
-    return render(request, 'warehouse/search.html', {'results': results})
+    # Пагинация: 30 запчастей на странице
+    paginator = Paginator(results, 30)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'warehouse/search.html', {'page_obj': page_obj})
 
 
 
@@ -560,3 +568,18 @@ def import_excel(request):
             return redirect('import_excel')
 
     return render(request, 'warehouse/import_parts.html')
+
+from django.contrib.auth.models import User
+from warehouse.models import Part
+
+def base_view(request):
+    # Подсчёт количества пользователей и запчастей
+    user_count = User.objects.count()
+    part_count = Part.objects.count()
+
+    return render(request, 'warehouse/base.html', {
+        'user_count': user_count,
+        'part_count': part_count,
+    })
+
+
