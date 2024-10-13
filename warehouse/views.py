@@ -477,8 +477,17 @@ def get_parts(request):
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
 
-    # Фильтруем и сортируем запчасти по полю (например, по устройству)
-    parts = Part.objects.filter(user=request.user, device=device, brand=brand, model=model, part_type=part_type).order_by('device')
+    # Фильтруем запчасти на основе переданных параметров
+    parts = Part.objects.filter(user=request.user)
+
+    if device:
+        parts = parts.filter(device=device)
+    if brand:
+        parts = parts.filter(brand=brand)
+    if model:
+        parts = parts.filter(model=model)
+    if part_type:
+        parts = parts.filter(part_type=part_type)
 
     # Формируем данные для ответа
     parts_data = [{

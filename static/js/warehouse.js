@@ -1,58 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const deviceInput = document.getElementById('device');
-    const brandInput = document.getElementById('brand');
-    const modelInput = document.getElementById('model');
-
-    deviceInput.addEventListener('input', function() {
-        const selectedDevice = deviceInput.value;
-        brandInput.value = '';
-        modelInput.value = '';
-        clearDatalist('brands');
-        clearDatalist('models');
-
-        if (selectedDevice) {
-            fetch(`/get-brands/?device=${selectedDevice}`)
-                .then(response => response.json())
-                .then(data => {
-                    populateDatalist('brands', data.brands);
-                });
-        }
-    });
-
-    brandInput.addEventListener('input', function() {
-        const selectedBrand = brandInput.value;
-        const selectedDevice = deviceInput.value;  // Устройство тоже должно быть учтено
-
-        modelInput.value = '';
-        clearDatalist('models');
-
-        if (selectedBrand) {
-            fetch(`/get-models/?brand=${selectedBrand}&device=${selectedDevice}`)  // Отправляем и устройство, и бренд
-                .then(response => response.json())
-                .then(data => {
-                    populateDatalist('models', data.models);
-                });
-        }
-    });
-
-    function populateDatalist(id, items) {
-        const datalist = document.getElementById(id);
-        datalist.innerHTML = '';
-        items.forEach(function(item) {
-            const option = document.createElement('option');
-            option.value = item;
-            datalist.appendChild(option);
-        });
-    }
-
-    function clearDatalist(id) {
-        const datalist = document.getElementById(id);
-        datalist.innerHTML = '';
-    }
-});
-
-
-document.addEventListener('DOMContentLoaded', function() {
     const deviceButtonsContainer = document.getElementById('device-buttons-container');
     const brandButtonsContainer = document.getElementById('brand-buttons-container');
     const modelButtonsContainer = document.getElementById('model-buttons-container');
@@ -66,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedDevice = '';
     let selectedBrand = '';
     let selectedModel = '';
+    let selectedPartType = '';
 
     // Загрузка кнопок для устройств при загрузке страницы
     fetch('/get-devices/')
@@ -77,10 +24,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработка нажатия на устройство
     function handleDeviceClick(device) {
         selectedDevice = device;
+
+        // Сброс брендов, моделей и типов запчастей при изменении устройства
+        selectedBrand = '';
+        selectedModel = '';
+        selectedPartType = '';
+
         brandButtons.innerHTML = '';  // Очищаем старые кнопки брендов
+        modelButtons.innerHTML = '';  // Очищаем старые кнопки моделей
+        partTypeButtons.innerHTML = '';  // Очищаем старые кнопки типов запчастей
         modelButtonsContainer.style.display = 'none';
         partTypeButtonsContainer.style.display = 'none';
 
+        // Запрашиваем бренды для выбранного устройства
         fetch(`/get-brands/?device=${device}`)
             .then(response => response.json())
             .then(data => {
@@ -89,44 +45,63 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
         setActiveButton(deviceButtons, device);
+        updateTable();
     }
 
     // Обработка нажатия на бренд
     function handleBrandClick(brand) {
         selectedBrand = brand;
-        modelButtons.innerHTML = '';  // Очищаем старые кнопки моделей
 
+        // Сброс моделей и типов запчастей при изменении бренда
+        selectedModel = '';
+        selectedPartType = '';
+
+        modelButtons.innerHTML = '';  // Очищаем старые кнопки моделей
+        partTypeButtons.innerHTML = '';  // Очищаем старые кнопки типов запчастей
+        partTypeButtonsContainer.style.display = 'none';
+
+        // Запрашиваем модели для выбранного устройства и бренда
         fetch(`/get-models/?device=${selectedDevice}&brand=${brand}`)
             .then(response => response.json())
             .then(data => {
                 modelButtonsContainer.style.display = 'block';
-                populateButtons(modelButtons, data.models, handleModelClick, true);  // Компактные кнопки для моделей
+                populateButtons(modelButtons, data.models, handleModelClick, true);
             });
 
         setActiveButton(brandButtons, brand);
+        updateTable();
     }
 
     // Обработка нажатия на модель
     function handleModelClick(model) {
         selectedModel = model;
+
+        // Сброс типов запчастей при изменении модели
+        selectedPartType = '';
+
         partTypeButtons.innerHTML = '';  // Очищаем старые кнопки типов запчастей
 
+        // Запрашиваем типы запчастей для выбранных устройства, бренда и модели
         fetch(`/get-part-types/?device=${selectedDevice}&brand=${selectedBrand}&model=${model}`)
             .then(response => response.json())
             .then(data => {
                 partTypeButtonsContainer.style.display = 'block';
-                populateButtons(partTypeButtons, data.part_types, handlePartTypeClick, true);  // Компактные кнопки для типов запчастей
+                populateButtons(partTypeButtons, data.part_types, handlePartTypeClick, true);
             });
 
         setActiveButton(modelButtons, model);
+        updateTable();
     }
 
     // Обработка нажатия на тип запчасти
     function handlePartTypeClick(partType) {
+        selectedPartType = partType;
+
+        // Запрашиваем запчасти для выбранных устройства, бренда, модели и типа запчасти
         fetch(`/get-parts/?device=${selectedDevice}&brand=${selectedBrand}&model=${selectedModel}&part_type=${partType}`)
             .then(response => response.json())
             .then(data => {
-                displayParts(data.parts);  // Отображаем только таблицу запчастей
+                displayParts(data.parts);  // Обновляем таблицу запчастей
             });
 
         setActiveButton(partTypeButtons, partType);
@@ -155,21 +130,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Функция для изменения активной кнопки (подсвечивание)
     function setActiveButton(container, selectedItem) {
-        // Удаляем класс "btn-active" у всех кнопок
         Array.from(container.children).forEach(button => {
             button.classList.remove('btn-active');
             button.classList.add('btn-primary');
         });
 
-        // Добавляем "btn-active" только на выбранную кнопку
         const selectedButton = Array.from(container.children).find(button => button.textContent === selectedItem);
         if (selectedButton) {
             selectedButton.classList.remove('btn-primary');
-            selectedButton.classList.add('btn-active');  // Используем кастомный зеленый класс
+            selectedButton.classList.add('btn-active');
         }
     }
 
-    // Функция для отображения запчастей в таблице (не трогаем кнопки)
+    // Функция для обновления таблицы с запчастями
+    function updateTable() {
+        fetch(`/get-parts/?device=${selectedDevice}&brand=${selectedBrand}&model=${selectedModel}&part_type=${selectedPartType}`)
+            .then(response => response.json())
+            .then(data => {
+                displayParts(data.parts);
+            });
+    }
+
+    // Функция для отображения запчастей в таблице
     function displayParts(parts) {
         const tbody = document.querySelector('#parts-table tbody');
         tbody.innerHTML = '';  // Очищаем старые данные таблицы
