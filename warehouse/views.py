@@ -140,7 +140,9 @@ def logout_view(request):
 
 
 
+
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 def search(request):
     query = request.GET.get('q')
@@ -151,9 +153,24 @@ def search(request):
 
     results = Part.objects.all().order_by('-created_at')
 
-    # Применение фильтров
+    # Если запрос существует, обрабатываем его
     if query:
-        results = results.filter(device__icontains=query)
+        query = query.strip()  # Убираем лишние пробелы
+        keywords = query.split()  # Разбиваем строку на слова
+
+        # Создаем пустой Q объект для объединения условий
+        q_objects = Q()
+        for keyword in keywords:
+            # Объединяем условия с помощью AND
+            q_objects &= (Q(device__icontains=keyword) |
+                          Q(brand__icontains=keyword) |
+                          Q(model__icontains=keyword) |
+                          Q(part_type__icontains=keyword))
+
+        # Применяем фильтрацию
+        results = results.filter(q_objects)
+
+    # Расширенный поиск
     if brand:
         results = results.filter(brand__icontains=brand)
     if model:
@@ -163,7 +180,7 @@ def search(request):
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
-    # Пагинация: 30 запчастей на странице
+    # Пагинация: 30 запчастей на страницу
     paginator = Paginator(results, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

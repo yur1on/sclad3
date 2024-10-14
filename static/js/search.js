@@ -36,27 +36,59 @@ const modelPartTypeMap = {
     'iPhone 13': ['Дисплей', 'Камера'],
 };
 
-document.getElementById('device').addEventListener('input', function() {
-    const device = this.value;
+document.addEventListener('DOMContentLoaded', function() {
+    const deviceInput = document.getElementById('device');
     const brandInput = document.getElementById('brand');
     const modelInput = document.getElementById('model');
     const partTypeInput = document.getElementById('part_type');
 
-    brandInput.value = '';
-    modelInput.value = '';
-    partTypeInput.value = '';
-    document.getElementById('brand-list').innerHTML = '';
-    document.getElementById('model-list').innerHTML = '';
-    document.getElementById('part-type-list').innerHTML = '';
+    // Очищаем значения и списки при изменении устройства
+    deviceInput.addEventListener('input', function() {
+        const selectedDevice = deviceInput.value;
+        brandInput.value = '';
+        modelInput.value = '';
+        partTypeInput.value = '';
+        clearDatalist('brand-list');
+        clearDatalist('model-list');
+        clearDatalist('part-type-list');
 
-    if (deviceBrandMap[device]) {
-        const brandOptions = deviceBrandMap[device].map(brand => `<option value="${brand}">`).join('');
-        document.getElementById('brand-list').innerHTML = brandOptions;
+        if (deviceBrandMap[selectedDevice]) {
+            const brandOptions = deviceBrandMap[selectedDevice].map(brand => `<option value="${brand}">`).join('');
+            document.getElementById('brand-list').innerHTML = brandOptions;
+        }
+    });
+
+    // Очищаем модель и тип запчасти при выборе бренда
+    brandInput.addEventListener('input', function() {
+        const selectedBrand = brandInput.value;
+        const selectedDevice = deviceInput.value;
+
+        modelInput.value = '';
+        partTypeInput.value = '';
+        clearDatalist('model-list');
+        clearDatalist('part-type-list');
+
+        if (brandModelMap[selectedDevice] && brandModelMap[selectedDevice][selectedBrand]) {
+            const modelOptions = brandModelMap[selectedDevice][selectedBrand].map(model => `<option value="${model}">`).join('');
+            document.getElementById('model-list').innerHTML = modelOptions;
+        }
+    });
+
+    // Очищаем тип запчасти при выборе модели
+    modelInput.addEventListener('input', function() {
+        const selectedModel = modelInput.value;
+        if (modelPartTypeMap[selectedModel]) {
+            const partTypeOptions = modelPartTypeMap[selectedModel].map(partType => `<option value="${partType}">`).join('');
+            document.getElementById('part-type-list').innerHTML = partTypeOptions;
+        }
+    });
+
+    function clearDatalist(id) {
+        document.getElementById(id).innerHTML = '';
     }
 });
 
-// Обработчики событий для брендов и моделей...
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     const regionSelect = document.getElementById('id_region');
     const citySelect = document.getElementById('id_city');
 
@@ -102,12 +134,12 @@ document.addEventListener('DOMContentLoaded', function () {
     ]
     };
 
-    regionSelect.addEventListener('change', function () {
+    regionSelect.addEventListener('change', function() {
         const selectedRegion = regionSelect.value;
-        citySelect.innerHTML = '';  // Очищаем предыдущие города
+        citySelect.innerHTML = '';
 
         if (citiesByRegion[selectedRegion]) {
-            citiesByRegion[selectedRegion].forEach(function (city) {
+            citiesByRegion[selectedRegion].forEach(function(city) {
                 const option = document.createElement('option');
                 option.value = city;
                 option.text = city;
@@ -121,3 +153,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
