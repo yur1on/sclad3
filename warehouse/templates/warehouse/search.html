@@ -7,6 +7,23 @@
 
         <!-- Простой поиск -->
         <form method="GET" action="{% url 'search' %}" class="mb-4">
+                                <div class="col-md-4 mb-3">
+                        <label for="region">Область и город</label>
+                        <div class="input-group">
+                            <select id="id_region" name="region" class="form-control">
+                                <option value="">Вся Беларусь</option>
+                                <option value="Минская область">Минская область</option>
+                                <option value="Гомельская область">Гомельская область</option>
+                                <option value="Гродненская область">Гродненская область</option>
+                                <option value="Витебская область">Витебская область</option>
+                                <option value="Брестская область">Брестская область</option>
+                                <option value="Могилёвская область">Могилёвская область</option>
+                            </select>
+                            <select id="id_city" name="city" class="form-control">
+                                <option value="">Все города</option>
+                            </select>
+                        </div>
+                    </div>
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label for="search">Поиск по ключевым словам</label>
@@ -51,23 +68,7 @@
                         <input type="text" name="part_type" id="part_type" class="form-control border-dark" placeholder="Тип запчасти" value="{{ request.GET.part_type }}" list="part-type-list">
                         <datalist id="part-type-list"></datalist>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="region">Область и город</label>
-                        <div class="input-group">
-                            <select id="id_region" name="region" class="form-control">
-                                <option value="">Вся Беларусь</option>
-                                <option value="Минская область">Минская область</option>
-                                <option value="Гомельская область">Гомельская область</option>
-                                <option value="Гродненская область">Гродненская область</option>
-                                <option value="Витебская область">Витебская область</option>
-                                <option value="Брестская область">Брестская область</option>
-                                <option value="Могилёвская область">Могилёвская область</option>
-                            </select>
-                            <select id="id_city" name="city" class="form-control">
-                                <option value="">Все города</option>
-                            </select>
-                        </div>
-                    </div>
+
                     <div class="col-md-2 d-flex align-items-end mb-3">
                         <button type="submit" class="btn btn-dark btn-block text-white">Расширенный поиск</button>
                     </div>
