@@ -93,6 +93,7 @@
                     <th>Цвет</th>
                     <th>Кол-во</th>
                     <th>Цена</th>
+                    <th>Примечание</th> <!-- Новое поле для примечания -->
                     <th>Фото</th>
                     <th>Действия</th>
                 </tr>
@@ -107,6 +108,7 @@
                     <td>{{ part.color|default:"Не указан" }}</td>
                     <td>{{ part.quantity }}</td>
                     <td>{{ part.price }}</td>
+                    <td>{{ part.note|default:"нет примечаний" }}</td> <!-- Отображение примечания -->
                     <td>
                         {% if part.images.all %}
                         <div class="d-flex">

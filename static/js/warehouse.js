@@ -166,6 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${part.color || 'Не указан'}</td>
                 <td>${part.quantity}</td>
                 <td>${part.price}</td>
+                <td>${part.note || "нет примечаний" }</td> <!-- Отображение примечания -->
                 <td>
                     ${part.images.length ? part.images.map(image => `
                         <a href="${image.image_url}" target="_blank">
