@@ -102,15 +102,17 @@
                 });
             }
         }
-        function handlePartTypeChange() {
+         function handlePartTypeChange() {
             var partType = document.getElementById('id_part_type').value;
+
+            // Управление выбором цвета
             var colorGroup = document.getElementById('color-group');
             var colorSelect = document.getElementById('colors');
             colorSelect.innerHTML = '';  // Очистить предыдущие цвета
             var colors = {
                 'Дисплей': ['Черный', 'Белый', 'Серый', 'Синий'],
                 'Задняя крышка': ['Черный', 'Белый', 'Красный', 'Зеленый'],
-                'Шлейф с отпечатком пальца': ['Черный', 'Белый', 'Серый', 'Синий', 'Золото'],
+                'Шлейф с отпечатком пальца': ['Черный', 'Белый', 'Серый', 'Синий', 'Золото']
             };
             if (colors[partType]) {
                 colorGroup.style.display = 'block'; // Показать поле выбора цвета
@@ -122,5 +124,24 @@
                 });
             } else {
                 colorGroup.style.display = 'none'; // Скрыть поле выбора цвета
+            }
+
+            // Управление выбором состояния запчасти
+            var conditionSelect = document.getElementById('conditions');
+            conditionSelect.innerHTML = '';  // Очистить предыдущие состояния
+            var conditions = {
+                'Дисплей': ['б/у.', 'новое копия', 'новое оригинал'],
+                'Аккумулятор': ['б/у.', 'новый оригинал', 'новый копия'],
+                'Задняя крышка': ['б/у.', 'новое копия', 'новое оригинал'],
+                'Шлейф дисплея': ['б/у.', 'новое копия', 'новое оригинал']
+                // Добавьте другие типы запчастей и состояния по необходимости
+            };
+            if (conditions[partType]) {
+                conditions[partType].forEach(function(condition) {
+                    var option = document.createElement('option');
+                    option.value = condition;
+                    option.text = condition;
+                    conditionSelect.appendChild(option);
+                });
             }
         }

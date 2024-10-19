@@ -8,7 +8,7 @@ class PartForm(forms.ModelForm):
 
     class Meta:
         model = Part
-        fields = ['device', 'brand', 'model', 'part_type', 'color', 'quantity', 'price', 'note']  # Добавляем поле note
+        fields = ['device', 'brand', 'model', 'part_type', 'condition', 'color', 'quantity', 'price', 'note']
 
 class PartImageForm(forms.ModelForm):
     class Meta:

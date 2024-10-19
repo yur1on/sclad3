@@ -34,12 +34,25 @@
             <datalist id="models"></datalist>
         </div>
 
-        <!-- Тип запчасти -->
-        <div class="form-group mb-3">
-            <label for="part_type" class="form-label">Тип запчасти</label>
-            <input list="part_types" id="id_part_type" name="part_type" class="form-control" placeholder="Введите тип запчасти" onchange="handlePartTypeChange();" required>
-            <datalist id="part_types"></datalist>
-        </div>
+<!-- Тип запчасти -->
+<div class="form-group mb-3">
+    <label for="part_type" class="form-label">Тип запчасти</label>
+    <input list="part_types" id="id_part_type" name="part_type" class="form-control" placeholder="Введите тип запчасти" onchange="handlePartTypeChange();" required>
+    <datalist id="part_types"></datalist>
+</div>
+
+<!-- Состояние -->
+<div class="form-group mb-3">
+    <label for="condition" class="form-label">Состояние</label>
+    <input list="conditions" id="id_condition" name="condition" class="form-control" placeholder="Выберите состояние" required>
+    <datalist id="conditions">
+        <option value="б/у.">
+        <option value="новое копия">
+        <option value="новое оригинал">
+        <!-- Добавьте другие варианты по необходимости -->
+    </datalist>
+</div>
+
 
         <!-- Цвет (показывается только при необходимости) -->
         <div class="form-group mb-3" id="color-group" style="display: none;">

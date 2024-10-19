@@ -26,15 +26,21 @@
                     {% endif %}
                 </td>
 
-                <!-- Столбец с описанием -->
                 <td>
-                    <strong>{{ result.part_type }}</strong>
-                    {% if result.note %}
-                        ({{ result.note }})
+                    <strong style="font-size: 16px; color: #333;">{{ result.part_type }}</strong>
+                    {% if result.condition %}
+                        (Состояние {{ result.condition }})
                     {% endif %}
                     <br>
-                    Для устройства: {{ result.device }} {{ result.brand }} {{ result.model }}
+                    <span>Для устройства: {{ result.device }} {{ result.brand }} {{ result.model }}</span>
+                    <br>
+                    {% if result.note %}
+                        <span style="color: rgba(0, 0, 0, 0.6);">Примечание: {{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>
+                    {% endif %}
                 </td>
+
+
+
 
                 <!-- Столбец с ценой -->
                 <td>{{ result.price|floatformat:0 }} руб.</td>

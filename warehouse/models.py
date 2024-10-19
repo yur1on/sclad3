@@ -10,10 +10,11 @@ class Part(models.Model):
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     part_type = models.CharField(max_length=100)
+    condition = models.CharField(max_length=50, blank=True, null=True)  # Новое поле для состояния
     color = models.CharField(max_length=50, blank=True, null=True)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    note = models.TextField(blank=True, null=True)  # Поле для примечания
+    note = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
