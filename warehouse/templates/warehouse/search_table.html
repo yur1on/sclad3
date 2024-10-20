@@ -13,17 +13,20 @@
             <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
                 <!-- Столбец с изображением -->
                 <td>
-                    {% if result.images.all %}
-                        <a href="{{ result.images.first.image.url }}" target="_blank">
-                            <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
-                        </a>
-                        {% if result.images.count > 1 %}
-                            <br>
-                            <small>+{{ result.images.count|add:"-1" }} еще</small>
+                    <div class="image-container">
+                        {% if result.images.all %}
+                            <a href="{{ result.images.first.image.url }}" target="_blank">
+                                <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail" style="max-width: 100%; max-height: 100%;">
+                            </a>
+                            {% if result.images.count > 1 %}
+                                <div style="margin-top: 5px;">
+                                    <small>+{{ result.images.count|add:"-1" }} еще</small>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <span class="no-image-text">Нет изображения</span>
                         {% endif %}
-                    {% else %}
-                        Нет изображения
-                    {% endif %}
+                    </div>
                 </td>
 
                 <td>
@@ -39,9 +42,6 @@
                     {% endif %}
                 </td>
 
-
-
-
                 <!-- Столбец с ценой -->
                 <td>{{ result.price|floatformat:0 }} руб.</td>
 
@@ -52,6 +52,7 @@
         </tbody>
     </table>
 </div>
+
 
 <!-- Пагинация -->
 <nav aria-label="Page navigation">
