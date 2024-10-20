@@ -90,25 +90,36 @@
                     <th>Бренд</th>
                     <th>Модель</th>
                     <th>Тип запчасти</th>
-                    <th>Цвет</th>
-                    <th>Кол-во</th>
-                    <th>Цена</th>
-                    <th>Примечание</th> <!-- Новое поле для примечания -->
+                    <th>Примечание</th>
                     <th>Фото</th>
                     <th>Действия</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="parts-table-body">
                 {% for part in page_obj %}
                 <tr>
                     <td>{{ part.device }}</td>
                     <td>{{ part.brand }}</td>
                     <td>{{ part.model }}</td>
                     <td>{{ part.part_type }}</td>
-                    <td>{{ part.color|default:"Не указан" }}</td>
-                    <td>{{ part.quantity }}</td>
-                    <td>{{ part.price }}</td>
-                    <td>{{ part.note|default:"нет примечаний" }}</td> <!-- Отображение примечания -->
+                    <td>
+                        <div>
+                            <strong>Цвет:</strong> {{ part.color|default:"Не указан" }},
+                            <strong>Цена:</strong> {{ part.price }},
+                            <strong>Количество:</strong> {{ part.quantity }}
+                        </div>
+                        <div>
+                            {% if part.condition %}
+                                <strong>Состояние:</strong> {{ part.condition }}
+                            {% endif %}
+                            {% if part.note %}
+                                <strong>, Примечание:</strong>{{ part.note }}
+                            {% else %}
+                                <strong>, Примечание:</strong><span> Нет примечаний</span>
+                            {% endif %}
+
+                        </div>
+                    </td>
                     <td>
                         {% if part.images.all %}
                         <div class="d-flex">
@@ -129,7 +140,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9" class="text-center">Запчасти не найдены</td>
+                    <td colspan="7" class="text-center">Запчасти не найдены</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -151,7 +162,6 @@
                     </a>
                 </li>
             {% endif %}
-
             {% for num in page_obj.paginator.page_range %}
                 {% if page_obj.number == num %}
                     <li class="page-item active"><span class="page-link">{{ num }}</span></li>
@@ -159,7 +169,6 @@
                     <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
                 {% endif %}
             {% endfor %}
-
             {% if page_obj.has_next %}
                 <li class="page-item">
                     <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
@@ -174,7 +183,6 @@
             {% endif %}
         </ul>
     </nav>
-
 </div>
 
 <script src="{% static 'js/warehouse.js' %}"></script>

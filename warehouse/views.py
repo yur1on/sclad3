@@ -487,6 +487,10 @@ def get_part_types(request):
     return JsonResponse({'part_types': list(part_types)})
 
 
+from django.http import JsonResponse
+from .models import Part
+from django.contrib.auth.decorators import login_required
+
 @login_required
 def get_parts(request):
     device = request.GET.get('device')
@@ -506,7 +510,7 @@ def get_parts(request):
     if part_type:
         parts = parts.filter(part_type=part_type)
 
-    # Формируем данные для ответа
+    # Формируем данные для ответа с добавлением note и condition
     parts_data = [{
         'id': part.id,
         'device': part.device,
@@ -516,6 +520,8 @@ def get_parts(request):
         'color': part.color,
         'quantity': part.quantity,
         'price': part.price,
+        'note': part.note,  # Добавлено поле note
+        'condition': part.condition,  # Добавлено поле condition
         'images': [{'image_url': image.image.url} for image in part.images.all()]
     } for part in parts]
 

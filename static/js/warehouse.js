@@ -152,34 +152,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Функция для отображения запчастей в таблице
-    function displayParts(parts) {
-        const tbody = document.querySelector('#parts-table tbody');
-        tbody.innerHTML = '';  // Очищаем старые данные таблицы
+function displayParts(parts) {
+    const tbody = document.querySelector('#parts-table-body');
+    tbody.innerHTML = ''; // Очищаем старые данные таблицы
 
-        parts.forEach(part => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${part.device}</td>
-                <td>${part.brand}</td>
-                <td>${part.model}</td>
-                <td>${part.part_type}</td>
-                <td>${part.color || 'Не указан'}</td>
-                <td>${part.quantity}</td>
-                <td>${part.price}</td>
-                <td>${part.note || "нет примечаний" }</td> <!-- Отображение примечания -->
-                <td>
-                    ${part.images.length ? part.images.map(image => `
-                        <a href="${image.image_url}" target="_blank">
-                            <img src="${image.image_url}" alt="${part.model}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
-                        </a>
-                    `).join('') : 'Нет фото'}
-                </td>
-                <td>
-                    <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm mb-1">✏️</a>
-                    <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm">🗑️</a>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
+    parts.forEach(part => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${part.device}</td>
+            <td>${part.brand}</td>
+            <td>${part.model}</td>
+            <td>${part.part_type}</td>
+            <td>
+                <div>
+                    <strong>Цвет:</strong> ${part.color || 'Не указан'} |
+                    <strong>Цена:</strong> ${part.price} |
+                    <strong>Количество:</strong> ${part.quantity}
+                </div>
+                <div>
+
+                    ${part.condition ? `<strong>Состояние:</strong> ${part.condition}` : ''}
+                    ${part.note ? `<strong>, Примечание:</strong> ${part.note}</span>` : '<strong>, Примечание:</strong><span> Нет примечаний</span>'}
+                </div>
+            </td>
+            <td>
+                ${part.images.length ? `
+                    <div class="d-flex">
+                        ${part.images.map(image => `
+                            <a href="${image.image_url}" target="_blank" class="img-link">
+                                <img src="${image.image_url}" alt="${part.model}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
+                            </a>
+                        `).join('')}
+                    </div>
+                ` : 'Нет фото'}
+            </td>
+            <td>
+                <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm mb-1">✏️</a>
+                <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm">🗑️</a>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
 });
