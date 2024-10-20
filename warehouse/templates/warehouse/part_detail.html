@@ -121,6 +121,7 @@
                     </table>
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
+                        <a href="{% url 'user_parts' part.user.id %}" class="btn btn-outline-info">Запчасти пользователя</a>
                         <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
                         <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary ml-2">Посмотреть отзывы</a>
                     </div>

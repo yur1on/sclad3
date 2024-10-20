@@ -383,6 +383,10 @@ from django.shortcuts import render, get_object_or_404
 from .models import Part
 
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, render
+from .models import Part
+
 @login_required
 def part_detail(request, part_id):
     part = get_object_or_404(Part, id=part_id)
@@ -395,6 +399,17 @@ def part_detail(request, part_id):
         'is_bookmarked': is_bookmarked
     })
 
+
+
+@login_required
+def user_parts(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    parts = Part.objects.filter(user=user)  # Получаем все запчасти этого пользователя
+
+    return render(request, 'warehouse/user_parts.html', {
+        'user': user,
+        'parts': parts
+    })
 
 def add_part_success(request):
     return render(request, 'warehouse/add_part_success.html')

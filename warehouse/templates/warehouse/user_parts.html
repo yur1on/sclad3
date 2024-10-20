@@ -1,0 +1,42 @@
+{% extends 'warehouse/base.html' %}
+
+{% block title %}Запчасти пользователя{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Запчасти пользователя {{ user.username }}</h2>
+
+    {% if parts %}
+        <table class="table table-bordered table-striped">
+            <thead class="thead-light">
+                <tr>
+                    <th>Устройство</th>
+                    <th>Бренд</th>
+                    <th>Модель</th>
+                    <th>Тип запчасти</th>
+                    <th>Цвет</th>
+                    <th>Количество</th>
+                    <th>Цена</th>
+                    <th>Детали</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for part in parts %}
+                    <tr>
+                        <td>{{ part.device }}</td>
+                        <td>{{ part.brand }}</td>
+                        <td>{{ part.model }}</td>
+                        <td>{{ part.part_type }}</td>
+                        <td>{{ part.color }}</td>
+                        <td>{{ part.quantity }}</td>
+                        <td>{{ part.price }}</td>
+                        <td><a href="{% url 'part_detail' part.id %}" class="btn btn-info btn-sm">Подробнее</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>У пользователя нет добавленных запчастей.</p>
+    {% endif %}
+</div>
+{% endblock %}

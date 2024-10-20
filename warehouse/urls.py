@@ -26,8 +26,10 @@ urlpatterns = [
     path('get-parts/', views.get_parts, name='get_parts'),
     path('import-excel/', import_excel, name='import_parts'),
     path('', views.base_view, name='home'),
+    path('user/<int:user_id>/parts/', views.user_parts, name='user_parts'),
 
 ]
+
 
 
 
