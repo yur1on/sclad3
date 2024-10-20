@@ -130,6 +130,22 @@
     </div>
 </div>
 
+<!-- Модальное окно для просмотра изображений -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <img id="modalImage" src="" class="img-fluid" alt="Изображение запчасти">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="changeImage(-1)">Предыдущее</button>
+                <button type="button" class="btn btn-secondary" onclick="changeImage(1)">Следующее</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     let currentImageIndex = 0;
     const imageUrls = [
