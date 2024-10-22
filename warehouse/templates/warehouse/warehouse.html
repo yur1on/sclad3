@@ -14,47 +14,47 @@
         </div>
     </div>
 
-    <!-- Форма поиска -->
-    <div class="mb-4">
-        <form method="get" class="row g-3">
-            <div class="col-md-3">
-                <label for="device" class="form-label">Устройство</label>
-                <input type="text" list="devices" name="q" id="device" class="form-control" placeholder="Устройство" value="{{ query|default_if_none:'' }}">
-                <datalist id="devices">
-                    <option value="Телефон">
-                    <option value="Планшет">
-                    <option value="Ноутбук">
-                    <option value="Смарт-часы">
-                </datalist>
-            </div>
+<!--    &lt;!&ndash; Форма поиска &ndash;&gt;-->
+<!--    <div class="mb-4">-->
+<!--        <form method="get" class="row g-3">-->
+<!--            <div class="col-md-3">-->
+<!--                <label for="device" class="form-label">Устройство</label>-->
+<!--                <input type="text" list="devices" name="q" id="device" class="form-control" placeholder="Устройство" value="{{ query|default_if_none:'' }}">-->
+<!--                <datalist id="devices">-->
+<!--                    <option value="Телефон">-->
+<!--                    <option value="Планшет">-->
+<!--                    <option value="Ноутбук">-->
+<!--                    <option value="Смарт-часы">-->
+<!--                </datalist>-->
+<!--            </div>-->
 
-            <div class="col-md-2">
-                <label for="brand" class="form-label">Бренд</label>
-                <input list="brands" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ brand|default_if_none:'' }}">
-                <datalist id="brands"></datalist>
-            </div>
+<!--            <div class="col-md-2">-->
+<!--                <label for="brand" class="form-label">Бренд</label>-->
+<!--                <input list="brands" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ brand|default_if_none:'' }}">-->
+<!--                <datalist id="brands"></datalist>-->
+<!--            </div>-->
 
-            <div class="col-md-2">
-                <label for="model" class="form-label">Модель</label>
-                <input list="models" name="model" id="model" class="form-control" placeholder="Модель" value="{{ model|default_if_none:'' }}">
-                <datalist id="models"></datalist>
-            </div>
+<!--            <div class="col-md-2">-->
+<!--                <label for="model" class="form-label">Модель</label>-->
+<!--                <input list="models" name="model" id="model" class="form-control" placeholder="Модель" value="{{ model|default_if_none:'' }}">-->
+<!--                <datalist id="models"></datalist>-->
+<!--            </div>-->
 
-            <div class="col-md-3">
-                <label for="part_type" class="form-label">Тип запчасти</label>
-                <input list="part_types" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ part_type|default_if_none:'' }}">
-                <datalist id="part_types"></datalist>
-            </div>
+<!--            <div class="col-md-3">-->
+<!--                <label for="part_type" class="form-label">Тип запчасти</label>-->
+<!--                <input list="part_types" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ part_type|default_if_none:'' }}">-->
+<!--                <datalist id="part_types"></datalist>-->
+<!--            </div>-->
 
-            <div class="col-md-2 d-grid align-items-end">
-                <button type="submit" class="btn btn-primary">Поиск</button>
-            </div>
-        </form>
-    </div>
+<!--            <div class="col-md-2 d-grid align-items-end">-->
+<!--                <button type="submit" class="btn btn-primary">Поиск</button>-->
+<!--            </div>-->
+<!--        </form>-->
+<!--    </div>-->
 
     <!-- Контейнеры для кнопочного поиска -->
     <div id="device-buttons-container" class="mb-4">
-        <h4 class="small-header">Устройство</h4>
+        <h4 class="small-header">Устройства на складе</h4>
         <div id="device-buttons" class="mb-3">
             {% for device in devices %}
                 <button class="btn btn-outline-primary btn-compact" onclick="filterByDevice('{{ device }}')">{{ device }}</button>
@@ -81,71 +81,101 @@
         <div id="part-type-buttons" class="mb-3"></div>
     </div>
 
-    <!-- Таблица запчастей -->
-    <div id="parts-table-container" class="table-responsive">
-        <table id="parts-table" class="table table-striped table-hover table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th>Устройство</th>
-                    <th>Бренд</th>
-                    <th>Модель</th>
-                    <th>Тип запчасти</th>
-                    <th>Примечание</th>
-                    <th>Фото</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody id="parts-table-body">
-                {% for part in page_obj %}
-                <tr>
-                    <td>{{ part.device }}</td>
-                    <td>{{ part.brand }}</td>
-                    <td>{{ part.model }}</td>
-                    <td>{{ part.part_type }}</td>
-                    <td>
-                        <div>
-                            <strong>Цвет:</strong> {{ part.color|default:"Не указан" }},
-                            <strong>Цена:</strong> {{ part.price }},
-                            <strong>Количество:</strong> {{ part.quantity }}
-                        </div>
-                        <div>
-                            {% if part.condition %}
-                                <strong>Состояние:</strong> {{ part.condition }}
-                            {% endif %}
-                            {% if part.note %}
-                                <strong>, Примечание:</strong>{{ part.note }}
-                            {% else %}
-                                <strong>, Примечание:</strong><span> Нет примечаний</span>
-                            {% endif %}
-
-                        </div>
-                    </td>
-                    <td>
-                        {% if part.images.all %}
-                        <div class="d-flex">
-                            {% for image in part.images.all %}
-                            <a href="{{ image.image.url }}" target="_blank" class="img-link">
-                                <img src="{{ image.image.url }}" alt="{{ part.model }}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
-                            </a>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        Нет фото
+<!-- Таблица запчастей -->
+<div id="parts-table-container" class="table-responsive">
+    <table id="parts-table" class="table table-striped table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Устройство</th>
+                <th>Бренд</th>
+                <th>Модель</th>
+                <th>Тип запчасти</th>
+                <th>Прочее</th>
+                <th>Фото</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="parts-table-body">
+            {% for part in page_obj %}
+            <tr>
+                <td>{{ part.device }}</td>
+                <td>{{ part.brand }}</td>
+                <td>{{ part.model }}</td>
+                <td>{{ part.part_type }}</td>
+                <td>
+                    <div>
+                        <strong>Цвет:</strong> {{ part.color|default:"Не указан" }},
+                        <strong>Цена:</strong> {{ part.price }},
+                        <strong>Количество:</strong> {{ part.quantity }}
+                    </div>
+                    <div>
+                        {% if part.condition %}
+                            <strong>Состояние:</strong> {{ part.condition }}
                         {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Редактировать">✏️</a>
-                        <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Удалить">🗑️</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center">Запчасти не найдены</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        {% if part.note %}
+                            <strong>, Примечание:</strong>{{ part.note }}
+                        {% else %}
+                            <strong>, Примечание:</strong><span> Нет примечаний</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    {% if part.images.all %}
+                    <!-- Отображаем только первую фотографию -->
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal-{{ part.id }}">
+                        <img src="{{ part.images.all.0.image.url }}" alt="{{ part.model }}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
+                    </a>
+                    {% else %}
+                    Нет фото
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Редактировать">✏️</a>
+                    <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Удалить">🗑️</a>
+                </td>
+            </tr>
+
+            <!-- Модальное окно с каруселью изображений -->
+            <div class="modal fade" id="imageModal-{{ part.id }}" tabindex="-1" aria-labelledby="imageModalLabel-{{ part.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <!-- Карусель -->
+                            <div id="carouselPartImages-{{ part.id }}" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    {% for image in part.images.all %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <!-- Увеличиваем размер изображения для модального окна -->
+                                        <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ part.model }}" style="max-height: 500px; object-fit: contain;">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <!-- Навигация влево/вправо -->
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselPartImages-{{ part.id }}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: black; padding: 10px;"></span>
+                                    <span class="visually-hidden">Предыдущий</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselPartImages-{{ part.id }}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: black; padding: 10px;"></span>
+                                    <span class="visually-hidden">Следующий</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">Запчасти не найдены</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 
     <!-- Пагинация -->
     <nav aria-label="Page navigation">
