@@ -62,8 +62,10 @@
                             <td>{{ part.part_type }}</td>
                         </tr>
                         <tr>
-                            <th>Цвет</th>
-                            <td>{{ part.color }}</td>
+                            {% if part.color %}
+                                <th>Цвет</th>
+                                <td>{{ part.color }}</td>
+                            {% endif %}
                         </tr>
                         <tr>
                             <th>Количество</th>
@@ -71,7 +73,12 @@
                         </tr>
                         <tr>
                             <th>Цена</th>
-                            <td>{{ part.price }}</td>
+                            <td>{{ part.price }} бел. руб.</td>
+                        </tr>
+
+                        <tr>
+                        <th>Дата добавления</th>
+                            <td>{{ part.created_at|date:"d.m.Y" }}</td>
                         </tr>
                         <!-- Добавлено примечание -->
                         <tr>
@@ -102,6 +109,11 @@
                             <th>Имя пользователя</th>
                             <td>{{ part.user.username }}</td>
                         </tr>
+                        <tr>
+                        <th>Зарегистрирован на сайте </th>
+                             <td>{{ part.user.date_joined|date:"d.m.Y" }}</td>
+                        </tr>
+
                         <tr>
                             <th>Название мастерской</th>
                             <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td>
