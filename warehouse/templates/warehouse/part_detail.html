@@ -1,145 +1,187 @@
 {% extends 'warehouse/base.html' %}
+{% load device_filters %}
+
 {% block title %}Информация о запчасти{% endblock %}
+
 {% block content %}
+<style>
+    /* Основной стиль для карточек */
+    .card {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Детали запчасти</h5>
-                </div>
-                <div class="card-body">
-                    {% if part.images.all %}
-                        <div class="text-center mb-3">
-                            <!-- Основное изображение -->
-                            <div id="partImagesCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    {% for image in part.images.all %}
-                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                            <img src="{{ image.image.url }}" alt="Изображение запчасти" class="img-fluid" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="openModal({{ forloop.counter0 }})">
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                <!-- Навигация влево/вправо -->
-                                <button class="carousel-control-prev" type="button" data-bs-target="#partImagesCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#partImagesCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
-                        </div>
+    /* Таблицы и рамки с равномерными отступами */
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+    }
 
-                        <!-- Миниатюры -->
-                        <div class="d-flex justify-content-center">
-                            {% for image in part.images.all %}
-                                <img src="{{ image.image.url }}" alt="Изображение запчасти" class="img-thumbnail mx-1" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="openModal({{ forloop.counter0 }})">
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p>Нет изображений для этой запчасти.</p>
+    /* Общий стиль для всех кнопок */
+    .btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Эффект при наведении на кнопку */
+    .btn:hover {
+        background-color: #0056b3;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Карточки кнопок с выравниванием */
+    .action-buttons .btn {
+        margin: 10px;
+    }
+
+    /* Стили для карусели изображений */
+    .carousel-inner img {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Миниатюры изображений */
+    .img-thumbnail {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: transform 0.2s ease;
+    }
+
+    .img-thumbnail:hover {
+        transform: scale(1.1);
+    }
+
+    /* Модальные окна */
+    .modal-content {
+        border-radius: 10px;
+    }
+</style>
+
+<!-- В верхней части тип запчасти, устройство, бренд и модель -->
+
+<div class="row mb-3">
+    <div class="card-body text-left">
+        <h4><strong>{{ part.part_type }}</strong> для {{ part.device|device_declension }} {{ part.brand }} {{ part.model }}</h4>
+    </div>
+</div>
+
+
+<!-- Блок с фото справа и описанием слева -->
+<div class="row">
+    <!-- Описание и информация о пользователе -->
+    <div class="col-md-6">
+        <table class="table table-striped">
+            <tr>
+                <th>Количество</th>
+                <td>{{ part.quantity }}</td>
+            </tr>
+            <tr>
+                <th>Цена</th>
+                <td>{{ part.price }} бел. руб.</td>
+            </tr>
+                    {% if part.color %}
+                        <tr>
+                            <th>Цвет</th>
+                            <td>{{ part.color }}</td>
+                        </tr>
                     {% endif %}
 
-                    <!-- Таблица с деталями запчасти -->
-                    <table class="table table-striped mt-3">
-                        <tr>
-                            <th>Устройство</th>
-                            <td>{{ part.device }}</td>
-                        </tr>
-                        <tr>
-                            <th>Бренд</th>
-                            <td>{{ part.brand }}</td>
-                        </tr>
-                        <tr>
-                            <th>Модель</th>
-                            <td>{{ part.model }}</td>
-                        </tr>
-                        <tr>
-                            <th>Тип запчасти</th>
-                            <td>{{ part.part_type }}</td>
-                        </tr>
-                        <tr>
-                            {% if part.color %}
-                                <th>Цвет</th>
-                                <td>{{ part.color }}</td>
-                            {% endif %}
-                        </tr>
-                        <tr>
-                            <th>Количество</th>
-                            <td>{{ part.quantity }}</td>
-                        </tr>
-                        <tr>
-                            <th>Цена</th>
-                            <td>{{ part.price }} бел. руб.</td>
-                        </tr>
+            <tr>
+                <th>Дата добавления</th>
+                <td>{{ part.created_at|date:"d.m.Y" }}</td>
+            </tr>
+            <tr>
+                <th>Примечание</th>
+                <td>{{ part.note|default:"Нет примечаний" }}</td>
+            </tr>
+        </table>
 
-                        <tr>
-                        <th>Дата добавления</th>
-                            <td>{{ part.created_at|date:"d.m.Y" }}</td>
-                        </tr>
-                        <!-- Добавлено примечание -->
-                        <tr>
-                            <th>Примечание</th>
-                            <td>{{ part.note|default:"Нет примечаний" }}</td>
-                        </tr>
-                    </table>
-                    <a href="{% url 'toggle_bookmark' part.id %}" class="btn {% if is_bookmarked %}btn-danger{% else %}btn-outline-success{% endif %}">
-                        {% if is_bookmarked %}
-                            Удалить из закладок
-                        {% else %}
-                            Добавить в закладки
-                        {% endif %}
-                    </a>
-                </div>
+        <!-- Карточка с кнопками действий -->
+        <div class="card action-buttons">
+            <div class="card-body text-center">
+                <a href="{% url 'toggle_bookmark' part.id %}" class="btn">
+                    {% if is_bookmarked %}Удалить из закладок{% else %}Добавить в закладки{% endif %}
+                </a>
+                <a href="{% url 'user_parts' part.user.id %}" class="btn btn-secondary">Запчасти пользователя</a>
             </div>
         </div>
 
-        <!-- Информация о пользователе -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Информация о пользователе</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-striped">
-                        <tr>
-                            <th>Имя пользователя</th>
-                            <td>{{ part.user.username }}</td>
-                        </tr>
-                        <tr>
-                        <th>Зарегистрирован на сайте </th>
-                             <td>{{ part.user.date_joined|date:"d.m.Y" }}</td>
-                        </tr>
-
-                        <tr>
-                            <th>Название мастерской</th>
-                            <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td>
-                        </tr>
-                        <tr>
-                            <th>Средний рейтинг</th>
-                            <td>{{ part.user.profile.average_rating }} / 5</td>
-                        </tr>
-                        <tr>
-                            <th>Город</th>
-                            <td>{{ part.user.profile.city }}</td>
-                        </tr>
-                        <tr>
-                            <th>Телефон</th>
-                            <td>{{ part.user.profile.phone }}</td>
-                        </tr>
-                    </table>
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <a href="{% url 'user_parts' part.user.id %}" class="btn btn-outline-info">Запчасти пользователя</a>
-                        <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
-                        <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary ml-2">Посмотреть отзывы</a>
-                    </div>
-                </div>
+<!-- Информация о пользователе -->
+        <div class="card mt-3">
+            <div class="card-header bg-success text-white">Информация о пользователе</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tr>
+                        <th>Имя пользователя</th>
+                        <td>{{ part.user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Мастерская</th>
+                        <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Город</th>
+                        <td>{{ part.user.profile.city }}</td>
+                    </tr>
+                    <tr>
+                        <th>Телефон</th>
+                        <td>{{ part.user.profile.phone }}</td>
+                    </tr>
+                    <tr>
+                        <th>Средний рейтинг</th>
+                        <td>{{ part.user.profile.average_rating }} / 5</td>
+                    </tr>
+                    <tr>
+                        <th>Дата регистрации</th>
+                        <td>{{ part.user.date_joined|date:"d.m.Y" }}</td>
+                    </tr>
+                </table>
             </div>
         </div>
+
+    </div>
+
+    <!-- Фото запчасти -->
+    <div class="col-md-6 text-center">
+        {% if part.images.all %}
+            <!-- Основное изображение с каруселью -->
+            <div id="partImagesCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for image in part.images.all %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img id="mainImage" src="{{ image.image.url }}" alt="Изображение запчасти" class="img-fluid" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="openModal({{ forloop.counter0 }})">
+                        </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#partImagesCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#partImagesCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+
+            <!-- Миниатюры изображений -->
+            <div class="row mt-3">
+                <div class="col-12 d-flex justify-content-center">
+                    {% for image in part.images.all %}
+                        <img src="{{ image.image.url }}" alt="Миниатюра" class="img-thumbnail mx-1" style="width: 100px; height: 100px;" onclick="selectThumbnail({{ forloop.counter0 }})">
+                    {% endfor %}
+                </div>
+            </div>
+
+        {% else %}
+            <p>Нет изображений</p>
+        {% endif %}
     </div>
 </div>
 
@@ -154,6 +196,17 @@
                 <button type="button" class="btn btn-secondary" onclick="changeImage(-1)">Предыдущее</button>
                 <button type="button" class="btn btn-secondary" onclick="changeImage(1)">Следующее</button>
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
+                <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary">Посмотреть отзывы</a>
             </div>
         </div>
     </div>
@@ -180,6 +233,10 @@
             currentImageIndex = 0;
         }
         document.getElementById('modalImage').src = imageUrls[currentImageIndex];
+    }
+
+    function selectThumbnail(index) {
+        document.getElementById('mainImage').src = imageUrls[index];
     }
 </script>
 
