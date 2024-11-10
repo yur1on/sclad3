@@ -2,22 +2,88 @@
 {% block title %}Редактировать запчасть{% endblock %}
 {% block content %}
 {% load static %}
+
 <style>
-    .image-item {
-        display: inline-block;
-        margin: 5px;
-    }
-    .image-item img {
-        max-width: 100px;
-    }
-    .add-image {
-        display: inline-block;
-        margin: 5px;
-        border: 1px dashed #ccc;
-        padding: 10px;
-        text-align: center;
-        cursor: pointer;
-    }
+/* Контейнер для изображений */
+.image-container {
+    display: flex;
+    flex-wrap: wrap; /* Перенос на следующую строку при нехватке места */
+    gap: 10px; /* Отступы между изображениями */
+    align-items: flex-start;
+    width: 100%; /* Ширина контейнера */
+}
+
+/* Элемент внутри контейнера */
+.image-item {
+    display: flex;
+    flex-direction: column; /* Кнопка будет под фото */
+    align-items: center;
+    width: 80px; /* Фиксированная ширина блока для каждого изображения */
+}
+
+/* Изображения внутри контейнера */
+.image-item img {
+    width: 100px; /* Фиксированная ширина изображения */
+    height: 100px; /* Фиксированная высота изображения */
+
+    border-radius: 10px; /* Скругление углов */
+}
+
+/* Кнопка под изображением */
+.image-item .delete-image {
+    margin-top: 5px;
+}
+
+.image-edit-section {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+
+.image-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100px;
+    text-align: center;
+}
+
+.image-item img {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+}
+
+.add-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    width: 80px;
+    height: 100px;
+    cursor: pointer;
+}
+
+.add-image .add-icon {
+    font-size: 24px;
+    color: #555;
+    font-weight: bold;
+}
+
+.add-image:hover {
+    border-color: #aaa;
+}
+
+
 </style>
 
 <div class="container">
@@ -25,6 +91,8 @@
 
     <form method="post" enctype="multipart/form-data" id="edit-part-form">
         {% csrf_token %}
+
+        <!-- Информация о запчасти -->
         <div class="form-group">
             <label for="device">Устройство</label>
             <input type="text" name="device" id="device" class="form-control" value="{{ part.device }}" required>
@@ -60,25 +128,34 @@
             <input type="number" name="price" id="price" class="form-control" value="{{ part.price }}" required>
         </div>
 
-        <div class="form-group">
-            <label>Изображения (можно загрузить до 5)</label>
+         <!-- Секция редактирования изображений -->
+        <div class="form-group image-edit-section p-3 mt-4">
+            <h4>Изображения (до 5)</h4>
             <div class="image-container" id="image-container">
                 {% for image in part.images.all %}
                     <div class="image-item" data-image-id="{{ image.id }}">
                         <img src="{{ image.image.url }}" alt="Image">
-                        <button type="button" class="btn btn-danger btn-sm delete-image" data-image-id="{{ image.id }}">
-                            Удалить
-                        </button>
+                        <button type="button" class="btn btn-sm btn-danger delete-image" data-image-id="{{ image.id }}">Удалить</button>
                     </div>
                 {% endfor %}
-                <!-- Кнопка добавления фото будет динамически генерироваться через JS -->
+                <!-- Кнопка добавления изображения -->
+                {% if part.images.count < 5 %}
+                    <div class="image-item add-image" onclick="document.getElementById('new-image-input').click();">
+                        <input type="file" id="new-image-input" class="d-none" onchange="uploadImage(this);" accept="image/*">
+                        <div class="add-icon">+</div>
+                        <span>Добавить фото</span>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-        <a href="{% url 'warehouse' %}" class="btn btn-secondary">Назад</a>
+        <!-- Кнопки сохранения и отмены -->
+        <button type="submit" class="btn btn-primary mt-3">Сохранить изменения</button>
+        <a href="{% url 'warehouse' %}" class="btn btn-secondary mt-3">Назад</a>
     </form>
 </div>
+
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

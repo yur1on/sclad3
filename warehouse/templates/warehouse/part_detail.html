@@ -111,13 +111,13 @@
                 <a href="{% url 'toggle_bookmark' part.id %}" class="btn">
                     {% if is_bookmarked %}Удалить из закладок{% else %}Добавить в закладки{% endif %}
                 </a>
-                <a href="{% url 'user_parts' part.user.id %}" class="btn btn-secondary">Запчасти пользователя</a>
+                <a href="{% url 'user_parts' part.user.id %}" class="btn btn-secondary">Все запчасти продавца</a>
             </div>
         </div>
 
 <!-- Информация о пользователе -->
         <div class="card mt-3">
-            <div class="card-header bg-success text-white">Информация о пользователе</div>
+            <div class="card-header bg-success text-white">Информация о продавце</div>
             <div class="card-body">
                 <table class="table table-striped">
                     <tr>
