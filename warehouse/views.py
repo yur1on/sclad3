@@ -1,7 +1,7 @@
 
-from django.http import JsonResponse
+
 from django.contrib.auth import logout
-from django.shortcuts import get_object_or_404
+
 from .models import Part, PartImage
 from .forms import PartForm, PartImageFormSet
 from openpyxl import Workbook
@@ -12,7 +12,7 @@ from django.http import HttpResponse
 import openpyxl
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Part
+
 from django.contrib.auth.decorators import login_required
 
 
@@ -51,14 +51,17 @@ def warehouse_view(request):
     if part_type:
         parts = parts.filter(part_type__icontains=part_type)
 
+    # Упорядочиваем объекты (например, по дате создания или названию устройства)
+    parts = parts.order_by('device', 'brand')  # Замените на подходящие вам поля
+
     # Пагинация: 30 запчастей на странице
-    paginator = Paginator(parts, 30)  # Отображаем 30 запчастей на одной странице
+    paginator = Paginator(parts, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     # Получаем уникальные устройства и бренды для отображения кнопок
-    devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
-    brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct()
+    devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct().order_by()
+    brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct().order_by()
 
     return render(request, 'warehouse/warehouse.html', {
         'page_obj': page_obj,

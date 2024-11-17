@@ -11,51 +11,118 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Подключаем пользовательские стили -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <style>
-        .counter {
-            border: 1px solid #007bff; /* Цвет рамки */
-            border-radius: 7px; /* Скругление углов */
-            padding: 4px; /* Внутренние отступы */
-            margin: 0 8px; /* Отступы между счетчиками */
-            display: flex; /* Используем flexbox для выравнивания иконок и текста */
-            align-items: center; /* Центрируем по вертикали */
-            background-color: #f8f9fa; /* Цвет фона */
-        }
+<style>
+    /* Главный контейнер */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background-color: #ffffff;
+        background-image: url('{% static "images/background.jpg" %}');
+        background-size: cover;
+        background-position: center center;
+    }
 
-        .counter i {
-            font-size: 1rem; /* Размер иконок */
-            margin-right: 8px; /* Отступ между иконкой и текстом */
-            color: #007bff; /* Цвет иконок */
-        }
+    /* Шапка */
+    .header {
+        background-color: #343a40;
+        color: #ffffff;
+        height: 60px; /* Высота шапки */
+        display: flex; /* Используем Flexbox */
+        align-items: center; /* Выравнивание по вертикали */
+        justify-content: space-between; /* Равномерное распределение элементов */
+        padding: 0 20px; /* Отступы слева и справа */
+        position: fixed; /* Фиксация шапки наверху */
+        width: 100%; /* Растягиваем на всю ширину экрана */
+        z-index: 1000; /* Поверх остальных элементов */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень для отделения от контента */
+    }
+    .navbar {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Распределение элементов */
+    }
 
-        .footer .counter-group {
-            display: flex;
-            justify-content: center; /* Центрирование элементов */
-            gap: 20px; /* Отступы между элементами */
-            margin-bottom: 10px; /* Отступ снизу */
-        }
-    </style>
+    .navbar .navbar-brand,
+    .navbar .navbar-nav {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Основной контент растягивается */
+    main {
+        flex-grow: 1;
+    }
+
+    /* Подвал */
+    .footer {
+        background-color: #343a40;
+        color: #fff;
+        padding: 10px 0;
+        text-align: center;
+    }
+
+    .footer .counter {
+        font-size: 1.4rem;
+    }
+
+    .footer .counter span {
+        font-size: 1.6rem;
+    }
+
+    .footer p {
+        margin-top: 10px;
+        font-size: 0.9rem;
+    }
+
+    /* Стили навигации */
+    .navbar-nav .nav-link, .navbar-brand, .navbar-text {
+        color: #ffffff !important;
+    }
+
+    .navbar-nav .nav-link:hover {
+        color: #007bff !important;
+        transform: scale(1.05);
+    }
+
+    /* Стили кнопок */
+    .btn-outline-primary, .btn-outline-secondary {
+        border-radius: 30px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .btn-outline-primary:hover, .btn-outline-secondary:hover {
+        background-color: #007bff !important;
+        color: #fff !important;
+    }
+
+    /* Отступ для контента */
+    .content-padding {
+        padding-top: 80px;
+    }
+</style>
+
 </head>
 <body>
-
     <!-- Шапка сайта -->
-    <header class="header bg-light py-3 mb-4">
+    <header class="header py-3 fixed-top">
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-light">
-                <a class="navbar-brand" href="{% url 'home' %}">Склад</a>
+                <a class="navbar-brand" href="{% url 'home' %}"><i class="fas fa-warehouse"></i> Склад</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         {% if user.is_authenticated %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Профиль</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'warehouse' %}">Мой склад</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}"><i class="fas fa-user"></i> Профиль</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'warehouse' %}"><i class="fas fa-box"></i> Мой склад</a></li>
                         {% endif %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'search' %}">Поиск</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'search' %}"><i class="fas fa-search"></i> Поиск</a></li>
                     </ul>
                     {% if user.is_authenticated %}
-                        <span class="navbar-text ms-3">Привет, {{ user.username }}</span>
+                        <span class="navbar-text ms-3">{{ user.username }}</span>
                         <a class="btn btn-outline-danger ms-2" href="{% url 'logout' %}">Выход</a>
                     {% else %}
                         <a class="btn btn-outline-primary ms-2" href="{% url 'login' %}">Вход</a>
@@ -66,27 +133,36 @@
         </div>
     </header>
 
-    <!-- Основной контент -->
-    <div class="container mt-4">
-        {% block content %}{% endblock %}
-    </div>
+    <!-- Основной контент с отступом сверху -->
+    <main class="content-padding">
+        <div class="container mt-4">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
 
-    <!-- Нижний колонтитул -->
-    <footer class="footer bg-dark text-white py-4 mt-5">
-        <div class="container">
-            <div class="counter-group">
+<!-- Нижний колонтитул -->
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <!-- Колонка для запчастей -->
+            <div class="col-md-6 text-center mb-3 mb-md-0">
                 <div class="counter">
                     <i class="fas fa-cogs"></i>
-                    <span class="navbar-text text-success fw-bold">Запчастей: <strong class="text-danger">{{ part_count }}</strong></span>
-                </div>
-                <div class="counter">
-                    <i class="fas fa-users"></i>
-                    <span class="navbar-text text-info fw-bold">Пользователей: <strong class="text-danger">{{ user_count }}</strong></span>
+                    Запчастей: <span class="text-danger">{{ part_count }}</span>
                 </div>
             </div>
-            <p class="text-center">&copy; 2024 Склад. Все права защищены.</p>
+            <!-- Колонка для пользователей -->
+            <div class="col-md-6 text-center">
+                <div class="counter">
+                    <i class="fas fa-users"></i>
+                    Пользователей: <span class="text-danger">{{ user_count }}</span>
+                </div>
+            </div>
         </div>
-    </footer>
+        <p class="text-center mt-3">&copy; 2024 Склад. Все права защищены.</p>
+    </div>
+</footer>
+
 
     <!-- Подключаем jQuery (если используется) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
