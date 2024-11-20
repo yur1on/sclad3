@@ -4,6 +4,27 @@
 {% load static %}
 {% load widget_tweaks %}
 
+<!-- Подключение стилей -->
+<link rel="stylesheet" href="{% static 'css/messages.css' %}">
+
+<!-- Отображение сообщений -->
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} custom-alert mb-3 shadow-sm">
+      {% if message.tags == 'success' %}
+        <i class="fas fa-check-circle text-success me-2"></i>
+      {% elif message.tags == 'error' or message.tags == 'danger' %}
+        <i class="fas fa-exclamation-circle text-danger me-2"></i>
+      {% elif message.tags == 'warning' %}
+        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+      {% elif message.tags == 'info' %}
+        <i class="fas fa-info-circle text-info me-2"></i>
+      {% endif %}
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
 <div class="container profile-page my-4">
     <div class="card mb-4 shadow-sm">
         <div class="card-header bg-primary text-white">
@@ -74,10 +95,10 @@
                     </div>
                     <div class="col-md-6 text-end">
                         <a href="?edit=true" class="btn btn-primary">Редактировать профиль</a>
-                                <a href="{% url 'bookmarks' %}" class="btn btn-info">
-            Мои закладки
-            <span class="badge bg-secondary">{{ bookmarks_count }}</span>  <!-- Количество закладок внутри кнопки -->
-        </a>
+                        <a href="{% url 'bookmarks' %}" class="btn btn-info">
+                            Мои закладки
+                            <span class="badge bg-secondary">{{ bookmarks_count }}</span>
+                        </a>
                     </div>
                 </div>
             {% endif %}
@@ -105,5 +126,7 @@
     {% endif %}
 </div>
 
+<!-- Подключение скриптов -->
 <script src="{% static 'js/profile.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 {% endblock %}

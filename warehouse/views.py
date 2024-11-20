@@ -1,7 +1,5 @@
 
-
 from django.contrib.auth import logout
-
 from .models import Part, PartImage
 from .forms import PartForm, PartImageFormSet
 from openpyxl import Workbook
@@ -10,17 +8,18 @@ from itertools import groupby
 from operator import itemgetter
 from django.http import HttpResponse
 import openpyxl
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.contrib import messages
-
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-
-
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.shortcuts import render
 
 def home(request):
     return render(request, 'warehouse/home.html')
 
-from django.core.paginator import Paginator
 
 @login_required
 def warehouse_view(request):
@@ -51,17 +50,14 @@ def warehouse_view(request):
     if part_type:
         parts = parts.filter(part_type__icontains=part_type)
 
-    # Упорядочиваем объекты (например, по дате создания или названию устройства)
-    parts = parts.order_by('device', 'brand')  # Замените на подходящие вам поля
-
     # Пагинация: 30 запчастей на странице
-    paginator = Paginator(parts, 30)
+    paginator = Paginator(parts, 30)  # Отображаем 30 запчастей на одной странице
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     # Получаем уникальные устройства и бренды для отображения кнопок
-    devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct().order_by()
-    brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct().order_by()
+    devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
+    brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct()
 
     return render(request, 'warehouse/warehouse.html', {
         'page_obj': page_obj,
@@ -77,6 +73,12 @@ def warehouse_view(request):
 
 @login_required
 def add_part(request):
+    # Проверяем профиль пользователя
+    profile = getattr(request.user, 'profile', None)
+    if not profile or not profile.city or not profile.phone:
+        messages.error(request, 'Пожалуйста, укажите город и номер телефона в вашем профиле, прежде чем добавлять запчасть.')
+        return redirect('profile')  # Перенаправляем на страницу профиля
+
     if request.method == 'POST':
         form = PartForm(request.POST, request.FILES)
         formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
@@ -106,8 +108,7 @@ def add_part(request):
                         image.part = new_part
                         image.save()
 
-                messages.success(request, 'Запчасть успешно добавлена повторно!')
-                return render(request, 'warehouse/success.html')  # Страница успеха
+                return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена повторно!'})
 
             if existing_part:
                 return render(request, 'warehouse/confirm_add_part.html', {
@@ -126,15 +127,13 @@ def add_part(request):
                     image.part = part
                     image.save()
 
-            messages.success(request, 'Запчасть успешно добавлена!')
-            return render(request, 'warehouse/success.html')  # Страница успеха
+            return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена!'})
 
     else:
         form = PartForm()
         formset = PartImageFormSet(queryset=PartImage.objects.none())
 
     return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
-
 
 
 def logout_view(request):
@@ -144,31 +143,29 @@ def logout_view(request):
 
 
 
-from django.core.paginator import Paginator
-from django.db.models import Q
-
 def search(request):
-    query = request.GET.get('q')
-    brand = request.GET.get('brand')
-    model = request.GET.get('model')
-    part_type = request.GET.get('part_type')
-    city = request.GET.get('city')
+    query = request.GET.get('q', '').strip()  # Убираем лишние пробелы
+    brand = request.GET.get('brand', '').strip()
+    model = request.GET.get('model', '').strip()
+    part_type = request.GET.get('part_type', '').strip()
+    city = request.GET.get('city', '').strip()
 
     results = Part.objects.all().order_by('-created_at')
 
     # Если запрос существует, обрабатываем его
     if query:
-        query = query.strip()  # Убираем лишние пробелы
         keywords = query.split()  # Разбиваем строку на слова
 
         # Создаем пустой Q объект для объединения условий
         q_objects = Q()
         for keyword in keywords:
             # Объединяем условия с помощью AND
-            q_objects &= (Q(device__icontains=keyword) |
-                          Q(brand__icontains=keyword) |
-                          Q(model__icontains=keyword) |
-                          Q(part_type__icontains=keyword))
+            q_objects &= (
+                Q(device__icontains=keyword) |
+                Q(brand__icontains=keyword) |
+                Q(model__icontains=keyword) |
+                Q(part_type__icontains=keyword)
+            )
 
         # Применяем фильтрацию
         results = results.filter(q_objects)
@@ -382,13 +379,7 @@ def filter_parts(request):
 
 
 
-from django.shortcuts import render, get_object_or_404
-from .models import Part
 
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
-from .models import Part
 
 @login_required
 def part_detail(request, part_id):
@@ -505,9 +496,7 @@ def get_part_types(request):
     return JsonResponse({'part_types': list(part_types)})
 
 
-from django.http import JsonResponse
-from .models import Part
-from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def get_parts(request):

@@ -1,0 +1,31 @@
+.custom-alert {
+  border-radius: 16px; /* Более выраженные скругленные углы */
+  font-size: 1rem;
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.custom-alert.alert-success {
+  background: linear-gradient(45deg, #d4edda, #c3e6cb);
+  color: #155724;
+}
+
+.custom-alert.alert-error,
+.custom-alert.alert-danger {
+  background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+  color: #721c24;
+}
+
+.custom-alert.alert-warning {
+  background: linear-gradient(45deg, #fff3cd, #ffeeba);
+  color: #856404;
+}
+
+.custom-alert.alert-info {
+  background: linear-gradient(45deg, #d1ecf1, #bee5eb);
+  color: #0c5460;
+}
