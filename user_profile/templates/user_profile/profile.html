@@ -4,129 +4,110 @@
 {% load static %}
 {% load widget_tweaks %}
 
-<!-- Подключение стилей -->
-<link rel="stylesheet" href="{% static 'css/messages.css' %}">
-
-<!-- Отображение сообщений -->
-{% if messages %}
-  {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} custom-alert mb-3 shadow-sm">
-      {% if message.tags == 'success' %}
-        <i class="fas fa-check-circle text-success me-2"></i>
-      {% elif message.tags == 'error' or message.tags == 'danger' %}
-        <i class="fas fa-exclamation-circle text-danger me-2"></i>
-      {% elif message.tags == 'warning' %}
-        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-      {% elif message.tags == 'info' %}
-        <i class="fas fa-info-circle text-info me-2"></i>
-      {% endif %}
-      {{ message }}
-    </div>
-  {% endfor %}
-{% endif %}
+<!-- Стили -->
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <div class="container profile-page my-4">
-    <div class="card mb-4 shadow-sm">
+    <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h3 class="mb-0">Ваш профиль</h3>
+            <h3 class="mb-0">Мой профиль</h3>
         </div>
         <div class="card-body">
-            {% if edit_mode %}
-                <!-- Форма редактирования -->
-                <form method="post" class="form">
-                    {% csrf_token %}
-                    <div class="form-group mb-3">
-                        <label for="phone" class="form-label">Телефон:</label>
-                        {{ form.phone|add_class:"form-control" }}
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="region" class="form-label">Область:</label>
-                        <select id="id_region" name="region" class="form-control">
-                            <option value="">Выберите область</option>
-                            {% for region in form.region.field.choices %}
-                                <option value="{{ region.0 }}" {% if region.0 == form.region.value %}selected{% endif %}>
-                                    {{ region.1 }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="city" class="form-label">Город:</label>
-                        <select id="id_city" name="city" class="form-control">
-                            <option value="">Выберите город</option>
-                        </select>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="workshop_name" class="form-label">Название мастерской:</label>
-                        {{ form.workshop_name|add_class:"form-control" }}
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <button type="submit" class="btn btn-success">Сохранить изменения</button>
-                        <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
-                    </div>
-                </form>
-            {% else %}
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="list-group mb-3">
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Имя пользователя:</span> <span>{{ user.username }}</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Телефон:</span> <span>{{ user.profile.phone }}</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Город:</span> <span>{{ user.profile.city }}</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Название мастерской:</span> <span>{{ user.profile.workshop_name|default:"Не указано" }}</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Рейтинг:</span>
-                                <span>
-                                    {% if user.profile.average_rating %}
-                                        {{ user.profile.average_rating|floatformat:1 }} / 5 ({{ user.profile.received_reviews.count }} отзывов)
-                                    {% else %}
-                                        0 / 5 (0 отзывов)
-                                    {% endif %}
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <a href="?edit=true" class="btn btn-primary">Редактировать профиль</a>
-                        <a href="{% url 'bookmarks' %}" class="btn btn-info">
-                            Мои закладки
-                            <span class="badge bg-secondary">{{ bookmarks_count }}</span>
-                        </a>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-    </div>
+            <!-- Навигация и кнопка закладок -->
+            <div class="d-flex justify-content-between align-items-center">
+                <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
+                            Профиль
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">
+                            Отзывы
+                        </button>
+                    </li>
+                </ul>
+                <a href="{% url 'bookmarks' %}" class="btn btn-info">
+                    Мои закладки
+                    <span class="badge bg-secondary">{{ bookmarks_count }}</span>
+                </a>
+            </div>
 
-    <!-- Отзывы -->
-    {% if not edit_mode %}
-        <div class="reviews-section mb-4">
-            <h4 class="mb-3">Отзывы пользователей</h4>
-            <div class="list-group">
-                {% for review in reviews %}
-                    <div class="list-group-item list-group-item-action mb-2 shadow-sm">
-                        <div class="d-flex justify-content-between">
-                            <strong>Рейтинг: {{ review.rating }} / 5</strong>
-                            <small class="text-muted">Оставил: {{ review.reviewer.username }} | Дата: {{ review.created_at|date:"d M Y" }}</small>
+            <!-- Контент вкладок -->
+            <div class="tab-content mt-4">
+                <!-- Вкладка "Профиль" -->
+                <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    {% if edit_mode %}
+                        <form method="post" class="form">
+                            {% csrf_token %}
+                            {{ form.non_field_errors }}
+                            <div class="form-group mb-3">
+                                <label for="phone" class="form-label">Телефон:</label>
+                                {{ form.phone|add_class:"form-control" }}
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="region" class="form-label">Область:</label>
+                                {{ form.region|add_class:"form-control" }}
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="city" class="form-label">Город:</label>
+                                {{ form.city|add_class:"form-control" }}
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="workshop_name" class="form-label">Название мастерской:</label>
+                                {{ form.workshop_name|add_class:"form-control" }}
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-success">Сохранить</button>
+                                <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-group">
+                                    <li class="list-group-item">Имя пользователя: {{ user.username }}</li>
+                                    <li class="list-group-item">Телефон: {{ user.profile.phone }}</li>
+                                    <li class="list-group-item">Город: {{ user.profile.city }}</li>
+                                    <li class="list-group-item">Мастерская: {{ user.profile.workshop_name|default:"Не указано" }}</li>
+                                    <li class="list-group-item">
+                                        Рейтинг:
+                                        {{ user.profile.average_rating|default:"0.0" }} / 5
+                                        ({{ user.profile.received_reviews.count }} отзывов)
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <a href="?edit=true" class="btn btn-primary">Редактировать</a>
+                            </div>
                         </div>
-                        <p class="mb-1 text-truncate" title="{{ review.comment }}">{{ review.comment }}</p>
-                    </div>
-                {% empty %}
-                    <p class="text-muted">Нет отзывов</p>
-                {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Вкладка "Отзывы" -->
+                <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                    <h4>Отзывы пользователей</h4>
+                    {% if reviews %}
+                        <div class="list-group">
+                            {% for review in reviews %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Оценка:</strong> {{ review.rating }} / 5</span>
+                                        <small class="text-muted">Дата: {{ review.created_at|date:"d M Y" }}</small>
+                                    </div>
+                                    <p>{{ review.comment }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Нет отзывов</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    {% endif %}
+    </div>
 </div>
 
-<!-- Подключение скриптов -->
 <script src="{% static 'js/profile.js' %}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 {% endblock %}
