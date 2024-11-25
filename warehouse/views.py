@@ -143,13 +143,20 @@ def logout_view(request):
 
 
 
+from django.core.paginator import Paginator
+from django.db.models import Q
+from .models import Part
+
 def search(request):
     query = request.GET.get('q', '').strip()  # Убираем лишние пробелы
+    device = request.GET.get('device', '').strip()  # Новое поле: Устройство
     brand = request.GET.get('brand', '').strip()
     model = request.GET.get('model', '').strip()
     part_type = request.GET.get('part_type', '').strip()
+    region = request.GET.get('region', '').strip()  # Новое поле: Область
     city = request.GET.get('city', '').strip()
 
+    # Базовый запрос: все запчасти, отсортированные по дате добавления
     results = Part.objects.all().order_by('-created_at')
 
     # Если запрос существует, обрабатываем его
@@ -171,12 +178,16 @@ def search(request):
         results = results.filter(q_objects)
 
     # Расширенный поиск
+    if device:
+        results = results.filter(device__icontains=device)
     if brand:
         results = results.filter(brand__icontains=brand)
     if model:
         results = results.filter(model__icontains=model)
     if part_type:
         results = results.filter(part_type__icontains=part_type)
+    if region:
+        results = results.filter(user__profile__region__icontains=region)
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
@@ -185,8 +196,17 @@ def search(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'warehouse/search.html', {'page_obj': page_obj})
-
+    # Передача данных в шаблон
+    return render(request, 'warehouse/search.html', {
+        'page_obj': page_obj,
+        'query': query,
+        'device': device,
+        'brand': brand,
+        'model': model,
+        'part_type': part_type,
+        'region': region,
+        'city': city,
+    })
 
 
 @login_required

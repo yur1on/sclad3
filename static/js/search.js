@@ -1,3 +1,4 @@
+
 const deviceBrandMap = {
     'Телефон': ['Samsung', 'Huawei', 'Xiaomi', 'Apple', 'LG'],
     'Планшет': ['Samsung', 'Huawei'],
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const brandInput = document.getElementById('brand');
     const modelInput = document.getElementById('model');
     const partTypeInput = document.getElementById('part_type');
+    const searchForm = document.querySelector('form'); // Форма поиска
 
     // Очищаем значения и списки при изменении устройства
     deviceInput.addEventListener('input', function() {
@@ -83,11 +85,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Очищаем поля формы после обновления страницы
+    window.addEventListener('pageshow', function() {
+        deviceInput.value = '';
+        brandInput.value = '';
+        modelInput.value = '';
+        partTypeInput.value = '';
+        clearDatalist('brand-list');
+        clearDatalist('model-list');
+        clearDatalist('part-type-list');
+    });
+
     function clearDatalist(id) {
         document.getElementById(id).innerHTML = '';
     }
 });
 
+
+// Работа с регионами и городами
 document.addEventListener('DOMContentLoaded', function() {
     const regionSelect = document.getElementById('id_region');
     const citySelect = document.getElementById('id_city');
@@ -133,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
                'Осиповичи','Славгород','Хотимск','Чаусы','Чериков','Шклов'
     ]
     };
-
     regionSelect.addEventListener('change', function() {
         const selectedRegion = regionSelect.value;
         citySelect.innerHTML = '';
@@ -153,4 +167,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
