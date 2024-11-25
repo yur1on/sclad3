@@ -102,10 +102,18 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+
+
+
 // Работа с регионами и городами
 document.addEventListener('DOMContentLoaded', function() {
+    // Поля простого поиска
     const regionSelect = document.getElementById('id_region');
     const citySelect = document.getElementById('id_city');
+
+    // Поля расширенного поиска
+    const regionAdvSelect = document.getElementById('id_region_adv');
+    const cityAdvSelect = document.getElementById('id_city_adv');
 
     const citiesByRegion = {
         'Минская область': [
@@ -148,7 +156,8 @@ document.addEventListener('DOMContentLoaded', function() {
                'Осиповичи','Славгород','Хотимск','Чаусы','Чериков','Шклов'
     ]
     };
-    regionSelect.addEventListener('change', function() {
+    // Функция для заполнения списка городов
+    function updateCitySelect(regionSelect, citySelect) {
         const selectedRegion = regionSelect.value;
         citySelect.innerHTML = '';
 
@@ -164,6 +173,34 @@ document.addEventListener('DOMContentLoaded', function() {
             defaultOption.value = '';
             defaultOption.text = 'Выберите город';
             citySelect.appendChild(defaultOption);
+        }
+    }
+
+    // Слушатели событий для простого поиска
+    regionSelect.addEventListener('change', function() {
+        updateCitySelect(regionSelect, citySelect);
+    });
+
+    // Слушатели событий для расширенного поиска
+    regionAdvSelect.addEventListener('change', function() {
+        updateCitySelect(regionAdvSelect, cityAdvSelect);
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('toggle-advanced-search');
+    const basicSearch = document.getElementById('basic-search');
+    const advancedSearch = document.getElementById('advanced-search');
+
+    toggleButton.addEventListener('click', function () {
+        if (basicSearch.style.display === 'none') {
+            basicSearch.style.display = 'block';
+            advancedSearch.style.display = 'none';
+            toggleButton.textContent = 'Расширенный поиск';
+        } else {
+            basicSearch.style.display = 'none';
+            advancedSearch.style.display = 'block';
+            toggleButton.textContent = 'Обычный поиск';
         }
     });
 });

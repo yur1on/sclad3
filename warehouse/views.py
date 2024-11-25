@@ -147,37 +147,40 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import Part
 
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from .models import Part  # Предполагается, что модель называется Part
+
 def search(request):
-    query = request.GET.get('q', '').strip()  # Убираем лишние пробелы
-    device = request.GET.get('device', '').strip()  # Новое поле: Устройство
-    brand = request.GET.get('brand', '').strip()
-    model = request.GET.get('model', '').strip()
-    part_type = request.GET.get('part_type', '').strip()
-    region = request.GET.get('region', '').strip()  # Новое поле: Область
-    city = request.GET.get('city', '').strip()
+    # Получаем параметры поиска из GET-запроса
+    query = request.GET.get('q', '').strip()  # Поисковая строка
+    device = request.GET.get('device', '').strip()  # Устройство
+    brand = request.GET.get('brand', '').strip()  # Бренд
+    model = request.GET.get('model', '').strip()  # Модель
+    part_type = request.GET.get('part_type', '').strip()  # Тип запчасти
+    region = request.GET.get('region', '').strip()  # Область
+    city = request.GET.get('city', '').strip()  # Город
 
     # Базовый запрос: все запчасти, отсортированные по дате добавления
     results = Part.objects.all().order_by('-created_at')
 
-    # Если запрос существует, обрабатываем его
+    # Фильтрация по поисковому запросу
     if query:
-        keywords = query.split()  # Разбиваем строку на слова
-
-        # Создаем пустой Q объект для объединения условий
+        # Разбиваем строку на отдельные ключевые слова
+        keywords = query.split()
         q_objects = Q()
         for keyword in keywords:
-            # Объединяем условия с помощью AND
+            # Поиск по нескольким полям с использованием OR
             q_objects &= (
                 Q(device__icontains=keyword) |
                 Q(brand__icontains=keyword) |
                 Q(model__icontains=keyword) |
                 Q(part_type__icontains=keyword)
             )
-
-        # Применяем фильтрацию
         results = results.filter(q_objects)
 
-    # Расширенный поиск
+    # Расширенная фильтрация по отдельным параметрам
     if device:
         results = results.filter(device__icontains=device)
     if brand:
@@ -187,11 +190,12 @@ def search(request):
     if part_type:
         results = results.filter(part_type__icontains=part_type)
     if region:
+        # Фильтр по связанному профилю пользователя
         results = results.filter(user__profile__region__icontains=region)
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
-    # Пагинация: 30 запчастей на страницу
+    # Пагинация: 30 элементов на страницу
     paginator = Paginator(results, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -207,6 +211,7 @@ def search(request):
         'region': region,
         'city': city,
     })
+
 
 
 @login_required
