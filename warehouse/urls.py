@@ -1,4 +1,5 @@
 from .views import logout_view
+from .views import add_part, get_dynamic_data
 
 from . import views
 from .views import add_image
@@ -27,6 +28,8 @@ urlpatterns = [
     path('import-excel/', import_excel, name='import_parts'),
     path('', views.base_view, name='home'),
     path('user/<int:user_id>/parts/', views.user_parts, name='user_parts'),
+    path('add-part/', add_part, name='add_part'),
+    path('get_dynamic_data/', get_dynamic_data, name='get_dynamic_data'),
 
 ]
 

@@ -5,72 +5,66 @@
 <div class="container mt-5">
     <h2 class="text-center mb-4">Добавить запчасть</h2>
     <div class="row justify-content-center">
-        <div class="col-md-8"> <!-- Ограничиваем ширину формы -->
+        <div class="col-md-8">
             <form method="post" id="part-form" class="form-container p-4 bg-light shadow-sm rounded" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <!-- Устройство -->
                 <div class="form-group mb-3">
-                    <label for="device" class="form-label">Устройство</label>
-                    <input list="devices" id="id_device" name="device" class="form-control" placeholder="Введите устройство" onchange="handleDeviceChange();" required>
+                    <label for="id_device" class="form-label">Устройство</label>
+                    <input list="devices" id="id_device" name="device" class="form-control" placeholder="Введите устройство" required>
                     <datalist id="devices">
                         <option value="Телефон">
                         <option value="Планшет">
-                        <option value="Ноутбук">
-                        <option value="Компьютер">
                         <option value="Смарт-часы">
+                        <option value="Ноутбук">
                     </datalist>
                 </div>
 
                 <!-- Бренд -->
                 <div class="form-group mb-3">
-                    <label for="brand" class="form-label">Бренд</label>
-                    <input list="brands" id="id_brand" name="brand" class="form-control" placeholder="Введите бренд" onchange="updateModelOptions();" required>
+                    <label for="id_brand" class="form-label">Бренд</label>
+                    <input list="brands" id="id_brand" name="brand" class="form-control" placeholder="Введите бренд" required>
                     <datalist id="brands"></datalist>
                 </div>
 
                 <!-- Модель -->
                 <div class="form-group mb-3">
-                    <label for="model" class="form-label">Модель</label>
+                    <label for="id_model" class="form-label">Модель</label>
                     <input list="models" id="id_model" name="model" class="form-control" placeholder="Введите модель" required>
                     <datalist id="models"></datalist>
                 </div>
 
                 <!-- Тип запчасти -->
                 <div class="form-group mb-3">
-                    <label for="part_type" class="form-label">Тип запчасти</label>
-                    <input list="part_types" id="id_part_type" name="part_type" class="form-control" placeholder="Введите тип запчасти" onchange="handlePartTypeChange();" required>
+                    <label for="id_part_type" class="form-label">Тип запчасти</label>
+                    <input list="part_types" id="id_part_type" name="part_type" class="form-control" placeholder="Введите тип запчасти" required>
                     <datalist id="part_types"></datalist>
+                </div>
+
+                <!-- Цвет -->
+                <div id="color_input_container" class="form-group mb-3" style="display: none;">
+                    <label for="id_color" class="form-label">Цвет</label>
+                    <input type="text" id="id_color" name="color" list="colors" class="form-control" placeholder="Введите цвет (если нужно)">
+                    <datalist id="colors"></datalist>
                 </div>
 
                 <!-- Состояние -->
                 <div class="form-group mb-3">
-                    <label for="condition" class="form-label">Состояние</label>
+                    <label for="id_condition" class="form-label">Состояние</label>
                     <input list="conditions" id="id_condition" name="condition" class="form-control" placeholder="Выберите состояние" required>
-                    <datalist id="conditions">
-                        <option value="б/у.">
-                        <option value="новое копия">
-                        <option value="новое оригинал">
-                        <!-- Добавьте другие варианты по необходимости -->
-                    </datalist>
-                </div>
-
-                <!-- Цвет (показывается только при необходимости) -->
-                <div class="form-group mb-3" id="color-group" style="display: none;">
-                    <label for="color" class="form-label">Цвет</label>
-                    <input list="colors" id="id_color" name="color" class="form-control" placeholder="Выберите цвет">
-                    <datalist id="colors"></datalist>
+                    <datalist id="conditions"></datalist>
                 </div>
 
                 <!-- Количество -->
                 <div class="form-group mb-3">
-                    <label for="quantity" class="form-label">Количество</label>
-                    {{ form.quantity }}
+                    <label for="id_quantity" class="form-label">Количество</label>
+                    <input type="number" name="quantity" id="id_quantity" class="form-control" placeholder="Введите количество" min="1" required>
                 </div>
 
                 <!-- Цена -->
                 <div class="form-group mb-3">
-                    <label for="price" class="form-label">Цена</label>
+                    <label for="id_price" class="form-label">Цена</label>
                     <div class="input-group">
                         <input type="number" name="price" id="id_price" class="form-control" placeholder="Введите цену" step="1" min="0" required>
                         <span class="input-group-text">бел.руб.</span>
@@ -79,13 +73,13 @@
 
                 <!-- Примечание -->
                 <div class="form-group mb-3">
-                    <label for="note" class="form-label">Примечание</label>
+                    <label for="id_note" class="form-label">Примечание</label>
                     <textarea name="note" id="id_note" class="form-control" rows="3" placeholder="Введите примечание"></textarea>
                 </div>
 
                 <!-- Загрузка изображений -->
                 <div class="form-group mb-4">
-                    <label for="image" class="form-label">Фото (до 5 изображений)</label>
+                    <label for="images" class="form-label">Фото (до 5 изображений)</label>
                     {{ formset.management_form }}
                     <div class="row">
                         {% for form in formset %}

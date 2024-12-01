@@ -1,25 +1,24 @@
 
 from django.contrib.auth import logout
-from .models import Part, PartImage
-from .forms import PartForm, PartImageFormSet
+from django.db.models import Q
+from django.core.paginator import Paginator
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
 from itertools import groupby
 from operator import itemgetter
 from django.http import HttpResponse
 import openpyxl
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.contrib import messages
+from .data import DATA, CONDITIONS
+from django.contrib.auth.models import User
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
-from django.core.paginator import Paginator
-from django.shortcuts import render
-
+from django.contrib import messages
+from .forms import PartForm, PartImageFormSet
+from .models import Part, PartImage
 def home(request):
     return render(request, 'warehouse/home.html')
-
 
 @login_required
 def warehouse_view(request):
@@ -71,86 +70,12 @@ def warehouse_view(request):
 
 
 
-@login_required
-def add_part(request):
-    # Проверяем профиль пользователя
-    profile = getattr(request.user, 'profile', None)
-    if not profile or not profile.city or not profile.phone:
-        messages.error(request, 'Пожалуйста, укажите город и номер телефона в вашем профиле, прежде чем добавлять запчасть.')
-        return redirect('profile')  # Перенаправляем на страницу профиля
-
-    if request.method == 'POST':
-        form = PartForm(request.POST, request.FILES)
-        formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
-
-        if form.is_valid() and formset.is_valid():
-            device = form.cleaned_data.get('device')
-            brand = form.cleaned_data.get('brand')
-            model = form.cleaned_data.get('model')
-            part_type = form.cleaned_data.get('part_type')
-
-            existing_part = Part.objects.filter(
-                user=request.user,
-                device=device,
-                brand=brand,
-                model=model,
-                part_type=part_type
-            ).first()
-
-            if existing_part and 'confirm_add' in request.POST:
-                new_part = form.save(commit=False)
-                new_part.user = request.user
-                new_part.save()
-
-                for image_form in formset:
-                    if image_form.cleaned_data:
-                        image = image_form.save(commit=False)
-                        image.part = new_part
-                        image.save()
-
-                return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена повторно!'})
-
-            if existing_part:
-                return render(request, 'warehouse/confirm_add_part.html', {
-                    'form': form,
-                    'formset': formset,
-                    'existing_part': existing_part
-                })
-
-            part = form.save(commit=False)
-            part.user = request.user
-            part.save()
-
-            for image_form in formset:
-                if image_form.cleaned_data:
-                    image = image_form.save(commit=False)
-                    image.part = part
-                    image.save()
-
-            return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена!'})
-
-    else:
-        form = PartForm()
-        formset = PartImageFormSet(queryset=PartImage.objects.none())
-
-    return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
-
-
 def logout_view(request):
     logout(request)
     return redirect('home')  # Перенаправление на главную страницу после выхода
 
 
 
-
-from django.core.paginator import Paginator
-from django.db.models import Q
-from .models import Part
-
-from django.db.models import Q
-from django.core.paginator import Paginator
-from django.shortcuts import render
-from .models import Part  # Предполагается, что модель называется Part
 
 def search(request):
     # Получаем параметры поиска из GET-запроса
@@ -211,8 +136,6 @@ def search(request):
         'region': region,
         'city': city,
     })
-
-
 
 @login_required
 def edit_part(request, part_id):
@@ -354,17 +277,11 @@ def export_excel(request):
 
     return response
 
-
-
-
 @login_required
 def get_brands_for_device(request):
     device = request.GET.get('device')
     brands = Part.objects.filter(user=request.user, device=device).values_list('brand', flat=True).distinct()
     return JsonResponse({'brands': list(brands)})
-
-
-
 
 @login_required
 def filter_parts(request):
@@ -399,13 +316,6 @@ def filter_parts(request):
     return JsonResponse({'parts': parts_data})
 
 
-
-
-
-
-
-
-
 @login_required
 def part_detail(request, part_id):
     part = get_object_or_404(Part, id=part_id)
@@ -417,8 +327,6 @@ def part_detail(request, part_id):
         'part': part,
         'is_bookmarked': is_bookmarked
     })
-
-
 
 @login_required
 def user_parts(request, user_id):
@@ -432,10 +340,6 @@ def user_parts(request, user_id):
 
 def add_part_success(request):
     return render(request, 'warehouse/add_part_success.html')
-
-
-
-
 
 def delete_image(request, image_id):
     if request.method == 'POST' and request.user.is_authenticated:
@@ -453,8 +357,6 @@ def delete_image(request, image_id):
         return JsonResponse({'status': 'success'})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
-
-
 
 
 def add_image(request):
@@ -480,12 +382,10 @@ def add_image(request):
     return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса.'})
 
 
-
 def get_brands(request):
     device = request.GET.get('device')
     brands = Part.objects.filter(device=device).values_list('brand', flat=True).distinct()
     return JsonResponse({'brands': list(brands)})
-
 
 @login_required
 def get_devices(request):
@@ -519,8 +419,6 @@ def get_part_types(request):
     # Фильтруем и сортируем типы запчастей по устройству, бренду, модели и пользователю
     part_types = Part.objects.filter(user=request.user, device=device, brand=brand, model=model).values_list('part_type', flat=True).distinct().order_by('part_type')
     return JsonResponse({'part_types': list(part_types)})
-
-
 
 
 @login_required
@@ -558,8 +456,6 @@ def get_parts(request):
     } for part in parts]
 
     return JsonResponse({'parts': parts_data})
-
-
 
 @login_required
 def import_excel(request):
@@ -633,8 +529,6 @@ def import_excel(request):
 
     return render(request, 'warehouse/import_parts.html')
 
-from django.contrib.auth.models import User
-from warehouse.models import Part
 
 def base_view(request):
     # Подсчёт количества пользователей и запчастей
@@ -647,3 +541,85 @@ def base_view(request):
     })
 
 
+
+def get_dynamic_data(request):
+    """Универсальное представление для динамического обновления данных."""
+    device = request.GET.get("device")
+    brand = request.GET.get("brand")
+    part_type = request.GET.get("part_type")
+    response = {}
+
+    if device:
+        response["brands"] = DATA.get(device, {}).get("brands", [])
+        response["part_types"] = DATA.get(device, {}).get("part_types", [])
+
+    if device and brand:
+        response["models"] = DATA.get(device, {}).get("models", {}).get(brand, [])
+
+    if device and part_type:
+        response["colors"] = DATA.get(device, {}).get("colors", {}).get(part_type, [])
+        response["conditions"] = CONDITIONS  # Отдаем все состояния для любых типов запчастей
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_part(request):
+    """Добавление запчасти с обработкой формы и изображений."""
+    profile = getattr(request.user, 'profile', None)
+    if not profile or not profile.city or not profile.phone:
+        messages.error(request, 'Пожалуйста, укажите город и номер телефона в вашем профиле.')
+        return redirect('profile')
+
+    if request.method == 'POST':
+        form = PartForm(request.POST, request.FILES)
+        formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
+
+        if form.is_valid() and formset.is_valid():
+            device = form.cleaned_data['device']
+            brand = form.cleaned_data['brand']
+            model = form.cleaned_data['model']
+            part_type = form.cleaned_data['part_type']
+
+            existing_part = Part.objects.filter(
+                user=request.user,
+                device=device,
+                brand=brand,
+                model=model,
+                part_type=part_type
+            ).first()
+
+            if existing_part and 'confirm_add' in request.POST:
+                new_part = form.save(commit=False)
+                new_part.user = request.user
+                new_part.save()
+                for image_form in formset:
+                    if image_form.cleaned_data:
+                        image = image_form.save(commit=False)
+                        image.part = new_part
+                        image.save()
+                return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена повторно!'})
+
+            if existing_part:
+                return render(request, 'warehouse/confirm_add_part.html', {
+                    'form': form,
+                    'formset': formset,
+                    'existing_part': existing_part
+                })
+
+            part = form.save(commit=False)
+            part.user = request.user
+            part.save()
+            for image_form in formset:
+                if image_form.cleaned_data:
+                    image = image_form.save(commit=False)
+                    image.part = part
+                    image.save()
+
+            return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена!'})
+
+    else:
+        form = PartForm()
+        formset = PartImageFormSet(queryset=PartImage.objects.none())
+
+    return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})

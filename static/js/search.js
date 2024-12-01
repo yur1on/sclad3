@@ -1,103 +1,47 @@
-
-const deviceBrandMap = {
-    'Телефон': ['Samsung', 'Huawei', 'Xiaomi', 'Apple', 'LG'],
-    'Планшет': ['Samsung', 'Huawei'],
-    'Ноутбук': ['Asus', 'Acer'],
-    'Смарт-часы': ['Apple', 'Samsung', 'Garmin', 'Huawei']
-};
-
-const brandModelMap = {
-    'Телефон': {
-        'Samsung': ['S21', 'A10', 'A20', 'A30'],
-        'Huawei': ['P40', 'P50'],
-        'Xiaomi': ['Redmi Note 10', 'Mi 11'],
-        'Apple': ['iPhone 13', 'iPhone 12'],
-        'LG': ['LG G7', 'LG K50']
-    },
-    'Планшет': {
-        'Samsung': ['T500', 'T735'],
-        'Huawei': ['MatePad 10.4']
-    },
-    'Ноутбук': {
-        'Asus': ['ZenBook 14', 'ROG Strix G15'],
-        'Acer': ['Aspire 7', 'Nitro 5']
-    },
-    'Смарт-часы': {
-        'Apple': ['Apple Watch Series 8', 'Apple Watch SE'],
-        'Samsung': ['Galaxy Watch 5', 'Galaxy Watch Active 2'],
-        'Garmin': ['Forerunner 945', 'Fenix 7']
-    }
-};
-
-const modelPartTypeMap = {
-    'S21': ['Дисплей', 'Камера', 'Батарея'],
-    'A10': ['Дисплей', 'Камера', 'Батарея'],
-    'P40': ['Дисплей', 'Камера'],
-    'Redmi Note 10': ['Дисплей', 'Камера'],
-    'iPhone 13': ['Дисплей', 'Камера'],
-};
-
 document.addEventListener('DOMContentLoaded', function() {
     const deviceInput = document.getElementById('device');
     const brandInput = document.getElementById('brand');
     const modelInput = document.getElementById('model');
     const partTypeInput = document.getElementById('part_type');
-    const searchForm = document.querySelector('form'); // Форма поиска
 
-    // Очищаем значения и списки при изменении устройства
     deviceInput.addEventListener('input', function() {
-        const selectedDevice = deviceInput.value;
-        brandInput.value = '';
-        modelInput.value = '';
-        partTypeInput.value = '';
-        clearDatalist('brand-list');
-        clearDatalist('model-list');
-        clearDatalist('part-type-list');
-
-        if (deviceBrandMap[selectedDevice]) {
-            const brandOptions = deviceBrandMap[selectedDevice].map(brand => `<option value="${brand}">`).join('');
-            document.getElementById('brand-list').innerHTML = brandOptions;
-        }
+        fetch(`/get_dynamic_data?device=${deviceInput.value}`)
+            .then(response => response.json())
+            .then(data => {
+                updateDatalist('brand-list', data.brands);
+                updateDatalist('part-type-list', data.part_types);
+                clearDatalist('model-list'); // Очистка моделей
+                brandInput.value = '';       // Очистка текущего бренда
+                modelInput.value = '';       // Очистка текущей модели
+                partTypeInput.value = '';    // Очистка текущего типа запчасти
+            });
     });
 
-    // Очищаем модель и тип запчасти при выборе бренда
     brandInput.addEventListener('input', function() {
-        const selectedBrand = brandInput.value;
-        const selectedDevice = deviceInput.value;
-
-        modelInput.value = '';
-        partTypeInput.value = '';
-        clearDatalist('model-list');
-        clearDatalist('part-type-list');
-
-        if (brandModelMap[selectedDevice] && brandModelMap[selectedDevice][selectedBrand]) {
-            const modelOptions = brandModelMap[selectedDevice][selectedBrand].map(model => `<option value="${model}">`).join('');
-            document.getElementById('model-list').innerHTML = modelOptions;
-        }
+        fetch(`/get_dynamic_data?device=${deviceInput.value}&brand=${brandInput.value}`)
+            .then(response => response.json())
+            .then(data => {
+                updateDatalist('model-list', data.models);
+                modelInput.value = ''; // Очистка текущей модели
+            });
     });
 
-    // Очищаем тип запчасти при выборе модели
-    modelInput.addEventListener('input', function() {
-        const selectedModel = modelInput.value;
-        if (modelPartTypeMap[selectedModel]) {
-            const partTypeOptions = modelPartTypeMap[selectedModel].map(partType => `<option value="${partType}">`).join('');
-            document.getElementById('part-type-list').innerHTML = partTypeOptions;
-        }
+    partTypeInput.addEventListener('input', function() {
+        fetch(`/get_dynamic_data?device=${deviceInput.value}&part_type=${partTypeInput.value}`)
+            .then(response => response.json())
+            .then(data => {
+                updateDatalist('part-type-list', data.colors);
+            });
     });
 
-    // Очищаем поля формы после обновления страницы
-    window.addEventListener('pageshow', function() {
-        deviceInput.value = '';
-        brandInput.value = '';
-        modelInput.value = '';
-        partTypeInput.value = '';
-        clearDatalist('brand-list');
-        clearDatalist('model-list');
-        clearDatalist('part-type-list');
-    });
+    function updateDatalist(id, options) {
+        const datalist = document.getElementById(id);
+        datalist.innerHTML = options.map(option => `<option value="${option}">`).join('');
+    }
 
     function clearDatalist(id) {
-        document.getElementById(id).innerHTML = '';
+        const datalist = document.getElementById(id);
+        datalist.innerHTML = '';
     }
 });
 
