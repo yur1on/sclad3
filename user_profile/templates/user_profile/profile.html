@@ -42,22 +42,29 @@
                         <form method="post" class="form">
                             {% csrf_token %}
                             {{ form.non_field_errors }}
-                            <div class="form-group mb-3">
-                                <label for="phone" class="form-label">Телефон:</label>
-                                {{ form.phone|add_class:"form-control" }}
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="region" class="form-label">Область:</label>
-                                {{ form.region|add_class:"form-control" }}
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="city" class="form-label">Город:</label>
-                                {{ form.city|add_class:"form-control" }}
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="workshop_name" class="form-label">Название мастерской:</label>
-                                {{ form.workshop_name|add_class:"form-control" }}
-                            </div>
+                            {% for field in form.visible_fields %}
+                                <div class="form-group mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}:
+                                    </label>
+                                    {% if field.name == "region" %}
+                                        <select id="id_region" name="region" class="form-control">
+                                            <option value="">Выберите область</option>
+                                            {% for region in form.region.field.choices %}
+                                                <option value="{{ region.0 }}" {% if region.0 == form.region.value %}selected{% endif %}>
+                                                    {{ region.1 }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    {% elif field.name == "city" %}
+                                        <select id="id_city" name="city" class="form-control">
+                                            <option value="">Выберите город</option>
+                                        </select>
+                                    {% else %}
+                                        {{ field|add_class:"form-control" }}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
                             <div class="d-flex justify-content-between">
                                 <button type="submit" class="btn btn-success">Сохранить</button>
                                 <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>

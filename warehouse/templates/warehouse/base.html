@@ -101,6 +101,7 @@
     .content-padding {
         padding-top: 80px;
     }
+
 </style>
 
 </head>
@@ -136,9 +137,23 @@
     <!-- Основной контент с отступом сверху -->
     <main class="content-padding">
         <div class="container mt-4">
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-warning" role="alert" style="padding: 2rem; border-radius: 10px; text-align: center;">
+                <p style="font-size: 1rem; margin-bottom: 1.5rem;">
+                    {{ message }}
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
             {% block content %}{% endblock %}
         </div>
     </main>
+
+
 
 <!-- Нижний колонтитул -->
 <footer class="footer">

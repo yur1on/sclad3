@@ -7,9 +7,15 @@ DATA = {
                    "Oppo", "Google", "OnePlus", "Alcatel", "Amigoo", "Archos", "Asus", "Black Shark",
                    "BlackBerry", "Blackview", "BLU", "Cat", "Caterpillar", "Coolpad", "Cubot", "Doogee",
                    "Elephone", "HTC", "Lava", "Lenovo", "LG", "Meizu", "Micromax", "Motorola", "Nokia",
-                   "Nubia", "Oukitel", "Sharp", "Sony", "Wiko", "ZTE",  ],
+                   "Nubia", "Oukitel", "Sharp", "Sony", "Wiko", "ZTE", ],
 
         "models": {
+            "Apple": ["iPhone 16 Pro Max", "iPhone 16 Pro", "iPhone 16 Plus", "iPhone 16", "iPhone 15 Pro Max", "iPhone 15 Pro",
+                      "iPhone 15 Plus", "iPhone 15", "iPhone 14 Pro Max", "iPhone 14 Pro", "iPhone 14 Plus", "iPhone 14", "iPhone SE 2022",
+                      "iPhone 13 Pro Max", "iPhone 13 Pro", "iPhone 13", "iPhone 13 mini", "iPhone 12 Pro Max", "iPhone 12 Pro", "iPhone 12",
+                      "iPhone 12 mini", "iPhone SE 2020", "iPhone 11 Pro Max", "iPhone 11 Pro", "iPhone 11", "iPhone Xr", "iPhone Xs Max", "iPhone Xs",
+                      "iPhone X", "iPhone 8 Plus", "iPhone 8", "iPhone 7 Plus", "iPhone 7", "iPhone SE", "iPhone 6s Plus", "iPhone 6s", "iPhone 6 Plus",
+                      "iPhone 6", "iPhone 5s", "iPhone 5c", "iPhone 5"],
             "Samsung": ["A01", "A02", "A11", "A12", "A20", "A30"],
             "Huawei": ["P40", "P40 Lite", "P50"],
         },

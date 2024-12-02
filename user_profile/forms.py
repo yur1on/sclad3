@@ -17,7 +17,7 @@ BELARUS_REGIONS = [
 class ProfileForm(forms.ModelForm):
     region = forms.ChoiceField(choices=BELARUS_REGIONS, label="Область", required=True)
     city = forms.CharField(label="Город", required=True)
-    workshop_name = forms.CharField(label="Название мастерской", required=False)  # Новое поле для названия мастерской
+    workshop_name = forms.CharField(label="Название мастерской (не заполняйте если мастерской нет)", required=False)  # Новое поле для названия мастерской
 
     class Meta:
         model = Profile

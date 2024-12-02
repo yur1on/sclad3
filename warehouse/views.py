@@ -568,7 +568,7 @@ def add_part(request):
     """Добавление запчасти с обработкой формы и изображений."""
     profile = getattr(request.user, 'profile', None)
     if not profile or not profile.city or not profile.phone:
-        messages.error(request, 'Пожалуйста, укажите город и номер телефона в вашем профиле.')
+        messages.error(request, 'Перед началом создания склада, укажите пожалуйста город и номер телефона в вашем профиле.')
         return redirect('profile')
 
     if request.method == 'POST':
