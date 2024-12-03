@@ -576,11 +576,20 @@ def add_part(request):
         formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
 
         if form.is_valid() and formset.is_valid():
+            # Извлекаем данные из формы
+            part_type = form.cleaned_data['part_type']
+            chip_marking = request.POST.get('chip_marking', '').strip()
+
+            # Объединяем тип запчасти и маркировку микросхемы
+            if part_type == "Микросхема" and chip_marking:
+                form.cleaned_data['part_type'] = f"{part_type} {chip_marking}"
+
             device = form.cleaned_data['device']
             brand = form.cleaned_data['brand']
             model = form.cleaned_data['model']
-            part_type = form.cleaned_data['part_type']
+            part_type = form.cleaned_data['part_type']  # Обновлённое значение
 
+            # Проверяем наличие аналогичной запчасти
             existing_part = Part.objects.filter(
                 user=request.user,
                 device=device,
@@ -607,6 +616,7 @@ def add_part(request):
                     'existing_part': existing_part
                 })
 
+            # Сохраняем новую запчасть
             part = form.save(commit=False)
             part.user = request.user
             part.save()

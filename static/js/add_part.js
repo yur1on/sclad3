@@ -5,6 +5,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const partTypeInput = document.getElementById("id_part_type");
     const colorInputContainer = document.getElementById("color_input_container");
     const colorInput = document.getElementById("id_color");
+    const chipMarkingContainer = document.getElementById("chip_marking_container");
+    const chipMarkingInput = document.getElementById("id_chip_marking");
+    const form = document.querySelector("form");
 
     // Обработчик для изменения устройства
     deviceInput.addEventListener("change", () => {
@@ -22,11 +25,14 @@ document.addEventListener("DOMContentLoaded", function () {
     partTypeInput.addEventListener("change", () => {
         updateDynamicFields({ device: deviceInput.value, part_type: partTypeInput.value });
         toggleColorInput(partTypeInput.value);
+        toggleChipMarking(partTypeInput.value);
     });
 
-    // Обработчик для изменения модели (если потребуется в будущем)
-    modelInput.addEventListener("change", () => {
-        // Можно добавить дополнительную логику, если нужно
+    // Обработчик для отправки формы
+    form.addEventListener("submit", function () {
+        if (partTypeInput.value === "Микросхема" && chipMarkingInput.value.trim() !== "") {
+            partTypeInput.value += ` ${chipMarkingInput.value.trim()}`;
+        }
     });
 
     // Функция для очистки всех связанных полей
@@ -35,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
         modelInput.value = '';
         partTypeInput.value = '';
         colorInputContainer.style.display = "none";
+        chipMarkingContainer.style.display = "none";
         colorInput.value = '';
         clearDatalists(["brands", "models", "part_types", "colors"]);
     }
@@ -44,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
         modelInput.value = '';
         partTypeInput.value = '';
         colorInputContainer.style.display = "none";
+        chipMarkingContainer.style.display = "none";
         colorInput.value = '';
         clearDatalists(["models", "part_types", "colors"]);
     }
@@ -89,16 +97,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then((data) => {
                     if (data.colors && data.colors.length > 0) {
                         updateDatalist("colors", data.colors);
-                        colorInputContainer.style.display = "block"; // Показываем поле для цвета
+                        colorInputContainer.style.display = "block";
                     } else {
-                        colorInputContainer.style.display = "none"; // Скрываем поле для цвета
-                        colorInput.value = ''; // Очищаем значение цвета
+                        colorInputContainer.style.display = "none";
+                        colorInput.value = '';
                     }
                 })
                 .catch((error) => console.error("Ошибка загрузки цветов:", error));
         } else {
             colorInputContainer.style.display = "none";
             colorInput.value = '';
+        }
+    }
+
+    // Функция для отображения или скрытия контейнера маркировки чипа
+    function toggleChipMarking(partType) {
+        if (partType === "Микросхема") {
+            chipMarkingContainer.style.display = "block";
+        } else {
+            chipMarkingContainer.style.display = "none";
         }
     }
 });
