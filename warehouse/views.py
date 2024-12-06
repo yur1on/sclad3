@@ -9,7 +9,8 @@ from operator import itemgetter
 from django.http import HttpResponse
 import openpyxl
 from django.shortcuts import get_object_or_404
-from .data import DATA, CONDITIONS
+import json
+from pathlib import Path
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -542,26 +543,34 @@ def base_view(request):
 
 
 
+
+# Путь к JSON файлу
+DATA_FILE = Path(__file__).resolve().parent / "data.json"
+
+def load_data():
+    with open(DATA_FILE, 'r', encoding='utf-8') as file:
+        return json.load(file)
+
 def get_dynamic_data(request):
     """Универсальное представление для динамического обновления данных."""
+    data = load_data()  # Загружаем данные из JSON
     device = request.GET.get("device")
     brand = request.GET.get("brand")
     part_type = request.GET.get("part_type")
     response = {}
 
     if device:
-        response["brands"] = DATA.get(device, {}).get("brands", [])
-        response["part_types"] = DATA.get(device, {}).get("part_types", [])
+        response["brands"] = data.get(device, {}).get("brands", [])
+        response["part_types"] = data.get(device, {}).get("part_types", [])
 
     if device and brand:
-        response["models"] = DATA.get(device, {}).get("models", {}).get(brand, [])
+        response["models"] = data.get(device, {}).get("models", {}).get(brand, [])
 
     if device and part_type:
-        response["colors"] = DATA.get(device, {}).get("colors", {}).get(part_type, [])
-        response["conditions"] = CONDITIONS  # Отдаем все состояния для любых типов запчастей
+        response["colors"] = data.get(device, {}).get("colors", {}).get(part_type, [])
+        response["conditions"] = data.get(device, {}).get("conditions", [])
 
     return JsonResponse(response)
-
 
 @login_required
 def add_part(request):
