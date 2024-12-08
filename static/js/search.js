@@ -48,103 +48,91 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
-// Работа с регионами и городами
 document.addEventListener('DOMContentLoaded', function() {
-    // Поля простого поиска
     const regionSelect = document.getElementById('id_region');
     const citySelect = document.getElementById('id_city');
 
-    // Поля расширенного поиска
     const regionAdvSelect = document.getElementById('id_region_adv');
     const cityAdvSelect = document.getElementById('id_city_adv');
 
-    const citiesByRegion = {
-        'Минская область': [
-              'Минск','Березино','Бобр','Борисов','Боровляны','Вилейка','Воложин','Городея','Дзержинск','Дружный',
-              'Жодино','Заславль','Ивенец','Клецк','Копыль','Кривичи','Крупки',
-              'Логойск','Любань','Марьина Горка','Молодечно','Мядель','Негорелое','Несвиж','Плещеницы',
-              'Радошковичи','Руденск','Свирь','Слуцк','Смиловичи','Смолевичи','Солигорск','Старобин','Старые Дороги',
-              'Столбцы','Узда','Уречье','Холопеничи','Червень'
-
-        ],
-
-        'Гомельская область': ['Гомель','Брагин','Буда-Кошелёво','Василевичи','Ветка','Добруш','Ельск',
-               'Житковичи','Жлобин','Калинковичи','Корма','Лельчицы','Лоев','Мозырь','Наровля','Озаричи','Октябрьский',
-               'Петриков','Речица','Рогачёв','Светлогорск','Стрешин','Туров',
-               'Хойники','Чечерск'
-    ],
-
-        'Гродненская область': [
-                'Гродно','Большая Берестовица','Волковыск','Вороново','Дятлово','Зельва',
-                'Ивье','Козловщина','Кореличи','Лида','Любча','Мир','Мосты','Новогрудок','Островец','Ошмяны',
-                'Свислочь','Скидель','Слоним', 'Сморгонь','Сопоцкин','Щучин'
-    ],
-
-        'Витебская область': [
-              'Витебск','Бегомль','Бешенковичи','Браслав','Верхнедвинск','Видзы','Глубокое','Городок','Дисна','Докшицы',
-              'Друя','Дубровно','Езерище','Лепель','Лиозно','Миоры','Новолукомль','Новополоцк','Орша',
-              'Полоцк','Поставы','Россоны','Сенно','Толочин',
-              'Шарковщина', 'Тарчин','Ушачи','Чашники','Шарковщина','Шумилино'
-    ],
-        'Брестская область': [
-               'Брест', "Антополь", 'Барановичи', 'Белоозёрск', 'Берёза', 'Высокое', 'Ганцевичи', 'Городище',
-               'Давид-Городок', 'Дрогичин', 'Жабинка', 'Иваново', 'Ивацевичи', 'Каменец', 'Кобрин', 'Коссово',
-               'Логишин', 'Лунинец', 'Ляховичи', 'Малорита', 'Пинск', 'Пружаны', 'Ружаны', 'Столин', 'Телеханы',
-               'Шерешёво'
-    ],
-
-        'Могилёвская область': [
-               'Могилёв','Белыничи','Бобруйск','Быхов','Глуск','Горки','Дрибин','Кировск',
-               'Климовичи','Кличев','Костюковичи','Краснополье','Кричев','Круглое','Мстиславль',
-               'Осиповичи','Славгород','Хотимск','Чаусы','Чериков','Шклов'
-    ]
-    };
-    // Функция для заполнения списка городов
-    function updateCitySelect(regionSelect, citySelect) {
+    // Функция для обновления списка городов
+    function updateCitySelect(regionSelect, citySelect, data) {
         const selectedRegion = regionSelect.value;
         citySelect.innerHTML = '';
 
-        if (citiesByRegion[selectedRegion]) {
-            citiesByRegion[selectedRegion].forEach(function(city) {
+        if (data[selectedRegion]) {
+            data[selectedRegion].forEach(city => {
                 const option = document.createElement('option');
                 option.value = city;
-                option.text = city;
+                option.textContent = city;
                 citySelect.appendChild(option);
             });
         } else {
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
-            defaultOption.text = 'Выберите город';
+            defaultOption.textContent = 'Выберите город';
             citySelect.appendChild(defaultOption);
         }
     }
 
-    // Слушатели событий для простого поиска
-    regionSelect.addEventListener('change', function() {
-        updateCitySelect(regionSelect, citySelect);
-    });
+    // Загрузка данных о регионах и городах с сервера
+    fetch('/get_regions_and_cities/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки данных');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Обработчик для основного поиска
+            if (regionSelect && citySelect) {
+                regionSelect.addEventListener('change', function() {
+                    updateCitySelect(regionSelect, citySelect, data);
+                });
 
-    // Слушатели событий для расширенного поиска
-    regionAdvSelect.addEventListener('change', function() {
-        updateCitySelect(regionAdvSelect, cityAdvSelect);
-    });
-});
+                // Если регион уже выбран, обновить города
+                if (regionSelect.value) {
+                    updateCitySelect(regionSelect, citySelect, data);
+                }
+            }
 
-document.addEventListener('DOMContentLoaded', function () {
+            // Обработчик для расширенного поиска
+            if (regionAdvSelect && cityAdvSelect) {
+                regionAdvSelect.addEventListener('change', function() {
+                    updateCitySelect(regionAdvSelect, cityAdvSelect, data);
+                });
+
+                // Если регион уже выбран в расширенном поиске, обновить города
+                if (regionAdvSelect.value) {
+                    updateCitySelect(regionAdvSelect, cityAdvSelect, data);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Ошибка загрузки данных';
+            if (citySelect) citySelect.appendChild(defaultOption);
+            if (cityAdvSelect) cityAdvSelect.appendChild(defaultOption);
+        });
+
+    // Логика переключения между обычным и расширенным поиском
     const toggleButton = document.getElementById('toggle-advanced-search');
     const basicSearch = document.getElementById('basic-search');
     const advancedSearch = document.getElementById('advanced-search');
 
-    toggleButton.addEventListener('click', function () {
-        if (basicSearch.style.display === 'none') {
-            basicSearch.style.display = 'block';
-            advancedSearch.style.display = 'none';
-            toggleButton.textContent = 'Расширенный поиск';
-        } else {
-            basicSearch.style.display = 'none';
-            advancedSearch.style.display = 'block';
-            toggleButton.textContent = 'Обычный поиск';
-        }
-    });
+    if (toggleButton && basicSearch && advancedSearch) {
+        toggleButton.addEventListener('click', function() {
+            if (basicSearch.style.display === 'none') {
+                basicSearch.style.display = 'block';
+                advancedSearch.style.display = 'none';
+                toggleButton.textContent = 'Расширенный поиск';
+            } else {
+                basicSearch.style.display = 'none';
+                advancedSearch.style.display = 'block';
+                toggleButton.textContent = 'Обычный поиск';
+            }
+        });
+    }
 });

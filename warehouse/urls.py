@@ -1,10 +1,10 @@
 from .views import logout_view
 from .views import add_part, get_dynamic_data
-
 from . import views
 from .views import add_image
-from django.urls import path
 from .views import import_excel
+from django.urls import path
+from .views import get_regions_and_cities
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -30,10 +30,9 @@ urlpatterns = [
     path('user/<int:user_id>/parts/', views.user_parts, name='user_parts'),
     path('add-part/', add_part, name='add_part'),
     path('get_dynamic_data/', get_dynamic_data, name='get_dynamic_data'),
+    path('get_regions_and_cities/', get_regions_and_cities, name='get_regions_and_cities'),
 
 ]
-
-
 
 
 

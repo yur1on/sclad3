@@ -9,17 +9,22 @@ from operator import itemgetter
 from django.http import HttpResponse
 import openpyxl
 from django.shortcuts import get_object_or_404
-import json
 from pathlib import Path
 from django.contrib.auth.models import User
-from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import PartForm, PartImageFormSet
 from .models import Part, PartImage
+import json
+from django.http import JsonResponse
+from django.conf import settings
+import os
+
+
 def home(request):
     return render(request, 'warehouse/home.html')
+
 
 @login_required
 def warehouse_view(request):
@@ -70,12 +75,9 @@ def warehouse_view(request):
     })
 
 
-
 def logout_view(request):
     logout(request)
     return redirect('home')  # Перенаправление на главную страницу после выхода
-
-
 
 
 def search(request):
@@ -138,6 +140,7 @@ def search(request):
         'city': city,
     })
 
+
 @login_required
 def edit_part(request, part_id):
     part = get_object_or_404(Part, id=part_id)
@@ -175,15 +178,14 @@ def delete_part(request, part_id):
     return render(request, 'warehouse/delete_part.html', {'part': part})
 
 
-
 @login_required(login_url='login')
 def profile(request):
     return render(request, 'warehouse/profile.html')
 
+
 @login_required(login_url='login')
 def warehouse(request):
     return render(request, 'warehouse/warehouse.html')
-
 
 
 @login_required
@@ -278,11 +280,13 @@ def export_excel(request):
 
     return response
 
+
 @login_required
 def get_brands_for_device(request):
     device = request.GET.get('device')
     brands = Part.objects.filter(user=request.user, device=device).values_list('brand', flat=True).distinct()
     return JsonResponse({'brands': list(brands)})
+
 
 @login_required
 def filter_parts(request):
@@ -329,6 +333,7 @@ def part_detail(request, part_id):
         'is_bookmarked': is_bookmarked
     })
 
+
 @login_required
 def user_parts(request, user_id):
     user = get_object_or_404(User, id=user_id)
@@ -339,8 +344,10 @@ def user_parts(request, user_id):
         'parts': parts
     })
 
+
 def add_part_success(request):
     return render(request, 'warehouse/add_part_success.html')
+
 
 def delete_image(request, image_id):
     if request.method == 'POST' and request.user.is_authenticated:
@@ -387,6 +394,7 @@ def get_brands(request):
     device = request.GET.get('device')
     brands = Part.objects.filter(device=device).values_list('brand', flat=True).distinct()
     return JsonResponse({'brands': list(brands)})
+
 
 @login_required
 def get_devices(request):
@@ -457,6 +465,7 @@ def get_parts(request):
     } for part in parts]
 
     return JsonResponse({'parts': parts_data})
+
 
 @login_required
 def import_excel(request):
@@ -542,14 +551,14 @@ def base_view(request):
     })
 
 
-
-
 # Путь к JSON файлу
 DATA_FILE = Path(__file__).resolve().parent / "data.json"
+
 
 def load_data():
     with open(DATA_FILE, 'r', encoding='utf-8') as file:
         return json.load(file)
+
 
 def get_dynamic_data(request):
     """Универсальное представление для динамического обновления данных."""
@@ -571,6 +580,7 @@ def get_dynamic_data(request):
         response["conditions"] = data.get(device, {}).get("conditions", [])
 
     return JsonResponse(response)
+
 
 @login_required
 def add_part(request):
@@ -642,3 +652,10 @@ def add_part(request):
         formset = PartImageFormSet(queryset=PartImage.objects.none())
 
     return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
+
+
+def get_regions_and_cities(request):
+    file_path = os.path.join(settings.BASE_DIR, 'static/json/belarus_regions_and_cities.json')
+    with open(file_path, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+    return JsonResponse(data)

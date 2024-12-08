@@ -76,9 +76,9 @@ def toggle_bookmark(request, part_id):
     if not created:
         # Если закладка уже существует, удаляем её
         bookmark.delete()
-        messages.success(request, f'Запчасть "{part.device} {part.brand} {part.model}" удалена из закладок.')
+        messages.success(request, f'Запчасть "{part.part_type}" для устройства {part.device} {part.brand} {part.model} удалена из закладок.')
     else:
-        messages.success(request, f'Запчасть "{part.device} {part.brand} {part.model}" добавлена в закладки.')
+        messages.success(request, f'Запчасть "{part.part_type}" для устройства {part.device} {part.brand} {part.model} добавлена в закладки.')
 
     # Проверяем, откуда пришел запрос: из профиля или с деталей запчасти
     next_page = request.GET.get('next')  # Попытаемся получить параметр next из URL
