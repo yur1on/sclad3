@@ -14,43 +14,13 @@
         </div>
     </div>
 
-<!--    &lt;!&ndash; Форма поиска &ndash;&gt;-->
-<!--    <div class="mb-4">-->
-<!--        <form method="get" class="row g-3">-->
-<!--            <div class="col-md-3">-->
-<!--                <label for="device" class="form-label">Устройство</label>-->
-<!--                <input type="text" list="devices" name="q" id="device" class="form-control" placeholder="Устройство" value="{{ query|default_if_none:'' }}">-->
-<!--                <datalist id="devices">-->
-<!--                    <option value="Телефон">-->
-<!--                    <option value="Планшет">-->
-<!--                    <option value="Ноутбук">-->
-<!--                    <option value="Смарт-часы">-->
-<!--                </datalist>-->
-<!--            </div>-->
+        <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Введите ключевые слова для поиска" value="{{ query|default_if_none:'' }}">
+            <button type="submit" class="btn btn-primary">Поиск</button>
+        </div>
+        </form>
 
-<!--            <div class="col-md-2">-->
-<!--                <label for="brand" class="form-label">Бренд</label>-->
-<!--                <input list="brands" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ brand|default_if_none:'' }}">-->
-<!--                <datalist id="brands"></datalist>-->
-<!--            </div>-->
-
-<!--            <div class="col-md-2">-->
-<!--                <label for="model" class="form-label">Модель</label>-->
-<!--                <input list="models" name="model" id="model" class="form-control" placeholder="Модель" value="{{ model|default_if_none:'' }}">-->
-<!--                <datalist id="models"></datalist>-->
-<!--            </div>-->
-
-<!--            <div class="col-md-3">-->
-<!--                <label for="part_type" class="form-label">Тип запчасти</label>-->
-<!--                <input list="part_types" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ part_type|default_if_none:'' }}">-->
-<!--                <datalist id="part_types"></datalist>-->
-<!--            </div>-->
-
-<!--            <div class="col-md-2 d-grid align-items-end">-->
-<!--                <button type="submit" class="btn btn-primary">Поиск</button>-->
-<!--            </div>-->
-<!--        </form>-->
-<!--    </div>-->
 
     <!-- Контейнеры для кнопочного поиска -->
     <div id="device-buttons-container" class="mb-4">

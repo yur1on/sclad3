@@ -122,3 +122,16 @@ body {
         height: 80px;
 
     }
+
+    /* Стили для таблиц */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white; /* Непрозрачный фон */
+    opacity: 1; /* Убираем прозрачность */
+    border: 1px solid #ddd; /* Граница таблицы */
+    border-radius: 8px; /* Закругленные углы */
+    overflow: hidden; /* Обрезка содержимого за границами */
+    margin-bottom: 20px; /* Отступ снизу */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Тень для таблицы */
+}

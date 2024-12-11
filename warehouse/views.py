@@ -18,6 +18,7 @@ from .forms import PartForm, PartImageFormSet
 from .models import Part, PartImage
 import json
 from django.http import JsonResponse
+
 from django.conf import settings
 import os
 
@@ -25,6 +26,8 @@ import os
 def home(request):
     return render(request, 'warehouse/home.html')
 
+
+from django.db.models import Q
 
 @login_required
 def warehouse_view(request):
@@ -39,9 +42,16 @@ def warehouse_view(request):
     # Фильтруем запчасти по пользователю
     parts = Part.objects.filter(user=request.user)
 
-    # Фильтрация по устройству
+    # Фильтрация по ключевым словам
     if query:
-        parts = parts.filter(device__icontains=query)
+        parts = parts.filter(
+            Q(device__icontains=query) |
+            Q(brand__icontains=query) |
+            Q(model__icontains=query) |
+            Q(part_type__icontains=query) |
+            Q(color__icontains=query) |
+            Q(note__icontains=query)
+        )
 
     # Фильтрация по бренду
     if brand:
@@ -56,7 +66,7 @@ def warehouse_view(request):
         parts = parts.filter(part_type__icontains=part_type)
 
     # Пагинация: 30 запчастей на странице
-    paginator = Paginator(parts, 30)  # Отображаем 30 запчастей на одной странице
+    paginator = Paginator(parts, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
