@@ -85,19 +85,34 @@
                     <textarea name="note" id="id_note" class="form-control" rows="3" placeholder="Введите примечание"></textarea>
                 </div>
 
-                <!-- Загрузка изображений -->
-                <div class="form-group mb-4">
-                    <label for="images" class="form-label">Фото (до 5 изображений)</label>
-                    {{ formset.management_form }}
-                    <div class="row">
+             <!-- Загрузка изображений -->
+            <div class="form-group mb-4">
+                <label for="images" class="form-label">Добавте фотографии (в формате JPG, JPEG, HEIC, PNG до 5 МБ каждый)</label>
+                {{ formset.management_form }}
+
+                <!-- Обработка ошибок formset -->
+                {% if formset.errors %}
+                <div class="error-list alert alert-danger">
+                    <ul>
                         {% for form in formset %}
-                        <div class="col-md-12 mb-3">
-                            {{ form.image.label_tag }}
-                            {{ form.image }}
-                        </div>
+                            {% for field, errors in form.errors.items %}
+                                <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+                            {% endfor %}
                         {% endfor %}
-                    </div>
+                    </ul>
                 </div>
+                {% endif %}
+
+                <div class="row">
+                    {% for form in formset %}
+                    <div class="col-md-12 mb-3">
+                        <label for="{{ form.image.id_for_label }}" class="form-label">Фото: </label>
+                        {{ form.image }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
 
                 <!-- Кнопка добавления -->
                 <div class="d-grid">

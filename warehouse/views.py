@@ -1,6 +1,5 @@
 
 from django.contrib.auth import logout
-from django.db.models import Q
 from django.core.paginator import Paginator
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
@@ -31,9 +30,6 @@ from django.db.models import Q
 
 @login_required
 def warehouse_view(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-
     query = request.GET.get('q')
     brand = request.GET.get('brand')
     model = request.GET.get('model')
@@ -64,6 +60,9 @@ def warehouse_view(request):
     # Фильтрация по типу запчасти
     if part_type:
         parts = parts.filter(part_type__icontains=part_type)
+
+    # Сортировка от новых к старым
+    parts = parts.order_by('-created_at')
 
     # Пагинация: 30 запчастей на странице
     paginator = Paginator(parts, 30)
