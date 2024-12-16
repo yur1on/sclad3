@@ -17,9 +17,10 @@ BELARUS_REGIONS = [
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=15)
-    region = models.CharField(max_length=100, choices=BELARUS_REGIONS, blank=True, null=True)  # Область
+    region = models.CharField(max_length=100, choices=BELARUS_REGIONS, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
-    workshop_name = models.CharField(max_length=100, blank=True, null=True)  # Добавляем поле мастерской
+    workshop_name = models.CharField(max_length=100, blank=True, null=True)
+    delivery_methods = models.TextField(max_length=300, blank=True, null=True)  # Новое поле для способов отправки
 
     def __str__(self):
         return f"{self.user.username} - {self.city} - {self.phone}"

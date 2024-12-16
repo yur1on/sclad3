@@ -116,38 +116,41 @@
         </div>
 
 <!-- Информация о пользователе -->
-        <div class="card mt-3">
-            <div class="card-header bg-success text-white">Информация о продавце</div>
-            <div class="card-body">
-                <table class="table table-striped">
-                    <tr>
-                        <th>Имя пользователя</th>
-                        <td>{{ part.user.username }}</td>
-                    </tr>
-                    <tr>
-                        <th>Мастерская</th>
-                        <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td>
-                    </tr>
-                    <tr>
-                        <th>Город</th>
-                        <td>{{ part.user.profile.city }}</td>
-                    </tr>
-                    <tr>
-                        <th>Телефон</th>
-                        <td>{{ part.user.profile.phone }}</td>
-                    </tr>
-                    <tr>
-                        <th>Средний рейтинг</th>
-                        <td>{{ part.user.profile.average_rating }} / 5</td>
-                    </tr>
-                    <tr>
-                        <th>Дата регистрации</th>
-                        <td>{{ part.user.date_joined|date:"d.m.Y" }}</td>
-                    </tr>
-                </table>
+             <div class="card mt-3">
+                <div class="card-header bg-success text-white">Информация о продавце</div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Имя пользователя</th>
+                            <td>{{ part.user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Мастерская</th>
+                            <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Город</th>
+                            <td>{{ part.user.profile.city }}</td>
+                        </tr>
+                        <tr>
+                            <th>Телефон</th>
+                            <td>{{ part.user.profile.phone }}</td>
+                        </tr>
+                        <tr>
+                            <th>Средний рейтинг</th>
+                            <td>{{ part.user.profile.average_rating }} / 5</td>
+                        </tr>
+                        <tr>
+                            <th>Дата регистрации</th>
+                            <td>{{ part.user.date_joined|date:"d.m.Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Способ доставки</th>
+                            <td>{{ part.user.profile.delivery_methods|default:"Не указан" }}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-        </div>
-
     </div>
 
     <!-- Фото запчасти -->
