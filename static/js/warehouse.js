@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedModel = '';
     let selectedPartType = '';
 
+    function removeParenthesesText(text) {
+    return text.replace(/\s*\(.*?\)\s*/g, ''); // Удаляем текст в скобках
+}
+
+
     // Загрузка кнопок для устройств при загрузке страницы
     fetch('/get-devices/')
         .then(response => response.json())
@@ -107,7 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setActiveButton(partTypeButtons, partType);
     }
 
-    // Функция для отображения кнопок
     function populateButtons(container, items, clickHandler, isCompact = false) {
         container.innerHTML = '';  // Очищаем контейнер от старых кнопок
 
@@ -122,11 +126,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 button.classList.add('btn-compact');  // Добавляем 'btn-compact' для кнопок моделей и типов запчастей
             }
 
-            button.textContent = item;
+            button.textContent = removeParenthesesText(item); // Убираем текст в скобках
             button.addEventListener('click', () => clickHandler(item));
             container.appendChild(button);
         });
     }
+
 
     // Функция для изменения активной кнопки (подсвечивание)
     function setActiveButton(container, selectedItem) {
@@ -160,10 +165,10 @@ function displayParts(parts) {
     parts.forEach(part => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${part.device}</td>
-            <td>${part.brand}</td>
-            <td>${part.model}</td>
-            <td>${part.part_type}</td>
+            <td>${removeParenthesesText(part.device)}</td>
+            <td>${removeParenthesesText(part.brand)}</td>
+            <td>${removeParenthesesText(part.model)}</td>
+            <td>${removeParenthesesText(part.part_type)}</td>
             <td>
                 <div>
                     <strong>Цвет:</strong> ${part.color || 'Не указан'} |
@@ -230,6 +235,7 @@ function displayParts(parts) {
         }
     });
 }
+
 
 
 });

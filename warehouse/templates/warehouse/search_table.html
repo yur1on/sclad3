@@ -35,7 +35,7 @@
                         (Состояние {{ result.condition }})
                     {% endif %}
                     <br>
-                    <span>Для устройства: {{ result.device }} {{ result.brand }} {{ result.model }}</span>
+                    <span>Для устройства: {{ result.device }} {{ result.brand }} {{ result.display_model }}</span>
                     <br>
                     {% if result.note %}
                         <span style="color: rgba(0, 0, 0, 0.6);">Примечание: {{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>

@@ -70,7 +70,7 @@
             <tr>
                 <td>{{ part.device }}</td>
                 <td>{{ part.brand }}</td>
-                <td>{{ part.model }}</td>
+                <td>{{ part.display_model }}</td> <!-- Новое поле -->
                 <td>{{ part.part_type }}</td>
                 <td>
                     <div>
@@ -91,7 +91,6 @@
                 </td>
                 <td>
                     {% if part.images.all %}
-                    <!-- Отображаем только первую фотографию -->
                     <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal-{{ part.id }}">
                         <img src="{{ part.images.all.0.image.url }}" alt="{{ part.model }}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
                     </a>
@@ -104,6 +103,7 @@
                     <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Удалить">🗑️</a>
                 </td>
             </tr>
+
 
             <!-- Модальное окно с каруселью изображений -->
             <div class="modal fade" id="imageModal-{{ part.id }}" tabindex="-1" aria-labelledby="imageModalLabel-{{ part.id }}" aria-hidden="true">

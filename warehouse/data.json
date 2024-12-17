@@ -53,30 +53,86 @@
                              "S23 Ultra (SM-S918)", "S24 (SM-S921)", "S24 FE (SM-S721B)", "S24 Plus (SM-S926)", "S24 Ultra (SM-S928)", "S25 Slim (SM-S937)",
                              "S25 Ultra (SM-S938)"],
 
-            "Huawei": ["Enjoy 6", "Enjoy 6s", "Enjoy 7", "Enjoy 7s", "Enjoy 7 Plus", "Enjoy 8", "Enjoy 8e", "Enjoy 8 Plus", "Enjoy 8e Lite", "Enjoy 9",
+            "Huawei": ["Enjoy 6 (NCE-AL00, NCE-TL00, NCE-AL10, NCE-TL10)", "Enjoy 6s (DIG-L01, DIG-L21HN, DIG-TL10, DIG-L03, DIG-L21, DIG-AL00, DIG-L23)", "Enjoy 7", "Enjoy 7s", "Enjoy 7 Plus", "Enjoy 8", "Enjoy 8e", "Enjoy 8 Plus", "Enjoy 8e Lite", "Enjoy 9",
                        "Enjoy 9e", "Enjoy 9s", "Enjoy 9 Plus", "Enjoy 10", "Enjoy 10s", "Enjoy 10e", "Enjoy 10 Plus", "Enjoy 20", "Enjoy 20e", "Enjoy 20 Pro",
-                       "Enjoy 20 Plus", "Enjoy 20 Se", "Enjoy 50", "Enjoy 50 Pro", "Enjoy 50z", "Enjoy 60", "Enjoy 60 Pro", "Enjoy 60x", "Enjoy 70", "Enjoy 70 Pro",
-                       "Enjoy 70z", "Enjoy 70s", "Y3", "Y5", "Y5 2018", "Y5 2019", "Y5p", "Y5s", "Y6", "Y6s", "Y6p", "Y6 Plus", "Y6 Pro", "Y6 2017", "Y6 Pro 2017", "Y6 2018", "Y6 2019", "Y6 Pro 2019", "Y6 Prime 2019",
-                       "Y7", "Y7a", "Y7 Prime", "Y7 Pro 2018", "Y7 Prime 2018", "Y7 Pro 2019", "Y7 Prime 2019", "Y8p", "Y8s", "Y9a", "Y9s", "Y9 2018", "Y9 2019", "Y9 Prime 2019", "Mate 8", "Mate 9" ,"Mate 9 Lite",
-                       "Mate 9 Pro", "Mate 10", "Mate 10 Lite", "Mate 10 Pro", "Mate RS", "Mate 20", "Mate 20 lite", "Mate 20 Pro", "Mate 20 RS", "Mate 20X", "Mate 20X 5G", "Mate 30", "Mate 30 Lite",
-                       "Mate 30 Pro", "Mate X2", "Mate X3", "Mate X5", "Mate X6", "Mate Xs", "Mate Xs 2", "Mate XT", "Mate 30E Pro 5G", "Mate 40", "Mate 40 Pro", "Mate 40 Pro Plus", "Mate 40 RS", "Mate 40E", "Mate 40 Pro",
-                       "Mate 50", "Mate 50 Pro", "Mate 50E", "Mate 50 RS", "Mate 60", "Mate 60 Pro", "Mate 60 Pro Plus", "Mate 70", "Mate 70 Pro", "Mate 70 Pro Plus", "Mate 70 RS"],
-             "Honor": [ ],
+                       "Enjoy 20 Plus", "Enjoy 20 Se", "Enjoy 50", "Enjoy 50 Pro", "Enjoy 50z", "Enjoy 60 (MGA-AL40)", "Enjoy 60 Pro", "Enjoy 60x (STG-AL00)", "Enjoy 70 (FGD-AL00)", "Enjoy 70 Pro",
+                       "Enjoy 70z (MGA-AL40)", "Enjoy 70s", "Y3 2017 (CRO-L02, CRO-L22, CRO-L03, CRO-L23, CRO-U00)", "Y3 2018 (CAG-L02, CAG-L22, CAG-L23, CAG-L03)", "Y5 2017 (MYA-L03, MYA-L23, MYA-L02, MYA-L22, MYA-U29, MYA-L13)",
+                       "Y5 Prime 2018 (DRA-LX2, DUA-LX2, DRA-L01, DUA-L21, DRA-L21, DRA-LX3, DRA-AL00, DRA-TL00, ATU-AL10)", "Y5 Lite 2018 (DRA-LX5)", "Y5 2019 (AMN-LX9, AMN-LX1, AMN-LX2, AMN-LX3)", "Y5p (DRA-LX9)",
+                       "Y6 (SCC-U21, SCL-U31, SCL-L21, SCL-L01, SCL-L04, SCL-AL00, HW-SCL-L32, SCL-TL00, SCL-L03, SCL-TL00H)",  "Y6p (MED-LX9, MED-LX9N)",
+                       "Y6 Pro (TIT-AL00, TIT-U02, TIT-L01, TIT-TL00)", "Y6 2017 (MYA-AL10, MYA-TL10, MYA-L03/L23, MYA-L02/L22, MYA-L11, MYA-L41)",  "Y6 2018 (ATU-L11, ATU-LX3, ATU-L21, ATU-L22)",
+                       "Y6 Prime 2018 (ATU-L31, ATU-L42)", "Y6 2019 (MRD-LX1F, MRD-LX1, MRD-LX3, MRD-LX1N)", "Y6 Pro 2019 (MRD-LX2)", "Y6s 2019 (JAT-LX3, JAT-L29, JAT-LX1, JAT-L41)",
+                       "Y7 (H1711, TRT-LX1, TRT-LX3, TRT-LX2)", "Y7a (PPA-LX3)", "Y7 Prime (TRT-L53, TRT-L21A, TRT-AL00, SLA-TL10, TRT-TL10, SLA-AL00, TRT-AL00A)", "Y7 Pro 2018", "Y7 Prime 2018 (LDN-L21, LDN-LX2, LDN-TL10)",
+                       "Y7 Pro 2019 (DUB-LX2, DUB-AL20, DUB-AL00, DUB-TL00)", "Y7 2019 (DUB-LX1, DUB-LX3)", "Y7 Prime 2019 (DUB-LX3)", "Y7a (PPA-LX3)", "Y7p (ART-L28, ART-L29)", "Y8p (AQM-LX1)", "Y8s (JKM-LX1, JKM-LX2, JKM-LX3)",
+                       "Y9a (FRL-22, FRL-23, FRL-L22, FRL-L23)", "Y9s (STK-L21, STK-LX3, STK-L22)", "Y9 2018 (FLA-AL10, FLA-AL00, FLA-LX1, FLA-LX2, FLA-LX3, LDN-AL00, FLA-AL20, FLA-TL10)",
+                       "Y9 2019 (JKM-LX1, JKM-LX2, JKM-LX3, JKM-AL00, JKM-TL00, JKM-AL00a, JKM-AL00b)", "Y9 Prime 2019 (STK-L21, STK-L22, STK-LX3)", "Mate 8 (NXT-AL10, NXT-CL00, NXT-DL00, NXT-TL00, NXT-L09, NXT-L29)", "Mate 9 (MHA-L29, MHA-L09, MHA-AL00, MHA-TL00)",
+                       "Mate 9 Lite",
+                       "Mate 9 Pro (LON-L29, LON-AL00)", "Mate 10 (ALP-L29, ALP-L09, ALP-AL00, ALP-TL00)", "Mate 10 Lite (RNE-L21, RNE-L22, RNE-L01, RNE-L02, RNE-L11, RNE-L23, RNE-L03, RNE-AL00)",
+                       "Mate 10 Pro (BLA-L29, BLA-L09, BLA-AL00, BLA-A09, BLA-TL00)", "Mate 20 (HMA-L29, HMA-L09, HMA-LX9, HMA-AL00, HMA-TL00)", "Mate 20 lite (SNE-AL00, SNE-LX1, SNE-LX2, SNE-LX3, INE-LX2)",
+                       "Mate 20 Pro (LYA-L09, LYA-L29, LYA-AL00, LYA-AL10, LYA-TL00, LYA-L0C)", "Mate 20 RS", "Mate 20X (EVR-L29, EVR-AL00, EVR-TL00)", "Mate 20X 5G (EVR-N29, EVR-AN00)",
+                       "Mate 30 (TAS-L09, TAS-L29, TAS-AL00, TAS-TL00)", "Mate 30 5G (TAS-AN00, TAS-TN00)", "Mate 30 Lite (SPL-AL00, SPL-TL00)",
+                       "Mate 30 Pro (LIO-L09, LIO-L29, LIO-AL00, LIO-TL00)", "Mate 30 Pro 5G (LIO-N29, LIO-AL10, LIO-TL10)", "Mate 30E Pro 5G (LIO-AN00m)", "Mate 40 (OCE-AN10)", "Mate 40 Pro (NOH-NX9, NOH-AN00, NOH-AN01)", "Mate 40 Pro Plus (NOP-AN00)",
+                       "Mate 40 RS (NOP-AN00)", "Mate 40E (OCE-AN50)", "Mate 40 Pro 4G (NOH-AL00, NOH-AL10)",
+                       "Mate 50 (CET-AL00, CET-LX9)", "Mate 50 Pro (DCO-AL00, DCO-LX9)", "Mate 50E (CET-AL60)", "Mate 50 RS (DCO-AL00)", "Mate 60 (ALN-AL00, BRA-AL00)",
+                       "Mate 60 Pro (ALN-AL00, ALN-AL80)", "Mate 60 Pro Plus (ALN-AL10)", "Mate RS (ALN-AL10)", "Mate 70 (CLS-AL00)", "Mate 70 Pro (PLR-AL00)", "Mate 70 Pro Plus (PLA-AL10)",
+                       "Mate 70 RS (PLU-AL10)", "Mate X2 (TET-AN00)", "Mate X3 (ALT-AL00, ALT-L29)", "Mate X5 (ALT-AL10)", "Mate X6 (ICL-AL10)", "Mate Xs (TAH-N29m)", "Mate Xs 2 (PAL-AL00, PAL-LX9)", "Mate XT (GRL-AL10)" ],
+            "Honor": [ ],
             "Xiaomi": [ ],
-              "Poco": [ ]
+            "Poco": [ ],
+            "Realme": [ ],
+            "Vivo": [ ],
+            "Tecno": [ ],
+            "Infinix": [ ],
+            "TCL": [ ],
+            "Oppo": [ ],
+            "Google": [ ],
+            "OnePlus": [ ],
+            "Alcatel": [ ],
+            "Amigoo": [ ],
+            "Archos": [ ],
+            "Asus": [ ],
+            "Black Shark": [ ],
+            "BlackBerry": [ ],
+            "BLU": [ ],
+            "Cat": [ ],
+            "Caterpillar": [ ],
+            "Coolpad": [ ],
+            "Cubot": [ ],
+            "Doogee": [ ],
+            "Elephone": [ ],
+            "HTC": [ ],
+            "Lava": [ ],
+            "Lenovo": [ ],
+            "LG": [ ],
+            "Meizu": [ ],
+            "Micromax": [ ],
+            "Motorola": [ ],
+            "Nokia": [ ],
+            "Nubia": [ ],
+            "Oukitel": [ ],
+            "Sharp": [ ],
+            "Sony": [ ],
+            "Wiko": [ ],
+            "ZTE": [ ]
 
         },
         "part_types": ["Аккумулятор", "Вибромотор", "Датчик приближения", "Динамик музыкальный", "Динамик слуховой",
                        "Дисплей", "Камера основная", "Камера фронтальная", "Коннектор АКБ", "Коннектор дисплея", "Коннектор межплатный", "Корпус", "Крышка задняя", "Разъем гарнитуры",
                        "Разъем зарядки", "Рама дисплея", "Сетка слухового динамика", "Сим-лоток", "Сканер отпечатка",
-                       "Стекло камеры", "Стекло для переклейки", "Микросхема", "Микрофон", "Шлейф межплатный", "Шлейф сканера отпечатка",
+                       "Стекло камеры", "Стекло для переклейки", "Тачскрин", "Микросхема", "Микрофон", "Шлейф межплатный", "Шлейф сканера отпечатка",
                        "Шлейф дисплея", "Шлейф боковых кнопок", "Плата системная", ""],
         "colors": {
-            "Дисплей": ["Черный", "Белый", "Серый"],
-            "Сим-лоток": ["Черный", "Белый"],
-            "Крышка задняя": ["Черный", "Белый"]
-        },
-        "conditions": ["новый", "б/у", "оригинал"]
+            "Дисплей": ["Черный", "Белый", "Бордовый", "Голубой", "Графитовый", "Желтый", "Зеленый", "Золотой", "Оранжевый", "Розовый", "Синий", "Серый", "Серебряный", "Фиолетовый"],
+            "Сим-лоток": ["Черный", "Белый", "Бордовый", "Голубой", "Графитовый", "Желтый", "Зеленый", "Золотой", "Оранжевый", "Розовый", "Синий", "Серый", "Серебряный", "Фиолетовый"],
+            "Корпус": ["Черный", "Белый", "Бордовый", "Голубой", "Графитовый", "Желтый", "Зеленый", "Золотой", "Оранжевый", "Розовый", "Синий", "Серый", "Серебряный", "Фиолетовый"],
+            "Крышка задняя": ["Черный", "Белый", "Бордовый", "Голубой", "Графитовый", "Желтый", "Зеленый", "Золотой", "Оранжевый", "Розовый", "Синий", "Серый", "Серебряный", "Фиолетовый"],
+            "Рама дисплея": ["Черный", "Белый", "Бордовый", "Голубой", "Графитовый", "Желтый", "Зеленый", "Золотой", "Оранжевый", "Розовый", "Синий", "Серый", "Серебряный", "Фиолетовый"],
+            "Тачскрин": ["Черный", "Белый"],
+            "Сканер отпечатка": ["Черный", "Белый", "Бордовый", "Голубой", "Графитовый", "Желтый", "Зеленый", "Золотой", "Оранжевый", "Розовый", "Синий", "Серый", "Серебряный", "Фиолетовый"],
+            "Стекло камеры": ["Черный", "Белый", "Бордовый", "Голубой", "Графитовый", "Желтый", "Зеленый", "Золотой", "Оранжевый", "Розовый", "Синий", "Серый", "Серебряный", "Фиолетовый"],
+            "Стекло для переклейки": ["Черный", "Белый"]
+          },
+
+        "conditions": ["Оригинал б/у", "Оригинал новый", "Копия б/у", "Копия новый"]
     },
     "Планшет": {
         "brands": ["Apple", "Samsung", "Huawei", "Honor", "Xiaomi", "Poco", "Realme", "Lenovo", "Vivo", "Infinix", "TCL",
@@ -93,7 +149,7 @@
             "Аккумулятор": ["Черный", "Белый"],
             "Задняя крышка": ["Черный", "Белый"]
         },
-        "conditions": ["новый", "б/у", "оригинал"]
+        "conditions": ["Оригинал б/у", "Оригинал новый", "Копия б/у", "Копия новый"]
     },
     "Смарт-часы": {
         "brands": ["Samsung", "Huawei", "Xiaomi", "Apple", "LG", "Realme"],
@@ -107,7 +163,7 @@
             "Аккумулятор": ["Черный", "Белый"],
             "Задняя крышка": ["Черный", "Белый"]
         },
-        "conditions": ["новый", "б/у", "оригинал"]
+        "conditions": ["Оригинал б/у", "Оригинал новый", "Копия б/у", "Копия новый"]
     },
     "Ноутбук": {
         "brands": ["Samsung", "Huawei", "Xiaomi", "Apple", "LG", "Realme"],
@@ -121,6 +177,6 @@
             "Аккумулятор": ["Черный", "Белый"],
             "Задняя крышка": ["Черный", "Белый"]
         },
-        "conditions": ["б/у", "новый", "оригинал"]
+        "conditions": ["Оригинал б/у", "Оригинал новый", "Копия б/у", "Копия новый"]
     }
 }

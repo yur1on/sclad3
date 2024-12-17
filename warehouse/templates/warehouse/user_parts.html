@@ -1,42 +1,44 @@
 {% extends 'warehouse/base.html' %}
 
-{% block title %}Запчасти пользователя{% endblock %}
+{% block title %}Запчасти пользователя {{ viewed_user.username }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Запчасти пользователя {{ user.username }}</h2>
+    <h2 class="mb-4">Запчасти пользователя {{ viewed_user.username }}</h2>
 
-    {% if parts %}
-        <table class="table table-bordered table-striped">
-            <thead class="thead-light">
-                <tr>
-                    <th>Устройство</th>
-                    <th>Бренд</th>
-                    <th>Модель</th>
-                    <th>Тип запчасти</th>
-                    <th>Цвет</th>
-                    <th>Количество</th>
-                    <th>Цена</th>
-                    <th>Детали</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for part in parts %}
-                    <tr>
-                        <td>{{ part.device }}</td>
-                        <td>{{ part.brand }}</td>
-                        <td>{{ part.model }}</td>
-                        <td>{{ part.part_type }}</td>
-                        <td>{{ part.color }}</td>
-                        <td>{{ part.quantity }}</td>
-                        <td>{{ part.price }}</td>
-                        <td><a href="{% url 'part_detail' part.id %}" class="btn btn-info btn-sm">Подробнее</a></td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    {% if grouped_parts %}
+        {% for device, brands in grouped_parts.items %}
+            <h3>Устройство: {{ device }}</h3>
+            {% for brand, parts in brands.items %}
+                <h4 class="ml-3">Бренд: {{ brand }}</h4>
+                <table class="table table-bordered table-striped ml-4">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Модель</th>
+                            <th>Тип запчасти</th>
+                            <th>Цвет</th>
+                            <th>Количество</th>
+                            <th>Цена</th>
+                            <th>Детали</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for part in parts %}
+                            <tr>
+                                <td>{{ part.display_model }}</td>
+                                <td>{{ part.part_type }}</td>
+                                <td>{{ part.color }}</td>
+                                <td>{{ part.quantity }}</td>
+                                <td>{{ part.price }}</td>
+                                <td><a href="{% url 'part_detail' part.id %}" class="btn btn-info btn-sm">Подробнее</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
+        {% endfor %}
     {% else %}
-        <p>У пользователя нет добавленных запчастей.</p>
+        <p>У пользователя {{ viewed_user.username }} нет добавленных запчастей.</p>
     {% endif %}
 </div>
 {% endblock %}

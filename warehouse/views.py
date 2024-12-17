@@ -3,13 +3,10 @@ from django.contrib.auth import logout
 from django.core.paginator import Paginator
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
-from itertools import groupby
 from operator import itemgetter
 from django.http import HttpResponse
 import openpyxl
-from django.shortcuts import get_object_or_404
 from pathlib import Path
-from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -17,9 +14,13 @@ from .forms import PartForm, PartImageFormSet
 from .models import Part, PartImage
 import json
 from django.http import JsonResponse
-
 from django.conf import settings
 import os
+from itertools import groupby
+from django.shortcuts import render
+from .models import Part
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
 
 
 def home(request):
@@ -343,15 +344,6 @@ def part_detail(request, part_id):
     })
 
 
-@login_required
-def user_parts(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    parts = Part.objects.filter(user=user)  # Получаем все запчасти этого пользователя
-
-    return render(request, 'warehouse/user_parts.html', {
-        'user': user,
-        'parts': parts
-    })
 
 
 def add_part_success(request):
@@ -399,45 +391,33 @@ def add_image(request):
     return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса.'})
 
 
-def get_brands(request):
-    device = request.GET.get('device')
-    brands = Part.objects.filter(device=device).values_list('brand', flat=True).distinct()
-    return JsonResponse({'brands': list(brands)})
 
 
 @login_required
 def get_devices(request):
-    # Фильтруем и сортируем устройства по текущему пользователю
     devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct().order_by('device')
     return JsonResponse({'devices': list(devices)})
-
 
 @login_required
 def get_brands(request):
     device = request.GET.get('device')
-    # Фильтруем и сортируем бренды по устройству и пользователю
     brands = Part.objects.filter(user=request.user, device=device).values_list('brand', flat=True).distinct().order_by('brand')
     return JsonResponse({'brands': list(brands)})
-
 
 @login_required
 def get_models(request):
     device = request.GET.get('device')
     brand = request.GET.get('brand')
-    # Фильтруем и сортируем модели по устройству, бренду и пользователю
     models = Part.objects.filter(user=request.user, device=device, brand=brand).values_list('model', flat=True).distinct().order_by('model')
     return JsonResponse({'models': list(models)})
-
 
 @login_required
 def get_part_types(request):
     device = request.GET.get('device')
     brand = request.GET.get('brand')
     model = request.GET.get('model')
-    # Фильтруем и сортируем типы запчастей по устройству, бренду, модели и пользователю
     part_types = Part.objects.filter(user=request.user, device=device, brand=brand, model=model).values_list('part_type', flat=True).distinct().order_by('part_type')
     return JsonResponse({'part_types': list(part_types)})
-
 
 @login_required
 def get_parts(request):
@@ -446,19 +426,17 @@ def get_parts(request):
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
 
-    # Фильтруем запчасти на основе переданных параметров
-    parts = Part.objects.filter(user=request.user)
-
+    filters = {'user': request.user}
     if device:
-        parts = parts.filter(device=device)
+        filters['device'] = device
     if brand:
-        parts = parts.filter(brand=brand)
+        filters['brand'] = brand
     if model:
-        parts = parts.filter(model=model)
+        filters['model'] = model
     if part_type:
-        parts = parts.filter(part_type=part_type)
+        filters['part_type'] = part_type
 
-    # Формируем данные для ответа с добавлением note и condition
+    parts = Part.objects.filter(**filters).prefetch_related('images')
     parts_data = [{
         'id': part.id,
         'device': part.device,
@@ -468,13 +446,12 @@ def get_parts(request):
         'color': part.color,
         'quantity': part.quantity,
         'price': part.price,
-        'note': part.note,  # Добавлено поле note
-        'condition': part.condition,  # Добавлено поле condition
+        'note': part.note,  # Поле должно существовать в модели
+        'condition': part.condition,  # Поле должно существовать в модели
         'images': [{'image_url': image.image.url} for image in part.images.all()]
     } for part in parts]
 
     return JsonResponse({'parts': parts_data})
-
 
 @login_required
 def import_excel(request):
@@ -668,3 +645,48 @@ def get_regions_and_cities(request):
     with open(file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
     return JsonResponse(data)
+
+
+# views.py
+
+
+def user_parts_list(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user_parts = Part.objects.filter(user_id=user_id).order_by('device', 'brand', 'model')
+
+    grouped_parts = {}
+    for device, device_parts in groupby(user_parts, lambda x: x.device):
+        grouped_parts[device] = {}
+        for brand, brand_parts in groupby(device_parts, lambda x: x.brand):
+            grouped_parts[device][brand] = list(brand_parts)
+
+    return render(request, 'warehouse/user_parts.html', {
+        'grouped_parts': grouped_parts,
+        'viewed_user': user,
+    })
+
+# @login_required
+# def user_parts(request, user_id):
+#     user = get_object_or_404(User, id=user_id)
+#     parts = Part.objects.filter(user=user)  # Получаем все запчасти этого пользователя
+#
+#     return render(request, 'warehouse/user_parts.html', {
+#         'user': user,
+#         'parts': parts
+#     })
+
+@login_required
+def user_parts(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user_parts = Part.objects.filter(user_id=user_id).order_by('device', 'brand', 'model')
+
+    grouped_parts = {}
+    for device, device_parts in groupby(user_parts, lambda x: x.device):
+        grouped_parts[device] = {}
+        for brand, brand_parts in groupby(device_parts, lambda x: x.brand):
+            grouped_parts[device][brand] = list(brand_parts)
+
+    return render(request, 'warehouse/user_parts.html', {
+        'grouped_parts': grouped_parts,
+        'viewed_user': user,  # Передаём просмотренного пользователя
+    })

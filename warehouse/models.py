@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import re
 
 class Part(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -18,9 +19,13 @@ class Part(models.Model):
     def __str__(self):
         return f"{self.device} - {self.brand} - {self.model} - {self.part_type}"
 
+    # Свойство для отображения модели без содержимого в скобках
+    @property
+    def display_model(self):
+        return re.sub(r'\s\(.*?\)$', '', self.model)
+
     # Переопределяем метод delete для удаления связанных изображений
     def delete(self, using=None, keep_parents=False):
-        # Удаляем все связанные изображения перед удалением запчасти
         for image in self.images.all():
             image.delete()
         super().delete(using=using, keep_parents=keep_parents)
