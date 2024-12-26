@@ -133,19 +133,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    // Функция для изменения активной кнопки (подсвечивание)
     function setActiveButton(container, selectedItem) {
         Array.from(container.children).forEach(button => {
             button.classList.remove('btn-active');
             button.classList.add('btn-primary');
         });
 
-        const selectedButton = Array.from(container.children).find(button => button.textContent === selectedItem);
+        const selectedButton = Array.from(container.children).find(button =>
+            removeParenthesesText(button.textContent) === removeParenthesesText(selectedItem)
+        );
         if (selectedButton) {
             selectedButton.classList.remove('btn-primary');
             selectedButton.classList.add('btn-active');
         }
     }
+
 
     // Функция для обновления таблицы с запчастями
     function updateTable() {

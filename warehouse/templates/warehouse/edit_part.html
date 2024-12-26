@@ -1,76 +1,56 @@
 {% extends 'warehouse/base.html' %}
+
 {% block title %}Редактировать запчасть{% endblock %}
+
 {% block content %}
 {% load static %}
 
 <style>
-/* Контейнер для изображений */
-.image-container {
-    display: flex;
-    flex-wrap: wrap; /* Перенос на следующую строку при нехватке места */
-    gap: 10px; /* Отступы между изображениями */
+
+/* Основной контейнер */
+.container {
+    display: table;
+
+    flex-direction: list-item;
+    justify-content: space-between;
     align-items: flex-start;
-    width: 100%; /* Ширина контейнера */
-}
-
-/* Элемент внутри контейнера */
-.image-item {
-    display: flex;
-    flex-direction: column; /* Кнопка будет под фото */
-    align-items: center;
-    width: 80px; /* Фиксированная ширина блока для каждого изображения */
-}
-
-/* Изображения внутри контейнера */
-.image-item img {
-    width: 100px; /* Фиксированная ширина изображения */
-    height: 100px; /* Фиксированная высота изображения */
-
-    border-radius: 10px; /* Скругление углов */
-}
-
-/* Кнопка под изображением */
-.image-item .delete-image {
-    margin-top: 5px;
-}
-
-.image-edit-section {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-}
-
-.image-container {
-    display: flex;
-    flex-wrap: wrap;
     gap: 10px;
     margin-top: 10px;
 }
 
-.image-item {
+/* Левая колонка для изображений */
+.image-column {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 100px;
-    text-align: center;
+    align-items: flex-start; /* Выравнивание по верхнему краю */
+    gap: 10px;
+    width: 250px;
 }
 
+/* Изображение */
 .image-item img {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
     border-radius: 8px;
+    border: 1px solid #ddd;
+    min-height: 90px; /* Одинаковая высота для всех ячеек */
 }
 
+/* Пустая ячейка для добавления фото */
 .add-image {
-    display: flex;
+   display: flex;
+    grid-template-columns: repeat(3, 1fr); /* 3 колонки одинаковой ширины */
+    gap: 10px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2px dashed #ddd;
+    border: 1px dashed #ddd;
     border-radius: 8px;
-    width: 80px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     cursor: pointer;
+    min-height: 90px; /* Одинаковая высота для всех ячеек */
 }
 
 .add-image .add-icon {
@@ -83,106 +63,149 @@
     border-color: #aaa;
 }
 
+/* Кнопка удаления */
+.delete-image {
+    padding: 5px 10px;
+    font-size: 12px;
+    color: white;
+    background-color: #ff4d4d; /* Красный фон */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.delete-image:hover {
+    background-color: #e60000; /* Темно-красный при наведении */
+    transform: scale(1.1); /* Легкое увеличение при наведении */
+}
+
+/* Правая колонка для форм */
+.form-column {
+    flex-grow: 1;
+    max-width: 700px;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+button {
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #565e64;
+}
+
 
 </style>
 
 <div class="container">
-    <h2>Редактировать запчасть</h2>
-
-    <form method="post" enctype="multipart/form-data" id="edit-part-form">
-        {% csrf_token %}
-
-        <!-- Информация о запчасти -->
-        <div class="form-group">
-            <label for="device">Устройство</label>
-            <input type="text" name="device" id="device" class="form-control" value="{{ part.device }}" required>
+           <h2>Редактировать запчасть</h2>
+    <!-- Левая колонка для изображений -->
+    <div class="image-column">
+        <h4>Изображения</h4>
+        {% for image in part.images.all %}
+        <div class="image-item" data-image-id="{{ image.id }}">
+            <img src="{{ image.image.url }}" alt="Image">
+            <button type="button" class="delete-image" data-image-id="{{ image.id }}">Удалить</button>
         </div>
-
-        <div class="form-group">
-            <label for="brand">Бренд</label>
-            <input type="text" name="brand" id="brand" class="form-control" value="{{ part.brand }}" required>
+        {% endfor %}
+        {% if part.images.count < 5 %}
+        <div class="add-image" onclick="document.getElementById('new-image-input').click();">
+            <input type="file" id="new-image-input" class="d-none" onchange="uploadImage(this);" accept="image/*">
+            <div class="add-icon">+</div>
+            <span>Добавить фото</span>
         </div>
+        {% endif %}
+    </div>
 
-        <div class="form-group">
-            <label for="model">Модель</label>
-            <input type="text" name="model" id="model" class="form-control" value="{{ part.model }}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="part_type">Тип запчасти</label>
-            <input type="text" name="part_type" id="part_type" class="form-control" value="{{ part.part_type }}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="color">Цвет</label>
-            <input type="text" name="color" id="color" class="form-control" value="{{ part.color }}">
-        </div>
-
-        <div class="form-group">
-            <label for="quantity">Количество</label>
-            <input type="number" name="quantity" id="quantity" class="form-control" value="{{ part.quantity }}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="price">Цена</label>
-            <input type="number" name="price" id="price" class="form-control" value="{{ part.price }}" required>
-        </div>
-
-         <!-- Секция редактирования изображений -->
-        <div class="form-group image-edit-section p-3 mt-4">
-            <h4>Изображения (до 5)</h4>
-            <div class="image-container" id="image-container">
-                {% for image in part.images.all %}
-                    <div class="image-item" data-image-id="{{ image.id }}">
-                        <img src="{{ image.image.url }}" alt="Image">
-                        <button type="button" class="btn btn-sm btn-danger delete-image" data-image-id="{{ image.id }}">Удалить</button>
-                    </div>
-                {% endfor %}
-                <!-- Кнопка добавления изображения -->
-                {% if part.images.count < 5 %}
-                    <div class="image-item add-image" onclick="document.getElementById('new-image-input').click();">
-                        <input type="file" id="new-image-input" class="d-none" onchange="uploadImage(this);" accept="image/*">
-                        <div class="add-icon">+</div>
-                        <span>Добавить фото</span>
-                    </div>
-                {% endif %}
+    <!-- Правая колонка для формы -->
+    <div class="form-column">
+        <form method="post" enctype="multipart/form-data" id="edit-part-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="device">Устройство</label>
+                <input type="text" name="device" id="device" class="form-control" value="{{ part.device }}" required>
             </div>
-        </div>
 
-        <!-- Кнопки сохранения и отмены -->
-        <button type="submit" class="btn btn-primary mt-3">Сохранить изменения</button>
-        <a href="{% url 'warehouse' %}" class="btn btn-secondary mt-3">Назад</a>
-    </form>
+            <div class="form-group">
+                <label for="brand">Бренд</label>
+                <input type="text" name="brand" id="brand" class="form-control" value="{{ part.brand }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="model">Модель</label>
+                <input type="text" name="model" id="model" class="form-control" value="{{ part.model }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="part_type">Тип запчасти</label>
+                <input type="text" name="part_type" id="part_type" class="form-control" value="{{ part.part_type }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="color">Цвет</label>
+                <input type="text" name="color" id="color" class="form-control" value="{{ part.color }}">
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">Количество</label>
+                <input type="number" name="quantity" id="quantity" class="form-control" value="{{ part.quantity }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Цена</label>
+                <input type="number" name="price" id="price" class="form-control" value="{{ part.price }}" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            <a href="{% url 'warehouse' %}" class="btn btn-secondary">Назад</a>
+        </form>
+    </div>
 </div>
 
-
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <script>
 const maxImages = 5;
 
-function updateAddImageButton() {
-    const currentImagesCount = $('#image-container .image-item').length;
-    $('.add-image').remove(); // Удаляем все кнопки перед обновлением
-
-    if (currentImagesCount < maxImages) {
-        const remainingSlots = maxImages - currentImagesCount;
-
-        for (let i = 1; i <= remainingSlots; i++) {
-            const buttonId = currentImagesCount + i;
-            $('#image-container').append(`
-                <div class="add-image" onclick="document.getElementById('images-${buttonId}').click();">
-                    <input type="file" name="images" id="images-${buttonId}" class="d-none" onchange="uploadImage(this);">
-                    Добавить фото
-                </div>
-            `);
-        }
-    }
-}
-
 function uploadImage(input) {
-    const currentImagesCount = $('#image-container .image-item').length;
+    const currentImagesCount = $('.image-item').length;
 
     if (currentImagesCount >= maxImages) {
         alert('Вы можете загрузить не более 5 изображений.');
@@ -202,58 +225,36 @@ function uploadImage(input) {
         processData: false,
         success: function(response) {
             if (response.status === 'success') {
-                response.images.forEach(image => {
-                    const newImageItem = `
-                        <div class="image-item" data-image-id="${image.id}">
-                            <img src="${image.url}" alt="Image">
-                            <button type="button" class="btn btn-danger btn-sm delete-image" data-image-id="${image.id}">
-                                Удалить
-                            </button>
-                        </div>
-                    `;
-                    $('#image-container').append(newImageItem);
-                });
-                updateAddImageButton();
+                location.reload();
             } else {
                 alert('Ошибка при добавлении изображения: ' + response.message);
             }
         },
-        error: function(xhr, status, error) {
-            console.error('Ошибка AJAX запроса:', error);
-            alert('Произошла ошибка при выполнении запроса. Пожалуйста, попробуйте снова.');
+        error: function() {
+            alert('Произошла ошибка при загрузке изображения.');
         }
     });
 }
 
 $(document).on('click', '.delete-image', function () {
     const imageId = $(this).data('image-id');
-    const imageItem = $(this).closest('.image-item');
-
     if (confirm('Вы уверены, что хотите удалить это изображение?')) {
         $.ajax({
             url: '/delete-image/' + imageId + '/',
             method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            success: function (response) {
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: function(response) {
                 if (response.status === 'success') {
-                    imageItem.remove();
-                    updateAddImageButton();
+                    location.reload();
                 } else {
                     alert('Ошибка при удалении изображения: ' + response.message);
                 }
             },
-            error: function (xhr, status, error) {
-                console.error('Ошибка AJAX запроса:', error);
-                alert('Произошла ошибка при выполнении запроса. Пожалуйста, попробуйте снова.');
+            error: function() {
+                alert('Произошла ошибка при удалении изображения.');
             }
         });
     }
-});
-
-$(document).ready(function() {
-    updateAddImageButton(); // Инициализация кнопок при загрузке страницы
 });
 </script>
 

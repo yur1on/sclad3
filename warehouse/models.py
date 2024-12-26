@@ -6,7 +6,7 @@ class Part(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     device = models.CharField(max_length=100)
     brand = models.CharField(max_length=100)
-    model = models.CharField(max_length=100)
+    model = models.CharField(max_length=200)
     part_type = models.CharField(max_length=100)
     condition = models.CharField(max_length=50, blank=True, null=True)  # Новое поле для состояния
     color = models.CharField(max_length=50, blank=True, null=True)

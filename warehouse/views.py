@@ -1,14 +1,9 @@
 
 from django.contrib.auth import logout
 from django.core.paginator import Paginator
-from openpyxl import Workbook
-from openpyxl.styles import PatternFill, Font
-from operator import itemgetter
-from django.http import HttpResponse
 import openpyxl
 from pathlib import Path
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import PartForm, PartImageFormSet
 from .models import Part, PartImage
@@ -16,11 +11,15 @@ import json
 from django.http import JsonResponse
 from django.conf import settings
 import os
-from itertools import groupby
 from django.shortcuts import render
-from .models import Part
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
+from django.http import HttpResponse
+from itertools import groupby
+from .models import Part
+from django.contrib.auth.decorators import login_required
 
 
 def home(request):
@@ -205,7 +204,7 @@ def export_excel(request):
     ws = wb.active
     ws.title = "Запчасти"
 
-    # Обновляем заголовки для отдельных столбцов
+    # Заголовки столбцов
     headers = ["Устройство", "Бренд", "Модель", "Тип запчасти", "Цвет", "Количество (шт.)", "Цена (руб.)"]
     ws.append(headers)
 
@@ -215,60 +214,53 @@ def export_excel(request):
         cell = ws.cell(row=1, column=col_num)
         cell.font = header_font
 
-    # Цвета для заливки (чередуем два цвета для лучшей читабельности)
-    fill_colors = ['DCE6F1', 'FCE4D6']  # Светло-синий и светло-оранжевый
-    color_index = 0  # Индекс для чередования цветов
+    # Получаем данные из модели, сортируем по устройству, бренду и модели
+    user_parts = Part.objects.filter(user=request.user).order_by('device', 'brand', 'model')
 
-    # Получаем данные из модели, сортируем по устройству, бренду, модели и типу запчасти
-    parts = Part.objects.filter(user=request.user).order_by('device', 'brand', 'model', 'part_type')
+    # Группируем данные по устройству, бренду и модели
+    grouped_parts = {}
+    for device, device_parts in groupby(user_parts, lambda x: x.device):
+        grouped_parts[device] = {}
+        for brand, brand_parts in groupby(device_parts, lambda x: x.brand):
+            grouped_parts[device][brand] = list(brand_parts)
 
-    # Группируем запчасти по комбинации устройства, бренда и модели
-    parts_list = list(parts.values('device', 'brand', 'model', 'part_type', 'color', 'quantity', 'price'))
-    grouped_parts = groupby(parts_list, key=itemgetter('device', 'brand', 'model'))
+    row_num = 2  # Начинаем со второй строки (первая строка — заголовки)
 
-    row_num = 2  # Начинаем со второй строки, так как первая — заголовки
-    for (device, brand, model), part_group in grouped_parts:
-        # Цвет заливки для каждой новой модели
-        fill = PatternFill(start_color=fill_colors[color_index], end_color=fill_colors[color_index], fill_type="solid")
-        color_index = (color_index + 1) % len(fill_colors)  # Переключаем цвет для следующей модели
+    # Цвет заливки для строк-разделителей
+    separator_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
 
-        # Добавляем строку с данными устройства, бренда и модели
-        ws.append([device, brand, model, "", "", "", ""])
-        for col_num in range(1, 8):  # Применяем цвет ко всей строке
-            ws.cell(row=row_num, column=col_num).fill = fill
+    # Заполняем Excel-файл
+    for device, brands in grouped_parts.items():
+        for brand, parts in brands.items():
+            for part in parts:
+                # Заполняем строку данными
+                ws.append([
+                    part.device,
+                    part.brand,
+                    part.model,
+                    part.part_type,
+                    part.color or "Не указан",
+                    part.quantity,
+                    part.price
+                ])
 
-        # Полужирный шрифт для строки устройства, бренда и модели
-        ws.cell(row=row_num, column=1).font = Font(bold=True)
-        ws.cell(row=row_num, column=2).font = Font(bold=True)
-        ws.cell(row=row_num, column=3).font = Font(bold=True)
-        row_num += 1
+                # Форматируем столбец "Количество (шт.)"
+                quantity_cell = ws.cell(row=row_num, column=6)
+                quantity_cell.number_format = '#,##0 "шт."'
 
-        # Добавляем запчасти для каждой модели
-        for part in part_group:
-            ws.append([
-                "",  # Пустая ячейка для устройства
-                "",  # Пустая ячейка для бренда
-                "",  # Пустая ячейка для модели
-                part['part_type'],
-                part['color'] or "Не указан",
-                part['quantity'],  # Количество запчастей
-                part['price']  # Цена запчастей
-            ])
-            # Применяем заливку цветом для строк, относящихся к одной модели
+                # Форматируем столбец "Цена (руб.)"
+                price_cell = ws.cell(row=row_num, column=7)
+                price_cell.number_format = '#,##0 "руб."'
+
+                row_num += 1
+
+            # Добавляем строку-разделитель после каждой группы бренда
             for col_num in range(1, 8):
-                ws.cell(row=row_num, column=col_num).fill = fill
-
-            # Форматируем столбец "Количество (шт.)"
-            quantity_cell = ws.cell(row=row_num, column=6)
-            quantity_cell.number_format = '#,##0 "шт."'  # Форматирование количества с текстом "шт."
-
-            # Форматируем столбец "Цена (руб.)"
-            price_cell = ws.cell(row=row_num, column=7)
-            price_cell.number_format = '#,##0 "руб."'  # Форматирование числа с текстом "руб."
-
+                separator_cell = ws.cell(row=row_num, column=col_num)
+                separator_cell.fill = separator_fill
             row_num += 1
 
-    # Настройка ширины столбцов в зависимости от самого длинного значения в столбце
+    # Настройка ширины столбцов
     for col in ws.columns:
         max_length = 0
         column = col[0].column_letter  # Получаем букву столбца
@@ -280,7 +272,7 @@ def export_excel(request):
                         max_length = cell_length
             except:
                 pass
-        adjusted_width = (max_length + 2)  # Добавляем небольшой запас к ширине
+        adjusted_width = max_length + 2  # Добавляем небольшой запас
         ws.column_dimensions[column].width = adjusted_width
 
     # Создаем HTTP ответ с Excel файлом
@@ -593,14 +585,16 @@ def add_part(request):
             brand = form.cleaned_data['brand']
             model = form.cleaned_data['model']
             part_type = form.cleaned_data['part_type']  # Обновлённое значение
+            condition = form.cleaned_data['condition']  # Добавляем состояние запчасти
 
-            # Проверяем наличие аналогичной запчасти
+            # Проверяем наличие аналогичной запчасти с учетом состояния
             existing_part = Part.objects.filter(
                 user=request.user,
                 device=device,
                 brand=brand,
                 model=model,
-                part_type=part_type
+                part_type=part_type,
+                condition=condition  # Сравниваем по состоянию
             ).first()
 
             if existing_part and 'confirm_add' in request.POST:
@@ -645,9 +639,6 @@ def get_regions_and_cities(request):
     with open(file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
     return JsonResponse(data)
-
-
-# views.py
 
 
 def user_parts_list(request, user_id):

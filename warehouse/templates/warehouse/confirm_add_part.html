@@ -2,23 +2,17 @@
 {% load static %}
 {% block title %}Подтвердите добавление запчасти{% endblock %}
 {% block content %}
-    <h2 class="page-title">Подтверждение добавления запчасти</h2>
+    <h2 class="page-title">Повторное добавление запчасти</h2>
 
     <div class="alert alert-warning">
-        <p>Запчасть <strong>{{ existing_part.device }} {{ existing_part.brand }} {{ existing_part.model }}</strong> уже существует на складе.</p>
-        <p>Вы можете добавить новую запчасть повторно или отменить добавление.</p>
-        <form method="post" id="confirm-form">
-            {% csrf_token %}
-            {{ form.as_p }}
-            {{ formset.management_form }}
-            {% for form_image in formset %}
-                {{ form_image.as_p }}
-            {% endfor %}
-            <button type="submit" name="confirm_add" class="btn btn-success">Добавить повторно</button>
-            <a href="{% url 'warehouse' %}" class="btn btn-secondary">Отменить</a>
-        </form>
+        <p>Запчасть <strong>{{ existing_part.part_type }} {{ existing_part.brand }} {{ existing_part.model }}</strong> уже существует на складе.</p>
+        <p>Вы можете редактировать уже имеющуюся запчасть.</p>
+        <a href="{% url 'edit_part' existing_part.id %}" class="btn btn-primary">Редактировать</a>
+        <a href="{% url 'warehouse' %}" class="btn btn-secondary">Склад</a>
     </div>
 
     <link rel="stylesheet" href="{% static 'css/add_part.css' %}">
     <script src="{% static 'js/add_part.js' %}"></script>
 {% endblock %}
+
+

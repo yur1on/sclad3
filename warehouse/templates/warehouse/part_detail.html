@@ -2,7 +2,7 @@
 {% load device_filters %}
 
 {% block title %}Информация о запчасти{% endblock %}
-
+{% load static %}
 {% block content %}
 <style>
     /* Основной стиль для карточек */
@@ -19,17 +19,6 @@
         border-radius: 8px;
         overflow: hidden;
         border: 1px solid #dee2e6;
-    }
-
-    /* Общий стиль для всех кнопок */
-    .btn {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        transition: background-color 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     /* Эффект при наведении на кнопку */
@@ -67,13 +56,11 @@
 </style>
 
 <!-- В верхней части тип запчасти, устройство, бренд и модель -->
-
 <div class="row mb-3">
     <div class="card-body text-left">
         <h4><strong>{{ part.part_type }}</strong> для {{ part.device|device_declension }} {{ part.brand }} {{ part.model }}</h4>
     </div>
 </div>
-
 
 <!-- Блок с фото справа и описанием слева -->
 <div class="row">
@@ -88,13 +75,12 @@
                 <th>Цена</th>
                 <td>{{ part.price }} бел. руб.</td>
             </tr>
-                    {% if part.color %}
-                        <tr>
-                            <th>Цвет</th>
-                            <td>{{ part.color }}</td>
-                        </tr>
-                    {% endif %}
-
+            {% if part.color %}
+                <tr>
+                    <th>Цвет</th>
+                    <td>{{ part.color }}</td>
+                </tr>
+            {% endif %}
             <tr>
                 <th>Дата добавления</th>
                 <td>{{ part.created_at|date:"d.m.Y" }}</td>
@@ -115,42 +101,48 @@
             </div>
         </div>
 
-<!-- Информация о пользователе -->
-             <div class="card mt-3">
-                <div class="card-header bg-success text-white">Информация о продавце</div>
-                <div class="card-body">
-                    <table class="table table-striped">
-                        <tr>
-                            <th>Имя пользователя</th>
-                            <td>{{ part.user.username }}</td>
-                        </tr>
-                        <tr>
-                            <th>Мастерская</th>
-                            <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td>
-                        </tr>
-                        <tr>
-                            <th>Город</th>
-                            <td>{{ part.user.profile.city }}</td>
-                        </tr>
-                        <tr>
-                            <th>Телефон</th>
-                            <td>{{ part.user.profile.phone }}</td>
-                        </tr>
-                        <tr>
-                            <th>Средний рейтинг</th>
-                            <td>{{ part.user.profile.average_rating }} / 5</td>
-                        </tr>
-                        <tr>
-                            <th>Дата регистрации</th>
-                            <td>{{ part.user.date_joined|date:"d.m.Y" }}</td>
-                        </tr>
-                        <tr>
-                            <th>Способ доставки</th>
-                            <td>{{ part.user.profile.delivery_methods|default:"Не указан" }}</td>
-                        </tr>
-                    </table>
+        <!-- Информация о пользователе -->
+        <div class="card mt-3">
+            <div class="card-header bg-success text-white">Информация о продавце</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tr>
+                        <th>Имя пользователя</th>
+                        <td>{{ part.user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Мастерская</th>
+                        <td>{{ part.user.profile.workshop_name|default:"Частное лицо" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Город</th>
+                        <td>{{ part.user.profile.city }}</td>
+                    </tr>
+                    <tr>
+                        <th>Телефон</th>
+                        <td>{{ part.user.profile.phone }}</td>
+                    </tr>
+                    <tr>
+                        <th>Средний рейтинг</th>
+                        <td>{{ part.user.profile.average_rating }} / 5</td>
+                    </tr>
+                    <tr>
+                        <th>Дата регистрации</th>
+                        <td>{{ part.user.date_joined|date:"d.m.Y" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Способ доставки</th>
+                        <td>{{ part.user.profile.delivery_methods|default:"Не указан" }}</td>
+                    </tr>
+                </table>
+
+                <!-- Кнопки для отзывов -->
+                <div class="text-center mt-3">
+                    <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
+                    <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary">Отзывы продавца</a>
                 </div>
             </div>
+        </div>
     </div>
 
     <!-- Фото запчасти -->
@@ -199,17 +191,6 @@
                 <button type="button" class="btn btn-secondary" onclick="changeImage(-1)">Предыдущее</button>
                 <button type="button" class="btn btn-secondary" onclick="changeImage(1)">Следующее</button>
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mb-4">
-    <div class="col-6">
-        <div class="card">
-            <div class="card-body text-center">
-                <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
-                <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary">Посмотреть отзывы</a>
             </div>
         </div>
     </div>
