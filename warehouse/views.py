@@ -667,7 +667,7 @@ def user_parts_list(request, user_id):
 #     })
 
 @login_required
-def user_parts(request, user_id):
+def user_parts(request, user_id, template_name='warehouse/user_parts.html'):
     user = get_object_or_404(User, id=user_id)
     user_parts = Part.objects.filter(user_id=user_id).order_by('device', 'brand', 'model')
 
@@ -677,7 +677,7 @@ def user_parts(request, user_id):
         for brand, brand_parts in groupby(device_parts, lambda x: x.brand):
             grouped_parts[device][brand] = list(brand_parts)
 
-    return render(request, 'warehouse/user_parts.html', {
+    return render(request, template_name, {
         'grouped_parts': grouped_parts,
         'viewed_user': user,  # Передаём просмотренного пользователя
     })

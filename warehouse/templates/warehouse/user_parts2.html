@@ -1,0 +1,47 @@
+{% extends 'warehouse/base.html' %}
+
+{% block title %}Все запчасти {{ viewed_user.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Все запчасти</h2>
+
+    {% if grouped_parts %}
+        {% for device, brands in grouped_parts.items %}
+            <div class="device-section mb-5">
+                <h3 class="text-primary">{{ device }}</h3>
+                {% for brand, parts in brands.items %}
+                    <div class="brand-section">
+                        <h4 class="ml-3 text-success">{{ brand }}</h4>
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Модель</th>
+                                    <th>Тип запчасти</th>
+                                    <th>Цвет</th>
+                                    <th>Количество</th>
+                                    <th>Цена</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for part in parts %}
+                                    <tr>
+                                        <td>{{ part.display_model }}</td>
+                                        <td>{{ part.part_type }}</td>
+                                        <td>{{ part.color }}</td>
+                                        <td>{{ part.quantity }}</td>
+                                        <td>{{ part.price }}</td>
+
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Еще нет добавленных запчастей.</p>
+    {% endif %}
+</div>
+{% endblock %}

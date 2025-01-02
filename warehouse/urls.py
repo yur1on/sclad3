@@ -28,6 +28,7 @@ urlpatterns = [
     path('import-excel/', import_excel, name='import_parts'),
     path('', views.base_view, name='home'),
     path('user/<int:user_id>/parts/', views.user_parts, name='user_parts'),
+    path('user_parts2/<int:user_id>/', views.user_parts, {'template_name': 'warehouse/user_parts2.html'}, name='user_parts2'),
     path('add-part/', add_part, name='add_part'),
     path('get_dynamic_data/', get_dynamic_data, name='get_dynamic_data'),
     path('get_regions_and_cities/', get_regions_and_cities, name='get_regions_and_cities'),
