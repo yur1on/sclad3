@@ -354,44 +354,135 @@
                           "Tab S9 Ultra (SM-X910, SM-X916B, SM-X918U)", "Tab S9 Plus (SM-X810, SM-X816B)", "Tab Pro 10.1 (SM-T520)", "Tab Pro S", "Tab View"],
 
 
-            "Huawei": ["P40", "P40 Lite", "P50"],
+            "Huawei":    ["MatePad 10.4 2020 (BAH3-W09, BAH3-AL00, BAH3-L09, BAH3-W59)", "MatePad 10.4 2022 (BAH4-W09)", "MatePad 10.8 (SCMR-W09, SCMR-AL00)", "MatePad 11 2021 (DBY-W09)", "MatePad 11 2023 (DBR-W10)", "MatePad 11.5 2023 (BTKR-W09)", "MatePad 11.5 2024", "MatePad 11.5 S (TGR-W09)", "MatePad 12 X",
+                          "MatePad 5G (BAH3-AN10)", "MatePad Air (DBY2-L09CK)", "MatePad Air 2024", "MatePad C5e (BZI-W00)", "MatePad Pro 10.8 2019 (MRX-AL09, MRX-AL19, MRX-W09, MRX-W19)", "MatePad Pro 10.8 5G 2019", "MatePad Pro 10.8 2021 (MRR-W29)", "MatePad Pro 11 2022 (GOT-W09, GOT-W29, GOT-AL09, GOT-AL19)",
+                          "MatePad Pro 11 2024 (XYAO-W00)", "MatePad Pro 12.2 2024", "MatePad Pro 12.6 2021 (WGR-W09, WGR-W19, WGR-AN19)", "MatePad Pro 13.2 (PCE-W30, PCE-AL30)", "MatePad Pro 13.2 2024 (WEB-W00)", "MatePad SE (AGS3K-W20, AGS3K-AL20, AGS5-W09)", "MatePad SE 10.4", "MatePad SE 11", "MatePad T8 (Kobe2-L09, Kobe2-L03, KOB2-L09, KOB2-W09)", "MatePad T10 (AGRK-L09, AGRK-W09, AGR-L09", "MatePad T10s (AGS3-L09, AGS3-W09, AGS3K-W09)",
+                          "MediaPad M2 7.0", "MediaPad M2 8.0 (M2-801L, M2-803L, M2-802L)", "MediaPad M2 10 (M2-A01W, M2-A01L)", "MediaPad M3 8.4 (BTV-DL09, BTV-W09)", "MediaPad M3 Lite 8.0 (CPN-AL00, CPN-W09, CPN-L09)", "MediaPad M3 Lite 10 (Bach-L09, Bach-W09, BAH-L09, BAH-W09)", "MediaPad M5 8 (SHT-AL09, SHT-W09)", "MediaPad M5 10 (CMR-AL09, CMR-W09)", "MediaPad M5 10 Pro (CMR-AL19, CMR-W19)",
+                          "MediaPad M5 Lite 8.0 (BAH2-L09, BAH2-W09, BAH2-W19, BAH2-AL10)", "MediaPad M5 Lite 10 (BAH2-L09, BAH2-W09, BAH2-W19, BAH2-AL10)", "MediaPad M6 8.4", "MediaPad M6 Turbo 8.4 (VRD-AL10, VRD-W10, VRD-W09, VRD-AL09)", "MediaPad M6 10.8 (SCM-AL09, SCM-W09)", "MediaPad Pro", "MediaPad T1 7.0", "MediaPad T1 8.0", "MediaPad T1 10 (T1-A21L)", "MediaPad T2 7.0 (BGO-DL09, BGO-L03)",
+                          "MediaPad T2 7.0 Pro (PLE-701L, PLE-703L)", "MediaPad T2 10 Pro (FDR-A01L, FDR-A03L, FDR-A04L)", "MediaPad T3 7.0 (BG2-U01, BG2-W09, BG2-U03)", "MediaPad T3 8.0 (KOB-L09, KOB-W09)", "MediaPad T3 10 (AGS-W09, AGS-L09, AGS-L03)", "MediaPad T5 10 (AGS2-W09, AGS2-W19, AGS2-L09)"],
 
-            "Honor": [],
 
-            "Poco": [],
-            "Realme": [],
-            "Lenovo": [],
-            "Vivo": [],
-            "Infinix": [],
-            "TCL": [],
-            "AGM": [],
-            "Alcatel": [],
-            "Blackview": [],
-            "Chuwi": [],
-            "Cubot": [],
-            "Doogee": [],
-            "Fossibot": [],
-            "Google": [],
-            "Hotwav": [],
-            "HTC": [],
-            "Microsoft": [],
-            "Motorola": [],
-            "Nokia": [],
-            "Nubia": [],
-            "OnePlus": [],
-            "Oppo": [],
-            "Oukitel": [],
-            "Teclast": [],
-            "Ulefone": [],
-            "UMiDIGI": [],
-            "ZTE": []
+            "Honor":     ["MagicPad 13 (GDI-W09)", "MagicPad 2 12.3 (ROD2-W09)", "Pad 2", "Pad 5 8.0 (JDN2-AL00HN)", "Pad 5 10.1 (AGS2-AL00HN)", "Pad 6 (AGS3-W09, AGS3-AL09)", "Pad 7", "Pad 8 (HEY-W09)", "Pad 9 (HEY2-W09)", "Pad 9 Pro", "Pad GT Pro (ROD2-W69)", "Pad V8 (BRT-W09)",
+                          "Pad V8 Pro (ROD-W09)", "Pad V9 (ROL-W00)", "Pad X8 (AGM3-W09HN)", "Pad X8 Lite", "Pad X8 Pro", "Pad X8a", "Pad X9", "Tab V7 (KRJ2-W09)",
+                          "Tab V7 Pro", "Tablet X7 (KOB2-W09HN)", "T3", "V6 (KRJ-W09, KRJ-AN00)"],
+
+
+            "Xiaomi":    ["Mi Pad", "Mi Pad 2", "Mi Pad 3", "Mi Pad 4", "Mi Pad 4 Plus", "Mi Pad 5 (21051182G, 21051182C)", "Mi Pad 5 Pro (M2105K81AC, M2105K81C)", "Pad 5 Pro 12.4", "Pad 6 (23043RP34C, 23043RP34G)",
+                          "Pad 6 Max 14.0", "Pad 6 Pro", "Pad 6S Pro 12.4", "Pad 7", "Pad 7 Pro", "Redmi Pad (22081283G)", "Redmi Pad Pro", "Redmi Pad SE (23073RPBFG)", "Redmi Pad SE 8.7"],
+
+
+            "Poco":      ["Pad (2405CPCFBG)", "Pad 5G"],
+
+
+            "Realme":    ["Pad (RMP2102, RMP2103)", "Pad 2", "Pad 2 Lite", "Pad Mini (RMP2105, RMP2106)", "Pad X (RMP2107, RMP2108)"],
+
+
+            "Lenovo":    ["Erazer M10", "Erazer M20 5G", "K10 Pro 5G (XTT992131)", "Legion Tab (ZACW0029IN)", "Legion Y700 (TB-9707F)", "Legion Y700 2023", "Legion Y700 2025", "Tab K10 (TB-X6C6F, TB-X6C6X)", "Tab K10 Pro", "Tab K11 (TB330FU)",
+                          "Tab K11 Plus (TB352FU)", "Tab M8 3rd Gen", "Tab M8 4th Gen", "Tab M9 (TB310FU)", "Tab M10", "Tab M10 3rd Gen ", "Tab M10 5G", "Tab M10 FHD Plus (TB-X606, TB-X606F, TB-X606X, TB-X606V)", "Tab M10 Plus (TB-X606, TB-X606F, TB-X606X, TB-X606V)", "Tab M10 Plus 3rd Gen", "Tab M11 (TB330FU)",
+                          "Tab P10 (TB-X705L)", "Tab P11 (TB-J606F)", "Tab P11 2022", "Tab P11 5G", "Tab P11 Gen 2 (TB350FU)",
+                          "Tab P11 Plus (TB-J616X, ZA940124SE)", "Tab P11 Pro (TB-J706F)", "Tab P11 Pro Gen 2 (ZAB50194GB, ZAB50043SE)", "Tab P12 (TB370FU)", "Tab P12 Pro (TB-Q706Z, TB-Q706F)", "Tab V7 (PB-6505M, PB-6505MC)", "Xiaoxin Pad",
+                          "Xiaoxin Pad 2022 (TB128FU)", "Xiaoxin Pad 2024 (TB331FC)", "Xiaoxin Pad Plus", "Xiaoxin Pad Plus 2023", "Xiaoxin Pad Pro", "Xiaoxin Pad Pro 2021",
+                          "Xiaoxin Pad Pro 2022 11.2", "Xiaoxin Pad Pro 2023", "Xiaoxin Pad Pro 2025", "Xiaoxin Pad Studio", "Yoga A12",
+                          "Yoga Book", "Yoga Duet 3", "Yoga Duet 7", "Yoga Smart Tab", "Yoga Tab 11", "Yoga Tab 13", "Yoga Tab 3 Plus",
+                          "Yoga Tab 4 10", "Yoga Tab 4 10 Plus", "Yoga Tab 4 8", "Yoga Tab 4 8 Plus", "Yoga Tab Pro", "ZhaoYang K10"],
+
+
+            "Vivo":      ["Pad", "Pad 2", "Pad 3", "Pad 3 Pro", "Pad Air", "iQOO Pad", "iQOO Pad2", "iQOO Pad2 Pro"],
+
+
+            "Infinix":   ["XPAD", "XPAD LTE"],
+
+
+            "TCL":       ["10 TabMax", "10 TabMid", "Tab 8 4G (9132G2)", "Tab 10 Gen2", "Tab 10 HD 4G", "Tab 10 NxtPaper (9199S)", "Tab 10L (8491X)", "Tab 10L Gen2",
+                          "Tab 10L Gen 3", "Tab 10s", "Tab 10s 5G", "Tab 11 (9166G, 9466X)"],
+
+
+            "AGM":       ["Pad P1", "Pad P2", "Pad P2 Active", "Pad T1"],
+
+
+            "Alcatel":  [ "1T 7 (9009G, 9013T, 9009A, 9013A, 9009F)", "1T 10 (8082_EEA)", "3T 8 (9027Q, 9027W, 9032X, 9032T, 9032X_EEA)", "3T 10 (8088L, 8088Q, 8088X, 8088X_EEA)", "3T 10 2020", "A2 XL", "A3 10", "Plus 10", "Plus 12", "OneTouch Pixi 3 10.0", "OneTouch Pixi 3 8.0", "Pixi 4 7.0"],
+
+
+            "Blackview":   ["Active 6", "Active 8", "Active 8 Pro", "Active 10 Pro", "MEGA 1", "MEGA 2", "Oscal ELITE 1", "Oscal Pad 10", "Oscal Pad 13", "Oscal Pad 15", "Oscal Pad 16", "Oscal Pad 18",
+                            "Oscal Pad 50", "Oscal Pad 60", "Oscal Pad 70", "Oscal Pad 80", "Oscal Pad 90", "Oscal Spider 8", "Pad 6", "Tab 5", "Tab 6", "Tab 7", "Tab 8", "Tab 8E", "Tab 8 WiFi", "Tab 9", "Tab 10", "Tab 10 Pro",
+                            "Tab 11", "Tab 11 SE", "Tab 11 WiFi", "Tab 12", "Tab 12 Pro", "Tab 13", "Tab 15", "Tab 16", "Tab 16 Pro", "Tab 18", "Tab 30",  "Tab 50", "Tab 60", "Tab 70",
+                            "Tab 80", "Tab 90"],
+
+
+            "Chuwi":      [ "eBook", "Hi10 Air", "Hi10 Go", "Hi10 Max", "Hi10 XR", "Hi10 X1", "Hi10x", "Hi13", "Hi8 SE", "Hi9", "Hi9 Air",
+                            "Hi9 Plus", "Hi9 Pro", "HiBook", "HiBook Pro", "HiPad", "HiPad 11", "HiPad Air", "HiPad Max", "HiPad Plus", "HiPad Pro",
+                            "HiPad X", "HiPad X Pro", "SurBook", "SurPad", "UBook", "UBook Pro", "UBook X", "UBook X Pro", "Vi10 Plus", "Vi10 Ultimate", "Vi8 Plus"],
+
+
+            "Cubot":       ["Tab 10", "Tab 20", "Tab 30", "Tab 40", "Tab 50", "Tab 60", "Tab KingKong", "Tab KingKong 2"],
+
+
+            "Doogee":      ["R08", "R10", "R20", "T10", "T10 Plus", "T10S", "T10W", "T20", "T20 Mini", "T20 Ultra", "T30E", "T30 Max", "T30 Pro", "T30 Ultra", "T30SE", "T30S", "T40", "T40 PRO", "U9", "U10", "U11"],
+
+
+            "Fossibot":    ["DT1", "DT2", "Tab 12"],
+
+
+            "Google":      ["Pixel C", "Pixel Tablet"],
+
+
+            "Hotwav":      ["Pad 8", "R5", "R6 Pro", "R6 Ultra", "R8", "R9 Pro", "Tab R7"],
+
+
+            "HTC":         ["A100", "A101", "A101 Plus", "A103 Plus", "A104"],
+
+
+            "Microsoft":   ["Surface 3", "Surface Go", "Surface Go 2", "Surface Go 3", "Surface Go 4", "Surface Pro", "Surface Pro 4", "Surface Pro 6", "Surface Pro 7", "Surface Pro 8", "Surface Pro 9", "Surface Pro 10", "Surface Pro 11", "Surface Pro X", "Surface Pro X SQ2"],
+
+
+            "Motorola":    ["Moto Tab G20", "Moto Tab G62", "Moto Tab G70"],
+
+
+            "Nokia":       ["T10", "T20", "T21"],
+
+
+            "Nubia":       ["Pad 3D", "Red Magic Gaming Tablet", "Red Magic Tab Pro"],
+
+
+            "OnePlus":    ["Pad", "Pad Go", "Pad Pro (OPD2404)", "Pad 2", "Pad 3 (OPD2407)"],
+
+
+            "Oppo":       ["Pad (OPD2101)", "Pad 2 (OPD2201, X22N2)", "Pad 3 (OPD2405)", "Pad 3 Pro (OPD2401)", "Pad Air (OPD2102, X21N2)", "Pad Air 2", "Pad Neo (OPD2302, OPD2303)"],
+
+
+            "Oukitel":    ["OKT1", "OKT3", "OT5", "OT5S", "OT6", "OT8", "OT9", "OT11", "OT12", "RT1", "RT2", "RT3", "RT3 Pro", "RT5", "RT6", "RT7", "RT8", "RT9"],
+
+
+            "Teclast":    ["A10H", "A10S", "M16", "M18", "M20", "M30", "M30 Pro", "M40", "M40 Air", "M40 Plus", "M40 Pro", "M40 Pro 2023", "M40SE", "M50", "M50 Mini", "M50 Plus", "M50 Pro", "P10", "P10 4G", "P10HD", "P10S", "P10SE", "P20", "P20S", "P25", "P26T", "P30 Air", "P30HD", "P30s", "P30T", "P40HD", "P40S", "P50", "P50AI", "P80T",
+                           "P80X", "P85", "P85T", "T10", "T20", "T30", "T40", "T40 Air", "T40 Plus", "T40 Pro", "T40HD", "T40s", "T45HD", "T50", "T60", "T60 Plus", "T65 MAX", "T70", "T80", "Tbook 10", "Tbook 10S", "Tbook 11",
+                           "Tbook 12", "Tbook 16", "Tbook 16 Pro", "Tbook 16 Power", "Tbook 16S", "T8", "T89", "Tbook X16 Power", "X10", "X10 3G", "X10 Plus", "X11", "X16", "X2 Pro", "X3 Plus", "X3 Pro", "X4", "X5 Pro", "X6 Plus", "X6 Pro", "X80 Plus", "X80 Power", "X89 Kindow", "X98"],
+
+
+            "Ulefone":    [ "Armor Pad 2", "Armor Pad 3 Pro", "Armor Pad 4 Ultra", "Armor Pad Lite", "Armor Pad", "Tab A11 Pro", "Tab A11", "Tab A8", "Tab A7", "Tab W10"],
+
+
+            "UMiDIGI":    [ "A13 Tab", "A15 Tab", "Active T1", "G1 Tab", "G1 Tab Mini", "G3 Tab", "G5 Tab", "G7 Tab Pro", "G9 Tab"],
+
+
+            "ZTE": ["Axon Pad", "BLADE X10 II", "Blade X10 Pro"]
         },
-        "part_types": ["Аккумулятор", "Динамик", "Дисплей", "Задняя крышка"],
+
+        "part_types": ["Аккумулятор", "Вибромотор", "Датчик приближения", "Динамик музыкальный", "Динамик слуховой",
+                       "Дисплей", "Камера основная", "Камера фронтальная", "Коннектор АКБ", "Коннектор дисплея", "Коннектор межплатный", "Корпус", "Крышка задняя", "Плата системная", "Разъем гарнитуры",
+                       "Разъем зарядки", "Рама дисплея", "Сетка слухового динамика", "Сим-лоток", "Сканер отпечатка",
+                       "Стекло камеры", "Стекло для переклейки", "Тачскрин", "Микросхема", "Микрофон", "Шлейф межплатный", "Шлейф сканера отпечатка",
+                       "Шлейф дисплея", "Шлейф боковых кнопок",  ""],
+
         "colors": {
-            "Дисплей": ["Черный", "Белый", "Серый"],
-            "Аккумулятор": ["Черный", "Белый"],
-            "Задняя крышка": ["Черный", "Белый"]
-        },
+            "Дисплей": ["Черный", "Белый"],
+            "Сим-лоток": ["Черный", "Белый"],
+            "Корпус": ["Черный", "Белый"],
+            "Крышка задняя": ["Черный", "Белый"],
+            "Рама дисплея": ["Черный", "Белый"],
+            "Тачскрин": ["Черный", "Белый"],
+            "Стекло для переклейки": ["Черный", "Белый"]
+          },
+
         "conditions": ["Оригинал б/у", "Оригинал новый", "Копия б/у", "Копия новый"]
     },
     "Смарт-часы": {

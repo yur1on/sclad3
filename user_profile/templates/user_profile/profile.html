@@ -34,6 +34,19 @@
             <div class="tab-content mt-4">
                 <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                     {% if edit_mode %}
+                      {% if form.errors %}
+                        <div class="alert alert-danger  ">
+                      <ul  class = "list-unstyled ">
+                      {% for error in form.errors.values %}
+                     {% for item  in  error %}
+                             <li>   {{item  }} </li>
+                     {% endfor %}
+                     {% endfor  %}
+                 </ul>
+
+             </div>
+           {% endif %}
+
                         <form method="post" class="form">
                             {% csrf_token %}
                             {% for field in form.visible_fields %}
@@ -41,29 +54,44 @@
                                     <label for="{{ field.id_for_label }}" class="form-label">
                                         {{ field.label }}:
                                     </label>
-                                    {% if field.name == "region" %}
-                                        <select id="id_region" name="region" class="form-control">
-                                            <option value="">Выберите область</option>
+                                      {% if field.name == "region" %}
+
+                                          <select id="id_region" name="region" class="form-control  form-select  {% if field.errors %}is-invalid{% endif %}"  >
+                                            <option value="" >Выберите область</option>
+
                                             {% for region in form.region.field.choices %}
-                                                <option value="{{ region.0 }}" {% if region.0 == form.region.value %}selected{% endif %}>
-                                                    {{ region.1 }}
-                                                </option>
+                                              <option value="{{ region.0 }}" {% if region.0 == form.region.value %}selected{% endif %} >
+                                                      {{ region.1 }} </option>
                                             {% endfor %}
-                                        </select>
-                                    {% elif field.name == "city" %}
-                                        <select id="id_city" name="city" class="form-control">
-                                            <option value="">Выберите город</option>
-                                        </select>
-                                    {% else %}
-                                        {{ field|add_class:"form-control" }}
-                                    {% endif %}
-                                </div>
+                                         </select>
+                                   {% elif field.name == "city" %}
+
+                                            <select id="id_city" name="city"  class="form-control form-select {% if field.errors %}is-invalid{% endif %}"   >
+                                            <option value="" >Выберите город</option>
+
+                                               </select>
+
+                                         {% else %}
+
+                                             {{ field|add_class:"form-control  {% if field.errors %}is-invalid{% endif %}" }}
+                                      {% endif %}
+
+                             </div>
+
+
                             {% endfor %}
-                            <div class="d-flex justify-content-between">
-                                <button type="submit" class="btn btn-success">Сохранить</button>
-                                <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
-                            </div>
+
+
+                      <div class="d-flex justify-content-between  mt-4 ">
+
+                               <button type="submit" class="btn btn-success">Сохранить</button>
+                             <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
+
+                        </div>
                         </form>
+
+
+
                     {% else %}
                         <div class="row">
                             <div class="col-md-6">
