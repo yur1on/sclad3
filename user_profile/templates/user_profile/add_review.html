@@ -1,43 +1,57 @@
 {% extends 'warehouse/base.html' %}
 {% load static %}
 {% block content %}
-{% load custom_filters %}
+<div class="container mt-5 d-flex justify-content-center align-items-center">
+    <!-- Форма в центре -->
+    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%; border-radius: 15px;">
+        <h4 class="text-center mb-4" style="font-weight: 600;">Оставить отзыв</h4>
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
 
-    <div class="container">
-        <h2 class="my-4 text-center">Оставить отзыв для {{ reviewed_user.username }}</h2>
-
-        <div class="card shadow p-4">
-            <form method="post">
-                {% csrf_token %}
-
-                <!-- Блок для оценки -->
-                <div class="form-group mb-4">
-                    <label for="rating" class="form-label">Оценка:</label>
-                    <div class="rating-container">
-                        <div class="rating d-flex justify-content-center">
-                            {% for i in "12345" %}
-                                <span class="rating-star" data-value="{{ i }}">&#9733;</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <input type="hidden" name="rating" id="rating-input" value="{{ form.rating.value }}">
+            <!-- Блок с рейтингом -->
+            <div class="form-group mb-4">
+                <label for="rating" class="form-label" style="font-weight: 500;">Ваша оценка:</label>
+                <div class="rating-container d-flex justify-content-between mt-2">
+                    {% for i in "12345" %}
+                        <span
+                            class="rating-star"
+                            data-value="{{ i }}"
+                            style="
+                                font-size: 2rem;
+                                cursor: pointer;
+                                color: #ddd;
+                                transition: all 0.3s ease;">
+                            &#9733;
+                        </span>
+                    {% endfor %}
                 </div>
+                <input type="hidden" name="rating" id="rating-input" value="{{ form.rating.value }}">
+            </div>
 
-                <!-- Поле для комментария -->
-                <div class="form-group mb-4">
-                    {{ form.comment.label_tag }}
-                    {{ form.comment|add_class:"form-control shadow-sm" }}
-                </div>
+            <!-- Поле комментария -->
+            <div class="form-group mb-4">
+                <label for="comment" class="form-label" style="font-weight: 500;">Ваш комментарий:</label>
+                <textarea
+                    id="id_comment"
+                    name="comment"
+                    class="form-control border shadow-sm"
+                    style="border: 2px solid #add8e6; border-radius: 10px; height: 100px;"
+                    placeholder="Введите ваш комментарий...">{{ form.comment.value|default_if_none:"" }}</textarea>
+            </div>
 
-                <!-- Кнопка отправки -->
-                <button type="submit" class="btn btn-success btn-lg w-100 shadow">Оставить отзыв</button>
-            </form>
-        </div>
+            <!-- Кнопка отправки -->
+            <button
+                type="submit"
+                class="btn btn-primary w-100 py-2"
+                style="font-weight: 600; border-radius: 10px;">
+                Отправить
+            </button>
+        </form>
 
         <!-- Ошибки формы -->
         {% if form.errors %}
-            <div class="alert alert-danger mt-4">
-                <ul>
+            <div class="alert alert-danger mt-3" style="border-radius: 10px;">
+                <ul class="mb-0">
                     {% for error in form.errors.values %}
                         <li>{{ error }}</li>
                     {% endfor %}
@@ -46,38 +60,43 @@
         {% endif %}
 
         <!-- Кнопка назад -->
-        <a href="javascript:history.back()" class="btn btn-secondary mt-3">Назад</a>
+        <a href="javascript:history.back()"
+           class="btn btn-link mt-3 text-center w-100"
+           style="text-decoration: none; color: #6c757d; font-weight: 500;">
+           Назад
+        </a>
     </div>
+</div>
 
-    <!-- Подключаем JavaScript для выбора звезды -->
-    <script>
-        document.querySelectorAll('.rating-star').forEach(star => {
-            star.addEventListener('click', function() {
-                const ratingValue = this.getAttribute('data-value');
-                document.getElementById('rating-input').value = ratingValue;
+<!-- JavaScript для работы со звездами -->
+<script>
+    document.querySelectorAll('.rating-star').forEach(star => {
+        star.addEventListener('click', function () {
+            const ratingValue = this.getAttribute('data-value');
+            document.getElementById('rating-input').value = ratingValue;
 
-                // Обновляем вид выделенных звезд
-                document.querySelectorAll('.rating-star').forEach(star => {
-                    if (star.getAttribute('data-value') <= ratingValue) {
-                        star.style.color = 'gold';
-                        star.style.transform = 'scale(1.2)';
-                    } else {
-                        star.style.color = 'grey';
-                        star.style.transform = 'scale(1)';
-                    }
-                });
+            // Обновляем стили для выделенных звезд
+            document.querySelectorAll('.rating-star').forEach(star => {
+                if (star.getAttribute('data-value') <= ratingValue) {
+                    star.style.color = '#FFD700'; // Золотой цвет
+                    star.style.transform = 'scale(1.1)';
+                } else {
+                    star.style.color = '#ddd'; // Серый цвет
+                    star.style.transform = 'scale(1)';
+                }
             });
         });
+    });
 
-        // Если рейтинг был ранее задан
-        const initialRating = document.getElementById('rating-input').value;
-        document.querySelectorAll('.rating-star').forEach(star => {
-            if (star.getAttribute('data-value') <= initialRating) {
-                star.style.color = 'gold';
-                star.style.transform = 'scale(1.2)';
-            } else {
-                star.style.color = 'grey';
-            }
-        });
-    </script>
+    // Если рейтинг уже был задан
+    const initialRating = document.getElementById('rating-input').value;
+    document.querySelectorAll('.rating-star').forEach(star => {
+        if (star.getAttribute('data-value') <= initialRating) {
+            star.style.color = '#FFD700'; // Золотой цвет
+            star.style.transform = 'scale(1.1)';
+        } else {
+            star.style.color = '#ddd'; // Серый цвет
+        }
+    });
+</script>
 {% endblock %}

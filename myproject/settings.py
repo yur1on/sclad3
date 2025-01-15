@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'user_registration',
     'widget_tweaks',
+
 ]
 
 
@@ -109,9 +110,19 @@ DATABASES = {
 }
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'django-app-db',
+#         'USER': 'admin',
+#         'PASSWORD': '12345678',
+#         'HOST': os.environ.get('DB_HOST'),
+#         'PORT': '5432',
+#     }
+# }
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {

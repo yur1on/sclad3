@@ -5,9 +5,9 @@
     <h2 class="mb-4">Отзывы пользователя {{ user.username }}</h2>
 
     {% if reviews %}
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Отзывы</h5>
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Отзывы</h5>
             </div>
             <div class="card-body">
                 <table class="table table-hover">
@@ -16,18 +16,24 @@
                             <th>Оценка</th>
                             <th>Комментарий</th>
                             <th>Дата</th>
-                            <th>Автор</th> <!-- Добавили столбец для автора -->
+                            <th>Автор</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for review in reviews %}
                         <tr>
                             <td>
-                                <span class="badge badge-success">{{ review.rating }} / 5</span>
+                                <!-- Отображение звёзд для рейтинга -->
+                                <div class="rating">
+                            {% for i in "12345" %}
+                               <span class="fa fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></span>
+                            {% endfor %}
+                                    <span class="ml-2">({{ review.rating }} / 5)</span>
+                                </div>
                             </td>
                             <td>{{ review.comment }}</td>
                             <td>{{ review.created_at|date:"d M Y" }}</td>
-                            <td>{{ review.reviewer.username }}</td> <!-- Отображаем автора отзыва -->
+                            <td>{{ review.reviewer.username }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -40,4 +46,18 @@
         </div>
     {% endif %}
 </div>
+
+<style>
+/* Добавление стилей для рейтинга */
+.rating .fa-star {
+    font-size: 18px;
+    margin-right: 2px;
+}
+.text-warning {
+    color: #ffc107;
+}
+.text-muted {
+    color: #e0e0e0;
+}
+</style>
 {% endblock %}

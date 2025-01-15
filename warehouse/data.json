@@ -486,31 +486,74 @@
         "conditions": ["Оригинал б/у", "Оригинал новый", "Копия б/у", "Копия новый"]
     },
     "Смарт-часы": {
-        "brands": ["Samsung", "Huawei", "Xiaomi", "Apple", "LG", "Realme"],
+        "brands": ["Apple", "Samsung", "Huawei", "Honor", "Xiaomi", "Amazfit", "Realme", "Garmin", "Google", "Oppo"],
+
         "models": {
-            "Samsung": ["1", "2", "91", "12", "20", "30"],
-            "Huawei": ["P40", "P40 Lite", "P50"]
+            "Apple": [    "Watch Series 10 46mm (A2999, A3000, A3003, A3006)", "Watch Series 10 42mm (A2997, A2998, A3001, A3002)", "Watch Hermès Ultra 2 (A2986, A2987)", "Watch Ultra 2 (A2986, A2987)", "Watch Series 9 45mm (A2980, A2984, A2985)", "Watch Series 9 41mm (A2978, A2982, A2983)",
+                          "Watch Ultra (A2622, A2684, A2859)", "Watch Series 8 45mm (A2771, A2774, A2775, A2858)", "Watch Series 8 41mm (A2770, A2772, A2773, A2857)", "Watch Series 7 45mm (A2474, A2477, A2478)", "Watch Series 7 41mm (A2473, A2475, A2476)", "Watch Series 6 44mm (A2292, A2294, A2376)",
+                          "Watch Series 6 40mm (A2291, A2293, A2375)", "Watch SE 2 44mm (A2723, A2727, A2724, A2856)", "Watch SE 2 40mm (A2722, A2726, A2725, A2855)", "Watch SE 44mm (A2352, A2354, A2356)", "Watch SE 40mm (A2351, A2353, A2355)", "Watch Series 5 44mm (A2093, A2095 A2157)",
+                          "Watch Series 5 40mm (A2092, A2094, A2156)", "Watch Series 4 44mm (A1978, A1976, A2008)", "Watch Series 4 40mm (A1977, A1975, A2007)", "Watch Series 3 42mm (A1859, A1861, A1891, A1892)", "Watch Series 3 38mm (A1858, A1860, A1889, A1890)", "Watch Series 2 42mm (A1758, A1817)",
+                          "Watch Series 2 38mm (A1757, A1816)", "Watch Series 1 42mm (A1803, A1554)", "Watch Series 1 38mm (A1802, A1553)"],
+
+
+            "Samsung":  [ "Galaxy Watch Active (SM-R500)", "Galaxy Watch Active2 (SM-R825F, SM-R835F, SM-R825U, SM-R835U)", "Galaxy Watch Active2 Aluminum (SM-R830)", "Galaxy Watch (SM-R810)", "Galaxy Watch (SM-805U, SM-805W, SM-815U, SM-815W, SM-R805F, SM-R805N, SM-R815F, SM-R815N, SM-R8050, SM-R800)", "Galaxy Watch3 (SM-R850, SM-R840, SM-R855F, SM-R845F, SM-R855U, SM-R845U)",
+                          "Galaxy Watch4 (SM-R860, SM-R870)", "Galaxy Watch4 Classic (SM-R880, SM-R890)", "Galaxy Watch5 (SM-R915F, SM-R905F)", "Galaxy Watch5 Pro (SM-R925F)", "Galaxy Watch6",
+                          "Galaxy Watch6 Classic", "Galaxy Watch7 (SM-L310F, SM-L315F)", "Galaxy Watch Ultra (SM-L705F, SM-L705N, SM-L705U)", "Galaxy Watch FE (SM-R861, SM-R866)", "Gear 2 (SM-R380)", "Gear 2 Neo (SM-R3810)", "Gear Fit", "Gear S (SM-R750, SM-R750A, SM-R750B, SM-R750C, SM-R750P, SM-R750R4, SM-R750T, SM-R750V, SM-R750W, SM-N910A, SM-N910V, SM-N915P, SM-N910T) ",
+                          "Gear S2 (SM-R720)", "Gear S3", "Gear Sport (SM-R600)"],
+
+
+            "Huawei":   [ "Honor Band Z1", "Honor Magic Watch 2 46mm", "Honor Watch Dream", "Honor Watch Magic", "TalkBand B1", "TalkBand B2", "TalkBand B3", "TalkBand B5", "TalkBand B6", "Watch", "Watch 2", "Watch 2 (2018)", "Watch 2 Classic", "Watch 2 Pro", "Watch 3", "Watch 3 Pro",
+                          "Watch 4", "Watch 4 Pro", "Watch Buds", "Watch D", "Watch D2", "Watch Fit 2", "Watch Fit 3", "Watch Fit Elegant Edition",
+                          "Watch Fit Mini", "Watch Fit Special Edition", "Watch GT", "Watch GT 2 46mm (LTN-B19)", "Watch GT 2 Porsche Design", "Watch GT 2 Pro (VID-B19)", "Watch GT 2 Pro ECG", "Watch GT 2e", "Watch GT 3 42mm", "Watch GT 3 46mm","Watch GT 3 Pro",
+                          "Watch GT 3 Pro Ceramic", "Watch GT 3 Pro Premium Edition", "Watch GT 3 Pro Titanium", "Watch GT 4 41mm", "Watch GT 4 46mm", "Watch GT 5 41mm", "Watch GT 5 46mm", "Watch GT 5 Pro 42mm", "Watch GT 5 Pro 46 mm",
+                          "Watch GT Active Edition", "Watch GT Cyber", "Watch GT Elegant Edition", "Watch GT Runner", "Watch Ultimate", "Watch Kids 5X"],
+
+
+            "Honor":      ["Watch 4", "Watch 4 Pro", "Watch 5", "Watch GS 3", "Watch GS 3i", "Watch GS 4", "Watch GS Pro"],
+
+
+            "Xiaomi":     ["Mi Watch", "Mi Watch China", "Mi Watch Lite", "Mi Watch Revolve", "Mi Watch Revolve Active", "Redmi Watch", "Redmi Watch 2", "Redmi Watch 2 Lite", "Redmi Watch 3", "Redmi Watch 3 Active", "Redmi Watch 4", "Redmi Watch 5 Active", "Redmi Watch 5 Lite",
+                           "Watch 2", "Watch 2 Pro", "Watch Color", "Watch Color 2", "Watch S1", "Watch S1 Active", "Watch S1 Pro", "Watch S2", "Watch S2 42mm", "Watch S3", "Watch S3 eSIM", "Watch S4", "Watch S4 Sport"],
+
+
+            "Amazfit":   [ "Active", "Active Edge", "Balance", "Bip 3", "Bip 3 Pro", "Bip 5", "Bip 5 Unity", "Bip Lite", "Bip S", "Bip S Lite", "Bip U", "Bip U Pro", "Cheetah Square", "Falcon", "GTR", "GTR 2",
+                           "GTR 2 (2022)", "GTR 2e", "GTR 3", "GTR 3 Pro", "GTR 4", "GTR 4 Limited Edition", "GTR 4 New", "GTR Mini", "GTS", "GTS 2", "GTS 2 Mini", "GTS 2 Mini (2022)",
+                           "GTS 2e", "GTS 3", "GTS 4", "GTS 4 Mini", "Nexo", "Pace 2s", "Pop", "Pop 2", "Pop 3R", "Pop 3S", "Pop Pro", "Smartwatch 2", "Smartwatch 2 ECG", "Stratos 3", "Stratos Plus", "T-Rex Pro", "Verge", "Verge 2", "Verge Lite", "X", "Zepp Z"],
+
+
+            "Realme":     ["TechLife Watch R100", "TechLife Watch S100", "Watch", "Watch 2", "Watch 2 Pro", "Watch 3", "Watch 3 Pro", "Watch S", "Watch S Pro", "Watch S2", "Watch T1"],
+
+
+            "Garmin":    [ "Approach S42", "Bounce", "Epix Pro Gen 2 42mm", "Epix Pro Gen 2 47mm", "Epix Pro Gen 2 51mm", "Epix Pro Gen 2 Sapphire 42mm", "Epix Pro Gen 2 Sapphire 47mm", "Epix Pro Gen 2 Sapphire 51mm", "Fenix 6 Solar", "Fenix 7 Pro Sapphire Solar",
+                           "Fenix 7 Pro Solar", "Fenix 7 Sapphire Solar", "Fenix 7 Solar", "Fenix 7S", "Fenix 7S Pro Sapphire Solar", "Fenix 7S Pro Solar", "Fenix 7S Sapphire Solar", "Fenix 7S Solar", "Fenix 7X Pro Sapphire Solar", "Fenix 7X Pro Solar",
+                           "Fenix 7X Sapphire Solar", "Fenix 7X Solar", "Forerunner 55", "Instinct 2X Solar", "Instinct Esports Edition", "Legacy Hero Captain Marvel", "Legacy Hero First Avenger", "Lily", "Lily 2 Active", "Marq Golfer", "Quatix 6X Solar", "Swim 2",
+                           "Tactix", "Tactix 7", "Tactix 7 AMOLED", "Tactix Bravo", "Tactix Charlie", "Tactix Delta Sapphire Edition", "Tactix Delta Solar Edition", "Venu", "Venu 2", "Venu 2 Plus",
+                           "Venu 2S", "Venu 3", "Venu 3S", "Venu Sq", "Venu Sq 2", "Venu Sq 2 Music Edition", "Vivoactive", "Vivoactive 3", "Vivoactive 4", "Vivoactive 4S", "Vivoactive 5", "Vivoactive HR", "Vivomove 3",
+                           "Vivomove 3S", "Vivomove HR", "Vivomove HR Premium", "Vivomove Luxe", "Vivomove Sport", "Vivomove Style", "Vivomove Trend"],
+
+
+            "Google": ["Pixel Watch", "Pixel Watch 2", "Pixel Watch 3 41mm", "Pixel Watch 3 45mm"],
+
+
+            "Oppo": [ "Watch 2 46mm", "Watch 3", "Watch 3 Pro", "Watch 4 Pro", "Watch Free", "Watch SE", "Watch Stainless Steel", "Watch X"],
+
+
+            "Polar": ["Grit X Pro", "Unite", "Vantage M (medium / large)", "Vantage V (medium / large)", "Vantage V3"]
+
         },
-        "part_types": ["Аккумулятор", "Динамик", "Дисплей", "Задняя крышка"],
+
+        "part_types": ["Аккумулятор", "Вибромотор", "Датчик приближения", "Динамик музыкальный",
+                       "Дисплей", "Камера основная", "Коннектор АКБ", "Коннектор дисплея", "Коннектор межплатный", "Корпус", "Крышка задняя", "Плата системная",
+                       "Разъем зарядки", "Рама дисплея",
+                       "Стекло для переклейки", "Тачскрин", "Микросхема", "Микрофон", "Шлейф межплатный",
+                       "Шлейф дисплея", "Шлейф боковых кнопок",  ""],
+
         "colors": {
-            "Дисплей": ["Черный", "Белый", "Серый"],
-            "Аккумулятор": ["Черный", "Белый"],
-            "Задняя крышка": ["Черный", "Белый"]
+            "Корпус": ["Черный", "Белый", "Серый"],
+            "Крышка задняя": ["Черный", "Белый"]
+
         },
         "conditions": ["Оригинал б/у", "Оригинал новый", "Копия б/у", "Копия новый"]
-    },
-    "Ноутбук": {
-        "brands": ["Samsung", "Huawei", "Xiaomi", "Apple", "LG", "Realme"],
-        "models": {
-            "Samsung": ["1", "2", "91", "12", "20", "30"],
-            "Huawei": ["P40", "P40 Lite", "P50"]
-        },
-        "part_types": ["Аккумулятор", "Динамик", "Дисплей", "Задняя крышка"],
-        "colors": {
-            "Дисплей": ["Черный", "Белый", "Серый"],
-            "Аккумулятор": ["Черный", "Белый"],
-            "Задняя крышка": ["Черный", "Белый"]
-        },
-        "conditions": ["Оригинал б/у", "Оригинал новый", "Копия б/у", "Копия новый"]
+
     }
 }

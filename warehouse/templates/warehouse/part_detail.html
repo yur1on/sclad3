@@ -15,11 +15,28 @@
     }
 
     /* Таблицы и рамки с равномерными отступами */
-    .table {
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid #dee2e6;
-    }
+.card {
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    background-color: #ffffff;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+.card .btn-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.card .btn {
+    flex: 1;
+    margin: 0 5px;
+    border-radius: 5px;
+}
+
 
     /* Эффект при наведении на кнопку */
     .btn:hover {
@@ -66,6 +83,8 @@
 <div class="row">
     <!-- Описание и информация о пользователе -->
     <div class="col-md-6">
+        <div class="card">
+
         <table class="table table-striped">
             <tr>
                 <th>Количество</th>
@@ -89,17 +108,18 @@
                 <th>Примечание</th>
                 <td>{{ part.note|default:"Нет примечаний" }}</td>
             </tr>
-        </table>
+
 
         <!-- Карточка с кнопками действий -->
-        <div class="card action-buttons">
-            <div class="card-body text-center">
-                <a href="{% url 'toggle_bookmark' part.id %}" class="btn">
-                    {% if is_bookmarked %}Удалить из закладок{% else %}Добавить в закладки{% endif %}
-                </a>
-                <a href="{% url 'user_parts' part.user.id %}" class="btn btn-secondary">Все запчасти продавца</a>
-            </div>
-        </div>
+
+    </table>
+    <div class="btn-group">
+        <a href="{% url 'toggle_bookmark' part.id %}" class="btn btn-outline-primary">
+            {% if is_bookmarked %}Удалить из закладок{% else %}Добавить в закладки{% endif %}
+        </a>
+        <a href="{% url 'user_parts' part.user.id %}" class="btn btn-outline-secondary">Все запчасти продавца</a>
+    </div>
+</div>
 
         <!-- Информация о пользователе -->
         <div class="card mt-3">
@@ -124,7 +144,7 @@
                     </tr>
                     <tr>
                         <th>Средний рейтинг</th>
-                        <td>{{ part.user.profile.average_rating }} / 5</td>
+                        <td>{{ part.user.profile.average_rating }} </td>
                     </tr>
                     <tr>
                         <th>Дата регистрации</th>

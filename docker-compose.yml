@@ -1,0 +1,27 @@
+services:
+  postgres-db:
+    image: postgres
+    container_name: my-postgres-db
+    ports:
+      - 6000:5432
+    environment: # исправлено с "environtent"
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=12345678
+      - POSTGRES_DB=django-app-db
+
+  django-app:
+    container_name: my_docker_blog
+    build: .
+    ports:
+      - 4567:8000
+    depends_on:
+      - postgres-db
+    environment:
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_NAME=django-app-db
+      - DB_USER=admin
+      - DB_PASSWORD=12345678
+networks:
+  default:
+    driver: bridge

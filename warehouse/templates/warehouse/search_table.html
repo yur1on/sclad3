@@ -1,55 +1,60 @@
 <div class="table-responsive">
     <table class="table table-striped table-bordered table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>Фото</th>
-                <th>Описание</th>
-                <th>Цена</th>
-                <th>Город</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in page_obj %}
-            <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
-                <!-- Столбец с изображением -->
-                <td>
-                    <div class="image-container">
-                        {% if result.images.all %}
-                            <a href="{{ result.images.first.image.url }}" target="_blank">
-                                <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail" style="max-width: 100%; max-height: 100%;">
-                            </a>
-                            {% if result.images.count > 1 %}
-                                <div style="margin-top: 5px;">
-                                    <small>+{{ result.images.count|add:"-1" }} еще</small>
-                                </div>
-                            {% endif %}
-                        {% else %}
-                            <span class="no-image-text">Нет изображения</span>
-                        {% endif %}
-                    </div>
-                </td>
+ <thead class="table-dark">
+    <tr>
+        <th>Фото</th>
+        <th>Описание</th>
+        <th>Цена</th>
+        <th>Продавец</th>
+        <th>Город</th>
+    </tr>
+</thead>
 
-                <td>
-                    <strong style="font-size: 16px; color: #333;">{{ result.part_type }}</strong>
-                    {% if result.condition %}
-                        (Состояние {{ result.condition }})
+<tbody>
+    {% for result in page_obj %}
+    <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
+        <!-- Столбец с изображением -->
+        <td>
+            <div class="image-container">
+                {% if result.images.all %}
+                    <a href="{{ result.images.first.image.url }}" target="_blank">
+                        <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail" style="max-width: 100%; max-height: 100%;">
+                    </a>
+                    {% if result.images.count > 1 %}
+                        <div style="margin-top: 5px;">
+                            <small>+{{ result.images.count|add:"-1" }} еще</small>
+                        </div>
                     {% endif %}
-                    <br>
-                    <span>Для устройства: {{ result.device }} {{ result.brand }} {{ result.display_model }}</span>
-                    <br>
-                    {% if result.note %}
-                        <span style="color: rgba(0, 0, 0, 0.6);">Примечание: {{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>
-                    {% endif %}
-                </td>
+                {% else %}
+                    <span class="no-image-text">Нет изображения</span>
+                {% endif %}
+            </div>
+        </td>
 
-                <!-- Столбец с ценой -->
-                <td>{{ result.price|floatformat:0 }} BYN.</td>
+        <td>
+            <strong style="font-size: 16px; color: #333;">{{ result.part_type }}</strong>
+            {% if result.condition %}
+                (Состояние {{ result.condition }})
+            {% endif %}
+            <br>
+            <span>Для устройства: {{ result.device }} {{ result.brand }} {{ result.display_model }}</span>
+            <br>
+            {% if result.note %}
+                <span style="color: rgba(0, 0, 0, 0.6);">Примечание: {{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>
+            {% endif %}
+        </td>
 
-                <!-- Столбец с городом -->
-                <td>{{ result.user.profile.city }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+        <!-- Столбец с ценой -->
+        <td>{{ result.price|floatformat:0 }} BYN.</td>
+
+        <!-- Новый столбец с именем продавца -->
+        <td>{{ result.user.username }}</td>
+
+        <!-- Столбец с городом -->
+        <td>{{ result.user.profile.city }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
     </table>
 </div>
 

@@ -96,11 +96,11 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <ul class="list-group">
-                                    <li class="list-group-item">Имя пользователя: {{ user.username }}</li>
+                                    <li class="list-group-item">Имя:  {{ user.username }}</li>
                                     <li class="list-group-item">Телефон: {{ user.profile.phone }}</li>
                                     <li class="list-group-item">Город: {{ user.profile.city }}</li>
                                     <li class="list-group-item">Мастерская: {{ user.profile.workshop_name|default:"Не указано" }}</li>
-                                    <li class="list-group-item">Рейтинг: {{ user.profile.average_rating|default:"0.0" }} / 5 ({{ user.profile.received_reviews.count }} отзывов)</li>
+                                    <li class="list-group-item">Рейтинг: {{ user.profile.average_rating|default:"0.0" }} / 5 {{ user.profile.received_reviews.count }}</li>
                                     <li class="list-group-item">Способы отправки: {{ user.profile.delivery_methods|default:"Не указано" }}</li>
                                 </ul>
                             </div>
