@@ -5,15 +5,26 @@
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Регистрация</h2>
-    <div class="card shadow mx-auto" style="max-width: 400px;"> <!-- Ограничиваем ширину карточки -->
-
+    <div class="card shadow mx-auto" style="max-width: 400px;">
         <div class="card-body">
+            <!-- Вывод сообщений -->
+            {% if messages %}
+                <div>
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} mb-3" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Форма -->
             <form method="POST" action="{% url 'register' %}">
                 {% csrf_token %}
 
                 <div class="form-group mb-3">
                     <label for="username" class="form-label">Логин</label>
-                    {{ form.username|add_class:"form-control" }} <!-- Применяем класс формы -->
+                    {{ form.username|add_class:"form-control" }}
                     {% if form.username.errors %}
                         <div class="text-danger">
                             {% for error in form.username.errors %}
@@ -25,7 +36,7 @@
 
                 <div class="form-group mb-3">
                     <label for="email" class="form-label">Email</label>
-                    {{ form.email|add_class:"form-control" }} <!-- Применяем класс формы -->
+                    {{ form.email|add_class:"form-control" }}
                     {% if form.email.errors %}
                         <div class="text-danger">
                             {% for error in form.email.errors %}
@@ -37,12 +48,26 @@
 
                 <div class="form-group mb-3">
                     <label for="password1" class="form-label">Пароль</label>
-                    {{ form.password1|add_class:"form-control" }} <!-- Применяем класс формы -->
+                    {{ form.password1|add_class:"form-control" }}
+                    {% if form.password1.errors %}
+                        <div class="text-danger">
+                            {% for error in form.password1.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="form-group mb-4">
                     <label for="password2" class="form-label">Подтвердите пароль</label>
-                    {{ form.password2|add_class:"form-control" }} <!-- Применяем класс формы -->
+                    {{ form.password2|add_class:"form-control" }}
+                    {% if form.password2.errors %}
+                        <div class="text-danger">
+                            {% for error in form.password2.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
@@ -50,4 +75,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}

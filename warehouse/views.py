@@ -3,23 +3,22 @@ from django.contrib.auth import logout
 from django.core.paginator import Paginator
 import openpyxl
 from pathlib import Path
-from django.shortcuts import render, redirect
-from django.contrib import messages
 from .forms import PartForm, PartImageFormSet
 from .models import Part, PartImage
 import json
 from django.http import JsonResponse
 from django.conf import settings
 import os
-from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from django.http import HttpResponse
 from itertools import groupby
-from .models import Part
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Part
 
 
 def home(request):
@@ -463,52 +462,57 @@ def import_excel(request):
             current_brand = None
             current_model = None
 
+            errors = []  # Список для хранения ошибок
+
             for row in ws.iter_rows(min_row=2, values_only=True):  # Пропускаем заголовок
-                device, brand, model, part_type, color, quantity, price = row
+                try:
+                    device, brand, model, part_type, color, quantity, price = row
 
-                # Если в строке указаны устройство, бренд, модель, обновляем их
-                if device and brand and model:
-                    current_device = device
-                    current_brand = brand
-                    current_model = model
+                    # Если в строке указаны устройство, бренд, модель, обновляем их
+                    if device and brand and model:
+                        current_device = device
+                        current_brand = brand
+                        current_model = model
 
-                # Если не указаны устройство, бренд или модель, используем последние известные значения
-                if not current_device or not current_brand or not current_model:
-                    messages.error(request, 'Ошибка: строка содержит незаполненные поля для устройства, бренда или модели.')
-                    continue  # Пропускаем строку с ошибкой
+                    # Если не указаны устройство, бренд или модель, используем последние известные значения
+                    if not current_device or not current_brand or not current_model:
+                        raise ValueError('Ошибка: строка содержит незаполненные поля для устройства, бренда или модели.')
 
-                # Проверяем, чтобы обязательные поля запчасти были заполнены
-                if not all([part_type, quantity, price]):
-                    messages.error(request, f'Не удалось импортировать строку: некоторые обязательные поля отсутствуют. ({device} {brand} {model})')
-                    continue
+                    # Проверяем, чтобы обязательные поля запчасти были заполнены
+                    if not all([part_type, quantity, price]):
+                        raise ValueError(f'Некоторые обязательные поля отсутствуют для строки: {current_device} {current_brand} {current_model}')
 
-                # Проверяем, существует ли запчасть с такими же параметрами в базе данных
-                existing_part = Part.objects.filter(
-                    user=request.user,
-                    device=current_device,
-                    brand=current_brand,
-                    model=current_model,
-                    part_type=part_type
-                ).exists()
+                    # Проверяем, существует ли запчасть с такими же параметрами в базе данных
+                    existing_part = Part.objects.filter(
+                        user=request.user,
+                        device=current_device,
+                        brand=current_brand,
+                        model=current_model,
+                        part_type=part_type
+                    ).exists()
 
-                if existing_part:
-                    # Сообщаем, что запчасть уже существует, и не добавляем ее повторно
-                    messages.info(request, f'Запчасть {current_device} {current_brand} {current_model} ({part_type}) уже существует в базе.')
-                    continue
+                    if existing_part:
+                        continue  # Пропускаем уже существующие запчасти
 
-                # Создаем новую запись о запчасти, если ее нет в базе
-                Part.objects.create(
-                    user=request.user,
-                    device=current_device,
-                    brand=current_brand,
-                    model=current_model,
-                    part_type=part_type,
-                    color=color if color else "Не указан",  # Обрабатываем пустой цвет
-                    quantity=int(quantity),  # Количество запчастей
-                    price=float(price)  # Цена запчастей
-                )
+                    # Создаем новую запись о запчасти, если ее нет в базе
+                    Part.objects.create(
+                        user=request.user,
+                        device=current_device,
+                        brand=current_brand,
+                        model=current_model,
+                        part_type=part_type,
+                        color=color if color else "Не указан",  # Обрабатываем пустой цвет
+                        quantity=int(quantity),  # Количество запчастей
+                        price=float(price)  # Цена запчастей
+                    )
+                except Exception as e:
+                    errors.append(str(e))
 
-            messages.success(request, 'Данные успешно импортированы!')
+            if errors:
+                messages.error(request, f'Обнаружены ошибки при импорте: {"; ".join(errors)}')
+            else:
+                messages.success(request, 'Данные успешно импортированы!')
+
             return redirect('warehouse')  # Перенаправляем на склад
 
         except Exception as e:
@@ -530,8 +534,9 @@ def base_view(request):
 
 
 # Путь к JSON файлу
-DATA_FILE = Path(__file__).resolve().parent / "data.json"
+# DATA_FILE = Path(__file__).resolve().parent.parent / "json_manager" / "г.json"
 
+DATA_FILE = Path(__file__).resolve().parent / "data.json"
 
 def load_data():
     with open(DATA_FILE, 'r', encoding='utf-8') as file:
@@ -681,3 +686,18 @@ def user_parts(request, user_id, template_name='warehouse/user_parts.html'):
         'grouped_parts': grouped_parts,
         'viewed_user': user,  # Передаём просмотренного пользователя
     })
+
+
+
+@login_required
+def delete_all_parts_page(request):
+    if request.method == 'POST':
+        Part.objects.filter(user=request.user).delete()
+        messages.success(request, 'Все запчасти были успешно удалены.')
+        return redirect('warehouse')  # Возврат на склад после удаления
+
+    return render(request, 'warehouse/delete_all_parts.html')
+
+
+def about_project(request):
+    return render(request, 'warehouse/about_project.html')

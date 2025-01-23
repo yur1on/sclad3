@@ -1,0 +1,14 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Удалить все запчасти{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Удаление всех запчастей</h2>
+    <p>Вы уверены, что хотите удалить <strong>все запчасти</strong>?</p>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить все</button>
+        <a href="{% url 'warehouse' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}
+

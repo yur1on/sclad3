@@ -6,4 +6,20 @@
         <p class="lead">Управляйте своим складом и находите запчасти легко и быстро.</p>
         <a class="btn btn-primary btn-lg" href="{% url 'warehouse' %}" role="button">Перейти в склад</a>
     </div>
+
+   <!-- Основной поиск -->
+    <div id="basic-search">
+        <form method="GET" action="{% url 'search' %}" class="mb-4">
+
+                <div class="col-md-4 mb-3">
+                    <label for="search" class="form-label">Поиск по ключевым словам</label>
+                    <input type="text" name="q" id="search" class="form-control" placeholder="Введите запрос" value="{{ request.GET.q }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end mb-3">
+                    <button type="submit" class="btn btn-dark btn-block">Поиск</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
 {% endblock %}

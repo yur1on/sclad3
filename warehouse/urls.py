@@ -26,12 +26,16 @@ urlpatterns = [
     path('get-part-types/', views.get_part_types, name='get_part_types'),
     path('get-parts/', views.get_parts, name='get_parts'),
     path('import-excel/', import_excel, name='import_parts'),
+    path('import-excel/', views.import_excel, name='import_excel'),
     path('', views.base_view, name='home'),
     path('user/<int:user_id>/parts/', views.user_parts, name='user_parts'),
     path('user_parts2/<int:user_id>/', views.user_parts, {'template_name': 'warehouse/user_parts2.html'}, name='user_parts2'),
     path('add-part/', add_part, name='add_part'),
     path('get_dynamic_data/', get_dynamic_data, name='get_dynamic_data'),
     path('get_regions_and_cities/', get_regions_and_cities, name='get_regions_and_cities'),
+    path('delete-all-parts/', views.delete_all_parts_page, name='delete_all_parts'),
+    path('about/', views.about_project, name='about_project')
+
 
 ]
 

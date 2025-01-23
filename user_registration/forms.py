@@ -1,9 +1,8 @@
-# user_registration/forms.py
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
-from django import forms
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.forms import UserCreationForm
+from django import forms
+from django.contrib.auth.models import User
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -11,6 +10,10 @@ class UserRegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+
+    error_messages = {
+        'password_mismatch': 'Пароли не совпадают.',  # Сообщение об ошибке на русском
+    }
 
     def clean_email(self):
         email = self.cleaned_data.get('email')

@@ -48,7 +48,7 @@
         <td>{{ result.price|floatformat:0 }} BYN.</td>
 
         <!-- Новый столбец с именем продавца -->
-        <td>{{ result.user.username }}</td>
+        <td>{{ result.user.profile.workshop_name|default:"Частное лицо" }}</td>
 
         <!-- Столбец с городом -->
         <td>{{ result.user.profile.city }}</td>

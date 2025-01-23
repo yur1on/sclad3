@@ -4,16 +4,23 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import UserRegisterForm
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from .forms import UserRegisterForm
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import UserRegisterForm
 
 def register(request):
     if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
+        form = UserRegisterForm(request.POST)  # Используем данные из POST
         if form.is_valid():
             form.save()
-            return redirect('login')
+            return redirect('login')  # Перенаправляем на страницу входа
     else:
-        form = UserRegisterForm()
+        form = UserRegisterForm()  # Пустая форма для GET-запроса
     return render(request, 'user_registration/register.html', {'form': form})
 
 def user_login(request):

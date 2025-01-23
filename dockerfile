@@ -15,4 +15,4 @@ COPY . /app/
 EXPOSE 8000
 
 # Команда запуска приложения
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh", "./entry.sh"]

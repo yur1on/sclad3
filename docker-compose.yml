@@ -9,6 +9,10 @@ services:
       - POSTGRES_PASSWORD=12345678
       - POSTGRES_DB=django-app-db
 
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+
   django-app:
     container_name: my_docker_blog
     build: .
@@ -22,6 +26,19 @@ services:
       - DB_NAME=django-app-db
       - DB_USER=admin
       - DB_PASSWORD=12345678
+
+    volumes:
+      - image-store:/etc/data/images
+
 networks:
   default:
     driver: bridge
+
+
+volumes:
+  db-data:
+    name: "Database_volume"
+
+  image-store:
+    name: "django-app-image-store"
+
