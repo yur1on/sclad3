@@ -34,7 +34,8 @@ urlpatterns = [
     path('get_dynamic_data/', get_dynamic_data, name='get_dynamic_data'),
     path('get_regions_and_cities/', get_regions_and_cities, name='get_regions_and_cities'),
     path('delete-all-parts/', views.delete_all_parts_page, name='delete_all_parts'),
-    path('about/', views.about_project, name='about_project')
+    path('about/', views.about_project, name='about_project'),
+    path('user/<int:user_id>/parts/search/', views.search_user_parts, name='search_user_parts'),
 
 
 ]

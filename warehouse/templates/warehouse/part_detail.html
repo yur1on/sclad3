@@ -128,7 +128,7 @@
                 <table class="table table-striped">
                     <tr>
                         <th>Имя пользователя</th>
-                        <td>{{ part.user.username }}</td>
+                        <td>{{ user.profile.full_name|default:"Не указано" }}</td>
                     </tr>
                     <tr>
                         <th>Мастерская</th>

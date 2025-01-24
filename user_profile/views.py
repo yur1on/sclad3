@@ -11,11 +11,12 @@ from .models import Bookmark  # Импортируем модель заклад
 
 @login_required
 def profile(request):
+    user = request.user
     edit_mode = request.GET.get('edit') == 'true'
 
     # Получаем отзывы, оставленные пользователю
     reviews = Review.objects.filter(user=request.user).order_by('-created_at')
-
+    given_reviews = user.given_reviews.all()  # Отзывы, оставленные пользователем
     # Получаем закладки текущего пользователя и количество закладок
     bookmarks = request.user.bookmarks.all()
     bookmarks_count = bookmarks.count()  # Подсчитываем количество закладок
@@ -32,6 +33,7 @@ def profile(request):
         'form': form,
         'edit_mode': edit_mode,
         'reviews': reviews,  # Передаем отзывы в шаблон
+        'given_reviews': given_reviews,
         'bookmarks': bookmarks,  # Передаем закладки в шаблон
         'bookmarks_count': bookmarks_count  # Передаем количество закладок в шаблон
     })

@@ -16,7 +16,7 @@
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><strong>Имя:</strong> {{ user.username }}</li>
+                        <li class="list-group-item"><strong>Имя:</strong> {{ user.profile.full_name|default:"Не указано" }}</li>
                         <li class="list-group-item"><strong>Телефон:</strong> {{ user.profile.phone }}</li>
                         <li class="list-group-item"><strong>Город:</strong> {{ user.profile.city }}</li>
                         <li class="list-group-item"><strong>Мастерская:</strong> {{ user.profile.workshop_name|default:"Не указано" }}</li>
@@ -43,6 +43,14 @@
                                 Отзывы обо мне
                             </button>
                         </li>
+
+                        <li class="nav-item">
+                            <button class="nav-link" id="given-reviews-tab" data-bs-toggle="tab" data-bs-target="#given-reviews" type="button" role="tab" aria-controls="given-reviews" aria-selected="false">
+                                Отзывы оставленные мной
+                            </button>
+                        </li>
+
+
                         <li class="nav-item">
                             <a href="{% url 'bookmarks' %}" class="nav-link">
                                 Закладки <span class="badge bg-secondary">{{ bookmarks_count }}</span>
@@ -83,6 +91,27 @@
                                 <p class="text-muted">Вы можете редактировать свой профиль, нажав кнопку «Редактировать профиль» в боковой панели.</p>
                             {% endif %}
                         </div>
+
+                        <div class="tab-pane fade" id="given-reviews" role="tabpanel">
+                            <h4>Отзывы оставленные мной</h4>
+                            {% if given_reviews %}
+                                <div class="list-group">
+                                    {% for review in given_reviews %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between">
+                                                <span><strong>Пользователь:</strong> {{ review.user.username }}</span>
+                                                <span><strong>Оценка:</strong> {{ review.rating }} / 5</span>
+                                            </div>
+                                            <p>{{ review.comment }}</p>
+                                            <small class="text-muted">Дата: {{ review.created_at|date:"d M Y" }}</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Вы ещё не оставили отзывов.</p>
+                            {% endif %}
+                        </div>
+
 
                         <!-- Reviews -->
                         <div class="tab-pane fade" id="reviews" role="tabpanel">

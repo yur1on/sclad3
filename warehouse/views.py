@@ -18,7 +18,7 @@ from itertools import groupby
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Part
+
 
 
 def home(request):
@@ -701,3 +701,27 @@ def delete_all_parts_page(request):
 
 def about_project(request):
     return render(request, 'warehouse/about_project.html')
+
+
+def search_user_parts(request, user_id):
+    viewed_user = get_object_or_404(User, id=user_id)
+    parts = Part.objects.filter(user=viewed_user)
+
+    # Обработка параметров поиска
+    query = request.GET.get('query', '').strip()
+    if query:
+        parts = parts.filter(
+            Q(model__icontains=query) |  # Используем поле model
+            Q(part_type__icontains=query)
+        )
+
+    # Группировка запчастей
+    grouped_parts = {}
+    for part in parts:
+        grouped_parts.setdefault(part.device, {}).setdefault(part.brand, []).append(part)
+
+    return render(request, 'warehouse/user_parts.html', {
+        'viewed_user': viewed_user,
+        'grouped_parts': grouped_parts,
+    })
+

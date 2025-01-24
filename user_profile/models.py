@@ -16,14 +16,16 @@ BELARUS_REGIONS = [
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="Полное имя")
     phone = models.CharField(max_length=15)
     region = models.CharField(max_length=100, choices=BELARUS_REGIONS, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     workshop_name = models.CharField(max_length=100, blank=True, null=True)
-    delivery_methods = models.TextField(max_length=300, blank=True, null=True)  # Новое поле для способов отправки
+    delivery_methods = models.TextField(max_length=300, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.city} - {self.phone}"
+        return f"{self.full_name or self.user.username} - {self.city} - {self.phone}"
+
 
     @property
     def average_rating(self):

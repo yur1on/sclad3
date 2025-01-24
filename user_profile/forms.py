@@ -16,17 +16,19 @@ BELARUS_REGIONS = [
 
 class ProfileForm(forms.ModelForm):
     region = forms.ChoiceField(choices=BELARUS_REGIONS, label="Область", required=True)
+    phone = forms.CharField(label="Телефон", required=True)
     city = forms.CharField(label="Город", required=True)
+    full_name = forms.CharField(label="Имя", required=False)
     workshop_name = forms.CharField(label="Название мастерской (не заполняйте, если мастерской нет)", required=False)
     delivery_methods = forms.CharField(
         label="Способы отправки",
         widget=forms.Textarea(attrs={"rows": 3}),
         required=False
-    )  # Новое поле для способов отправки
+    )
 
     class Meta:
         model = Profile
-        fields = ['phone', 'region', 'city', 'workshop_name', 'delivery_methods']
+        fields = ['full_name', 'phone', 'region', 'city', 'workshop_name', 'delivery_methods']
 
 
 class ReviewForm(forms.ModelForm):
