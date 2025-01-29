@@ -18,7 +18,7 @@ class ProfileForm(forms.ModelForm):
     region = forms.ChoiceField(choices=BELARUS_REGIONS, label="Область", required=True)
     phone = forms.CharField(label="Телефон", required=True)
     city = forms.CharField(label="Город", required=True)
-    full_name = forms.CharField(label="Имя", required=False)
+    full_name = forms.CharField(label="Имя", required=True)
     workshop_name = forms.CharField(label="Название мастерской (не заполняйте, если мастерской нет)", required=False)
     delivery_methods = forms.CharField(
         label="Способы отправки",

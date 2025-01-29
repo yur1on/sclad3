@@ -4,8 +4,115 @@
 {% load static %}
 {% load widget_tweaks %}
 
-<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<!--<link rel="stylesheet" href="{% static 'css/profile.css' %}">-->
+<style>
+/* Общие стили для страницы профиля */
+.profile-page {
+    max-width: 800px; /* Уменьшенная ширина для большей компактности */
+    margin: 0 auto;
+    padding: 20px; /* Добавлен внутренний отступ для комфортного расположения элементов */
+}
 
+/* Карточка профиля */
+.card {
+    border-radius: 6px; /* Меньший радиус для более строгого вида */
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Легкая тень для объема */
+    margin-bottom: 20px; /* Отступ между карточками */
+}
+
+/* Компактные списки */
+.list-group-item {
+    padding: 8px 12px; /* Уменьшенные отступы */
+    font-size: 0.95rem; /* Небольшое уменьшение шрифта */
+    border: none; /* Убрать лишние границы */
+    border-bottom: 1px solid #ddd; /* Легкая граница снизу для разделения */
+}
+
+.list-group-item:last-child {
+    border-bottom: none; /* Убрать нижнюю границу у последнего элемента */
+}
+
+/* Кнопки и формы */
+.form-group {
+    margin-bottom: 10px; /* Уменьшенный отступ между полями формы */
+}
+
+.form-control {
+    border-radius: 4px; /* Минимальное скругление */
+    padding: 8px 10px; /* Компактный внутренний отступ */
+    font-size: 0.9rem; /* Уменьшенный размер шрифта */
+}
+
+.form-control:focus {
+    border-color: #007bff; /* Цвет обводки при фокусе */
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.3); /* Легкое свечение */
+}
+
+/* Секция отзывов */
+.reviews-section h4 {
+    font-size: 1.2rem; /* Чуть меньший заголовок */
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.list-group-item-action {
+    display: flex;
+    justify-content: space-between; /* Разделение текста и кнопок */
+    align-items: center; /* Выравнивание по вертикали */
+    padding: 10px; /* Увеличенный отступ для кнопок */
+    transition: background-color 0.2s ease; /* Эффект при наведении */
+}
+
+.list-group-item-action:hover {
+    background-color: #f8f9fa; /* Легкая подсветка при наведении */
+}
+
+/* Текст в карточках */
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 85%; /* Более компактное ограничение ширины */
+    font-size: 0.9rem; /* Уменьшенный шрифт */
+}
+
+/* Стили для кнопок */
+.btn {
+    padding: 6px 10px; /* Уменьшенные отступы */
+    font-size: 0.9rem; /* Компактный размер шрифта */
+    border-radius: 4px; /* Минимальное скругление */
+    transition: background-color 0.3s ease; /* Плавное изменение цвета */
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Общая секция кнопок */
+.btn-group {
+    gap: 8px; /* Расстояние между кнопками */
+}
+
+/* Отступы и выравнивание */
+.section-header {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.section {
+    margin-bottom: 20px; /* Отступы между разделами */
+}
+
+
+
+</style>
 <div class="container my-4">
     <div class="row">
         <!-- Sidebar -->
@@ -92,25 +199,32 @@
                             {% endif %}
                         </div>
 
-                        <div class="tab-pane fade" id="given-reviews" role="tabpanel">
-                            <h4>Отзывы оставленные мной</h4>
-                            {% if given_reviews %}
-                                <div class="list-group">
-                                    {% for review in given_reviews %}
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between">
-                                                <span><strong>Пользователь:</strong> {{ review.user.username }}</span>
-                                                <span><strong>Оценка:</strong> {{ review.rating }} / 5</span>
-                                            </div>
-                                            <p>{{ review.comment }}</p>
-                                            <small class="text-muted">Дата: {{ review.created_at|date:"d M Y" }}</small>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <p class="text-muted">Вы ещё не оставили отзывов.</p>
-                            {% endif %}
-                        </div>
+<!-- Reviews оставленные мной -->
+<div class="tab-pane fade" id="given-reviews" role="tabpanel">
+    <h4>Отзывы оставленные мной</h4>
+    {% if given_reviews %}
+        <div class="list-group">
+            {% for review in given_reviews %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <span><strong>Пользователю:</strong> {{ review.user.profile.full_name }}</span>
+                        <span><strong>Оценка:</strong> {{ review.rating }} / 5</span>
+                    </div>
+                    <p>{{ review.comment }}</p>
+                    <small class="text-muted">Дата: {{ review.created_at|date:"d M Y" }}</small>
+                    <!-- Кнопка удаления отзыва -->
+                    <form method="post" action="{% url 'delete_review' review.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">Вы ещё не оставили отзывов.</p>
+    {% endif %}
+</div>
+
 
 
                         <!-- Reviews -->

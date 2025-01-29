@@ -97,3 +97,22 @@ def bookmarks(request):
     user_bookmarks = Bookmark.objects.filter(user=request.user).select_related('part')
     return render(request, 'user_profile/bookmarks.html', {'bookmarks': user_bookmarks})
 
+
+from django.contrib import messages
+from django.shortcuts import redirect, get_object_or_404
+from .models import Review
+
+
+@login_required
+def delete_review(request, review_id):
+    # Получаем отзыв по ID
+    review = get_object_or_404(Review, id=review_id, reviewer=request.user)
+
+    # Удаляем отзыв
+    review.delete()
+
+    # Показываем сообщение об успешном удалении
+    messages.success(request, "Отзыв был успешно удален.")
+
+    # Перенаправляем обратно на страницу профиля
+    return redirect('profile')

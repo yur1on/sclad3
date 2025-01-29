@@ -22,6 +22,7 @@
     background-color: #ffffff;
     margin-bottom: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 0.5px solid #000; /* черная обводка */
 }
 
 
@@ -128,7 +129,7 @@
                 <table class="table table-striped">
                     <tr>
                         <th>Имя пользователя</th>
-                        <td>{{ user.profile.full_name|default:"Не указано" }}</td>
+                        <td>{{ part.user.profile.full_name|default:"Не указано" }}</td>
                     </tr>
                     <tr>
                         <th>Мастерская</th>

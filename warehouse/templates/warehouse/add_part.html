@@ -2,125 +2,178 @@
 {% block title %}Добавить запчасть{% endblock %}
 {% block content %}
 {% load static %}
-<div class="container mt-4">
-    <h2 class="text-center mb-4">Добавить запчасть</h2>
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <form method="post" id="part-form" class="form-container p-4 bg-light shadow-sm rounded" enctype="multipart/form-data">
-                {% csrf_token %}
+<div class="container mt-3 mb-4"> <!-- Уменьшен верхний и нижний отступы контейнера -->
+    <h2 class="mb-3 text-center ">Добавить запчасть</h2> <!-- Уменьшен нижний отступ для заголовка -->
 
-                <!-- Устройство -->
-                <div class="form-group mb-3">
-                    <label for="id_device" class="form-label">Устройство</label>
-                    <input list="devices" id="id_device" name="device" class="form-control" placeholder="Введите устройство" required>
-                    <datalist id="devices">
-                        <option value="Телефон">
-                        <option value="Планшет">
-                        <option value="Смарт-часы">
-                    </datalist>
-                </div>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
 
-                <!-- Бренд -->
-                <div class="form-group mb-3">
-                    <label for="id_brand" class="form-label">Бренд</label>
-                    <input list="brands" id="id_brand" name="brand" class="form-control" placeholder="Введите бренд" required>
-                    <datalist id="brands"></datalist>
-                </div>
+        <!-- Устройство -->
+        <div class="form-group mb-3 row">
+            <label for="id_device" class="col-sm-2 col-form-label">Устройство:</label>
+            <div class="col-sm-8">
+                <input list="devices" id="id_device" name="device" class="form-control shadow-sm" placeholder="Введите устройство" required>
+                <datalist id="devices">
+                    <option value="Телефон">
+                    <option value="Планшет">
+                    <option value="Смарт-часы">
+                </datalist>
+            </div>
+        </div>
 
-                <!-- Модель -->
-                <div class="form-group mb-3">
-                    <label for="id_model" class="form-label">Модель</label>
-                    <input list="models" id="id_model" name="model" class="form-control" placeholder="Введите модель" required>
-                    <datalist id="models"></datalist>
-                </div>
+        <!-- Бренд -->
+        <div class="form-group mb-3 row">
+            <label for="id_brand" class="col-sm-2 col-form-label">Бренд:</label>
+            <div class="col-sm-8">
+                <input list="brands" id="id_brand" name="brand" class="form-control shadow-sm" placeholder="Введите бренд" required>
+                <datalist id="brands"></datalist>
+            </div>
+        </div>
 
-                <!-- Тип запчасти -->
-                <div class="form-group mb-3">
-                    <label for="id_part_type" class="form-label">Тип запчасти</label>
-                    <input list="part_types" id="id_part_type" name="part_type" class="form-control" placeholder="Введите тип запчасти" required>
-                    <datalist id="part_types"></datalist>
-                </div>
+        <!-- Модель -->
+        <div class="form-group mb-3 row">
+            <label for="id_model" class="col-sm-2 col-form-label">Модель:</label>
+            <div class="col-sm-8">
+                <input list="models" id="id_model" name="model" class="form-control shadow-sm" placeholder="Введите модель" required>
+                <datalist id="models"></datalist>
+            </div>
+        </div>
 
-                <!-- Цвет -->
-                <div id="color_input_container" class="form-group mb-3" style="display: none;">
-                    <label for="id_color" class="form-label">Цвет</label>
-                    <input type="text" id="id_color" name="color" list="colors" class="form-control" placeholder="Введите цвет (если нужно)">
-                    <datalist id="colors"></datalist>
-                </div>
+        <!-- Тип запчасти -->
+        <div class="form-group mb-3 row">
+            <label for="id_part_type" class="col-sm-2 col-form-label">Тип запчасти:</label>
+            <div class="col-sm-8">
+                <input list="part_types" id="id_part_type" name="part_type" class="form-control shadow-sm" placeholder="Введите тип запчасти" required>
+                <datalist id="part_types"></datalist>
+            </div>
+        </div>
 
+        <!-- Цвет -->
+        <div class="form-group mb-3 row" id="color_input_container"  style="display: none;">
+            <label for="id_color" class="col-sm-2 col-form-label">Цвет:</label>
+            <div class="col-sm-8">
+                <input type="text" id="id_color" name="color" list="colors" class="form-control shadow-sm" placeholder="Введите цвет (если нужно)">
+                <datalist id="colors"></datalist>
+            </div>
+        </div>
 
-                <!-- Поле для маркировки микросхемы -->
-<div id="chip_marking_container" class="form-group mb-3" style="display: none;">
-    <label for="id_chip_marking" class="form-label">Маркировка микросхемы</label>
-    <input type="text" id="id_chip_marking" name="chip_marking" class="form-control" placeholder="Введите маркировку микросхемы">
-</div>
+        <!-- Маркировка микросхемы -->
+        <div id="chip_marking_container" class="form-group mb-3 row" style="display: none;">
+            <label for="id_chip_marking" class="col-sm-2 col-form-label">Маркировка микросхемы:</label>
+            <div class="col-sm-8">
+                <input type="text" id="id_chip_marking" name="chip_marking" class="form-control shadow-sm" placeholder="Введите маркировку микросхемы">
+            </div>
+        </div>
 
+        <!-- Состояние -->
+        <div class="form-group mb-3 row">
+            <label for="id_condition" class="col-sm-2 col-form-label">Состояние:</label>
+            <div class="col-sm-8">
+                <input list="conditions" id="id_condition" name="condition" class="form-control shadow-sm" placeholder="Выберите состояние" required>
+                <datalist id="conditions"></datalist>
+            </div>
+        </div>
 
-                <!-- Состояние -->
-                <div class="form-group mb-3">
-                    <label for="id_condition" class="form-label">Состояние</label>
-                    <input list="conditions" id="id_condition" name="condition" class="form-control" placeholder="Выберите состояние" required>
-                    <datalist id="conditions"></datalist>
-                </div>
+        <!-- Количество -->
+        <div class="form-group mb-3 row">
+            <label for="id_quantity" class="col-sm-2 col-form-label">Количество:</label>
+            <div class="col-sm-8">
+                <input type="number" name="quantity" id="id_quantity" class="form-control shadow-sm" placeholder="Введите количество" min="1" required>
+            </div>
+        </div>
 
-                <!-- Количество -->
-                <div class="form-group mb-3">
-                    <label for="id_quantity" class="form-label">Количество</label>
-                    <input type="number" name="quantity" id="id_quantity" class="form-control" placeholder="Введите количество" min="1" required>
-                </div>
-
-                <!-- Цена -->
-                <div class="form-group mb-3">
-                    <label for="id_price" class="form-label">Цена</label>
-                    <div class="input-group">
-                        <input type="number" name="price" id="id_price" class="form-control" placeholder="Введите цену" step="1" min="0" required>
-                        <span class="input-group-text">бел.руб.</span>
-                    </div>
-                </div>
-
-                <!-- Примечание -->
-                <div class="form-group mb-3">
-                    <label for="id_note" class="form-label">Примечание</label>
-                    <textarea name="note" id="id_note" class="form-control" rows="3" placeholder="Введите примечание"></textarea>
-                </div>
-
-             <!-- Загрузка изображений -->
-            <div class="form-group mb-4">
-                <label for="images" class="form-label">Добавте фотографии (в формате JPG, JPEG, HEIC, PNG до 5 МБ каждый)</label>
-                {{ formset.management_form }}
-
-                <!-- Обработка ошибок formset -->
-                {% if formset.errors %}
-                <div class="error-list alert alert-danger">
-                    <ul>
-                        {% for form in formset %}
-                            {% for field, errors in form.errors.items %}
-                                <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
-                            {% endfor %}
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-
-                <div class="row">
-                    {% for form in formset %}
-                    <div class="col-md-12 mb-3">
-                        <label for="{{ form.image.id_for_label }}" class="form-label">Фото: </label>
-                        {{ form.image }}
-                    </div>
-                    {% endfor %}
+        <!-- Цена -->
+        <div class="form-group mb-3 row">
+            <label for="id_price" class="col-sm-2 col-form-label">Цена:</label>
+            <div class="col-sm-8">
+                <div class="input-group">
+                    <input type="number" name="price" id="id_price" class="form-control shadow-sm" placeholder="Введите цену" step="1" min="0" required>
+                    <span class="input-group-text">бел.руб.</span>
                 </div>
             </div>
-
-
-                <!-- Кнопка добавления -->
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg">Добавить запчасть</button>
-                </div>
-            </form>
         </div>
-    </div>
+
+        <!-- Примечание -->
+        <div class="form-group mb-3 row">
+            <label for="id_note" class="col-sm-2 col-form-label">Примечание:</label>
+            <div class="col-sm-8">
+                <textarea name="note" id="id_note" class="form-control shadow-sm" rows="3" placeholder="Введите примечание"></textarea>
+            </div>
+        </div>
+
+        <!-- Загрузка изображений -->
+        <div class="form-group mb-3">
+            <label class="form-label">Добавьте фотографии:</label>
+            {{ formset.management_form }}
+            <div class="row">
+                {% for form in formset %}
+                <div class="col-md-12 mb-3">
+                    <label for="{{ form.image.id_for_label }}" class="form-label">Фото:</label>
+                    {{ form.image }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Кнопка добавления -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg px-5">Добавить запчасть</button>
+        </div>
+    </form>
 </div>
+<style>
+    /* Улучшение внешнего вида полей ввода */
+    input.form-control, select.form-control, textarea.form-control {
+        border-radius: 10px; /* скругленные углы */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* легкая тень */
+        padding: 10px 13px;
+        transition: all 0.3s ease-in-out;
+        border: 0.5px solid #000; /* черная обводка */
+    }
+
+    input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
+        border-color: #007bff; /* синий цвет при фокусе */
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* свечение при фокусе */
+    }
+
+    /* Стиль кнопки отправки */
+    button[type="submit"] {
+        background-color: #28a745;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #218838;
+    }
+
+    /* Для улучшения кнопок выбора устройств */
+    input[list] {
+        background-image: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/svgs/solid/search.svg');
+        background-position: right 10px center;
+        background-repeat: no-repeat;
+        padding-right: 40px; /* добавим отступ для иконки */
+    }
+
+    /* Стили для разделителей */
+    .row {
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    /* Применить черный цвет только к меткам в форме */
+    .form-group label {
+        color: black;
+    }
+</style>
 
 <script src="{% static 'js/add_part.js' %}"></script>
 {% endblock %}

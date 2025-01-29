@@ -685,6 +685,7 @@ def user_parts(request, user_id, template_name='warehouse/user_parts.html'):
     return render(request, template_name, {
         'grouped_parts': grouped_parts,
         'viewed_user': user,  # Передаём просмотренного пользователя
+        'viewed_user_full_name': user.profile.full_name,
     })
 
 

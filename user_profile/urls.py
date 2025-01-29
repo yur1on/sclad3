@@ -10,4 +10,5 @@ urlpatterns = [
     path('bookmarks/', views.bookmarks, name='bookmarks'),
     path('toggle-bookmark/<int:part_id>/', views.toggle_bookmark, name='toggle_bookmark'),
     path('regions_and_cities/', get_regions_and_cities, name='regions_and_cities'),
+    path('delete_review/<int:review_id>/', views.delete_review, name='delete_review'),
 ]

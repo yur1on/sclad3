@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'user_registration',
     'widget_tweaks',
+    'custom_admin',
 
 ]
 
