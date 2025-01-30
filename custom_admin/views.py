@@ -1,75 +1,92 @@
-from django.shortcuts import render, get_object_or_404
-from warehouse.models import Part
-from user_profile.models import Profile, Review
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render
-
-@user_passes_test(lambda u: u.is_staff)
-def dashboard(request):
-    parts_count = Part.objects.count()
-    users_count = User.objects.count()
-    reviews_count = Review.objects.count()
-    return render(request, 'custom_admin/dashboard.html', {
-        'parts_count': parts_count,
-        'users_count': users_count,
-        'reviews_count': reviews_count,
-    })
-
-def parts_list(request):
-    parts = Part.objects.all()
-    return render(request, 'custom_admin/parts_list.html', {'parts': parts})
-
-def users_list(request):
-    users = Profile.objects.all()
-    return render(request, 'custom_admin/users_list.html', {'users': users})
-
-def reviews_list(request):
-    reviews = Review.objects.all()
-    return render(request, 'custom_admin/reviews_list.html', {'reviews': reviews})
-
-from django.shortcuts import get_object_or_404, render, redirect
-from user_profile.models import Review
-from user_profile.forms import ReviewForm  # Если у вас есть форма для редактирования отзыва
-
-def edit_review(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
-
-    if request.method == 'POST':
-        form = ReviewForm(request.POST, instance=review)
-        if form.is_valid():
-            form.save()
-            return redirect('custom_admin:reviews_list')
-    else:
-        form = ReviewForm(instance=review)
-
-    return render(request, 'custom_admin/edit_review.html', {'form': form, 'review': review})
-
-
-from django.shortcuts import redirect
-from user_profile.models import Review
-
-def delete_review(request, id):
-    review = Review.objects.get(id=id)
-    review.delete()
-    return redirect('reviews_list')  # Redirect to your reviews list page
-
-
-# custom_admin/views.py
+import json
+import os
 from django.shortcuts import render, redirect
-from .forms import DataEditForm
-from .utils import load_data_from_json, save_data_to_json
+from django.contrib.auth.decorators import user_passes_test
+from django.conf import settings
+from .forms import JSONDataForm
 
-def edit_data_view(request):
-    data = load_data_from_json()  # Загружаем текущие данные из data.json
-    if request.method == 'POST':
-        form = DataEditForm(request.POST)
+# Проверка, является ли пользователь админом
+def is_admin(user):
+    return user.is_superuser
+
+# Путь к файлу data.json
+DATA_FILE_PATH = os.path.join(settings.BASE_DIR, "warehouse", "data.json")
+
+@user_passes_test(is_admin)
+def edit_json(request):
+    if request.method == "POST":
+        form = JSONDataForm(request.POST)
         if form.is_valid():
-            # Обрабатываем изменения данных
-            new_data = form.cleaned_data
-            save_data_to_json(new_data)  # Сохраняем обновленные данные в JSON
-            return redirect('success_url')  # Или на другую страницу
+            with open(DATA_FILE_PATH, "w", encoding="utf-8") as f:
+                f.write(form.cleaned_data["json_data"])
+            return redirect("custom_admin:edit_json")
     else:
-        form = DataEditForm(initial=data)
+        try:
+            with open(DATA_FILE_PATH, "r", encoding="utf-8") as f:
+                json_content = json.dumps(json.load(f), indent=4, ensure_ascii=False)
+        except (FileNotFoundError, json.JSONDecodeError):
+            json_content = "{}"
 
-    return render(request, 'custom_admin/edit_data.html', {'form': form})
+        form = JSONDataForm(initial={"json_data": json_content})
+
+    return render(request, "custom_admin/edit_json.html", {"form": form})
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import user_passes_test
+from user_profile.models import Review
+
+# Проверка, является ли пользователь админом
+def is_admin(user):
+    return user.is_superuser
+
+# Просмотр всех комментариев
+@user_passes_test(is_admin)
+def review_list(request):
+    reviews = Review.objects.all().select_related("user")  # Загружаем все комментарии с пользователями
+    return render(request, "custom_admin/review_list.html", {"reviews": reviews})
+
+# Удаление комментария
+@user_passes_test(is_admin)
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    review.delete()
+    return redirect("custom_admin:review_list")
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import user_passes_test
+
+# Проверка, является ли пользователь админом
+def is_admin(user):
+    return user.is_superuser
+
+# Панель администратора
+@user_passes_test(is_admin)
+def admin_panel(request):
+    return render(request, "custom_admin/admin_panel.html")
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import User
+from user_profile.models import Profile  # Учитывая, что профиль хранится в user_profile.models.Profile
+
+# Проверка, является ли пользователь админом
+def is_admin(user):
+    return user.is_superuser
+
+# Управление пользователями
+@user_passes_test(is_admin)
+def user_list(request):
+    users = User.objects.select_related("profile").all()
+    return render(request, "custom_admin/user_list.html", {"users": users})
+
+# Удаление пользователя
+@user_passes_test(is_admin)
+def delete_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.delete()
+    return redirect("custom_admin:user_list")
+
+

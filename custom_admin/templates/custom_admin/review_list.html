@@ -1,0 +1,101 @@
+{% extends "warehouse/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="title">Все комментарии пользователей</h2>
+
+    <table class="review-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Пользователь</th>
+                <th>Рейтинг</th>
+                <th>Комментарий</th>
+                <th>Дата</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in reviews %}
+            <tr>
+                <td>{{ review.id }}</td>
+                <td>{{ review.user.username }}</td>
+                <td>{{ review.rating }}</td>
+                <td class="comment-text">{{ review.comment }}</td>
+                <td>{{ review.created_at }}</td>
+                <td>
+                    <a href="{% url 'custom_admin:delete_review' review.id %}" class="delete-button" onclick="return confirm('Удалить комментарий?');">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+
+
+    .title {
+        text-align: center;
+        color: #444;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .review-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fafafa;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .review-table th {
+        background: #0056b3;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: bold;
+    }
+
+    .review-table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        color: #333;
+    }
+
+    .review-table tr:nth-child(even) {
+        background: #f3f3f3;
+    }
+
+    .review-table tr:hover {
+        background: #e0e0e0;
+        transition: background 0.2s ease-in-out;
+    }
+
+    .comment-text {
+        max-width: 300px;
+        word-wrap: break-word;
+        font-style: italic;
+        color: #666;
+    }
+
+    .delete-button {
+        display: inline-block;
+        padding: 8px 12px;
+        background: #d9534f;
+        color: white;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        transition: background 0.3s ease-in-out;
+    }
+
+    .delete-button:hover {
+        background: #c9302c;
+    }
+</style>
+
+{% endblock %}

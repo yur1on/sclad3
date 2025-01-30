@@ -1,0 +1,93 @@
+{% extends "warehouse/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="title">Управление пользователями</h2>
+
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Телефон</th>
+                <th>Город</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.profile.phone|default:"Не указан" }}</td>
+                <td>{{ user.profile.city|default:"Не указан" }}</td>
+                <td>
+                    <a href="{% url 'custom_admin:delete_user' user.id %}"
+                       onclick="return confirm('Вы уверены, что хотите удалить пользователя?');"
+                       class="delete-button">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+
+    .title {
+        text-align: center;
+        color: #333;
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fafafa;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .user-table th {
+        background: #007bff;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: bold;
+    }
+
+    .user-table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        color: #333;
+    }
+
+    .user-table tr:nth-child(even) {
+        background: #f3f3f3;
+    }
+
+    .user-table tr:hover {
+        background: #e0e0e0;
+        transition: background 0.2s ease-in-out;
+    }
+
+    .delete-button {
+        display: inline-block;
+        padding: 6px 12px;
+        background: #d9534f;
+        color: white;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        transition: background 0.3s ease-in-out;
+    }
+
+    .delete-button:hover {
+        background: #c9302c;
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "warehouse/base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <h2 class="admin-title">Панель администратора</h2>
+
+<div class="admin-links">
+    <a href="{% url 'custom_admin:edit_json' %}" class="admin-button">Редактировать JSON</a>
+    <a href="{% url 'custom_admin:review_list' %}" class="admin-button">Управление комментариями</a>
+    <a href="{% url 'custom_admin:user_list' %}" class="admin-button">Управление пользователями</a>
+</div>
+
+</div>
+
+<style>
+    .admin-container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    .admin-title {
+        color: #333;
+        margin-bottom: 20px;
+    }
+    .admin-links {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .admin-button {
+        display: block;
+        padding: 10px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 18px;
+    }
+    .admin-button:hover {
+        background: #0056b3;
+    }
+</style>
+{% endblock %}

@@ -155,7 +155,10 @@
                     </ul>
                     {% if user.is_authenticated %}
                         <span class="navbar-text ms-3">{{ user.username }}</span>
-                        <a class="btn btn-outline-danger ms-2" href="{% url 'logout' %}">Выход</a>
+                    {% if user.is_superuser %}
+                        <a class="btn btn-outline-secondary ms-2" href="{% url 'custom_admin:admin_panel' %}">Панель администратора</a>
+                    {% endif %}
+                        <a  class="btn btn-outline-danger ms-2" href="{% url 'logout' %}">Выход</a>
                     {% else %}
                         <a class="btn btn-outline-primary ms-2" href="{% url 'login' %}">Вход</a>
                         <a class="btn btn-outline-secondary ms-2" href="{% url 'register' %}">Регистрация</a>

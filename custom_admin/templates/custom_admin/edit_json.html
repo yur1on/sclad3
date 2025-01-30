@@ -1,10 +1,84 @@
-{% extends 'admin/base_site.html' %}
+
+{% extends "warehouse/base.html" %}
 
 {% block content %}
-    <h1>Редактирование JSON файла</h1>
-    <form method="POST">
+<div class="container">
+    <h2 class="title">Редактирование JSON-файла</h2>
+    <form method="post" class="json-form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Сохранить</button>
+        <label for="json_data" class="label">JSON:</label>
+        <textarea id="json_data" name="json_data" class="json-textarea">{{ form.json_data.value|default:'' }}</textarea>
+        <button type="submit" class="save-button">Сохранить</button>
     </form>
+</div>
+
+<style>
+    /* Основной контейнер */
+
+
+    /* Заголовок */
+    .title {
+        text-align: center;
+        color: #333;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    /* Метка */
+    .label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+    }
+
+    /* Текстовое поле JSON */
+    .json-textarea {
+        width: 100%;
+        height: 350px;
+        font-family: monospace;
+        background: #1e1e1e;
+        color: #dcdcdc;
+        border: 1px solid #444;
+        padding: 12px;
+        border-radius: 6px;
+        resize: vertical;
+        font-size: 14px;
+        line-height: 1.5;
+        transition: border-color 0.3s;
+    }
+
+    .json-textarea:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    /* Кнопка сохранения */
+    .save-button {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        margin-top: 15px;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: background 0.3s ease-in-out, transform 0.2s;
+    }
+
+    .save-button:hover {
+        background: linear-gradient(135deg, #0056b3, #003f80);
+        transform: scale(1.03);
+    }
+
+    .save-button:active {
+        transform: scale(0.98);
+    }
+</style>
 {% endblock %}

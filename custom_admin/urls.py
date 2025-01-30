@@ -1,15 +1,18 @@
 
 from django.urls import path
-from . import views
+from .views import admin_panel, edit_json, review_list, delete_review
+from django.urls import path
+from .views import admin_panel, edit_json, review_list, delete_review, user_list, delete_user
 app_name = 'custom_admin'
 
 urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
-    path('parts/', views.parts_list, name='parts_list'),
-    path('users/', views.users_list, name='users_list'),
-    path('reviews/', views.reviews_list, name='reviews_list'),
-    path('reviews/edit/<int:review_id>/', views.edit_review, name='edit_review'),
-    path('delete-review/<int:id>/', views.delete_review, name='delete_review'),
-    path('edit-data/', views.edit_data_view, name='edit_data'),
+
+    path("", admin_panel, name="admin_panel"),
+    path("edit-json/", edit_json, name="edit_json"),
+    path("edit-json/", edit_json, name="edit_json"),
+    path("reviews/", review_list, name="review_list"),
+    path("reviews/delete/<int:review_id>/", delete_review, name="delete_review"),
+    path("users/", user_list, name="user_list"),
+    path("users/delete/<int:user_id>/", delete_user, name="delete_user"),
 ]
 
