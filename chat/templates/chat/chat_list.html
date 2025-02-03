@@ -1,0 +1,52 @@
+{% extends "warehouse/base.html" %}
+
+{% block content %}
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Мои чаты</h5>
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            {% for item in chat_data %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <!-- Информация о чате -->
+                    <div>
+                        <a href="{% url 'chat_detail' item.chat.id %}" class="text-decoration-none">
+                            Чат с
+                            {% if item.chat.user1 == request.user %}
+                                {{ item.chat.user2.username }}
+                            {% else %}
+                                {{ item.chat.user1.username }}
+                            {% endif %}
+                        </a>
+
+                        {% if item.chat.part %}
+                            <br>
+                            <small class="text-muted">
+                                <strong>Обсуждается:</strong>
+                                <a href="{% url 'part_detail' item.chat.part.id %}" class="text-decoration-none">
+                                    {{ item.chat.part.part_type }} - {{ item.chat.part.brand }} - {{ item.chat.part.display_model }}
+                                </a>
+                            </small>
+                        {% endif %}
+
+                        {% if item.unread_count > 0 %}
+                            <span class="badge bg-danger ms-2">
+                                {{ item.unread_count }} новых
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Кнопка для удаления чата -->
+                    <form method="post" action="{% url 'delete_chat' item.chat.id %}" onsubmit="return confirm('Вы уверены, что хотите удалить этот чат?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                    </form>
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted">У вас пока нет чатов.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

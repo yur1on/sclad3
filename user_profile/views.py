@@ -8,34 +8,42 @@ from django.contrib.auth.decorators import login_required
 from warehouse.models import Part
 from django.contrib import messages
 from .models import Bookmark  # Импортируем модель закладок
-
+from chat.models import Chat
+from django.contrib import messages
+from django.shortcuts import redirect, get_object_or_404
+from .models import Review
 @login_required
 def profile(request):
     user = request.user
     edit_mode = request.GET.get('edit') == 'true'
 
     # Получаем отзывы, оставленные пользователю
-    reviews = Review.objects.filter(user=request.user).order_by('-created_at')
+    reviews = Review.objects.filter(user=user).order_by('-created_at')
     given_reviews = user.given_reviews.all()  # Отзывы, оставленные пользователем
-    # Получаем закладки текущего пользователя и количество закладок
-    bookmarks = request.user.bookmarks.all()
-    bookmarks_count = bookmarks.count()  # Подсчитываем количество закладок
+
+    # Получаем закладки текущего пользователя и их количество
+    bookmarks = user.bookmarks.all()
+    bookmarks_count = bookmarks.count()
+
+    # Получаем чаты пользователя
+    chats = Chat.objects.filter(user1=user) | Chat.objects.filter(user2=user)
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=request.user.profile)
+        form = ProfileForm(request.POST, instance=user.profile)
         if form.is_valid():
             form.save()
             return redirect('profile')
     else:
-        form = ProfileForm(instance=request.user.profile)
+        form = ProfileForm(instance=user.profile)
 
     return render(request, 'user_profile/profile.html', {
         'form': form,
         'edit_mode': edit_mode,
-        'reviews': reviews,  # Передаем отзывы в шаблон
+        'reviews': reviews,
         'given_reviews': given_reviews,
-        'bookmarks': bookmarks,  # Передаем закладки в шаблон
-        'bookmarks_count': bookmarks_count  # Передаем количество закладок в шаблон
+        'bookmarks': bookmarks,
+        'bookmarks_count': bookmarks_count,
+        'chats': chats,  # Добавляем чаты в контекст
     })
 
 
@@ -97,10 +105,6 @@ def bookmarks(request):
     user_bookmarks = Bookmark.objects.filter(user=request.user).select_related('part')
     return render(request, 'user_profile/bookmarks.html', {'bookmarks': user_bookmarks})
 
-
-from django.contrib import messages
-from django.shortcuts import redirect, get_object_or_404
-from .models import Review
 
 
 @login_required

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'user_registration',
     'widget_tweaks',
     'custom_admin',
+    'chat',
 
 ]
 

@@ -9,7 +9,7 @@ urlpatterns = [
     path('', include('warehouse.urls')),
     path('user/', include('user_registration.urls')),
     path('admin-panel/', include('custom_admin.urls')),
-
+    path('chat/', include('chat.urls')),
     path("custom-admin/", include("custom_admin.urls")),
 ]
 if settings.DEBUG:

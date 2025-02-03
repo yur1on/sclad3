@@ -161,6 +161,11 @@
                 <div class="text-center mt-3">
                     <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
                     <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary">Отзывы продавца</a>
+{% if part.user != request.user %}
+    <a href="{% url 'start_chat' part.id part.user.id %}" class="btn btn-primary">Написать продавцу</a>
+{% endif %}
+
+
                 </div>
             </div>
         </div>
