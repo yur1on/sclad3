@@ -34,7 +34,7 @@
                                     <tr>
                                         <td>{{ part.display_model }}</td>
                                         <td>{{ part.part_type }}</td>
-                                        <td>{{ part.color }}</td>
+                                        <td>{{ part.color|default:"Не указан" }}</td>
                                         <td>{{ part.quantity }}</td>
                                         <td>{{ part.price }}</td>
                                         <td><a href="{% url 'part_detail' part.id %}" class="btn btn-info btn-sm">Подробнее</a></td>

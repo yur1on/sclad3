@@ -150,9 +150,14 @@
                         {% if user.is_authenticated %}
                                     <li class="nav-item"><a class="nav-link" href="{% url 'chat_list' %}">
                           <i class="fas fa-envelope"></i> Сообщения<span id="message-notification" class="badge bg-danger" style="display:none;"></span></a></li>
+<a href="{% url 'notification_list' %}" class="btn btn-primary">
+    Уведомления ({{ notifications.count }})
+</a>
+
                             <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}"><i class="fas fa-user"></i> Профиль</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'warehouse' %}"><i class="fas fa-box"></i> Мой склад</a></li>
                         {% endif %}
+
                         <li class="nav-item"><a class="nav-link" href="{% url 'search' %}"><i class="fas fa-search"></i> Поиск глобальный</a></li>
                     </ul>
                     {% if user.is_authenticated %}

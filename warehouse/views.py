@@ -726,3 +726,8 @@ def search_user_parts(request, user_id):
         'grouped_parts': grouped_parts,
     })
 
+from notifications.models import Notification
+
+def some_view(request):
+    notifications = Notification.objects.filter(is_read=False)
+    return render(request, 'warehouse/base.html', {'notifications': notifications})

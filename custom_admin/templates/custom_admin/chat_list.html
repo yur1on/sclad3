@@ -1,0 +1,43 @@
+{% extends "warehouse/base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <h2 class="admin-title">Чаты</h2>
+
+    {% for chat in chats %}
+    <div class="chat-box">
+        <h4>Чат между {{ chat.user1.username }} и {{ chat.user2.username }}</h4>
+
+        {% if chat.messages.all %}
+            <ul class="message-list">
+                {% for message in chat.messages.all %}
+                    <li>
+                        <strong>{{ message.sender.username }}:</strong> {{ message.text }}
+                        <small>{{ message.timestamp }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Сообщений нет.</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .chat-box {
+        background: #f9f9f9;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .message-list {
+        list-style: none;
+        padding-left: 0;
+    }
+    .message-list li {
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}

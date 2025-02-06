@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const brandInput = document.getElementById('brand');
     const modelInput = document.getElementById('model');
     const partTypeInput = document.getElementById('part_type');
+    const searchForm = document.getElementById("search-form");
 
     deviceInput.addEventListener('input', function() {
         fetch(`/get_dynamic_data?device=${deviceInput.value}`)
@@ -43,19 +44,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const datalist = document.getElementById(id);
         datalist.innerHTML = '';
     }
+
+    // Очистка формы после поиска
+    if (searchForm) {
+        searchForm.addEventListener("submit", function(event) {
+            setTimeout(() => {
+                deviceInput.value = "";
+                brandInput.value = "";
+                modelInput.value = "";
+                partTypeInput.value = "";
+                document.getElementById("id_region").value = "";
+                document.getElementById("id_city").value = "";
+
+                // Очистка списков
+                clearDatalist('brand-list');
+                clearDatalist('model-list');
+                clearDatalist('part-type-list');
+            }, 500); // Даем время серверу обработать запрос перед очисткой
+        });
+    }
 });
 
-
-
-
+// Динамическая подгрузка городов
 document.addEventListener('DOMContentLoaded', function() {
     const regionSelect = document.getElementById('id_region');
     const citySelect = document.getElementById('id_city');
-
     const regionAdvSelect = document.getElementById('id_region_adv');
     const cityAdvSelect = document.getElementById('id_city_adv');
 
-    // Функция для обновления списка городов
     function updateCitySelect(regionSelect, citySelect, data) {
         const selectedRegion = regionSelect.value;
         citySelect.innerHTML = '';
@@ -75,34 +91,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Загрузка данных о регионах и городах с сервера
     fetch('/get_regions_and_cities/')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки данных');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            // Обработчик для основного поиска
             if (regionSelect && citySelect) {
                 regionSelect.addEventListener('change', function() {
                     updateCitySelect(regionSelect, citySelect, data);
                 });
 
-                // Если регион уже выбран, обновить города
                 if (regionSelect.value) {
                     updateCitySelect(regionSelect, citySelect, data);
                 }
             }
 
-            // Обработчик для расширенного поиска
             if (regionAdvSelect && cityAdvSelect) {
                 regionAdvSelect.addEventListener('change', function() {
                     updateCitySelect(regionAdvSelect, cityAdvSelect, data);
                 });
 
-                // Если регион уже выбран в расширенном поиске, обновить города
                 if (regionAdvSelect.value) {
                     updateCitySelect(regionAdvSelect, cityAdvSelect, data);
                 }
@@ -110,14 +116,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Ошибка:', error);
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Ошибка загрузки данных';
-            if (citySelect) citySelect.appendChild(defaultOption);
-            if (cityAdvSelect) cityAdvSelect.appendChild(defaultOption);
         });
 
-    // Логика переключения между обычным и расширенным поиском
+    // Переключение между обычным и расширенным поиском
     const toggleButton = document.getElementById('toggle-advanced-search');
     const basicSearch = document.getElementById('basic-search');
     const advancedSearch = document.getElementById('advanced-search');

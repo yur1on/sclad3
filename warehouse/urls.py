@@ -38,6 +38,7 @@ urlpatterns = [
     path('user/<int:user_id>/parts/search/', views.search_user_parts, name='search_user_parts'),
 
 
+
 ]
 
 

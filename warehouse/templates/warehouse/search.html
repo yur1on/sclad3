@@ -7,8 +7,8 @@
 <div class="container">
     <h2 class="my-5 text-center text-dark">Поиск по складам</h2>
 
-    <!-- Кнопка для переключения между поисками -->
-    <div class="text-end mb-4">
+    <!-- Кнопка для переключения расширенного поиска -->
+    <div class="text-center mb-4">
         <button id="toggle-advanced-search" class="btn btn-outline-primary btn-lg">Расширенный поиск</button>
     </div>
 
@@ -41,19 +41,27 @@
                     <button type="submit" class="btn btn-dark btn-block">Поиск</button>
                 </div>
             </div>
+<!-- Вставить в шаблон поиска -->
+{% if not results %}
+    <p class="text-center">Запчасть не найдена.</p>
+    <div class="text-center">
+        <a href="{% url 'send_notification' %}" class="btn btn-danger">Отправить уведомление</a>
+    </div>
+{% endif %}
+
         </form>
     </div>
 
     <!-- Расширенный поиск -->
-    <div id="advanced-search" style="display: none;">
-        <form method="GET" action="{% url 'search' %}" class="mb-4">
+    <div id="advanced-search" class="card p-4" style="display: none;">
+        <h5 class="text-center mb-3">Расширенный поиск</h5>
+        <form method="GET" action="{% url 'search' %}">
             <div class="row g-2 align-items-center">
                 <div class="col-md-3">
                     <input type="text" name="device" id="device" class="form-control" placeholder="Устройство" value="{{ request.GET.device }}" list="device-list">
                     <datalist id="device-list">
                         <option value="Телефон">
                         <option value="Планшет">
-                        <option value="Ноутбук">
                         <option value="Смарт-часы">
                     </datalist>
                 </div>
@@ -99,10 +107,6 @@
 </div>
 
 <!-- Подключение стилей и скриптов -->
-<style>
-
-</style>
-
 <link rel="stylesheet" href="{% static 'css/search.css' %}">
 <script src="{% static 'js/search.js' %}"></script>
 {% endblock %}

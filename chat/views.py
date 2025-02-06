@@ -6,25 +6,47 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Chat, Message
+from django.db.models import Q
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from .models import Chat
+from django.contrib.auth.models import User
+
 @login_required
-def start_chat(request, part_id, seller_id):
-    part = get_object_or_404(Part, id=part_id)
+def start_chat(request, seller_id, part_id=None):
     seller = get_object_or_404(User, id=seller_id)
 
-    chat, created = Chat.objects.get_or_create(user1=request.user, user2=seller, part=part)
+    if part_id:
+        from warehouse.models import Part  # Импортируем здесь, чтобы избежать циклического импорта
+        part = get_object_or_404(Part, id=part_id)
+        chat, created = Chat.objects.get_or_create(user1=request.user, user2=seller, part=part)
+    else:
+        chat, created = Chat.objects.get_or_create(user1=request.user, user2=seller, part=None)
 
     return redirect('chat_detail', chat_id=chat.id)
+
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.shortcuts import render
+from .models import Chat, Message
 
 @login_required
 def chat_list(request):
     user = request.user
-    chats = Chat.objects.filter(user1=user) | Chat.objects.filter(user2=user)
+    chats = Chat.objects.filter(Q(user1=user) | Q(user2=user))
 
     chat_data = []
     for chat in chats:
-        unread_count = Message.objects.filter(
-            chat=chat, is_read=False
-        ).exclude(sender=user).count()
+        if user in chat.hidden_for.all():
+            has_new_messages = Message.objects.filter(chat=chat, is_read=False).exclude(sender=user).exists()
+            if has_new_messages:
+                chat.hidden_for.remove(user)  # Показываем чат, если есть новые сообщения
+            else:
+                continue  # Пропускаем скрытый чат, если нет новых сообщений
+
+        unread_count = Message.objects.filter(chat=chat, is_read=False).exclude(sender=user).count()
         chat_data.append({
             'chat': chat,
             'unread_count': unread_count
@@ -58,11 +80,18 @@ def send_message(request, chat_id):
             print(form.errors)  # Отладка ошибок формы
     return redirect('chat_detail', chat_id=chat_id)
 
+
 @login_required
 def delete_chat(request, chat_id):
     chat = get_object_or_404(Chat, id=chat_id)
-    if request.user == chat.user1 or request.user == chat.user2:
-        chat.delete()
+
+    if request.user in [chat.user1, chat.user2]:
+        chat.hidden_for.add(request.user)  # Скрываем чат для пользователя
+
+        # Если оба скрыли чат — удаляем его полностью
+        if chat.hidden_for.count() == 2:
+            chat.delete()
+
     return redirect('chat_list')
 
 

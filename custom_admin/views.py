@@ -1,6 +1,5 @@
 import json
 import os
-from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import user_passes_test
 from django.conf import settings
 from .forms import JSONDataForm
@@ -90,3 +89,12 @@ def delete_user(request, user_id):
     return redirect("custom_admin:user_list")
 
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import user_passes_test
+from chat.models import Chat
+
+# Панель администрирования чатов
+@user_passes_test(is_admin)
+def chat_list(request):
+    chats = Chat.objects.all().select_related('user1', 'user2').prefetch_related('messages')  # Предзагружаем сообщения
+    return render(request, "custom_admin/chat_list.html", {"chats": chats})

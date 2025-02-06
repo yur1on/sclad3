@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'custom_admin',
     'chat',
+    'notifications',
 
 ]
 
@@ -80,7 +81,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'warehouse.context_processors.counts',  # Обратите внимание на имя функции
+                'warehouse.context_processors.counts',
+                'notifications.context_processors.notifications_processor',# Обратите внимание на имя функции
             ],
         },
     },

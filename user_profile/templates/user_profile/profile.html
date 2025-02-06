@@ -126,8 +126,8 @@
                         <li class="list-group-item"><strong>Имя:</strong> {{ user.profile.full_name|default:"Не указано" }}</li>
                         <li class="list-group-item"><strong>Телефон:</strong> {{ user.profile.phone }}</li>
                         <li class="list-group-item"><strong>Город:</strong> {{ user.profile.city }}</li>
-                        <li class="list-group-item"><strong>Мастерская:</strong> {{ user.profile.workshop_name|default:"Не указано" }}</li>
-                        <li class="list-group-item"><strong>Рейтинг:</strong> {{ user.profile.average_rating|default:"0.0" }} / 5 ({{ user.profile.received_reviews.count }} отзывов)</li>
+                        <li class="list-group-item"><strong>Мастерская, магазин:</strong> {{ user.profile.workshop_name|default:"Не указано" }}</li>
+                        <li class="list-group-item"><strong>Рейтинг:</strong> {{ user.profile.average_rating|default:"0.0" }} / 5 </li>
                         <li class="list-group-item"><strong>Способы отправки:</strong> {{ user.profile.delivery_methods|default:"Не указано" }}</li>
                     </ul>
                     <a href="?edit=true" class="btn btn-primary w-100 mt-3">Редактировать профиль</a>

@@ -1,0 +1,31 @@
+{% extends 'warehouse/base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2>Запрос запчасти</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_device" class="form-label">Устройство</label>
+                {{ form.device }}
+            </div>
+            <div class="mb-3">
+                <label for="id_brand" class="form-label">Бренд</label>
+                {{ form.brand }}
+            </div>
+            <div class="mb-3">
+                <label for="id_model" class="form-label">Модель</label>
+                {{ form.model }}
+            </div>
+            <div class="mb-3">
+                <label for="id_part_type" class="form-label">Тип запчасти</label>
+                {{ form.part_type }}
+            </div>
+            <div class="mb-3">
+                <label for="id_additional_info" class="form-label">Доп. информация</label>
+                {{ form.additional_info }}
+            </div>
+            <button type="submit" class="btn btn-primary">Отправить запрос</button>
+        </form>
+    </div>
+{% endblock %}
