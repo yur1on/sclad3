@@ -1,13 +1,9 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from warehouse.models import Part
-from django.contrib.auth.models import User
+
 from .forms import MessageForm
 from django.http import JsonResponse
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import Chat, Message
 from django.db.models import Q
-
+from django.shortcuts import render
+from .models import Chat, Message
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from .models import Chat
@@ -26,11 +22,6 @@ def start_chat(request, seller_id, part_id=None):
 
     return redirect('chat_detail', chat_id=chat.id)
 
-
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q
-from django.shortcuts import render
-from .models import Chat, Message
 
 @login_required
 def chat_list(request):

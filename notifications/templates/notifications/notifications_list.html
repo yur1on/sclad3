@@ -1,0 +1,24 @@
+{% extends 'warehouse/base.html' %}
+
+{% block content %}
+<h2>Уведомления</h2>
+<ul>
+    {% for notification in notifications %}
+        <li>
+            <a href="{% url 'notification_detail' notification.id %}">
+                {% if not notification.is_read %}
+                    <strong>{{ notification.text }}</strong> (Новое)
+                {% else %}
+                    {{ notification.text }}
+                {% endif %}
+            </a>
+            <br>
+            <small>Отправитель: {{ notification.sender.username }}</small>  <!-- От кого уведомление -->
+            <br>
+            <small>Дата: {{ notification.timestamp }}</small>
+        </li>
+    {% empty %}
+        <p>Уведомлений нет</p>
+    {% endfor %}
+</ul>
+{% endblock %}

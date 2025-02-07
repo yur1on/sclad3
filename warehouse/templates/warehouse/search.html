@@ -42,12 +42,12 @@
                 </div>
             </div>
 <!-- Вставить в шаблон поиска -->
-{% if not results %}
-    <p class="text-center">Запчасть не найдена.</p>
-    <div class="text-center">
-        <a href="{% url 'send_notification' %}" class="btn btn-danger">Отправить уведомление</a>
-    </div>
-{% endif %}
+
+<a href="{% url 'send_notification' %}" class="btn btn-warning">Не нашли запчасть?</a>
+
+
+
+
 
         </form>
     </div>

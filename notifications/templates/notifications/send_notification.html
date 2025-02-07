@@ -1,11 +1,34 @@
+<!-- send_notification.html -->
 {% extends 'warehouse/base.html' %}
+
 {% block content %}
-<div class="container">
-    <h2>Отправить уведомление</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Отправить</button>
-    </form>
-</div>
+<h2>Отправить уведомление</h2>
+
+<!-- Отображение ошибки -->
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <textarea name="text" id="notificationText" placeholder="Введите текст уведомления (макс. 255 символов)" required oninput="updateCharCount()"></textarea><br>
+    <span id="charCount">0/255</span>
+    <br>
+    <button type="submit">Отправить</button>
+</form>
+
+<script>
+function updateCharCount() {
+    let textArea = document.getElementById("notificationText");
+    let charCount = document.getElementById("charCount");
+    charCount.textContent = textArea.value.length + "/255";
+
+    if (textArea.value.length > 255) {
+        charCount.style.color = "red";
+    } else {
+        charCount.style.color = "black";
+    }
+}
+</script>
+
 {% endblock %}

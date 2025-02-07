@@ -1,0 +1,18 @@
+
+
+{% extends "warehouse/base.html" %}
+
+{% block content %}
+<h2>Детали уведомления</h2>
+<p><strong>Отправитель:</strong> {{ notification.sender.username }}</p>  <!-- Показываем отправителя -->
+<p><strong>Текст:</strong> {{ notification.text }}</p>
+<p><strong>Дата:</strong> {{ notification.timestamp }}</p>
+
+<!-- Кнопка удаления -->
+<form action="{% url 'delete_notification' notification.id %}" method="post" onsubmit="return confirm('Удалить это уведомление?');">
+    {% csrf_token %}
+    <button type="submit">Удалить</button>
+</form>
+
+<a href="{% url 'notifications_list' %}">Назад</a>
+{% endblock %}
