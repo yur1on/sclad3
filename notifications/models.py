@@ -1,6 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.db import models
+from django.contrib.auth.models import User
+
+from django.db import models
+from django.contrib.auth.models import User
+
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_notifications")
@@ -10,3 +16,4 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Уведомление от {self.sender} для {self.user} ({self.timestamp})"
+

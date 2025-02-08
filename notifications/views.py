@@ -1,7 +1,3 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Notification
-from django.contrib.auth.models import User
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -35,9 +31,18 @@ def notifications_list(request):
 @login_required
 def notification_detail(request, notification_id):
     notification = get_object_or_404(Notification, id=notification_id, user=request.user)
-    notification.is_read = True  # Отмечаем как прочитанное
+    notification.is_read = True
     notification.save()
-    return render(request, "notifications/notification_detail.html", {"notification": notification})
+
+    sender_profile = notification.sender.profile  # Получаем профиль отправителя
+
+    context = {
+        "notification": notification,
+        "sender_name": sender_profile.full_name if sender_profile and sender_profile.full_name else notification.sender.username,
+        "sender_phone": sender_profile.phone if sender_profile else "Не указан",
+        "sender_workshop": sender_profile.workshop_name if sender_profile and sender_profile.workshop_name else "Не указано",
+    }
+    return render(request, "notifications/notification_detail.html", context)
 
 @login_required
 def delete_notification(request, notification_id):

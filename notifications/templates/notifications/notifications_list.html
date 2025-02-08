@@ -7,13 +7,13 @@
         <li>
             <a href="{% url 'notification_detail' notification.id %}">
                 {% if not notification.is_read %}
-                    <strong>{{ notification.text }}</strong> (Новое)
+                    <strong>{{ notification.text|truncatechars:50 }}</strong> (Новое)
                 {% else %}
-                    {{ notification.text }}
+                    {{ notification.text|truncatechars:50 }}
                 {% endif %}
             </a>
             <br>
-            <small>Отправитель: {{ notification.sender.username }}</small>  <!-- От кого уведомление -->
+            <small>Отправитель: {{ notification.sender.profile.full_name|default:notification.sender.username }}</small>
             <br>
             <small>Дата: {{ notification.timestamp }}</small>
         </li>
