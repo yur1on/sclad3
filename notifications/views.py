@@ -3,6 +3,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Notification
 from django.contrib.auth.models import User
+from chat.models import Chat  # Импортируем модель чата
+from django.db.models import Q
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from chat.models import Chat  # Убедись, что модель чата импортирована
+from notifications.models import Notification  # Убедись, что модель уведомлений импортирована
 
 @login_required
 def send_notification(request):
@@ -49,3 +57,23 @@ def delete_notification(request, notification_id):
     notification = get_object_or_404(Notification, id=notification_id, user=request.user)
     notification.delete()
     return redirect("notifications_list")
+
+
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from chat.models import Chat  # Импортируем модель чата
+
+
+@login_required
+def reply_to_notification(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+
+    # Проверяем, есть ли уже чат, связанный с этим уведомлением
+    chat, created = Chat.objects.get_or_create(
+        user1=min(notification.user, notification.sender, key=lambda u: u.id),
+        user2=max(notification.user, notification.sender, key=lambda u: u.id),
+        part=None,
+        related_notification=notification  # Привязываем к уведомлению
+    )
+
+    return redirect('chat_detail', chat_id=chat.id)

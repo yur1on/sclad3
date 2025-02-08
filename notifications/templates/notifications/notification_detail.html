@@ -7,6 +7,11 @@
 <p><strong>Мастерская:</strong> {{ sender_workshop }}</p>
 <p><strong>Текст:</strong> {{ notification.text }}</p>
 <p><strong>Дата:</strong> {{ notification.timestamp }}</p>
+<!-- Кнопка для ответа на уведомление -->
+<form action="{% url 'reply_to_notification' notification.id %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Ответить</button>
+</form>
 
 <!-- Кнопка удаления -->
 <form action="{% url 'delete_notification' notification.id %}" method="post" onsubmit="return confirm('Удалить это уведомление?');">

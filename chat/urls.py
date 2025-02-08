@@ -10,5 +10,6 @@ urlpatterns = [
     path('chat/<int:chat_id>/delete/', delete_chat, name='delete_chat'),
     path("check_new_messages/", check_new_messages, name="check_new_messages"),
 
+
 ]
 

@@ -84,17 +84,30 @@
     .back-link:hover {
         color: #0056b3;
     }
+    .notification-chat {
+        background: #fff3cd;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ffeeba;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
 </style>
 
 <div class="chat-container">
     <div class="chat-header">
         Чат с {% if chat.user1 == request.user %}
-    {{ chat.user2.profile.full_name|default:chat.user2.username }} ({{ chat.user2.profile.workshop_name|default:"Частное лицо" }})
-{% else %}
-    {{ chat.user1.profile.full_name|default:chat.user1.username }} ({{ chat.user1.profile.workshop_name|default:"Частное лицо" }})
-{% endif %}
-
+            {{ chat.user2.profile.full_name|default:chat.user2.username }} ({{ chat.user2.profile.workshop_name|default:"Частное лицо" }})
+        {% else %}
+            {{ chat.user1.profile.full_name|default:chat.user1.username }} ({{ chat.user1.profile.workshop_name|default:"Частное лицо" }})
+        {% endif %}
     </div>
+
+    {% if chat.related_notification %}
+        <div class="notification-chat">
+            <strong>Чат создан по уведомлению:</strong> "{{ chat.related_notification.text }}"
+        </div>
+    {% endif %}
 
     {% if chat.part %}
         <p><strong>Запчасть:</strong> <a href="{% url 'part_detail' chat.part.id %}">{{ chat.part.part_type }} - {{ chat.part.brand }} - {{ chat.part.display_model }} </a></p>
@@ -108,7 +121,6 @@
                         Вы
                     {% else %}
                         {{ message.sender.profile.full_name|default:message.sender.username }}
-
                     {% endif %}
                 </strong>: {{ message.text }}
                 <small>{{ message.timestamp|date:"H:i, d M Y" }}</small>
@@ -128,11 +140,9 @@
 </div>
 
 <script>
-    // Прокрутка до последнего сообщения при загрузке страницы
     const chatMessages = document.getElementById('chat-messages');
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    // Прокрутка до последнего сообщения при добавлении нового сообщения
     const messageForm = document.querySelector('.chat-form');
     messageForm.addEventListener('submit', function () {
         chatMessages.scrollTop = chatMessages.scrollHeight;
