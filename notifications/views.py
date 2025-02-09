@@ -1,20 +1,15 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Notification
 from django.contrib.auth.models import User
-from chat.models import Chat  # Импортируем модель чата
-from django.db.models import Q
-from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from notifications.models import Notification  # Убедись, что модель уведомлений импортирована
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from chat.models import Chat  # Убедись, что модель чата импортирована
-from notifications.models import Notification  # Убедись, что модель уведомлений импортирована
+from chat.models import Chat  # Импортируем модель чата
 
 @login_required
 def send_notification(request):
-    error_message = None  # Переменная для ошибки
+    error_message = None
 
     if request.method == "POST":
         text = request.POST.get("text")
@@ -23,7 +18,7 @@ def send_notification(request):
             error_message = "Текст уведомления не должен превышать 255 символов."
 
         elif text:
-            users = User.objects.exclude(id=request.user.id)
+            users = User.objects.exclude(id=request.user.id).filter(profile__receive_notifications=True)
             for user in users:
                 Notification.objects.create(user=user, sender=request.user, text=text)
             return redirect("notifications_list")
@@ -59,10 +54,6 @@ def delete_notification(request, notification_id):
     return redirect("notifications_list")
 
 
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
-from chat.models import Chat  # Импортируем модель чата
-
 
 @login_required
 def reply_to_notification(request, notification_id):
@@ -77,3 +68,11 @@ def reply_to_notification(request, notification_id):
     )
 
     return redirect('chat_detail', chat_id=chat.id)
+
+
+@login_required
+def toggle_notifications(request):
+    profile = request.user.profile
+    profile.receive_notifications = not profile.receive_notifications
+    profile.save()
+    return redirect("notifications_list")

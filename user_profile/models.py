@@ -1,5 +1,4 @@
-from django.db import models
-from django.contrib.auth.models import User
+
 from django.db import models
 from django.contrib.auth.models import User
 from warehouse.models import Part
@@ -22,9 +21,11 @@ class Profile(models.Model):
     city = models.CharField(max_length=100, blank=True, null=True)
     workshop_name = models.CharField(max_length=100, blank=True, null=True)
     delivery_methods = models.TextField(max_length=300, blank=True, null=True)
+    receive_notifications = models.BooleanField(default=True, verbose_name="Получать уведомления")  # Новое поле
 
     def __str__(self):
         return f"{self.full_name or self.user.username} - {self.city} - {self.phone}"
+
 
 
     @property

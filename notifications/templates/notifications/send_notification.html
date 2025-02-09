@@ -1,33 +1,109 @@
 {% extends 'warehouse/base.html' %}
 
 {% block content %}
-<h2>Отправить уведомление</h2>
+{% load static %}
 
-<!-- Отображение ошибки -->
-{% if error_message %}
-    <p style="color: red;">{{ error_message }}</p>
-{% endif %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
-<form method="post">
-    {% csrf_token %}
-    <textarea name="text" id="notificationText" placeholder="Введите текст уведомления (макс. 255 символов)" required oninput="updateCharCount()"></textarea><br>
-    <span id="charCount">0/255</span>
-    <br>
-    <button type="submit">Отправить</button>
-</form>
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
+    .notification-container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .notification-header {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #007bff;
+    }
+    .notification-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .notification-form textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        font-size: 14px;
+        resize: vertical;
+        min-height: 100px;
+    }
+    .notification-form button {
+        padding: 10px 15px;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .notification-form button:hover {
+        background: #0056b3;
+    }
+    .char-count {
+        font-size: 14px;
+        color: #555;
+    }
+    .char-count.error {
+        color: red;
+    }
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+    .back-link {
+        display: block;
+        margin-top: 20px;
+        text-decoration: none;
+        color: #007bff;
+        font-size: 16px;
+    }
+    .back-link:hover {
+        color: #0056b3;
+    }
+</style>
+
+<div class="notification-container">
+    <div class="notification-header">Отправить уведомление</div>
+
+    <!-- Отображение ошибки -->
+    {% if error_message %}
+        <p class="error-message">{{ error_message }}</p>
+    {% endif %}
+
+    <form method="post" class="notification-form">
+        {% csrf_token %}
+        <textarea name="text" id="notificationText" placeholder="Введите текст уведомления (макс. 255 символов)" required oninput="updateCharCount()"></textarea>
+        <span id="charCount" class="char-count">0/255</span>
+        <button type="submit">Отправить</button>
+    </form>
+
+    <a href="{% url 'notifications_list' %}" class="back-link">Назад</a>
+</div>
 
 <script>
-function updateCharCount() {
-    let textArea = document.getElementById("notificationText");
-    let charCount = document.getElementById("charCount");
-    charCount.textContent = textArea.value.length + "/255";
+    function updateCharCount() {
+        let textArea = document.getElementById("notificationText");
+        let charCount = document.getElementById("charCount");
+        charCount.textContent = textArea.value.length + "/255";
 
-    if (textArea.value.length > 255) {
-        charCount.style.color = "red";
-    } else {
-        charCount.style.color = "black";
+        if (textArea.value.length > 255) {
+            charCount.classList.add("error");
+        } else {
+            charCount.classList.remove("error");
+        }
     }
-}
 </script>
 
 {% endblock %}

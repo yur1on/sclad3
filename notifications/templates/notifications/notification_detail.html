@@ -1,23 +1,102 @@
 {% extends "warehouse/base.html" %}
 
 {% block content %}
-<h2>Детали уведомления</h2>
-<p><strong>Отправитель:</strong> {{ sender_name }}</p>  <!-- Показываем имя отправителя -->
-<p><strong>Телефон:</strong> {{ sender_phone }}</p>
-<p><strong>Мастерская:</strong> {{ sender_workshop }}</p>
-<p><strong>Текст:</strong> {{ notification.text }}</p>
-<p><strong>Дата:</strong> {{ notification.timestamp }}</p>
-<!-- Кнопка для ответа на уведомление -->
-<form action="{% url 'reply_to_notification' notification.id %}" method="post">
-    {% csrf_token %}
-    <button type="submit">Ответить</button>
-</form>
+{% load static %}
 
-<!-- Кнопка удаления -->
-<form action="{% url 'delete_notification' notification.id %}" method="post" onsubmit="return confirm('Удалить это уведомление?');">
-    {% csrf_token %}
-    <button type="submit">Удалить</button>
-</form>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
-<a href="{% url 'notifications_list' %}">Назад</a>
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
+    .notification-container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .notification-header {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #007bff;
+    }
+    .notification-details {
+        background: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+    }
+    .notification-details p {
+        margin: 5px 0;
+        font-size: 14px;
+    }
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .button-group button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .reply-button {
+        background: #28a745;
+        color: #fff;
+    }
+    .reply-button:hover {
+        background: #218838;
+    }
+    .delete-button {
+        background: #dc3545;
+        color: #fff;
+    }
+    .delete-button:hover {
+        background: #c82333;
+    }
+    .back-link {
+        display: block;
+        margin-top: 20px;
+        text-decoration: none;
+        color: #007bff;
+        font-size: 16px;
+    }
+    .back-link:hover {
+        color: #0056b3;
+    }
+</style>
+
+<div class="notification-container">
+    <div class="notification-header">Детали уведомления</div>
+
+    <div class="notification-details">
+        <p><strong>Отправитель:</strong> {{ sender_name }}</p>
+        <p><strong>Телефон:</strong> {{ sender_phone }}</p>
+        <p><strong>Мастерская:</strong> {{ sender_workshop }}</p>
+        <p><strong>Текст:</strong> {{ notification.text }}</p>
+        <p><strong>Дата:</strong> {{ notification.timestamp }}</p>
+    </div>
+
+    <div class="button-group">
+        <form action="{% url 'reply_to_notification' notification.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="reply-button">Ответить</button>
+        </form>
+
+        <form action="{% url 'delete_notification' notification.id %}" method="post" onsubmit="return confirm('Удалить это уведомление?');">
+            {% csrf_token %}
+            <button type="submit" class="delete-button">Удалить</button>
+        </form>
+    </div>
+
+    <a href="{% url 'notifications_list' %}" class="back-link">Назад</a>
+</div>
+
 {% endblock %}

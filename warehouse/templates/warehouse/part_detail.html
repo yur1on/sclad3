@@ -5,61 +5,94 @@
 {% load static %}
 {% block content %}
 <style>
-    /* Основной стиль для карточек */
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
+
     .card {
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
+        padding: 10px;
     }
 
-    /* Таблицы и рамки с равномерными отступами */
-.card {
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #dee2e6;
-    background-color: #ffffff;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 0.5px solid #000; /* черная обводка */
-}
+    .card-header {
+        font-size: 22px;
+        font-weight: 700;
+        color: #007bff;
+        background: #fff;
+        border-bottom: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 15px 15px 0 0;
+    }
 
+    .card-body {
+        padding: 15px;
+    }
 
-.card .btn-group {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-}
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
 
-.card .btn {
-    flex: 1;
-    margin: 0 5px;
-    border-radius: 5px;
-}
+    .table th,
+    .table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
 
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
 
-    /* Эффект при наведении на кнопку */
-    .btn:hover {
+    .btn {
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
         background-color: #0056b3;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
 
-    /* Карточки кнопок с выравниванием */
-    .action-buttons .btn {
-        margin: 10px;
+    .btn-outline-primary {
+        border: 1px solid #007bff;
+        color: #007bff;
     }
 
-    /* Стили для карусели изображений */
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .btn-outline-secondary {
+        border: 1px solid #6c757d;
+        color: #6c757d;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
     .carousel-inner img {
-        border-radius: 8px;
+        border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    /* Миниатюры изображений */
     .img-thumbnail {
         border-radius: 8px;
-        border: 1px solid #dee2e6;
+        border: 1px solid #ddd;
         transition: transform 0.2s ease;
     }
 
@@ -67,68 +100,73 @@
         transform: scale(1.1);
     }
 
-    /* Модальные окна */
     .modal-content {
+        border-radius: 15px;
+    }
+
+    .notification-chat {
+        background: #fff3cd;
+        padding: 10px;
         border-radius: 10px;
+        border: 1px solid #ffeeba;
+        margin-bottom: 15px;
+        font-size: 14px;
     }
 </style>
 
-<!-- В верхней части тип запчасти, устройство, бренд и модель -->
+<!-- Верхняя часть с информацией о запчасти -->
 <div class="row mb-3">
-    <div class="card-body text-left">
-        <h4><strong>{{ part.part_type }}</strong> для {{ part.device|device_declension }} {{ part.brand }} {{ part.model }}</h4>
+    <div class="card">
+        <div class="card-body">
+            <h4><strong>{{ part.part_type }}</strong> для {{ part.device|device_declension }} {{ part.brand }} {{ part.model }}</h4>
+        </div>
     </div>
 </div>
 
-<!-- Блок с фото справа и описанием слева -->
+<!-- Основной блок с описанием и фото -->
 <div class="row">
     <!-- Описание и информация о пользователе -->
     <div class="col-md-6">
         <div class="card">
-
-        <table class="table table-striped">
-            <tr>
-                <th>Количество</th>
-                <td>{{ part.quantity }}</td>
-            </tr>
-            <tr>
-                <th>Цена</th>
-                <td>{{ part.price }} бел. руб.</td>
-            </tr>
-            {% if part.color %}
+            <table class="table">
                 <tr>
-                    <th>Цвет</th>
-                    <td>{{ part.color }}</td>
+                    <th>Количество</th>
+                    <td>{{ part.quantity }}</td>
                 </tr>
-            {% endif %}
-            <tr>
-                <th>Дата добавления</th>
-                <td>{{ part.created_at|date:"d.m.Y" }}</td>
-            </tr>
-            <tr>
-                <th>Примечание</th>
-                <td>{{ part.note|default:"Нет примечаний" }}</td>
-            </tr>
-
-
-        <!-- Карточка с кнопками действий -->
-
-    </table>
-    <div class="btn-group">
-        <a href="{% url 'toggle_bookmark' part.id %}" class="btn btn-outline-primary">
-            {% if is_bookmarked %}Удалить из закладок{% else %}Добавить в закладки{% endif %}
-        </a>
-        <a href="{% url 'user_parts' part.user.id %}" class="btn btn-outline-secondary">Все запчасти продавца</a>
-    </div>
-</div>
-
-        <!-- Информация о пользователе -->
-        <div class="card mt-3">
-            <div class="card-header bg-success text-white">Информация о продавце</div>
-            <div class="card-body">
-                <table class="table table-striped">
+                <tr>
+                    <th>Цена</th>
+                    <td>{{ part.price }} бел. руб.</td>
+                </tr>
+                {% if part.color %}
                     <tr>
-                        <th>Имя пользователя</th>
+                        <th>Цвет</th>
+                        <td>{{ part.color }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Дата добавления</th>
+                    <td>{{ part.created_at|date:"d.m.Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Примечание</th>
+                    <td>{{ part.note|default:"Нет примечаний" }}</td>
+                </tr>
+            </table>
+            <div class="btn-group">
+                <a href="{% url 'toggle_bookmark' part.id %}" class="btn btn-outline-primary">
+                    {% if is_bookmarked %}Удалить из закладок{% else %}Добавить в закладки{% endif %}
+                </a>
+                <a href="{% url 'user_parts' part.user.id %}" class="btn btn-outline-secondary">Все запчасти продавца</a>
+            </div>
+        </div>
+
+        <!-- Информация о продавце -->
+        <div class="card mt-3">
+            <div class="card-header">Информация о продавце</div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Имя</th>
                         <td>{{ part.user.profile.full_name|default:"Не указано" }}</td>
                     </tr>
                     <tr>
@@ -145,7 +183,7 @@
                     </tr>
                     <tr>
                         <th>Средний рейтинг</th>
-                        <td>{{ part.user.profile.average_rating }} </td>
+                        <td>{{ part.user.profile.average_rating }}</td>
                     </tr>
                     <tr>
                         <th>Дата регистрации</th>
@@ -156,16 +194,12 @@
                         <td>{{ part.user.profile.delivery_methods|default:"Не указан" }}</td>
                     </tr>
                 </table>
-
-                <!-- Кнопки для отзывов -->
                 <div class="text-center mt-3">
                     <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
                     <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary">Отзывы продавца</a>
-{% if part.user != request.user %}
-    <a href="{% url 'start_chat' part.id part.user.id %}" class="btn btn-primary">Написать продавцу</a>
-{% endif %}
-
-
+                    {% if part.user != request.user %}
+                        <a href="{% url 'start_chat' part.id part.user.id %}" class="btn btn-primary">Написать продавцу</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -174,7 +208,7 @@
     <!-- Фото запчасти -->
     <div class="col-md-6 text-center">
         {% if part.images.all %}
-            <!-- Основное изображение с каруселью -->
+            <!-- Карусель изображений -->
             <div id="partImagesCarousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
                     {% for image in part.images.all %}
@@ -199,7 +233,6 @@
                     {% endfor %}
                 </div>
             </div>
-
         {% else %}
             <p>Нет изображений</p>
         {% endif %}
