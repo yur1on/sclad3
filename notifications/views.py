@@ -1,7 +1,6 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
 from notifications.models import Notification  # Убедись, что модель уведомлений импортирована
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -31,8 +30,13 @@ def notifications_list(request):
     notifications = Notification.objects.filter(user=request.user).order_by("-timestamp")
     return render(request, "notifications/notifications_list.html", {"notifications": notifications})
 
+
 @login_required
 def notification_detail(request, notification_id):
+    # Загружаем список всех уведомлений для текущего пользователя
+    notifications = Notification.objects.filter(user=request.user).order_by("-timestamp")
+
+    # Получаем выбранное уведомление
     notification = get_object_or_404(Notification, id=notification_id, user=request.user)
     notification.is_read = True
     notification.save()
@@ -40,12 +44,14 @@ def notification_detail(request, notification_id):
     sender_profile = notification.sender.profile  # Получаем профиль отправителя
 
     context = {
-        "notification": notification,
+        "notifications": notifications,  # список уведомлений для левой колонки
+        "notification": notification,  # выбранное уведомление для правой колонки
         "sender_name": sender_profile.full_name if sender_profile and sender_profile.full_name else notification.sender.username,
         "sender_phone": sender_profile.phone if sender_profile else "Не указан",
         "sender_workshop": sender_profile.workshop_name if sender_profile and sender_profile.workshop_name else "Не указано",
     }
-    return render(request, "notifications/notification_detail.html", context)
+    return render(request, "notifications/notifications_list.html", context)
+
 
 @login_required
 def delete_notification(request, notification_id):
@@ -76,3 +82,4 @@ def toggle_notifications(request):
     profile.receive_notifications = not profile.receive_notifications
     profile.save()
     return redirect("notifications_list")
+

@@ -43,14 +43,12 @@
             </div>
 <!-- Вставить в шаблон поиска -->
 
-<a href="{% url 'send_notification' %}" class="btn btn-warning">Не нашли запчасть?</a>
-
-
-
-
-
         </form>
     </div>
+<div class="text mt-4">
+    <p class="fw-bold">Не нашли нужную запчасть? Отправьте уведомление всем пользователям!</p>
+    <a href="{% url 'send_notification' %}" class="btn btn-warning">Написать уведомление</a>
+</div>
 
     <!-- Расширенный поиск -->
     <div id="advanced-search" class="card p-4" style="display: none;">

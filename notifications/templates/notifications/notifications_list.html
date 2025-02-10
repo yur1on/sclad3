@@ -1,7 +1,6 @@
 {% extends 'warehouse/base.html' %}
 {% block content %}
 {% load static %}
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
@@ -9,15 +8,25 @@
     body {
         font-family: 'Roboto', sans-serif;
     }
-    .notifications-container {
-        max-width: 600px;
-        margin: 20px auto;
-        margin-left: 20px; /* Сдвигает блок влево */
-        margin-right: auto;
+    /* Обёртка сдвинута влево */
+    .notifications-wrapper {
+        max-width: 1000px;
+        margin-left: 20px;   /* Отступ слева – контейнер выровнен по левому краю */
+        margin-right: auto;  /* Автоматический отступ справа */
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 20px;
+    }
+    /* Левая колонка – список уведомлений */
+    .notifications-list-container {
+        flex: 1;
         background: #f9f9f9;
         padding: 15px;
         border-radius: 15px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        max-height: 600px;
+        overflow-y: auto;
     }
     .notifications-header {
         font-size: 22px;
@@ -25,6 +34,7 @@
         margin-bottom: 15px;
         color: #007bff;
     }
+
     .notifications-list {
         list-style: none;
         padding: 0;
@@ -44,6 +54,11 @@
         color: #555;
         font-size: 12px;
     }
+    /* Новый класс для обозначения новых уведомлений */
+    .new-label {
+        color: red;  /* Красный цвет для новых уведомлений */
+        font-weight: bold;
+    }
     .notification-form {
         margin-bottom: 15px;
     }
@@ -51,39 +66,171 @@
         font-size: 16px;
         font-weight: 500;
     }
+    /* Правая колонка – детали уведомления */
+    .notification-detail-container {
+        flex: 2;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    .notification-header-detail {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #007bff;
+    }
+    .notification-details {
+        background: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+    }
+    .notification-details p {
+        margin: 5px 0;
+        font-size: 14px;
+    }
+    /* Выделение текста уведомления */
+    .notification-text {
+        font-style: italic;
+        font-size: 16px;
+        padding: 10px;
+        background-color: #e7f3ff;
+        border: 1px dashed #007bff;
+        border-radius: 8px;
+        margin: 10px 0;
+    }
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .button-group button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .reply-button {
+        background: #28a745;
+        color: #fff;
+    }
+    .reply-button:hover {
+        background: #218838;
+    }
+    .delete-button {
+        background: #dc3545;
+        color: #fff;
+    }
+    .delete-button:hover {
+        background: #c82333;
+    }
+    .back-link {
+        display: block;
+        margin-top: 20px;
+        text-decoration: none;
+        color: #007bff;
+        font-size: 16px;
+    }
+    .back-link:hover {
+        color: #0056b3;
+    }
+    .selected-notification {
+    background-color: #cce5ff !important; /* Голубой фон для выделения */
+    border: 2px solid #007bff; /* Синяя рамка */
+    font-weight: bold;
+}
+
 </style>
 
-<div class="notifications-container">
-    <div class="notifications-header">Уведомления</div>
+<div class="notifications-wrapper">
+    <!-- Левая колонка: список уведомлений -->
+    <div class="notifications-list-container">
+        <div class="notifications-header">Уведомления</div>
 
-    <form action="{% url 'toggle_notifications' %}" method="POST" class="notification-form">
-        {% csrf_token %}
-        <label>
-            <input type="checkbox" name="receive_notifications" onchange="this.form.submit()"
-                   {% if request.user.profile.receive_notifications %}checked{% endif %}>
-            Получать уведомления
-        </label>
-    </form>
+        <form action="{% url 'toggle_notifications' %}" method="POST" class="notification-form">
+            {% csrf_token %}
+            <label>
+                <input type="checkbox" name="receive_notifications" onchange="this.form.submit()"
+                       {% if request.user.profile.receive_notifications %}checked{% endif %}>
+                Получать уведомления
+            </label>
+        </form>
 
-    <ul class="notifications-list">
-        {% for notification in notifications %}
-            <li class="notification-item">
-                <a href="{% url 'notification_detail' notification.id %}">
-                    {% if not notification.is_read %}
-                        <strong>{{ notification.text|truncatechars:50 }}</strong> (Новое)
-                    {% else %}
-                        {{ notification.text|truncatechars:50 }}
-                    {% endif %}
-                </a>
-                <br>
-                <small>Отправитель: {{ notification.sender.profile.full_name|default:notification.sender.username }}</small>
-                <br>
-                <small>Дата: {{ notification.timestamp }}</small>
-            </li>
-        {% empty %}
-            <p>Уведомлений нет</p>
-        {% endfor %}
-    </ul>
+<ul class="notifications-list">
+    {% for notif in notifications %}
+        <li class="notification-item {% if notification and notif.id == notification.id %}selected-notification{% endif %}">
+            <a href="{% url 'notification_detail' notif.id %}">
+                {% if not notif.is_read %}
+                    <strong>{{ notif.text|truncatechars:50 }}</strong> <span class="new-label">(Новое)</span>
+                {% else %}
+                    {{ notif.text|truncatechars:50 }}
+                {% endif %}
+            </a>
+            <br>
+            <small>Отправитель: {{ notif.sender.profile.full_name|default:notif.sender.username }}</small>
+            <br>
+            <small>Дата: {{ notif.timestamp }}</small>
+        </li>
+    {% empty %}
+        <p>Уведомлений нет</p>
+    {% endfor %}
+</ul>
+    </div>
+
+    <!-- Правая колонка: детали выбранного уведомления -->
+    <div class="notification-detail-container">
+        {% if notification %}
+            <div class="notification-header-detail">Детали уведомления</div>
+
+            <div class="notification-details">
+                <p><strong>Отправитель:</strong> {{ sender_name }}</p>
+                <p><strong>Телефон:</strong> {{ sender_phone }}</p>
+                <p><strong>Мастерская:</strong> {{ sender_workshop }}</p>
+                <p><strong>Текст:</strong></p>
+                <div class="notification-text">
+                    {{ notification.text }}
+                </div>
+                <p><strong>Дата:</strong> {{ notification.timestamp }}</p>
+            </div>
+
+            <div class="button-group">
+                <form action="{% url 'reply_to_notification' notification.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="reply-button">Ответить</button>
+                </form>
+
+                <form action="{% url 'delete_notification' notification.id %}" method="post" onsubmit="return confirm('Удалить это уведомление?');">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-button">Удалить</button>
+                </form>
+            </div>
+
+        {% else %}
+            <div class="notification-header-detail">Детали уведомления</div>
+            <p>Выберите уведомление слева для просмотра деталей.</p>
+        {% endif %}
+    </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Восстановление прокрутки
+        if (sessionStorage.getItem("scrollPosition")) {
+            document.querySelector(".notifications-list-container").scrollTop = sessionStorage.getItem("scrollPosition");
+        }
+
+        // Сохранение позиции перед переходом
+        document.querySelectorAll(".notification-item a").forEach(item => {
+            item.addEventListener("click", function () {
+                sessionStorage.setItem("scrollPosition", document.querySelector(".notifications-list-container").scrollTop);
+            });
+        });
+    });
+</script>
 
 {% endblock %}

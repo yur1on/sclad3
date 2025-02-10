@@ -3,10 +3,8 @@ from .forms import ProfileForm
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import User, Review
 from .forms import ReviewForm
-from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from warehouse.models import Part
-from django.contrib import messages
 from .models import Bookmark  # Импортируем модель закладок
 from chat.models import Chat
 from django.contrib import messages
@@ -47,8 +45,6 @@ def profile(request):
     })
 
 
-
-
 @login_required
 def add_review(request, user_id):
     reviewed_user = get_object_or_404(User, id=user_id)
@@ -67,15 +63,11 @@ def add_review(request, user_id):
     return render(request, 'user_profile/add_review.html', {'form': form, 'reviewed_user': reviewed_user})
 
 
-
 @login_required
 def view_reviews(request, user_id):
     user = get_object_or_404(User, id=user_id)
     reviews = Review.objects.filter(user=user).order_by('-created_at')
     return render(request, 'warehouse/view_reviews.html', {'user': user, 'reviews': reviews})
-
-
-
 
 
 @login_required
@@ -99,12 +91,10 @@ def toggle_bookmark(request, part_id):
     return redirect('part_detail', part_id=part.id)
 
 
-
 @login_required
 def bookmarks(request):
     user_bookmarks = Bookmark.objects.filter(user=request.user).select_related('part')
     return render(request, 'user_profile/bookmarks.html', {'bookmarks': user_bookmarks})
-
 
 
 @login_required
