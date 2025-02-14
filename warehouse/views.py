@@ -690,12 +690,27 @@ def user_parts(request, user_id, template_name='warehouse/user_parts.html'):
 
 
 
+import os
+from django.conf import settings
+
 @login_required
 def delete_all_parts_page(request):
     if request.method == 'POST':
-        Part.objects.filter(user=request.user).delete()
-        messages.success(request, 'Все запчасти были успешно удалены.')
-        return redirect('warehouse')  # Возврат на склад после удаления
+        user_parts = Part.objects.filter(user=request.user)
+
+        for part in user_parts:
+            for image in part.images.all():
+                if image.image:  # Проверяем, есть ли файл
+                    image_path = os.path.join(settings.MEDIA_ROOT, str(image.image))
+                    if os.path.exists(image_path):
+                        os.remove(image_path)  # Удаляем файл изображения
+
+                image.delete()  # Удаляем запись из базы
+
+        user_parts.delete()  # Удаляем запчасти
+
+        messages.success(request, 'Все запчасти и их изображения были успешно удалены.')
+        return redirect('warehouse')
 
     return render(request, 'warehouse/delete_all_parts.html')
 

@@ -152,12 +152,15 @@
                     <td>{{ part.note|default:"Нет примечаний" }}</td>
                 </tr>
             </table>
-            <div class="btn-group">
-                <a href="{% url 'toggle_bookmark' part.id %}" class="btn btn-outline-primary">
-                    {% if is_bookmarked %}Удалить из закладок{% else %}Добавить в закладки{% endif %}
-                </a>
-                <a href="{% url 'user_parts' part.user.id %}" class="btn btn-outline-secondary">Все запчасти продавца</a>
-            </div>
+                {% if part.user != request.user %}
+                    <div class="btn-group">
+                        <a href="{% url 'toggle_bookmark' part.id %}" class="btn btn-outline-primary">
+                            {% if is_bookmarked %}Удалить из закладок{% else %}Добавить в закладки{% endif %}
+                        </a>
+                        <a href="{% url 'user_parts' part.user.id %}" class="btn btn-outline-secondary">Все запчасти продавца</a>
+                    </div>
+                {% endif %}
+
         </div>
 
         <!-- Информация о продавце -->
@@ -195,10 +198,10 @@
                     </tr>
                 </table>
                 <div class="text-center mt-3">
+                    {% if part.user != request.user %}
                     <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">Оставить отзыв</a>
                     <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary">Отзывы продавца</a>
-                    {% if part.user != request.user %}
-                        <a href="{% url 'start_chat' part.id part.user.id %}" class="btn btn-primary">Написать продавцу</a>
+                    <a href="{% url 'start_chat' part.id part.user.id %}" class="btn btn-primary">Написать продавцу</a>
                     {% endif %}
                 </div>
             </div>

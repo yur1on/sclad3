@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 import os
 
 # Разрешённые форматы изображений и максимальный размер файла (в МБ)
-ALLOWED_IMAGE_FORMATS = ['.jpeg', '.jpg', '.png', '.heic']
+ALLOWED_IMAGE_FORMATS = ['.jpeg', '.jpg', '.png', '.webp', '.heic']
 MAX_FILE_SIZE_MB = 5
 
 class PartForm(forms.ModelForm):
