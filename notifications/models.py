@@ -1,4 +1,4 @@
-
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -8,7 +8,7 @@ class Notification(models.Model):
     text = models.TextField(max_length=255)  # Ограничение на 255 символов
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    broadcast_id = models.UUIDField(default=uuid.uuid4, editable=False)  # Поле для группировки уведомлений
 
     def __str__(self):
         return f"Уведомление от {self.sender} для {self.user} ({self.timestamp})"
-
