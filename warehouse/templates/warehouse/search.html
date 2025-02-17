@@ -4,17 +4,226 @@
 {% block title %}Поиск{% endblock %}
 
 {% block content %}
+<style>
+    /* Общие стили для полей ввода, кнопок и формы */
+    input.form-control, select.form-control, textarea.form-control {
+        border-radius: 10px; /* скругленные углы */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* легкая тень */
+        padding: 8px 12px; /* Уменьшенный padding */
+        transition: all 0.3s ease-in-out;
+        border: 0.5px solid #000; /* черная обводка */
+        font-size: 14px; /* Уменьшенный размер шрифта */
+    }
+
+    input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
+        border-color: #007bff; /* синий цвет при фокусе */
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* свечение при фокусе */
+    }
+
+    /* Стили для кнопок */
+    .btn-primary {
+        background-color: #28a745;
+        border: none;
+        color: white;
+        padding: 8px 16px; /* Уменьшенный padding */
+        border-radius: 20px; /* Слегка уменьшенные скругления */
+        font-size: 14px; /* Уменьшенный размер шрифта */
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        background-color: #218838;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+        color: white;
+        padding: 8px 16px; /* Уменьшенный padding */
+        border-radius: 20px; /* Слегка уменьшенные скругления */
+        font-size: 14px; /* Уменьшенный размер шрифта */
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border: none;
+        color: black;
+        padding: 8px 16px; /* Уменьшенный padding */
+        border-radius: 20px; /* Слегка уменьшенные скругления */
+        font-size: 14px; /* Уменьшенный размер шрифта */
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+    }
+
+    /* Стили для карточек */
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        padding: 15px; /* Уменьшенный padding */
+    }
+
+    .card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Стили для таблиц */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Стили для заголовков */
+    h2 {
+        color: #333;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    /* Стили для меток */
+    .form-label {
+        color: black;
+        font-weight: bold;
+        font-size: 14px; /* Уменьшенный размер шрифта */
+    }
+
+    /* Стили для кнопки "Расширенный поиск" */
+    .btn-outline-primary {
+        border-color: #007bff;
+        color: #007bff;
+        transition: all 0.3s ease-in-out;
+        padding: 8px 16px; /* Уменьшенный padding */
+        font-size: 14px; /* Уменьшенный размер шрифта */
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Стили для выбора области и города */
+    .input-group .form-select {
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 8px 12px; /* Уменьшенный padding */
+        transition: all 0.3s ease-in-out;
+        border: 0.5px solid #000;
+        font-size: 14px; /* Уменьшенный размер шрифта */
+    }
+
+    .input-group .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    /* Стили для кнопки написания уведомления */
+    .btn-warning {
+        background-color: #ffc107;
+        border: none;
+        color: black;
+        padding: 8px 16px; /* Уменьшенный padding */
+        border-radius: 20px; /* Слегка уменьшенные скругления */
+        font-size: 14px; /* Уменьшенный размер шрифта */
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+    }
+
+    /* Уменьшение размера блока дополнительных параметров */
+    #advancedSearchCollapse .card {
+        padding: 10px; /* Уменьшенный padding */
+    }
+
+    #advancedSearchCollapse h5 {
+        font-size: 16px; /* Уменьшенный размер шрифта заголовка */
+        margin-bottom: 10px; /* Уменьшенный отступ */
+    }
+
+    #advancedSearchCollapse .row {
+        margin-bottom: 10px; /* Уменьшенный отступ между строками */
+    }
+
+    #advancedSearchCollapse .form-control {
+        font-size: 13px; /* Уменьшенный размер шрифта */
+        padding: 6px 10px; /* Уменьшенный padding */
+    }
+
+    #advancedSearchCollapse .btn-secondary {
+        padding: 6px 12px; /* Уменьшенный padding */
+        font-size: 13px; /* Уменьшенный размер шрифта */
+    }
+</style>
+
 <div class="container">
-    <h2 class="my-5 text-center text-dark">Поиск по складам</h2>
+    <h2 class="my-5 text-center">Поиск по складам</h2>
 
-    <!-- Кнопка для переключения расширенного поиска -->
-    <div class="text-center mb-4">
-        <button id="toggle-advanced-search" class="btn btn-outline-primary btn-lg">Расширенный поиск</button>
-    </div>
+    <!-- Единая форма для базового и расширенного поиска -->
+    <form method="GET" action="{% url 'search' %}" id="search-form">
+        <!-- Кнопка для переключения расширенного поиска -->
+        <div class="text-center mb-4">
+            <button class="btn btn-outline-primary btn-lg" type="button" id="toggleAdvancedSearch">
+                Расширенный поиск
+            </button>
+        </div>
 
-    <!-- Основной поиск -->
-    <div id="basic-search">
-        <form method="GET" action="{% url 'search' %}" class="mb-4">
+        <!-- Расширенный поиск: панель, которая разворачивается при нажатии -->
+        <div class="collapse mb-4" id="advancedSearchCollapse">
+            <div class="card p-3"> <!-- Уменьшенный padding -->
+                <h5 class="text-center mb-2">Дополнительные параметры</h5> <!-- Уменьшенный отступ -->
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <input type="text" name="device" id="device" class="form-control" placeholder="Устройство" value="{{ request.GET.device }}" list="device-list">
+                        <datalist id="device-list">
+                            <option value="Телефон">
+                            <option value="Планшет">
+                            <option value="Смарт-часы">
+                        </datalist>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ request.GET.brand }}" list="brand-list">
+                        <datalist id="brand-list"></datalist>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="model" id="model" class="form-control" placeholder="Модель" value="{{ request.GET.model }}" list="model-list">
+                        <datalist id="model-list"></datalist>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ request.GET.part_type }}" list="part-type-list">
+                        <datalist id="part-type-list"></datalist>
+                    </div>
+                </div>
+                <!-- Кнопка сброса параметров в расширенном поиске -->
+                <div class="row mt-2"> <!-- Уменьшенный отступ -->
+                    <div class="col text-end">
+                        <button type="button" class="btn btn-secondary" id="reset-advanced-fields">Сбросить параметры</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Базовый поиск -->
+        <div id="basic-search" class="mb-4">
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label for="region" class="form-label">Область и город</label>
@@ -38,64 +247,16 @@
                     <input type="text" name="q" id="search" class="form-control" placeholder="Пример: Samsung a53 динамик" value="{{ request.GET.q }}">
                 </div>
                 <div class="col-md-2 d-flex align-items-end mb-3">
-                    <button type="submit" class="btn btn-dark btn-block">Поиск</button>
+                    <button type="submit" class="btn btn-primary btn-block">Поиск</button>
                 </div>
             </div>
-<!-- Вставить в шаблон поиска -->
+        </div>
+    </form>
 
-        </form>
-    </div>
-<div class="text mt-4">
-    <p class="fw-bold">Не нашли нужную запчасть? Отправьте уведомление всем пользователям!</p>
-    <a href="{% url 'send_notification' %}" class="btn btn-warning">Написать уведомление</a>
-</div>
-
-    <!-- Расширенный поиск -->
-    <div id="advanced-search" class="card p-4" style="display: none;">
-        <h5 class="text-center mb-3">Расширенный поиск</h5>
-        <form method="GET" action="{% url 'search' %}">
-            <div class="row g-2 align-items-center">
-                <div class="col-md-3">
-                    <input type="text" name="device" id="device" class="form-control" placeholder="Устройство" value="{{ request.GET.device }}" list="device-list">
-                    <datalist id="device-list">
-                        <option value="Телефон">
-                        <option value="Планшет">
-                        <option value="Смарт-часы">
-                    </datalist>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ request.GET.brand }}" list="brand-list">
-                    <datalist id="brand-list"></datalist>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" name="model" id="model" class="form-control" placeholder="Модель" value="{{ request.GET.model }}" list="model-list">
-                    <datalist id="model-list"></datalist>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ request.GET.part_type }}" list="part-type-list">
-                    <datalist id="part-type-list"></datalist>
-                </div>
-                <div class="col-md-3">
-                    <select id="id_region_adv" name="region" class="form-select">
-                        <option value="">Область</option>
-                        <option value="Минская область">Минская область</option>
-                        <option value="Гомельская область">Гомельская область</option>
-                        <option value="Гродненская область">Гродненская область</option>
-                        <option value="Витебская область">Витебская область</option>
-                        <option value="Брестская область">Брестская область</option>
-                        <option value="Могилёвская область">Могилёвская область</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select id="id_city_adv" name="city" class="form-select">
-                        <option value="">Город</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-dark btn-block">Поиск</button>
-                </div>
-            </div>
-        </form>
+    <!-- Дополнительное уведомление -->
+    <div class="text mt-4 text-center">
+        <p class="fw-bold">Не нашли нужную запчасть? Отправьте уведомление всем пользователям!</p>
+        <a href="{% url 'send_notification' %}" class="btn btn-warning">Написать уведомление</a>
     </div>
 
     <hr>
@@ -107,4 +268,57 @@
 <!-- Подключение стилей и скриптов -->
 <link rel="stylesheet" href="{% static 'css/search.css' %}">
 <script src="{% static 'js/search.js' %}"></script>
+
+<!-- Скрипт для управления расширенным поиском и сбросом параметров -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const advancedSearch = document.getElementById("advancedSearchCollapse");
+    const toggleBtn = document.getElementById("toggleAdvancedSearch");
+    const resetAdvancedFieldsButton = document.getElementById("reset-advanced-fields");
+    const form = document.getElementById("search-form");
+
+    // Восстановление состояния из localStorage
+    const isAdvancedSearchOpen = localStorage.getItem("advancedSearchOpen") === "true";
+    if (isAdvancedSearchOpen) {
+        advancedSearch.classList.add("show");
+        toggleBtn.textContent = "Скрыть расширенный поиск";
+    }
+
+    // Функция сброса параметров расширенного поиска
+    function resetAdvancedFields() {
+        document.getElementById("device").value = "";
+        document.getElementById("brand").value = "";
+        document.getElementById("model").value = "";
+        document.getElementById("part_type").value = "";
+    }
+
+    // Обработчик для кнопки "Расширенный поиск"
+    toggleBtn.addEventListener("click", function () {
+        let isExpanded = advancedSearch.classList.contains("show");
+
+        if (isExpanded) {
+            // Если открыт, скрываем, сбрасываем параметры и обновляем localStorage
+            resetAdvancedFields();
+            toggleBtn.textContent = "Расширенный поиск";
+            localStorage.setItem("advancedSearchOpen", "false");
+        } else {
+            toggleBtn.textContent = "Скрыть расширенный поиск";
+            localStorage.setItem("advancedSearchOpen", "true");
+        }
+
+        // Переключаем состояние collapse
+        new bootstrap.Collapse(advancedSearch, {
+            toggle: true
+        });
+    });
+
+    // Обработчик кнопки "Сбросить параметры"
+    if (resetAdvancedFieldsButton) {
+        resetAdvancedFieldsButton.addEventListener("click", function () {
+            resetAdvancedFields();
+        });
+    }
+});
+</script>
+
 {% endblock %}
