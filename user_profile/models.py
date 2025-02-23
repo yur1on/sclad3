@@ -1,4 +1,3 @@
-
 from django.db import models
 from django.contrib.auth.models import User
 from warehouse.models import Part
@@ -13,27 +12,35 @@ BELARUS_REGIONS = [
     ('Витебская область', 'Витебская область'),
 ]
 
+# Выбор тарифного плана
+TARIFF_CHOICES = (
+    ('free', 'Бесплатный'),
+    ('standard', 'Стандарт'),
+    ('premium', 'Премиум'),
+)
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="Полное имя")
+    subscription_start = models.DateTimeField(blank=True, null=True, verbose_name="Начало подписки")
+    subscription_end = models.DateTimeField(blank=True, null=True, verbose_name="Окончание подписки")
     phone = models.CharField(max_length=15)
     region = models.CharField(max_length=100, choices=BELARUS_REGIONS, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     workshop_name = models.CharField(max_length=100, blank=True, null=True)
     delivery_methods = models.TextField(max_length=300, blank=True, null=True)
-    receive_notifications = models.BooleanField(default=True, verbose_name="Получать уведомления")  # Новое поле
+    receive_notifications = models.BooleanField(default=True, verbose_name="Получать уведомления")
+    tariff = models.CharField(max_length=10, choices=TARIFF_CHOICES, default='free', verbose_name="Тарифный план")
 
     def __str__(self):
         return f"{self.full_name or self.user.username} - {self.city} - {self.phone}"
-
-
 
     @property
     def average_rating(self):
         reviews = self.user.received_reviews.all()
         if reviews.exists():
             return sum(review.rating for review in reviews) / reviews.count()
-        return 5  # Возвращаем 5, если нет отзывов
+        return 5
 
 
 class Review(models.Model):
@@ -45,9 +52,6 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review from {self.reviewer} to {self.user} - {self.rating} stars"
-
-
-
 
 class Bookmark(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarks')

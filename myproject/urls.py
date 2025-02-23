@@ -12,6 +12,7 @@ urlpatterns = [
     path('chat/', include('chat.urls')),
     path("custom-admin/", include("custom_admin.urls")),
     path('notifications/', include('notifications.urls')),
+    path('payments/', include('payments.urls', namespace='payments')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

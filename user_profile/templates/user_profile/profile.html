@@ -4,253 +4,278 @@
 {% load static %}
 {% load widget_tweaks %}
 
-<!--<link rel="stylesheet" href="{% static 'css/profile.css' %}">-->
-<style>
-/* Общие стили для страницы профиля */
-.profile-page {
-    max-width: 800px; /* Уменьшенная ширина для большей компактности */
-    margin: 0 auto;
-    padding: 20px; /* Добавлен внутренний отступ для комфортного расположения элементов */
-}
-
-/* Карточка профиля */
-.card {
-    border-radius: 6px; /* Меньший радиус для более строгого вида */
-    overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Легкая тень для объема */
-    margin-bottom: 20px; /* Отступ между карточками */
-}
-
-/* Компактные списки */
-.list-group-item {
-    padding: 8px 12px; /* Уменьшенные отступы */
-    font-size: 0.95rem; /* Небольшое уменьшение шрифта */
-    border: none; /* Убрать лишние границы */
-    border-bottom: 1px solid #ddd; /* Легкая граница снизу для разделения */
-}
-
-.list-group-item:last-child {
-    border-bottom: none; /* Убрать нижнюю границу у последнего элемента */
-}
-
-/* Кнопки и формы */
-.form-group {
-    margin-bottom: 10px; /* Уменьшенный отступ между полями формы */
-}
-
-.form-control {
-    border-radius: 4px; /* Минимальное скругление */
-    padding: 8px 10px; /* Компактный внутренний отступ */
-    font-size: 0.9rem; /* Уменьшенный размер шрифта */
-}
-
-.form-control:focus {
-    border-color: #007bff; /* Цвет обводки при фокусе */
-    box-shadow: 0 0 4px rgba(0, 123, 255, 0.3); /* Легкое свечение */
-}
-
-/* Секция отзывов */
-.reviews-section h4 {
-    font-size: 1.2rem; /* Чуть меньший заголовок */
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.list-group-item-action {
-    display: flex;
-    justify-content: space-between; /* Разделение текста и кнопок */
-    align-items: center; /* Выравнивание по вертикали */
-    padding: 10px; /* Увеличенный отступ для кнопок */
-    transition: background-color 0.2s ease; /* Эффект при наведении */
-}
-
-.list-group-item-action:hover {
-    background-color: #f8f9fa; /* Легкая подсветка при наведении */
-}
-
-/* Текст в карточках */
-.text-truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 85%; /* Более компактное ограничение ширины */
-    font-size: 0.9rem; /* Уменьшенный шрифт */
-}
-
-/* Стили для кнопок */
-.btn {
-    padding: 6px 10px; /* Уменьшенные отступы */
-    font-size: 0.9rem; /* Компактный размер шрифта */
-    border-radius: 4px; /* Минимальное скругление */
-    transition: background-color 0.3s ease; /* Плавное изменение цвета */
-}
-
-.btn-primary {
-    background-color: #007bff;
-    border: none;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-
-/* Общая секция кнопок */
-.btn-group {
-    gap: 8px; /* Расстояние между кнопками */
-}
-
-/* Отступы и выравнивание */
-.section-header {
-    margin-bottom: 15px;
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-.section {
-    margin-bottom: 20px; /* Отступы между разделами */
-}
-
-
-
-</style>
 <div class="container my-4">
-    <div class="row">
-        <!-- Sidebar -->
-        <aside class="col-lg-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Мой профиль</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><strong>Имя:</strong> {{ user.profile.full_name|default:"Не указано" }}</li>
-                        <li class="list-group-item"><strong>Телефон:</strong> {{ user.profile.phone }}</li>
-                        <li class="list-group-item"><strong>Город:</strong> {{ user.profile.city }}</li>
-                        <li class="list-group-item"><strong>Мастерская, магазин:</strong> {{ user.profile.workshop_name|default:"Не указано" }}</li>
-                        <li class="list-group-item"><strong>Рейтинг:</strong> {{ user.profile.average_rating|default:"0.0" }} / 5 </li>
-                        <li class="list-group-item"><strong>Способы отправки:</strong> {{ user.profile.delivery_methods|default:"Не указано" }}</li>
-                    </ul>
-                    <a href="?edit=true" class="btn btn-primary w-100 mt-3">Редактировать профиль</a>
-                </div>
-            </div>
-        </aside>
+  <div class="row">
+    <!-- Sidebar -->
+    <aside class="col-lg-4 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Мой профиль</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <strong>Имя:</strong> {{ user.profile.full_name|default:"Не указано" }}
+            </li>
+            <li class="list-group-item">
+              <strong>Телефон:</strong> {{ user.profile.phone }}
+            </li>
+            <li class="list-group-item">
+              <strong>Город:</strong> {{ user.profile.city }}
+            </li>
+            <li class="list-group-item">
+              <strong>Мастерская, магазин:</strong> {{ user.profile.workshop_name|default:"Не указано" }}
+            </li>
+            <li class="list-group-item">
+              <strong>Рейтинг:</strong> {{ user.profile.average_rating|default:"0.0" }} / 5
+            </li>
+            <li class="list-group-item">
+              <strong>Способы отправки:</strong> {{ user.profile.delivery_methods|default:"Не указано" }}
+            </li>
+            <li class="list-group-item">
+              <strong>Тарифный план:</strong>
+              {% if user.profile.tariff == 'free' %}
+                Бесплатный
+              {% elif user.profile.tariff == 'standard' %}
+                Стандарт (до 1000 запчастей)
+              {% elif user.profile.tariff == 'premium' %}
+                Премиум (без ограничений)
+              {% endif %}
+            </li>
+            {% if user.profile.subscription_end %}
+            <li class="list-group-item">
+              <strong>Подписка:</strong>
+              {{ user.profile.subscription_start|date:"d M Y" }} – {{ user.profile.subscription_end|date:"d M Y" }}
+            </li>
+            {% endif %}
+          </ul>
 
-        <!-- Main Content -->
-        <main class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <ul class="nav nav-tabs" id="profileTabs" role="tablist">
-                        <li class="nav-item">
-                            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
-                                Настройки
-                            </button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">
-                                Отзывы обо мне
-                            </button>
-                        </li>
+          <!-- Вывод уведомления о подписке, если оно есть -->
+          {% if subscription_notification %}
+          <div class="alert alert-warning mt-3" role="alert">
+            {{ subscription_notification }}
+          </div>
+          {% endif %}
 
-                        <li class="nav-item">
-                            <button class="nav-link" id="given-reviews-tab" data-bs-toggle="tab" data-bs-target="#given-reviews" type="button" role="tab" aria-controls="given-reviews" aria-selected="false">
-                                Отзывы оставленные мной
-                            </button>
-                        </li>
+          <a href="?edit=true" class="btn btn-primary w-100 mt-3">Редактировать профиль</a>
 
-                        <li class="nav-item">
-                            <a href="{% url 'bookmarks' %}" class="nav-link">
-                                Закладки <span class="badge bg-secondary">{{ bookmarks_count }}</span>
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="tab-content mt-4">
-                        <!-- Profile Edit Form -->
-                        <div class="tab-pane fade show active" id="profile" role="tabpanel">
-                            {% if edit_mode %}
-                                <form method="post" class="form">
-                                    {% csrf_token %}
-                                    {% for field in form.visible_fields %}
-                                        <div class="mb-3">
-                                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}:</label>
-                                            {% if field.name == "region" %}
-                                                <select id="id_region" name="region" class="form-control {% if field.errors %}is-invalid{% endif %}">
-                                                    <option value="">Выберите область</option>
-                                                    {% for region in form.region.field.choices %}
-                                                        <option value="{{ region.0 }}" {% if region.0 == form.region.value %}selected{% endif %}>{{ region.1 }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% elif field.name == "city" %}
-                                                <select id="id_city" name="city" class="form-control {% if field.errors %}is-invalid{% endif %}">
-                                                    <option value="">Выберите город</option>
-                                                </select>
-                                            {% else %}
-                                                {{ field|add_class:"form-control {% if field.errors %}is-invalid{% endif %}" }}
-                                            {% endif %}
-                                        </div>
-                                    {% endfor %}
-                                    <div class="d-flex justify-content-between mt-3">
-                                        <button type="submit" class="btn btn-success">Сохранить</button>
-                                        <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
-                                    </div>
-                                </form>
-                            {% else %}
-                                <p class="text-muted">Вы можете редактировать свой профиль, нажав кнопку «Редактировать профиль» в боковой панели.</p>
-                            {% endif %}
+          <div class="mt-3">
+            <h6>Условия тарифов:</h6>
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Тарифный план</th>
+                  <th>Стоимость</th>
+                  <th>Ограничения</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Бесплатный</td>
+                  <td>0 руб/мес</td>
+                  <td>До 30 запчастей, 1 фото на запчасть, ограниченное число уведомлений</td>
+                </tr>
+                <tr>
+                  <td>Стандарт</td>
+                  <td>30 руб/мес</td>
+                  <td>До 1000 запчастей</td>
+                </tr>
+                <tr>
+                  <td>Премиум</td>
+                  <td>100 руб/мес</td>
+                  <td>Без ограничений</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {% if user.profile.tariff != 'premium' %}
+          <div class="mt-3">
+            <a href="{% url 'payments:choose_subscription' %}" class="btn btn-success w-100">
+              Изменить тариф / Перейти на платный тариф
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
+                Настройки
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">
+                Отзывы обо мне
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" id="given-reviews-tab" data-bs-toggle="tab" data-bs-target="#given-reviews" type="button" role="tab" aria-controls="given-reviews" aria-selected="false">
+                Отзывы оставленные мной
+              </button>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'bookmarks' %}" class="nav-link">
+                Закладки <span class="badge bg-secondary">{{ bookmarks_count }}</span>
+              </a>
+            </li>
+          </ul>
+          <div class="tab-content mt-4">
+            <!-- Profile Edit Form -->
+            <div class="tab-pane fade show active" id="profile" role="tabpanel">
+              {% if edit_mode %}
+                <form method="post" class="form">
+                  {% csrf_token %}
+                  {% for field in form.visible_fields %}
+                    {% if field.name == "tariff" %}
+                      {% if user.profile.tariff != 'free' %}
+                        <div class="mb-3">
+                          <label class="form-label">{{ field.label }}:</label>
+                          <input type="text" class="form-control" value="{{ user.profile.get_tariff_display }}" readonly>
                         </div>
+                        <input type="hidden" name="tariff" value="{{ user.profile.tariff }}">
+                      {% else %}
+                        <div class="mb-3">
+                          <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}:</label>
+                          {{ field|add_class:"form-control {% if field.errors %}is-invalid{% endif %}" }}
+                        </div>
+                      {% endif %}
+                    {% else %}
+                      <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}:</label>
+                        {% if field.name == "region" %}
+                          <select id="id_region" name="region" class="form-control {% if field.errors %}is-invalid{% endif %}">
+                            <option value="">Выберите область</option>
+                            {% for region in form.region.field.choices %}
+                              <option value="{{ region.0 }}" {% if region.0 == form.region.value %}selected{% endif %}>{{ region.1 }}</option>
+                            {% endfor %}
+                          </select>
+                        {% elif field.name == "city" %}
+                          <select id="id_city" name="city" class="form-control {% if field.errors %}is-invalid{% endif %}">
+                            <option value="">Выберите город</option>
+                          </select>
+                        {% else %}
+                          {{ field|add_class:"form-control {% if field.errors %}is-invalid{% endif %}" }}
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                  <div class="d-flex justify-content-between mt-3">
+                    <button type="submit" class="btn btn-success">Сохранить</button>
+                    <a href="{% url 'profile' %}" class="btn btn-secondary">Отменить</a>
+                  </div>
+                </form>
+              {% else %}
+                <p class="text-muted">Для редактирования профиля нажмите кнопку «Редактировать профиль» в боковой панели.</p>
+              {% endif %}
+            </div>
 
-<!-- Reviews оставленные мной -->
-<div class="tab-pane fade" id="given-reviews" role="tabpanel">
-    <h4>Отзывы оставленные мной</h4>
-    {% if given_reviews %}
-        <div class="list-group">
-            {% for review in given_reviews %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between">
+            <!-- Reviews оставленные мной -->
+            <div class="tab-pane fade" id="given-reviews" role="tabpanel">
+              <h4>Отзывы оставленные мной</h4>
+              {% if given_reviews %}
+                <div class="list-group">
+                  {% for review in given_reviews %}
+                    <div class="list-group-item">
+                      <div class="d-flex justify-content-between">
                         <span><strong>Пользователю:</strong> {{ review.user.profile.full_name }}</span>
                         <span><strong>Оценка:</strong> {{ review.rating }} / 5</span>
-                    </div>
-                    <p>{{ review.comment }}</p>
-                    <small class="text-muted">Дата: {{ review.created_at|date:"d M Y" }}</small>
-                    <!-- Кнопка удаления отзыва -->
-                    <form method="post" action="{% url 'delete_review' review.id %}" style="display:inline;">
+                      </div>
+                      <p>{{ review.comment }}</p>
+                      <small class="text-muted">Дата: {{ review.created_at|date:"d M Y" }}</small>
+                      <form method="post" action="{% url 'delete_review' review.id %}" style="display:inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
-                    </form>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="text-muted">Вы ещё не оставили отзывов.</p>
-    {% endif %}
-</div>
-
-
-
-                        <!-- Reviews -->
-                        <div class="tab-pane fade" id="reviews" role="tabpanel">
-                            <h4>Отзывы</h4>
-                            {% if reviews %}
-                                <div class="list-group">
-                                    {% for review in reviews %}
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between">
-                                                <span><strong>Оценка:</strong> {{ review.rating }} / 5</span>
-                                                <small class="text-muted">Дата: {{ review.created_at|date:"d M Y" }}</small>
-                                            </div>
-                                            <p>{{ review.comment }}</p>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <p class="text-muted">Нет отзывов</p>
-                            {% endif %}
-                        </div>
+                      </form>
                     </div>
+                  {% endfor %}
                 </div>
+              {% else %}
+                <p class="text-muted">Вы ещё не оставили отзывов.</p>
+              {% endif %}
             </div>
-        </main>
-    </div>
+
+            <!-- Reviews -->
+            <div class="tab-pane fade" id="reviews" role="tabpanel">
+              <h4>Отзывы</h4>
+              {% if reviews %}
+                <div class="list-group">
+                  {% for review in reviews %}
+                    <div class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <span><strong>Оценка:</strong> {{ review.rating }} / 5</span>
+                        <small class="text-muted">Дата: {{ review.created_at|date:"d M Y" }}</small>
+                      </div>
+                      <p>{{ review.comment }}</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="text-muted">Нет отзывов.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 </div>
+
+<style>
+  /* Стили, взятые из шаблона add_part */
+  input.form-control, select.form-control, textarea.form-control {
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 10px 13px;
+      transition: all 0.3s ease-in-out;
+      border: 0.5px solid #000;
+  }
+
+  input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+
+  button[type="submit"] {
+      background-color: #28a745;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+  }
+
+  button[type="submit"]:hover {
+      background-color: #218838;
+  }
+
+  input[list] {
+      background-image: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/svgs/solid/search.svg');
+      background-position: right 10px center;
+      background-repeat: no-repeat;
+      padding-right: 40px;
+  }
+
+  .row {
+      margin-bottom: 15px;
+  }
+
+  .form-group {
+      margin-bottom: 20px;
+  }
+
+  .form-group label {
+      color: black;
+  }
+</style>
 
 <script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}

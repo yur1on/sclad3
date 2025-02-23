@@ -1,23 +1,24 @@
 
 from django.contrib.auth import logout
-from django.core.paginator import Paginator
 import openpyxl
 from pathlib import Path
-from .forms import PartForm, PartImageFormSet
-from .models import Part, PartImage
 import json
 from django.http import JsonResponse
-from django.conf import settings
-import os
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from django.http import HttpResponse
 from itertools import groupby
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
 from django.contrib import messages
+from .forms import PartForm, PartImageFormSet
+from .models import Part, PartImage
+from tariff.utils import check_parts_limit, check_image_limit
+from django.db.models import Q, OuterRef, Subquery
+from django.core.paginator import Paginator
+from django.utils import timezone
+from warehouse.models import Part
 
 
 
@@ -89,34 +90,25 @@ def logout_view(request):
 
 
 def search(request):
-    # Получаем параметры поиска из GET-запроса
-    query = request.GET.get('q', '').strip()  # Поисковая строка
-    device = request.GET.get('device', '').strip()  # Устройство
-    brand = request.GET.get('brand', '').strip()  # Бренд
-    model = request.GET.get('model', '').strip()  # Модель
-    part_type = request.GET.get('part_type', '').strip()  # Тип запчасти
-    region = request.GET.get('region', '').strip()  # Область
-    city = request.GET.get('city', '').strip()  # Город
+    query = request.GET.get('q', '').strip()
+    device = request.GET.get('device', '').strip()
+    brand = request.GET.get('brand', '').strip()
+    model = request.GET.get('model', '').strip()
+    part_type = request.GET.get('part_type', '').strip()
+    region = request.GET.get('region', '').strip()
+    city = request.GET.get('city', '').strip()
 
-    # Базовый запрос: все запчасти, отсортированные по дате добавления
     results = Part.objects.all().order_by('-created_at')
 
-    # Фильтрация по поисковому запросу
     if query:
-        # Разбиваем строку на отдельные ключевые слова
         keywords = query.split()
         q_objects = Q()
         for keyword in keywords:
-            # Поиск по нескольким полям с использованием OR
-            q_objects &= (
-                Q(device__icontains=keyword) |
-                Q(brand__icontains=keyword) |
-                Q(model__icontains=keyword) |
-                Q(part_type__icontains=keyword)
-            )
+            q_objects &= (Q(device__icontains=keyword) |
+                          Q(brand__icontains=keyword) |
+                          Q(model__icontains=keyword) |
+                          Q(part_type__icontains=keyword))
         results = results.filter(q_objects)
-
-    # Расширенная фильтрация по отдельным параметрам
     if device:
         results = results.filter(device__icontains=device)
     if brand:
@@ -126,17 +118,28 @@ def search(request):
     if part_type:
         results = results.filter(part_type__icontains=part_type)
     if region:
-        # Фильтр по связанному профилю пользователя
         results = results.filter(user__profile__region__icontains=region)
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
-    # Пагинация: 30 элементов на страницу
+    now = timezone.now()
+    # Определяем пользователей с активной платной подпиской:
+    active_paid = Q(user__profile__tariff__in=['standard', 'premium']) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
+    # Все остальные (free, либо подписка истекла, либо не оформлена)
+    non_active = Q(user__profile__tariff='free') | Q(user__profile__subscription_end__lt=now) | Q(user__profile__subscription_end__isnull=True)
+
+    # Для пользователей без активной платной подписки показываем только последние 30 запчастей.
+    # Создаем подзапрос, который для каждого пользователя выбирает последние 30 запчастей.
+    subquery = Part.objects.filter(user=OuterRef('user_id')).order_by('-created_at').values('pk')[:30]
+
+    results = results.filter(
+        active_paid | Q(pk__in=Subquery(subquery))
+    )
+
     paginator = Paginator(results, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Передача данных в шаблон
     return render(request, 'warehouse/search.html', {
         'page_obj': page_obj,
         'query': query,
@@ -147,6 +150,7 @@ def search(request):
         'region': region,
         'city': city,
     })
+
 
 
 @login_required
@@ -565,41 +569,57 @@ def get_dynamic_data(request):
     return JsonResponse(response)
 
 
+
+
 @login_required
 def add_part(request):
-    """Добавление запчасти с обработкой формы и изображений."""
+    """Добавление запчасти с обработкой формы и изображений, с учетом новой логики тарифных планов."""
     profile = getattr(request.user, 'profile', None)
     if not profile or not profile.city or not profile.phone:
         messages.error(request, 'Перед началом создания склада, укажите пожалуйста город и номер телефона в вашем профиле.')
         return redirect('profile')
 
     if request.method == 'POST':
+        # Проверка лимита запчастей в зависимости от тарифа
+        if check_parts_limit(request.user):
+            tariff = request.user.profile.tariff
+            if tariff == 'free':
+                error_message = "Вы достигли лимита в 30 запчастей для бесплатного тарифа. Для добавления новых запчастей обновите тариф."
+            elif tariff == 'standard':
+                error_message = "Вы достигли лимита в 1000 запчастей для стандартного тарифа. Для добавления новых запчастей обновите тариф."
+            messages.error(request, error_message)
+            return redirect('profile')
+
         form = PartForm(request.POST, request.FILES)
         formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
 
         if form.is_valid() and formset.is_valid():
-            # Извлекаем данные из формы
+            # Если тариф бесплатный, разрешается только 1 изображение на запчасть
+            images = [img_form for img_form in formset if img_form.cleaned_data and img_form.cleaned_data.get('image')]
+            if request.user.profile.tariff == 'free' and check_image_limit(request.user, len(images)):
+                messages.error(request, "На бесплатном тарифе можно загрузить только 1 изображение для запчасти.")
+                return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
+
+            # Обработка данных формы
             part_type = form.cleaned_data['part_type']
             chip_marking = request.POST.get('chip_marking', '').strip()
-
-            # Объединяем тип запчасти и маркировку микросхемы
             if part_type == "Микросхема" and chip_marking:
                 form.cleaned_data['part_type'] = f"{part_type} {chip_marking}"
 
             device = form.cleaned_data['device']
             brand = form.cleaned_data['brand']
             model = form.cleaned_data['model']
-            part_type = form.cleaned_data['part_type']  # Обновлённое значение
-            condition = form.cleaned_data['condition']  # Добавляем состояние запчасти
+            part_type = form.cleaned_data['part_type']
+            condition = form.cleaned_data['condition']
 
-            # Проверяем наличие аналогичной запчасти с учетом состояния
+            # Проверка наличия аналогичной запчасти
             existing_part = Part.objects.filter(
                 user=request.user,
                 device=device,
                 brand=brand,
                 model=model,
                 part_type=part_type,
-                condition=condition  # Сравниваем по состоянию
+                condition=condition
             ).first()
 
             if existing_part and 'confirm_add' in request.POST:

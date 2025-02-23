@@ -8,28 +8,40 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Notification
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import Http404
+from django.contrib import messages
+import uuid
+from django.contrib.auth.models import User
+from .models import Notification
+from chat.models import Chat
+from tariff.utils import check_notifications_limit
+
 @login_required
 def send_notification(request):
     error_message = None
 
     if request.method == "POST":
+        # Проверяем, не достиг ли пользователь лимита уведомлений для бесплатного тарифа
+        if check_notifications_limit(request.user):
+            messages.error(request, "Вы превысили лимит отправки уведомлений для бесплатного тарифа. Обновите тариф для отправки большего количества уведомлений.")
+            return redirect("notifications_list")
+
         text = request.POST.get("text")
         if len(text) > 255:
             error_message = "Текст уведомления не должен превышать 255 символов."
         elif text:
-            # Генерируем общий идентификатор для уведомления
             broadcast_id = uuid.uuid4()
 
-            # Создаем копию для себя: отправитель = получатель, и помечаем как прочитанное
             Notification.objects.create(
                 user=request.user,
                 sender=request.user,
                 text=text,
-                is_read=True,  # чтобы не учитывалось в счетчике
+                is_read=True,
                 broadcast_id=broadcast_id
             )
 
-            # Создаем уведомления для остальных пользователей
             users = User.objects.exclude(id=request.user.id).filter(profile__receive_notifications=True)
             for user in users:
                 Notification.objects.create(

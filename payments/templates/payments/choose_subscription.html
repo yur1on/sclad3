@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Выбор подписки</title>
+</head>
+<body>
+    <h1>Выберите тариф и срок подписки</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% for option in tariff_options %}
+            <fieldset style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
+                <legend>{{ option.label }}</legend>
+                <input type="radio" name="tariff_type" id="tariff_{{ option.type }}" value="{{ option.type }}" {% if forloop.first %}checked{% endif %}>
+                <label for="tariff_{{ option.type }}">Выбрать тариф {{ option.label }}</label>
+                <div style="margin-top:10px;">
+                    {% for dur in option.durations %}
+                        <div>
+                            <input type="radio" name="duration" id="duration_{{ option.type }}_{{ dur.duration }}" value="{{ dur.duration }}" {% if forloop.first %}checked{% endif %}>
+                            <label for="duration_{{ option.type }}_{{ dur.duration }}">{{ dur.label }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </fieldset>
+        {% endfor %}
+        <button type="submit">Перейти к оплате</button>
+    </form>
+    <a href="{% url 'profile' %}">Вернуться в профиль</a>
+</body>
+</html>

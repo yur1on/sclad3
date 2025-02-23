@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'custom_admin',
     'chat',
     'notifications',
+    'tariff',
+    'payments',
 
 ]
 

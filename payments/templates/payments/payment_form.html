@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Оплата</title>
+</head>
+<body onload="document.forms[0].submit()">
+    <form action="{{ wsb_payment_url }}" method="post">
+        <input type="hidden" name="wsb_version" value="{{ wsb_version }}">
+        <input type="hidden" name="wsb_language_id" value="{{ wsb_language_id }}">
+        <input type="hidden" name="wsb_storeid" value="{{ wsb_storeid }}">
+        <input type="hidden" name="wsb_store" value="{{ wsb_store }}">
+        <input type="hidden" name="wsb_order_num" value="{{ wsb_order_num }}">
+        <input type="hidden" name="wsb_test" value="{{ wsb_test }}">
+        <input type="hidden" name="wsb_currency_id" value="{{ wsb_currency_id }}">
+        <input type="hidden" name="wsb_seed" value="{{ wsb_seed }}">
+        <input type="hidden" name="wsb_customer_name" value="{{ wsb_customer_name }}">
+        <input type="hidden" name="wsb_customer_address" value="{{ wsb_customer_address }}">
+        <input type="hidden" name="wsb_return_url" value="{{ wsb_return_url }}">
+        <input type="hidden" name="wsb_cancel_return_url" value="{{ wsb_cancel_return_url }}">
+        <input type="hidden" name="wsb_notify_url" value="{{ wsb_notify_url }}">
+        <input type="hidden" name="wsb_email" value="{{ wsb_email }}">
+        <input type="hidden" name="wsb_phone" value="{{ wsb_phone }}">
+        <input type="hidden" name="wsb_invoice_item_name[0]" value="{{ invoice_item_name }}">
+        <input type="hidden" name="wsb_invoice_item_quantity[0]" value="{{ invoice_item_quantity }}">
+        <input type="hidden" name="wsb_invoice_item_price[0]" value="{{ invoice_item_price }}">
+        <input type="hidden" name="wsb_total" value="{{ wsb_total }}">
+        <input type="hidden" name="wsb_signature" value="{{ wsb_signature }}">
+
+        {# Если выбран способ оплаты через ЕРИП, добавляем поля для активации вкладки и срока оплаты #}
+        {% if payment_method_choice == "erip" %}
+            <input type="hidden" name="wsb_tab" value="erip">
+            <input type="hidden" name="wsb_due_date" value="{{ wsb_due_date }}">
+        {% endif %}
+
+        <noscript>
+            <p>Нажмите кнопку ниже для перехода на страницу оплаты.</p>
+            <input type="submit" value="Перейти к оплате">
+        </noscript>
+    </form>
+    <p>Пожалуйста, подождите, вы перенаправляетесь на страницу оплаты...</p>
+</body>
+</html>
