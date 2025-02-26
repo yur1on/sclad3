@@ -1,30 +1,272 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Выбор подписки</title>
-</head>
-<body>
-    <h1>Выберите тариф и срок подписки</h1>
-    <form method="post">
-        {% csrf_token %}
-        {% for option in tariff_options %}
-            <fieldset style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
-                <legend>{{ option.label }}</legend>
-                <input type="radio" name="tariff_type" id="tariff_{{ option.type }}" value="{{ option.type }}" {% if forloop.first %}checked{% endif %}>
-                <label for="tariff_{{ option.type }}">Выбрать тариф {{ option.label }}</label>
-                <div style="margin-top:10px;">
-                    {% for dur in option.durations %}
-                        <div>
-                            <input type="radio" name="duration" id="duration_{{ option.type }}_{{ dur.duration }}" value="{{ dur.duration }}" {% if forloop.first %}checked{% endif %}>
-                            <label for="duration_{{ option.type }}_{{ dur.duration }}">{{ dur.label }}</label>
-                        </div>
-                    {% endfor %}
-                </div>
-            </fieldset>
-        {% endfor %}
-        <button type="submit">Перейти к оплате</button>
-    </form>
-    <a href="{% url 'profile' %}">Вернуться в профиль</a>
-</body>
-</html>
+{% extends "warehouse/base.html" %}
+{% load static %}
+
+{% block title %}Выбор подписки{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <!-- Блок информации о текущей подписке -->
+  <div class="row mb-4">
+    <div class="col">
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0 text-center">Ваша текущая подписка</h5>
+        </div>
+        <div class="card-body text-center" style="font-size:16px;">
+          {% if user.profile.subscription_end and user.profile.subscription_end > now %}
+            <p>Текущий тариф: <strong>{{ user.profile.get_tariff_display }}</strong><br>
+               Подписка действует до: <strong>{{ user.profile.subscription_end|date:"d M Y" }}</strong>
+            </p>
+            {% if user.profile.tariff == 'standard' %}
+              <form action="{% url 'payments:cancel_standard_subscription' %}" method="post" class="mt-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning"
+                        onclick="return confirm('Вы уверены, что хотите отключить подписку Стандарт? Это действие немедленно переведет вас на бесплатный тариф.')">
+                  Отключить подписку Стандарт
+                </button>
+              </form>
+            {% endif %}
+          {% else %}
+            <p class="text-danger">Подписка отсутствует или истекла</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Форма выбора подписки -->
+  <div class="row mb-4">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0 text-center">Выберите тариф и срок подписки</h5>
+        </div>
+        <div class="card-body">
+          <form method="post" id="subscription-form">
+            {% csrf_token %}
+            <!-- Группа для выбора тарифа -->
+            <div class="mb-4">
+<p style="font-size: 17px; font-weight: 600; color: red;">
+    ⚠ При смене тарифа оставшиеся дни не компенсируются!
+</p>
+              <p style="font-size:18px; font-weight:600;">Выберите тариф:</p>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="tariff_type" id="tariff_standard" value="standard" checked>
+                <label class="form-check-label" for="tariff_standard">
+                  Стандарт (до 1000 запчастей)
+                  {% if not user.profile.subscription_end or user.profile.subscription_end <= now %}
+                    <small class="text-muted">
+                      (При переходе на Премиум подписка Стандарт будет отключена без компенсации оплаченной суммы)
+                    </small>
+                  {% endif %}
+                </label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="tariff_type" id="tariff_premium" value="premium"
+                       {% if user.profile.tariff == 'standard' and user.profile.subscription_end > now %}disabled{% endif %}>
+                <label class="form-check-label" for="tariff_premium">
+                  Премиум (без ограничений)
+                  {% if user.profile.tariff == 'standard' and user.profile.subscription_end > now %}
+                    <small class="text-muted">(Недоступно при активной подписке Стандарт. Сначала отключите текущую подписку.)</small>
+                  {% endif %}
+                </label>
+              </div>
+            </div>
+
+            <!-- Блок для выбора срока подписки для тарифа Стандарт -->
+            <div id="duration_standard" class="duration-block mb-4">
+              <p style="font-size:18px; font-weight:600;">Выберите срок подписки для тарифа Стандарт (1 период = 30 дней):</p>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="duration" id="duration_standard_1" value="1" checked>
+                <label class="form-check-label" for="duration_standard_1">30 дней – 30 руб</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="duration" id="duration_standard_3" value="3">
+                <label class="form-check-label" for="duration_standard_3">90 дней – 90 руб</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="duration" id="duration_standard_6" value="6">
+                <label class="form-check-label" for="duration_standard_6">180 дней – 180 руб</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="duration" id="duration_standard_12" value="12">
+                <label class="form-check-label" for="duration_standard_12">360 дней – 360 руб</label>
+              </div>
+            </div>
+
+            <!-- Блок для выбора срока подписки для тарифа Премиум -->
+            <div id="duration_premium" class="duration-block mb-4" style="display:none;">
+              <p style="font-size:18px; font-weight:600;">Выберите срок подписки для тарифа Премиум (1 период = 30 дней):</p>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="duration" id="duration_premium_1" value="1" checked>
+                <label class="form-check-label" for="duration_premium_1">30 дней – 100 руб</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="duration" id="duration_premium_3" value="3">
+                <label class="form-check-label" for="duration_premium_3">90 дней – 300 руб</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="duration" id="duration_premium_6" value="6">
+                <label class="form-check-label" for="duration_premium_6">180 дней – 600 руб</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="duration" id="duration_premium_12" value="12">
+                <label class="form-check-label" for="duration_premium_12">360 дней – 1200 руб</label>
+              </div>
+            </div>
+
+            <!-- Блок предварительного расчёта итоговой подписки -->
+            <div id="subscription-info" class="mb-4" style="font-size:16px; text-align:center;"></div>
+
+            <div class="text-center">
+              <button type="submit" class="btn btn-success btn-lg">Перейти к оплате</button>
+            </div>
+          </form>
+          <div class="mt-3 text-center">
+            <a href="{% url 'profile' %}" class="btn btn-secondary">Вернуться в профиль</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Скрытый элемент для текущей даты окончания подписки -->
+<span id="current-end" data-current-end="{% if user.profile.subscription_end and user.profile.subscription_end > now %}{{ user.profile.subscription_end|date:"c" }}{% else %}{{ now|date:"c" }}{% endif %}" style="display:none;"></span>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const tariffRadios = document.getElementsByName("tariff_type");
+    const durationStandard = document.getElementById("duration_standard");
+    const durationPremium = document.getElementById("duration_premium");
+    const subscriptionInfo = document.getElementById("subscription-info");
+    const currentEndStr = document.getElementById("current-end").dataset.currentEnd;
+    const currentEndDate = new Date(currentEndStr);
+    const now = new Date();
+
+    // Функция прибавления дней к дате
+    function addDays(date, days) {
+        let d = new Date(date);
+        d.setDate(d.getDate() + days);
+        return d;
+    }
+
+    // Функция форматирования даты в формате dd.mm.yyyy
+    function formatDate(date) {
+        let dd = date.getDate();
+        let mm = date.getMonth() + 1;
+        let yyyy = date.getFullYear();
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+        return dd + '.' + mm + '.' + yyyy;
+    }
+
+    // Функция обновления информации о новой подписке
+    function updateSubscriptionInfo() {
+        const selectedTariff = document.querySelector('input[name="tariff_type"]:checked').value;
+        const selectedDuration = parseInt(document.querySelector('input[name="duration"]:checked').value);
+        // Базовая дата: если текущая подписка активна и тариф тот же, то её окончание, иначе текущая дата
+        let baseDate = (currentEndDate > now && selectedTariff === '{{ user.profile.tariff }}') ? currentEndDate : now;
+        let newEndDate = addDays(baseDate, 30 * selectedDuration);
+        subscriptionInfo.innerHTML = `<p>При выбранном варианте ваша подписка будет действовать до <strong>${formatDate(newEndDate)}</strong></p>`;
+    }
+
+    // Функция для переключения блоков выбора длительности
+    function toggleDurationBlocks() {
+        const selectedTariff = document.querySelector('input[name="tariff_type"]:checked').value;
+        if (selectedTariff === "standard") {
+            durationStandard.style.display = "block";
+            durationPremium.style.display = "none";
+            let firstStandard = durationStandard.querySelector('input[name="duration"]');
+            if (firstStandard) { firstStandard.checked = true; }
+        } else if (selectedTariff === "premium") {
+            durationStandard.style.display = "none";
+            durationPremium.style.display = "block";
+            let firstPremium = durationPremium.querySelector('input[name="duration"]');
+            if (firstPremium) { firstPremium.checked = true; }
+        }
+        updateSubscriptionInfo();
+    }
+
+    tariffRadios.forEach(function(radio) {
+        radio.addEventListener("change", toggleDurationBlocks);
+    });
+
+    const durationRadios = document.getElementsByName("duration");
+    durationRadios.forEach(function(radio) {
+        radio.addEventListener("change", updateSubscriptionInfo);
+    });
+
+    // Инициализация при загрузке страницы
+    toggleDurationBlocks();
+});
+</script>
+
+<style>
+  .form-check-label {
+    font-size: 16px;
+  }
+  .duration-block {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 15px;
+  }
+  .tariff-table-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+  }
+  .tariff-table-container h5 {
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  .tariff-table-container p {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  .tariff-table-container table {
+    width: 100%;
+    font-size: 16px;
+  }
+</style>
+
+<div class="container tariff-table-container">
+  <h5>Условия тарифов и ограничения в поиске</h5>
+  <p>При окончании подписки или при бесплатном тарифе в глобальном поиске будут отображаться только последние 30 запчастей из склада.</p>
+  <table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th>Тарифный план</th>
+        <th>Стоимость</th>
+        <th>Ограничения</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Бесплатный</td>
+        <td>0 руб/день</td>
+        <td>До 30 запчастей, 1 фото на запчасть, ограниченное число уведомлений</td>
+      </tr>
+      <tr>
+        <td>Стандарт</td>
+        <td>30 руб за 30 дней (1 руб/день)</td>
+        <td>До 1000 запчастей<br>При истечении подписки в поиске показываются только последние 30 запчастей</td>
+      </tr>
+      <tr>
+        <td>Премиум</td>
+        <td>100 руб за 30 дней (~3.33 руб/день)</td>
+        <td>Без ограничений</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

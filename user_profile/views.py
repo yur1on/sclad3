@@ -20,21 +20,22 @@ def profile(request):
             user.profile.tariff = 'free'
             user.profile.save()
 
-    # Получаем отзывы, закладки, чаты и т.д.
     reviews = Review.objects.filter(user=user).order_by('-created_at')
     given_reviews = user.given_reviews.all()
     bookmarks = user.bookmarks.all()
     bookmarks_count = bookmarks.count()
     chats = Chat.objects.filter(user1=user) | Chat.objects.filter(user2=user)
 
-    # Вычисляем оставшиеся дни подписки (если подписка оформлена)
     subscription_notification = None
+    renew_subscription = False  # Флаг для предложения продления подписки
     if user.profile.subscription_end:
         days_left = (user.profile.subscription_end - timezone.now()).days
         if days_left < 0:
             subscription_notification = "Ваша подписка истекла! Продлите подписку, чтобы продолжить пользоваться платными функциями."
+            renew_subscription = True
         elif days_left < 7:
             subscription_notification = f"Ваша подписка заканчивается через {days_left} дней. Продлите подписку, чтобы не прерывать работу."
+            renew_subscription = True
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=user.profile)
@@ -54,6 +55,7 @@ def profile(request):
         'bookmarks_count': bookmarks_count,
         'chats': chats,
         'subscription_notification': subscription_notification,
+        'renew_subscription': renew_subscription,
     })
 
 
