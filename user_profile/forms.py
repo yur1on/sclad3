@@ -13,6 +13,7 @@ BELARUS_REGIONS = [
 TARIFF_CHOICES = (
     ('free', 'Бесплатный'),
     ('standard', 'Стандарт'),
+    ('standard2', 'Стандарт 2'),  # Добавлен новый тариф
     ('premium', 'Премиум'),
 )
 
@@ -39,7 +40,6 @@ class ProfileForm(forms.ModelForm):
         # чтобы изменение тарифа происходило только через процесс подписки.
         self.fields['tariff'].widget = forms.HiddenInput()
         self.fields['tariff'].disabled = True
-
 
 class ReviewForm(forms.ModelForm):
     class Meta:

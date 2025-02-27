@@ -16,6 +16,7 @@ BELARUS_REGIONS = [
 TARIFF_CHOICES = (
     ('free', 'Бесплатный'),
     ('standard', 'Стандарт'),
+    ('standard2', 'Стандарт 2'),  # Добавлен новый тариф
     ('premium', 'Премиум'),
 )
 
@@ -41,7 +42,6 @@ class Profile(models.Model):
         if reviews.exists():
             return sum(review.rating for review in reviews) / reviews.count()
         return 5
-
 
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_reviews')

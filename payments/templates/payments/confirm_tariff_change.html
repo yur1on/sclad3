@@ -1,0 +1,23 @@
+{% extends "warehouse/base.html" %}
+{% block title %}Подтверждение смены тарифа{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-warning text-white">
+      <h5 class="mb-0 text-center">Подтверждение смены тарифа</h5>
+    </div>
+    <div class="card-body text-center">
+      <p>Ваш текущий тариф: <strong>{{ current_tariff }}</strong></p>
+      <p>Дата окончания текущей подписки: <strong>{{ subscription_end|date:"d M Y" }}</strong></p>
+      <p>Вы хотите сменить тариф на: <strong>{{ new_tariff }}</strong></p>
+      <p class="text-danger">⚠ При смене тарифа оставшиеся дни и сумма не компенсируются!</p>
+      <form method="post" action="{% url 'payments:initiate_payment' %}?tariff={{ tariff_type }}&duration={{ duration }}">
+        {% csrf_token %}
+        <input type="hidden" name="confirm_change" value="yes">
+        <button type="submit" class="btn btn-success">Подтвердить смену тарифа</button>
+        <a href="{% url 'payments:choose_subscription' %}" class="btn btn-secondary">Отмена</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

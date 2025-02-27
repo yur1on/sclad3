@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ProfileForm, ReviewForm
 from .models import Profile, Review, Bookmark
@@ -57,8 +56,6 @@ def profile(request):
         'subscription_notification': subscription_notification,
         'renew_subscription': renew_subscription,
     })
-
-
 
 @login_required
 def add_review(request, user_id):

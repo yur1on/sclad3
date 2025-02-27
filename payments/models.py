@@ -2,7 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 
 TARIFF_TYPE_CHOICES = (
+    ('free', 'Бесплатный'),
     ('standard', 'Стандарт'),
+    ('standard2', 'Стандарт 2'),  # Новый тариф
     ('premium', 'Премиум'),
 )
 

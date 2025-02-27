@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib import messages
-from .models import PaymentOrder
+from .models import PaymentOrder, TARIFF_TYPE_CHOICES
 from .utils import compute_wsb_signature, verify_notify_signature
 
 # Конфигурация Webpay.by
@@ -20,28 +20,41 @@ WSB_LANGUAGE_ID = "russian"
 WSB_STORE_NAME = "My Shop"  # Название магазина
 WSB_PAYMENT_URL = "https://securesandbox.webpay.by/"  # URL тестовой среды
 
-
 @login_required
 def initiate_payment(request):
     tariff_type = request.GET.get('tariff', 'standard')
     try:
-        duration = int(request.GET.get('duration', 1))  # duration – количество периодов по 30 дней
+        duration = int(request.GET.get('duration', 1))
     except ValueError:
         duration = 1
 
-    # Проверка: нельзя добавить Премиум к активной подписке Стандарт
     profile = request.user.profile
     now = timezone.now()
-    if tariff_type == 'premium' and profile.tariff == 'standard' and profile.subscription_end and profile.subscription_end > now:
-        messages.error(request, "Нельзя подключить тариф Премиум, пока активна подписка Стандарт. Сначала отключите текущую подписку.")
-        return redirect('payments:choose_subscription')
 
+    # Проверяем, есть ли активная подписка и меняется ли тариф
+    if profile.subscription_end and profile.subscription_end > now and profile.tariff != tariff_type and profile.tariff != 'free':
+        if request.method == 'POST' and request.POST.get('confirm_change') == 'yes':
+            # Пользователь подтвердил смену тарифа, продолжаем
+            pass
+        else:
+            # Показываем предупреждение вместо блокировки
+            return render(request, 'payments/confirm_tariff_change.html', {
+                'current_tariff': profile.get_tariff_display(),
+                'new_tariff': dict(TARIFF_TYPE_CHOICES).get(tariff_type, tariff_type),
+                'duration': duration,
+                'subscription_end': profile.subscription_end,
+                'tariff_type': tariff_type,
+            })
+
+    # Цены для тарифов
     if tariff_type == 'standard':
         price_lookup = {1: 30.00, 3: 90.00, 6: 180.00, 12: 360.00}
+    elif tariff_type == 'standard2':
+        price_lookup = {1: 50.00, 3: 150.00, 6: 300.00, 12: 600.00}
     elif tariff_type == 'premium':
         price_lookup = {1: 100.00, 3: 300.00, 6: 600.00, 12: 1200.00}
     else:
-        price_lookup = {1: 30.00, 3: 90.00, 6: 180.00, 12: 360.00}
+        price_lookup = {1: 0.00}  # Для бесплатного тарифа
     total = price_lookup.get(duration, 30.00)
 
     order_number = f"ORDER-{uuid.uuid4().hex[:10].upper()}"
@@ -97,7 +110,6 @@ def initiate_payment(request):
     }
     return render(request, 'payments/payment_form.html', context)
 
-
 @login_required
 def payment_success(request):
     order_num = request.GET.get('wsb_order_num')
@@ -110,25 +122,18 @@ def payment_success(request):
         profile = request.user.profile
         now = timezone.now()
 
-        # Определяем новый период в днях (1 период = 30 дней)
+        # Новый период в днях
         new_period_days = order.duration * 30
 
-        # Если у пользователя уже есть активная подписка того же типа, продлеваем её
-        if profile.subscription_end and profile.subscription_end > now and order.tariff_type == profile.tariff:
-            new_subscription_end = profile.subscription_end + timedelta(days=new_period_days)
-        else:
-            # Новая подписка начинается с текущего момента
-            new_subscription_end = now + timedelta(days=new_period_days)
-            profile.subscription_start = now
-
-        profile.subscription_end = new_subscription_end
+        # Применяем новый тариф сразу
+        profile.subscription_start = now
+        profile.subscription_end = now + timedelta(days=new_period_days)
         profile.tariff = order.tariff_type
         profile.save()
 
         return render(request, 'payments/payment_success.html', {'order': order})
     except PaymentOrder.DoesNotExist:
         return HttpResponse("Заказ не найден или уже обработан.", status=404)
-
 
 @login_required
 def payment_cancel(request):
@@ -140,7 +145,6 @@ def payment_cancel(request):
         return render(request, 'payments/payment_cancel.html', {'order': order})
     except PaymentOrder.DoesNotExist:
         return HttpResponse("Заказ не найден или уже обработан.", status=404)
-
 
 @csrf_exempt
 def payment_notify(request):
@@ -167,13 +171,16 @@ def payment_notify(request):
     except PaymentOrder.DoesNotExist:
         return HttpResponse("Заказ не найден", status=404)
 
-
 @login_required
 def choose_subscription(request):
     now = timezone.now()
     current_subscription = None
     if request.user.profile.subscription_end and request.user.profile.subscription_end > now:
         current_subscription = request.user.profile.subscription_end
+
+    # Проверяем, является ли это продлением
+    renew = request.GET.get('renew') == 'true'
+    tariff = request.GET.get('tariff', request.user.profile.tariff) if renew else None
 
     tariff_options = [
         {
@@ -184,6 +191,16 @@ def choose_subscription(request):
                 {'duration': 3, 'price': 90.00, 'label': '90 дней – 90 руб'},
                 {'duration': 6, 'price': 180.00, 'label': '180 дней – 180 руб'},
                 {'duration': 12, 'price': 360.00, 'label': '360 дней – 360 руб'},
+            ]
+        },
+        {
+            'type': 'standard2',
+            'label': 'Стандарт 2 (до 10000 запчастей)',
+            'durations': [
+                {'duration': 1, 'price': 50.00, 'label': '30 дней – 50 руб'},
+                {'duration': 3, 'price': 150.00, 'label': '90 дней – 150 руб'},
+                {'duration': 6, 'price': 300.00, 'label': '180 дней – 300 руб'},
+                {'duration': 12, 'price': 600.00, 'label': '360 дней – 600 руб'},
             ]
         },
         {
@@ -207,24 +224,6 @@ def choose_subscription(request):
     return render(request, 'payments/choose_subscription.html', {
         'tariff_options': tariff_options,
         'current_subscription': current_subscription,
-        'now': now
+        'now': now,
+        'renew': renew,
     })
-
-
-@login_required
-def cancel_standard_subscription(request):
-    if request.method == 'POST':
-        profile = request.user.profile
-        now = timezone.now()
-
-        # Проверяем, что у пользователя активная подписка Стандарт
-        if profile.tariff == 'standard' and profile.subscription_end and profile.subscription_end > now:
-            profile.tariff = 'free'
-            profile.subscription_end = now  # Завершаем подписку немедленно
-            profile.save()
-            messages.success(request, "Подписка Стандарт успешно отключена. Теперь у вас бесплатный тариф.")
-        else:
-            messages.error(request, "У вас нет активной подписки Стандарт для отключения.")
-
-        return redirect('profile')
-    return redirect('payments:choose_subscription')

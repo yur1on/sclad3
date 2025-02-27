@@ -9,5 +9,5 @@ urlpatterns = [
     path('cancel/', views.payment_cancel, name='payment_cancel'),
     path('notify/', views.payment_notify, name='payment_notify'),
     path('choose/', views.choose_subscription, name='choose_subscription'),
-    path('cancel-standard/', views.cancel_standard_subscription, name='cancel_standard_subscription'),
+
 ]
