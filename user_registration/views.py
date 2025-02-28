@@ -1,16 +1,6 @@
-from django.shortcuts import render
-# user_registration/views.py
 
-from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from .forms import UserRegisterForm
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
-from .forms import UserRegisterForm
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
 from .forms import UserRegisterForm
 
 def register(request):
@@ -33,4 +23,4 @@ def user_login(request):
             return redirect('warehouse')
     return render(request, 'user_registration/login.html')
 
-# Create your views here.
+

@@ -22,7 +22,7 @@ class ProfileForm(forms.ModelForm):
     phone = forms.CharField(label="Телефон", required=True)
     city = forms.CharField(label="Город", required=True)
     full_name = forms.CharField(label="Имя", required=True)
-    workshop_name = forms.CharField(label="Название мастерской (не заполняйте, если мастерской нет)", required=False)
+    workshop_name = forms.CharField(label="Название магазина или мастерской (не заполняйте, если магазина, мастерской нет)", required=False)
     delivery_methods = forms.CharField(
         label="Способы отправки",
         widget=forms.Textarea(attrs={"rows": 3}),

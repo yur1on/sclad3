@@ -761,3 +761,8 @@ def search_user_parts(request, user_id):
         'grouped_parts': grouped_parts,
     })
 
+from django.shortcuts import render
+
+def user_agreement_view(request):
+    return render(request, 'warehouse/user_agreement.html')
+

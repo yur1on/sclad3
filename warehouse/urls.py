@@ -5,6 +5,7 @@ from .views import add_image
 from .views import import_excel
 from django.urls import path
 from .views import get_regions_and_cities
+from .views import user_agreement_view
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -36,14 +37,11 @@ urlpatterns = [
     path('delete-all-parts/', views.delete_all_parts_page, name='delete_all_parts'),
     path('about/', views.about_project, name='about_project'),
     path('user/<int:user_id>/parts/search/', views.search_user_parts, name='search_user_parts'),
+    path('user-agreement/', user_agreement_view, name='user_agreement'),
 
 
 
 ]
-
-
-
-
 
 
 

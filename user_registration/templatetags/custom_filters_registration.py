@@ -1,4 +1,4 @@
-# my_app/templatetags/custom_filters_registration.py
+# templatetags/custom_filters_registration.py
 
 from django import template
 
