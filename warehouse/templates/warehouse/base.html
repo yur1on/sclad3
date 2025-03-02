@@ -229,7 +229,7 @@
                         <h5>Контакты</h5>
                         <p><i class="fas fa-envelope"></i> Email: <a href="mailto:info@example.com">info@example.com</a></p>
                         <p><i class="fas fa-phone"></i> Телефон: <a href="tel:+123456789">+1 234 567 89</a></p>
-                             <a href="{% url 'user_agreement' %}" class="btn btn-link">Пользовательское соглашение</a>
+
                     </div>
                 </div>
                 <!-- О проекте -->
@@ -239,6 +239,13 @@
                             <a href="{% url 'about_project' %}" class="btn btn-link">
                                 О проекте
                             </a>
+                            <div class="row">
+    <div class="col text-center">
+        <a href="{% url 'user_agreement' %}" class="btn btn-link">Пользовательское соглашение</a>
+        <span>|</span>
+        <a href="{% url 'privacy_policy' %}" class="btn btn-link">Политика конфиденциальности</a>
+    </div>
+</div>
                         </p>
                     </div>
                 </div>

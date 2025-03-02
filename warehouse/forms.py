@@ -1,3 +1,6 @@
+
+from pillow_heif import register_heif_opener
+register_heif_opener()
 from django import forms
 from .models import Part, PartImage
 from django.forms import modelformset_factory
@@ -21,7 +24,6 @@ class PartForm(forms.ModelForm):
         model = Part
         fields = ['device', 'brand', 'model', 'part_type', 'condition', 'color', 'quantity', 'price', 'note', 'chip_label']
 
-
 class PartImageForm(forms.ModelForm):
     class Meta:
         model = PartImage
@@ -29,26 +31,24 @@ class PartImageForm(forms.ModelForm):
 
     def clean_image(self):
         image = self.cleaned_data.get('image')
-
         if not image:
             return image
 
-        # Проверяем размер файла
+        # Проверка размера файла
         if image.size > MAX_FILE_SIZE_MB * 1024 * 1024:
             raise ValidationError(f"Размер файла не должен превышать {MAX_FILE_SIZE_MB} МБ.")
 
-        # Проверяем формат файла
+        # Проверка формата файла
         file_extension = os.path.splitext(image.name)[1].lower()
         if file_extension not in ALLOWED_IMAGE_FORMATS:
-            raise ValidationError("Допустимы только форматы JPEG, JPG, PNG и HEIC.")
+            raise ValidationError("Допустимы только форматы JPEG, JPG, PNG, WEBP и HEIC.")
 
         return image
 
-
-# Создание FormSet с использованием PartImageForm и поддержкой до 5 изображений
+# Создание FormSet для загрузки до 5 изображений
 PartImageFormSet = modelformset_factory(
     PartImage,
     form=PartImageForm,
-    extra=5,  # Позволяет добавлять до 5 изображений
-    can_delete=True  # Возможность удалять изображения
+    extra=5,
+    can_delete=True
 )

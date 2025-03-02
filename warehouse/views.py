@@ -10,15 +10,15 @@ from openpyxl.styles import Font, PatternFill
 from django.http import HttpResponse
 from itertools import groupby
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q, OuterRef, Subquery
+from django.core.paginator import Paginator
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import PartForm, PartImageFormSet
 from .models import Part, PartImage
 from tariff.utils import check_parts_limit, check_image_limit
-from django.db.models import Q, OuterRef, Subquery
-from django.core.paginator import Paginator
-from django.utils import timezone
-from warehouse.models import Part
+from .utils import compress_image
 
 
 
@@ -26,7 +26,6 @@ def home(request):
     return render(request, 'warehouse/home.html')
 
 
-from django.db.models import Q
 
 @login_required
 def warehouse_view(request):
@@ -571,16 +570,26 @@ def get_dynamic_data(request):
 
 
 
+
+
+# Регистрация pillow-heif для поддержки HEIC-формата
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    # Если библиотека не установлена, HEIC-формат не будет поддерживаться
+    pass
+
 @login_required
 def add_part(request):
-    """Добавление запчасти с обработкой формы и изображений, с учетом новой логики тарифных планов."""
+    """Добавление запчасти с обработкой формы и изображений, с учетом тарифных ограничений."""
     profile = getattr(request.user, 'profile', None)
     if not profile or not profile.city or not profile.phone:
-        messages.error(request, 'Перед началом создания склада, укажите пожалуйста город и номер телефона в вашем профиле.')
+        messages.error(request, 'Перед началом создания склада, укажите, пожалуйста, город и номер телефона в вашем профиле.')
         return redirect('profile')
 
     if request.method == 'POST':
-        # Проверка лимита запчастей в зависимости от тарифа
+        # Проверка лимита запчастей по тарифу
         if check_parts_limit(request.user):
             tariff = request.user.profile.tariff
             if tariff == 'free':
@@ -594,7 +603,6 @@ def add_part(request):
         formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
 
         if form.is_valid() and formset.is_valid():
-            # Если тариф бесплатный, разрешается только 1 изображение на запчасть
             images = [img_form for img_form in formset if img_form.cleaned_data and img_form.cleaned_data.get('image')]
             if request.user.profile.tariff == 'free' and check_image_limit(request.user, len(images)):
                 messages.error(request, "На бесплатном тарифе можно загрузить только 1 изображение для запчасти.")
@@ -627,10 +635,12 @@ def add_part(request):
                 new_part.user = request.user
                 new_part.save()
                 for image_form in formset:
-                    if image_form.cleaned_data:
-                        image = image_form.save(commit=False)
-                        image.part = new_part
-                        image.save()
+                    if image_form.cleaned_data and image_form.cleaned_data.get('image'):
+                        image_obj = image_form.save(commit=False)
+                        # Обработка изображения: конвертация в JPEG
+                        image_obj.image = compress_image(image_obj.image)
+                        image_obj.part = new_part
+                        image_obj.save()
                 return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена повторно!'})
 
             if existing_part:
@@ -640,15 +650,17 @@ def add_part(request):
                     'existing_part': existing_part
                 })
 
-            # Сохраняем новую запчасть
+            # Сохранение новой запчасти
             part = form.save(commit=False)
             part.user = request.user
             part.save()
             for image_form in formset:
-                if image_form.cleaned_data:
-                    image = image_form.save(commit=False)
-                    image.part = part
-                    image.save()
+                if image_form.cleaned_data and image_form.cleaned_data.get('image'):
+                    image_obj = image_form.save(commit=False)
+                    # Обработка изображения: конвертация в JPEG
+                    image_obj.image = compress_image(image_obj.image)
+                    image_obj.part = part
+                    image_obj.save()
 
             return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена!'})
 
@@ -761,8 +773,12 @@ def search_user_parts(request, user_id):
         'grouped_parts': grouped_parts,
     })
 
-from django.shortcuts import render
+
 
 def user_agreement_view(request):
     return render(request, 'warehouse/user_agreement.html')
 
+
+
+def privacy_policy_view(request):
+    return render(request, 'warehouse/privacy_policy.html')
