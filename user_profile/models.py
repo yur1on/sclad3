@@ -14,10 +14,12 @@ BELARUS_REGIONS = [
 
 # Выбор тарифного плана
 TARIFF_CHOICES = (
-    ('free', 'Бесплатный'),
-    ('standard', 'Стандарт'),
-    ('standard2', 'Стандарт 2'),  # Добавлен новый тариф
-    ('premium', 'Премиум'),
+    ('free', 'Беспла́тный'),
+    ('lite', 'Базовый'),
+    ('standard', 'Cтандартный'),
+    ('standard2', 'Продвинутый'),
+    ('standard3', 'Профессиональный'),
+    ('premium', 'Неограниченный'),
 )
 
 class Profile(models.Model):
@@ -51,7 +53,7 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Review from {self.reviewer} to {self.user} - {self.rating} stars"
+        return f"Отзыв от {self.reviewer} к {self.user} - {self.rating} звезд"
 
 class Bookmark(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarks')

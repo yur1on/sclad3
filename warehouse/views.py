@@ -594,8 +594,16 @@ def add_part(request):
             tariff = request.user.profile.tariff
             if tariff == 'free':
                 error_message = "Вы достигли лимита в 30 запчастей для бесплатного тарифа. Для добавления новых запчастей обновите тариф."
+            elif tariff == 'lite':
+                error_message = "Вы достигли лимита в 500 запчастей для тарифа Lite. Для добавления новых запчастей обновите тариф."
             elif tariff == 'standard':
-                error_message = "Вы достигли лимита в 1000 запчастей для стандартного тарифа. Для добавления новых запчастей обновите тариф."
+                error_message = "Вы достигли лимита в 2000 запчастей для тарифа Стандарт. Для добавления новых запчастей обновите тариф."
+            elif tariff == 'standard2':
+                error_message = "Вы достигли лимита в 7000 запчастей для тарифа Стандарт 2. Для добавления новых запчастей обновите тариф."
+            elif tariff == 'standard3':
+                error_message = "Вы достигли лимита в 15000 запчастей для тарифа Стандарт 3. Для добавления новых запчастей обновите тариф."
+            else:
+                error_message = "Лимит запчастей достигнут."
             messages.error(request, error_message)
             return redirect('profile')
 
@@ -637,7 +645,6 @@ def add_part(request):
                 for image_form in formset:
                     if image_form.cleaned_data and image_form.cleaned_data.get('image'):
                         image_obj = image_form.save(commit=False)
-                        # Обработка изображения: конвертация в JPEG
                         image_obj.image = compress_image(image_obj.image)
                         image_obj.part = new_part
                         image_obj.save()
@@ -657,7 +664,6 @@ def add_part(request):
             for image_form in formset:
                 if image_form.cleaned_data and image_form.cleaned_data.get('image'):
                     image_obj = image_form.save(commit=False)
-                    # Обработка изображения: конвертация в JPEG
                     image_obj.image = compress_image(image_obj.image)
                     image_obj.part = part
                     image_obj.save()

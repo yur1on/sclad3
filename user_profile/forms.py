@@ -11,10 +11,12 @@ BELARUS_REGIONS = [
 ]
 
 TARIFF_CHOICES = (
-    ('free', 'Бесплатный'),
-    ('standard', 'Стандарт'),
-    ('standard2', 'Стандарт 2'),  # Добавлен новый тариф
-    ('premium', 'Премиум'),
+    ('free', 'Беспла́тный'),
+    ('lite', 'Базовый'),
+    ('standard', 'Cтандартный'),
+    ('standard2', 'Продвинутый'),
+    ('standard3', 'Профессиональный'),
+    ('premium', 'Неограниченный'),
 )
 
 class ProfileForm(forms.ModelForm):

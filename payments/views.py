@@ -34,10 +34,8 @@ def initiate_payment(request):
     # Проверяем, есть ли активная подписка и меняется ли тариф
     if profile.subscription_end and profile.subscription_end > now and profile.tariff != tariff_type and profile.tariff != 'free':
         if request.method == 'POST' and request.POST.get('confirm_change') == 'yes':
-            # Пользователь подтвердил смену тарифа, продолжаем
             pass
         else:
-            # Показываем предупреждение вместо блокировки
             return render(request, 'payments/confirm_tariff_change.html', {
                 'current_tariff': profile.get_tariff_display(),
                 'new_tariff': dict(TARIFF_TYPE_CHOICES).get(tariff_type, tariff_type),
@@ -46,16 +44,20 @@ def initiate_payment(request):
                 'tariff_type': tariff_type,
             })
 
-    # Цены для тарифов
-    if tariff_type == 'standard':
-        price_lookup = {1: 30.00, 3: 90.00, 6: 180.00, 12: 360.00}
+    # Цены для тарифов (за 30 дней как база)
+    if tariff_type == 'lite':
+        price_lookup = {1: 20.00, 3: 60.00, 6: 120.00, 12: 240.00}
+    elif tariff_type == 'standard':
+        price_lookup = {1: 40.00, 3: 120.00, 6: 240.00, 12: 480.00}
     elif tariff_type == 'standard2':
-        price_lookup = {1: 50.00, 3: 150.00, 6: 300.00, 12: 600.00}
+        price_lookup = {1: 70.00, 3: 210.00, 6: 420.00, 12: 840.00}
+    elif tariff_type == 'standard3':
+        price_lookup = {1: 120.00, 3: 360.00, 6: 720.00, 12: 1440.00}
     elif tariff_type == 'premium':
-        price_lookup = {1: 100.00, 3: 300.00, 6: 600.00, 12: 1200.00}
+        price_lookup = {1: 300.00, 3: 900.00, 6: 1800.00, 12: 3600.00}
     else:
         price_lookup = {1: 0.00}  # Для бесплатного тарифа
-    total = price_lookup.get(duration, 30.00)
+    total = price_lookup.get(duration, 20.00)  # По умолчанию Lite, если что-то не так
 
     order_number = f"ORDER-{uuid.uuid4().hex[:10].upper()}"
     order = PaymentOrder.objects.create(
@@ -65,6 +67,7 @@ def initiate_payment(request):
         duration=duration,
         tariff_type=tariff_type
     )
+
 
     wsb_seed = str(int(time.time()))
     wsb_order_num = order.order_number
@@ -178,39 +181,58 @@ def choose_subscription(request):
     if request.user.profile.subscription_end and request.user.profile.subscription_end > now:
         current_subscription = request.user.profile.subscription_end
 
-    # Проверяем, является ли это продлением
     renew = request.GET.get('renew') == 'true'
     tariff = request.GET.get('tariff', request.user.profile.tariff) if renew else None
 
     tariff_options = [
         {
-            'type': 'standard',
-            'label': 'Стандарт (до 1000 запчастей)',
+            'type': 'lite',
+            'label': 'Базовый (до 500 запчастей)',
             'durations': [
-                {'duration': 1, 'price': 30.00, 'label': '30 дней – 30 руб'},
-                {'duration': 3, 'price': 90.00, 'label': '90 дней – 90 руб'},
-                {'duration': 6, 'price': 180.00, 'label': '180 дней – 180 руб'},
-                {'duration': 12, 'price': 360.00, 'label': '360 дней – 360 руб'},
+                {'duration': 1, 'price': 20.00, 'label': '30 дней – 20 руб'},
+                {'duration': 3, 'price': 60.00, 'label': '90 дней – 60 руб'},
+                {'duration': 6, 'price': 120.00, 'label': '180 дней – 120 руб'},
+                {'duration': 12, 'price': 240.00, 'label': '360 дней – 240 руб'},
+            ]
+        },
+        {
+            'type': 'standard',
+            'label': 'Cтандартный (до 2000 запчастей)',
+            'durations': [
+                {'duration': 1, 'price': 40.00, 'label': '30 дней – 40 руб'},
+                {'duration': 3, 'price': 120.00, 'label': '90 дней – 120 руб'},
+                {'duration': 6, 'price': 240.00, 'label': '180 дней – 240 руб'},
+                {'duration': 12, 'price': 480.00, 'label': '360 дней – 480 руб'},
             ]
         },
         {
             'type': 'standard2',
-            'label': 'Стандарт 2 (до 10000 запчастей)',
+            'label': 'Продвинутый (до 7000 запчастей)',
             'durations': [
-                {'duration': 1, 'price': 50.00, 'label': '30 дней – 50 руб'},
-                {'duration': 3, 'price': 150.00, 'label': '90 дней – 150 руб'},
-                {'duration': 6, 'price': 300.00, 'label': '180 дней – 300 руб'},
-                {'duration': 12, 'price': 600.00, 'label': '360 дней – 600 руб'},
+                {'duration': 1, 'price': 70.00, 'label': '30 дней – 70 руб'},
+                {'duration': 3, 'price': 210.00, 'label': '90 дней – 210 руб'},
+                {'duration': 6, 'price': 420.00, 'label': '180 дней – 420 руб'},
+                {'duration': 12, 'price': 840.00, 'label': '360 дней – 840 руб'},
+            ]
+        },
+        {
+            'type': 'standard3',
+            'label': 'Профессиональный (до 15000 запчастей)',
+            'durations': [
+                {'duration': 1, 'price': 120.00, 'label': '30 дней – 120 руб'},
+                {'duration': 3, 'price': 360.00, 'label': '90 дней – 360 руб'},
+                {'duration': 6, 'price': 720.00, 'label': '180 дней – 720 руб'},
+                {'duration': 12, 'price': 1440.00, 'label': '360 дней – 1440 руб'},
             ]
         },
         {
             'type': 'premium',
-            'label': 'Премиум (без ограничений)',
+            'label': 'Неограниченный (без ограничений)',
             'durations': [
-                {'duration': 1, 'price': 100.00, 'label': '30 дней – 100 руб'},
-                {'duration': 3, 'price': 300.00, 'label': '90 дней – 300 руб'},
-                {'duration': 6, 'price': 600.00, 'label': '180 дней – 600 руб'},
-                {'duration': 12, 'price': 1200.00, 'label': '360 дней – 1200 руб'},
+                {'duration': 1, 'price': 300.00, 'label': '30 дней – 300 руб'},
+                {'duration': 3, 'price': 900.00, 'label': '90 дней – 900 руб'},
+                {'duration': 6, 'price': 1800.00, 'label': '180 дней – 1800 руб'},
+                {'duration': 12, 'price': 3600.00, 'label': '360 дней – 3600 руб'},
             ]
         },
     ]

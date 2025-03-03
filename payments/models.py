@@ -2,12 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 
 TARIFF_TYPE_CHOICES = (
-    ('free', 'Бесплатный'),
-    ('standard', 'Стандарт'),
-    ('standard2', 'Стандарт 2'),  # Новый тариф
-    ('premium', 'Премиум'),
+    ('free', 'Беспла́тный'),
+    ('lite', 'Базовый'),
+    ('standard', 'Cтандартный'),
+    ('standard2', 'Продвинутый'),
+    ('standard3', 'Профессиональный'),
+    ('premium', 'Неограниченный'),
 )
-
 class PaymentOrder(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
