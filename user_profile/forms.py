@@ -38,12 +38,12 @@ class ProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Независимо от текущего тарифа, мы всегда скрываем и блокируем поле tariff,
-        # чтобы изменение тарифа происходило только через процесс подписки.
         self.fields['tariff'].widget = forms.HiddenInput()
         self.fields['tariff'].disabled = True
 
 class ReviewForm(forms.ModelForm):
+    rating = forms.IntegerField(required=False, initial=5)  # Делаем поле необязательным с начальным значением 5
+
     class Meta:
         model = Review
         fields = ['rating', 'comment']
@@ -55,7 +55,6 @@ class ReviewForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        # Проверяем, что пользователь не оставляет отзыв самому себе
         if self.reviewer == self.user:
             raise forms.ValidationError("Нельзя оставлять отзыв самому себе.")
         if Review.objects.filter(user=self.user, reviewer=self.reviewer).exists():

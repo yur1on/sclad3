@@ -1,43 +1,55 @@
 {% extends 'warehouse/base.html' %}
+
 {% block title %}Отзывы пользователя{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Отзывы пользователя {{ user.username }}</h2>
+    <h2 class="mb-4">
+        Отзывы пользователя
+        {% if user.profile and user.profile.full_name %}
+            {{ user.profile.full_name }}
+        {% else %}
+            {{ user.username }}
+        {% endif %}
+    </h2>
 
     {% if reviews %}
-        <div class="card shadow-sm">
+        <div class="card shadow-sm reviews-container">
             <div class="card-header bg-primary text-white">
                 <h5 class="card-title mb-0">Отзывы</h5>
             </div>
             <div class="card-body">
-                <table class="table table-hover">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Оценка</th>
-                            <th>Комментарий</th>
-                            <th>Дата</th>
-                            <th>Автор</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for review in reviews %}
-                        <tr>
-                            <td>
-                                <!-- Отображение звёзд для рейтинга -->
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                    <div class="card mb-3 shadow-sm review-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="rating">
-                            {% for i in "12345" %}
-                               <span class="fa fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></span>
-                            {% endfor %}
+                                    {% for i in "12345" %}
+                                        <span class="fa fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></span>
+                                    {% endfor %}
                                     <span class="ml-2">({{ review.rating }} / 5)</span>
                                 </div>
-                            </td>
-                            <td>{{ review.comment }}</td>
-                            <td>{{ review.created_at|date:"d M Y" }}</td>
-                            <td>{{ review.reviewer.username }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                            </div>
+                            <p class="card-text mb-2">{{ review.comment }}</p>
+                            <p class="card-text text-muted small">
+                                Автор:
+                                {% if review.reviewer.profile and review.reviewer.profile.full_name %}
+                                    {{ review.reviewer.profile.full_name }}
+                                    {% if review.reviewer.profile.workshop_name %}
+                                        ({{ review.reviewer.profile.workshop_name }})
+                                    {% else %}
+                                        (Частное лицо)
+                                    {% endif %}
+                                {% else %}
+                                    {{ review.reviewer.username }}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     {% else %}
@@ -48,16 +60,116 @@
 </div>
 
 <style>
-/* Добавление стилей для рейтинга */
-.rating .fa-star {
-    font-size: 18px;
-    margin-right: 2px;
-}
-.text-warning {
-    color: #ffc107;
-}
-.text-muted {
-    color: #e0e0e0;
-}
+    /* Базовые стили с округлением углов */
+    .container {
+        max-width: 1200px;
+        border-radius: 15px;
+        padding: 1rem;
+    }
+
+    .reviews-container {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0;
+        padding: 1rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+        border-radius: 0 0 15px 15px;
+    }
+
+    .review-card {
+        border-radius: 10px;
+        background-color: #fff;
+    }
+
+    .review-card .card-body {
+        padding: 1rem;
+    }
+
+    .rating .fa-star {
+        font-size: 18px;
+        margin-right: 2px;
+    }
+
+    .text-warning {
+        color: #ffc107;
+    }
+
+    .text-muted {
+        color: #6c757d;
+    }
+
+    .card-text {
+        font-size: 1rem;
+    }
+
+    .card-text.text-muted.small {
+        font-size: 0.9rem;
+    }
+
+    .alert {
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 576px) {
+        .container {
+            margin-top: 2rem;
+            margin-bottom: 3rem;
+            padding: 0.5rem;
+            border-radius: 10px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .reviews-container {
+            border-radius: 10px;
+        }
+
+        .card-header {
+            border-radius: 10px 10px 0 0;
+            padding: 0.75rem;
+        }
+
+        .card-body {
+            padding: 0.75rem;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .review-card {
+            border-radius: 8px;
+        }
+
+        .review-card .card-body {
+            padding: 0.75rem;
+        }
+
+        .rating .fa-star {
+            font-size: 16px;
+        }
+
+        .card-text {
+            font-size: 0.85rem;
+        }
+
+        .card-text.text-muted.small {
+            font-size: 0.8rem;
+        }
+
+        .alert {
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+    }
 </style>
 {% endblock %}

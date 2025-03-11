@@ -4,10 +4,27 @@
 
 {% block content %}
 <div class="container my-4">
-  <div class="row">
-    <!-- Левая колонка: Блок выбора тарифа и срока подписки -->
-    <div class="col-md-6">
-      <div class="card shadow-sm mb-4">
+  <div class="row d-flex align-items-stretch">
+    <!-- Левая колонка: Блок текущей подписки и выбора тарифа -->
+    <div class="col-md-6 col-12 d-flex flex-column">
+      <!-- Блок информации о текущей подписке -->
+      <div class="card shadow-sm mb-4 flex-grow-1">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0 text-center">Ваша текущая подписка</h5>
+        </div>
+        <div class="card-body text-center" style="font-size:16px;">
+          {% if user.profile.subscription_end and user.profile.subscription_end > now %}
+            <p>Текущий тариф: <strong>{{ user.profile.get_tariff_display }}</strong><br>
+               Подписка действует до: <strong>{{ user.profile.subscription_end|date:"d M Y" }}</strong>
+            </p>
+          {% else %}
+            <p class="text-danger">Подписка отсутствует или истекла</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Блок выбора тарифа и срока подписки -->
+      <div class="card shadow-sm mb-4 flex-grow-1">
         <div class="card-header bg-primary text-white">
           <h5 class="mb-0 text-center">
             {% if renew %}Продление подписки{% else %}Выберите тариф и срок подписки{% endif %}
@@ -27,26 +44,46 @@
                 <input type="radio" class="form-check-input" name="tariff_type" id="tariff_lite" value="lite"
                        {% if user.profile.tariff == 'lite' %}checked{% endif %}>
                 <label class="form-check-label" for="tariff_lite">Базовый (до 500 запчастей)</label>
+                <a href="#" class="tariff-details ms-2" data-bs-toggle="modal" data-bs-target="#tariffModal"
+                   data-tariff-name="Базовый" data-tariff-cost="20 руб/30 дней"
+                   data-tariff-limits="Добавить на склад можно до 500 запчастей."
+                   data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей.">Подробнее</a>
               </div>
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="tariff_type" id="tariff_standard" value="standard"
                        {% if user.profile.tariff == 'standard' %}checked{% endif %}>
-                <label class="form-check-label" for="tariff_standard">Cтандартный (до 2000 запчастей)</label>
+                <label class="form-check-label" for="tariff_standard">Стандартный (до 2000 запчастей)</label>
+                <a href="#" class="tariff-details ms-2" data-bs-toggle="modal" data-bs-target="#tariffModal"
+                   data-tariff-name="Стандартный" data-tariff-cost="40 руб/30 дней"
+                   data-tariff-limits="Добавить на склад можно до 2000 запчастей."
+                   data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей.">Подробнее</a>
               </div>
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="tariff_type" id="tariff_standard2" value="standard2"
                        {% if user.profile.tariff == 'standard2' %}checked{% endif %}>
                 <label class="form-check-label" for="tariff_standard2">Продвинутый (до 7000 запчастей)</label>
+                <a href="#" class="tariff-details ms-2" data-bs-toggle="modal" data-bs-target="#tariffModal"
+                   data-tariff-name="Продвинутый" data-tariff-cost="70 руб/30 дней"
+                   data-tariff-limits="Добавить на склад можно до 7000 запчастей."
+                   data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей.">Подробнее</a>
               </div>
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="tariff_type" id="tariff_standard3" value="standard3"
                        {% if user.profile.tariff == 'standard3' %}checked{% endif %}>
-                <label class="form-check-label" for="tariff_standard3">Профессиональный (до 15000 запчастей)</label>
+                <label class="form-check-label" for="tariff_standard3">Профессиональный (до 15000 запч.)</label>
+                <a href="#" class="tariff-details ms-2" data-bs-toggle="modal" data-bs-target="#tariffModal"
+                   data-tariff-name="Профессиональный" data-tariff-cost="120 руб/30 дней"
+                   data-tariff-limits="Добавить на склад можно до 15000 запчастей."
+                   data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей.">Подробнее</a>
               </div>
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="tariff_type" id="tariff_premium" value="premium"
                        {% if user.profile.tariff == 'premium' %}checked{% endif %}>
                 <label class="form-check-label" for="tariff_premium">Неограниченный (без ограничений)</label>
+                <a href="#" class="tariff-details ms-2" data-bs-toggle="modal" data-bs-target="#tariffModal"
+                   data-tariff-name="Неограниченный" data-tariff-cost="300 руб/30 дней"
+                   data-tariff-limits="Без лимита"
+                   data-tariff-description="Для максимальной активности.">Подробнее</a>
               </div>
               {% else %}
               <p style="font-size:18px; font-weight:600;">Продлите ваш тариф: {{ user.profile.get_tariff_display }}</p>
@@ -76,7 +113,7 @@
             </div>
 
             <div id="duration_standard" class="duration-block mb-4" style="{% if renew %}{% if user.profile.tariff == 'standard' %}display:block;{% else %}display:none;{% endif %}{% else %}{% if user.profile.tariff == 'standard' %}display:block;{% else %}display:none;{% endif %}{% endif %}">
-              <p style="font-size:18px; font-weight:600;">Выберите срок подписки для тарифа Cтандартный:</p>
+              <p style="font-size:18px; font-weight:600;">Выберите срок подписки для тарифа Стандартный:</p>
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="duration" id="duration_standard_1" value="1" checked>
                 <label class="form-check-label" for="duration_standard_1">30 дней – 40 руб</label>
@@ -169,66 +206,116 @@
       </div>
     </div>
 
-    <!-- Правая колонка: блок "Ваша текущая подписка" и блок "Условия тарифов" -->
-    <div class="col-md-6">
-      <!-- Блок информации о текущей подписке -->
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-secondary text-white">
-          <h5 class="mb-0 text-center">Ваша текущая подписка</h5>
-        </div>
-        <div class="card-body text-center" style="font-size:16px;">
-          {% if user.profile.subscription_end and user.profile.subscription_end > now %}
-            <p>Текущий тариф: <strong>{{ user.profile.get_tariff_display }}</strong><br>
-               Подписка действует до: <strong>{{ user.profile.subscription_end|date:"d M Y" }}</strong>
-            </p>
-          {% else %}
-            <p class="text-danger">Подписка отсутствует или истекла</p>
-          {% endif %}
+    <!-- Правая колонка: блок "Условия тарифов" (только для десктопа) -->
+    <div class="col-md-6 col-12 d-flex flex-column d-none d-md-flex">
+      <div class="tariff-table-container card shadow-sm flex-grow-1">
+        <div class="card-body">
+          <h5>Условия тарифов и ограничения</h5>
+          <p>Нажмите на тариф, чтобы увидеть подробности.</p>
+          <table class="tariff-table">
+            <thead>
+              <tr>
+                <th>Тариф</th>
+                <th>Стоимость</th>
+                <th>Лимиты</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                  data-tariff-name="Бесплатный"
+                  data-tariff-cost="0 руб"
+                  data-tariff-limits="- На склад можно добавить до 30 запчастей.<br>- Для каждой запчасти допустимо загрузить только одно фото.<br>- Отправка уведомлений возможна не чаще одного раза в 24 часа."
+                  data-tariff-description="Подходит для тех, кто разобрал своё устройство и хочет продать его запчасти."
+                  {% if user.profile.tariff == 'free' %}class="active-tariff"{% endif %}>
+                <td><i class="fas fa-gift"></i> Бесплатный</td>
+                <td>0 руб</td>
+                <td>До 30<br>1 фото</td>
+              </tr>
+              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                  data-tariff-name="Базовый"
+                  data-tariff-cost="20 руб/30 дней"
+                  data-tariff-limits="Добавить на склад можно до 500 запчастей."
+                  data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей."
+                  {% if user.profile.tariff == 'lite' %}class="active-tariff"{% endif %}>
+                <td><i class="fas fa-lightbulb"></i> Базовый</td>
+                <td>20 руб/30 дней</td>
+                <td>До 500</td>
+              </tr>
+              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                  data-tariff-name="Стандартный"
+                  data-tariff-cost="40 руб/30 дней"
+                  data-tariff-limits="Добавить на склад можно до 2000 запчастей."
+                  data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей."
+                  {% if user.profile.tariff == 'standard' %}class="active-tariff"{% endif %}>
+                <td><i class="fas fa-wrench"></i> Стандартный</td>
+                <td>40 руб/30 дней</td>
+                <td>До 2000</td>
+              </tr>
+              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                  data-tariff-name="Продвинутый"
+                  data-tariff-cost="70 руб/30 дней"
+                  data-tariff-limits="Добавить на склад можно до 7000 запчастей."
+                  data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей."
+                  {% if user.profile.tariff == 'standard2' %}class="active-tariff"{% endif %}>
+                <td><i class="fas fa-tools"></i> Продвинутый</td>
+                <td>70 руб/30 дней</td>
+                <td>До 7000</td>
+              </tr>
+              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                  data-tariff-name="Профессиональный"
+                  data-tariff-cost="120 руб/30 дней"
+                  data-tariff-limits="Добавить на склад можно до 15000 запчастей."
+                  data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей."
+                  {% if user.profile.tariff == 'standard3' %}class="active-tariff"{% endif %}>
+                <td><i class="fas fa-microchip"></i> Профессиональный</td>
+                <td>120 руб/30 дней</td>
+                <td>До 15000</td>
+              </tr>
+              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                  data-tariff-name="Неограниченный"
+                  data-tariff-cost="300 руб/30 дней"
+                  data-tariff-limits="Без лимита"
+                  data-tariff-description="Для максимальной активности."
+                  {% if user.profile.tariff == 'premium' %}class="active-tariff"{% endif %}>
+                <td><i class="fas fa-infinity"></i> Неограниченный</td>
+                <td>300 руб/30 дней</td>
+                <td>Без лимита</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">* При окончании подписки в поиске видны только 30 запчастей.</td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </div>
+    </div>
+  </div>
+</div>
 
-      <!-- Блок условий тарифов и ограничений -->
-      <div class="tariff-table-container">
-        <h5>Условия тарифов и ограничения</h5>
-        <p>При окончании подписки или использовании бесплатного тарифа в глобальном поиске будут отображаться только последние 30 запчастей со склада.</p>
-        <table class="tariff-table">
-          <thead>
-            <tr>
-              <th>Тариф</th>
-              <th>Стоимость</th>
-              <th>Лимиты</th>
-            </tr>
-          </thead>
+<!-- Модальное окно для подробностей тарифа -->
+<div class="modal fade" id="tariffModal" tabindex="-1" aria-labelledby="tariffModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content custom-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tariffModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
           <tbody>
-            <tr {% if user.profile.tariff == 'free' %}class="active-tariff"{% endif %}>
-              <td><i class="fas fa-gift"></i> Беспла́тный</td>
-              <td>0 руб/30 дней</td>
-              <td>До 30 запчастей<br>1 фото на запчасть<br>Ограниченные уведомления</td>
+            <tr>
+              <th>Стоимость</th>
+              <td id="tariffCost"></td>
             </tr>
-            <tr {% if user.profile.tariff == 'lite' %}class="active-tariff"{% endif %}>
-              <td><i class="fas fa-lightbulb"></i> Базовый</td>
-              <td>20 руб/30 дней</td>
-              <td>До 500 запчастей<br>После окончания — 30 в поиске</td>
+            <tr>
+              <th>Лимиты</th>
+              <td id="tariffLimits"></td>
             </tr>
-            <tr {% if user.profile.tariff == 'standard' %}class="active-tariff"{% endif %}>
-              <td><i class="fas fa-wrench"></i> Cтандартный</td>
-              <td>40 руб/30 дней</td>
-              <td>До 2000 запчастей<br>После окончания — 30 в поиске</td>
-            </tr>
-            <tr {% if user.profile.tariff == 'standard2' %}class="active-tariff"{% endif %}>
-              <td><i class="fas fa-tools"></i> Продвинутый</td>
-              <td>70 руб/30 дней</td>
-              <td>До 7000 запчастей<br>После окончания — 30 в поиске</td>
-            </tr>
-            <tr {% if user.profile.tariff == 'standard3' %}class="active-tariff"{% endif %}>
-              <td><i class="fas fa-microchip"></i> Профессиональный</td>
-              <td>120 руб/30 дней</td>
-              <td>До 15000 запчастей<br>После окончания — 30 в поиске</td>
-            </tr>
-            <tr {% if user.profile.tariff == 'premium' %}class="active-tariff"{% endif %}>
-              <td><i class="fas fa-infinity"></i> Неограниченный</td>
-              <td>300 руб/30 дней</td>
-              <td>Без ограничений</td>
+            <tr>
+              <th>Описание</th>
+              <td id="tariffDescription"></td>
             </tr>
           </tbody>
         </table>
@@ -308,21 +395,199 @@ document.addEventListener("DOMContentLoaded", function() {
     {% else %}
     updateSubscriptionInfo();
     {% endif %}
+
+    // Скрипт для модального окна
+    var tariffModal = document.getElementById('tariffModal');
+    tariffModal.addEventListener('show.bs.modal', function (event) {
+      var trigger = event.relatedTarget;
+      var tariffName = trigger.getAttribute('data-tariff-name');
+      var tariffCost = trigger.getAttribute('data-tariff-cost');
+      var tariffLimits = trigger.getAttribute('data-tariff-limits');
+      var tariffDescription = trigger.getAttribute('data-tariff-description');
+
+      var modalTitle = tariffModal.querySelector('.modal-title');
+      var modalCost = tariffModal.querySelector('#tariffCost');
+      var modalLimits = tariffModal.querySelector('#tariffLimits');
+      var modalDescription = tariffModal.querySelector('#tariffDescription');
+
+      modalTitle.textContent = tariffName;
+      modalCost.textContent = tariffCost;
+      modalLimits.innerHTML = tariffLimits;
+      modalDescription.textContent = tariffDescription;
+    });
 });
 </script>
 
 <style>
-  .form-check-label { font-size: 16px; }
-  .duration-block { background-color: #f8f9fa; padding: 15px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; }
-  .tariff-table-container { margin-top: 20px; margin-bottom: 20px; background-color: #f8f9fa; padding: 20px; border: 1px solid #dee2e6; border-radius: 10px; }
-  .tariff-table-container h5 { font-size: 22px; text-align: center; margin-bottom: 15px; font-weight: bold; }
-  .tariff-table-container p { text-align: center; font-size: 16px; margin-bottom: 15px; }
-  .tariff-table { width: 100%; border-collapse: collapse; font-size: 16px; }
-  .tariff-table th, .tariff-table td { padding: 12px; text-align: center; border-bottom: 1px solid #dee2e6; }
-  .tariff-table th { background-color: #007bff; color: white; font-weight: 600; }
-  .tariff-table td { background-color: #fff; }
-  .tariff-table tr.active-tariff td { background-color: #d4edda; color: #155724; }
-  .tariff-table i { margin-right: 5px; color: #007bff; }
-  .tariff-table tr.active-tariff i { color: #155724; }
+  .card {
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .card-header {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  .card-body {
+    flex-grow: 1;
+  }
+  .duration-block {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+  .tariff-table-container {
+    margin-top: 0;
+    margin-bottom: 0;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+  }
+  .tariff-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .tariff-table th, .tariff-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #dee2e6;
+  }
+  .tariff-table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+  }
+  .tariff-table td {
+    background-color: #fff;
+  }
+  .tariff-table tr.active-tariff td {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  .tariff-table tbody tr:hover {
+    transform: scale(1.02);
+    background-color: #e9ecef;
+    cursor: pointer;
+  }
+  .tariff-table i {
+    margin-right: 5px;
+    color: #007bff;
+  }
+  .tariff-table tr.active-tariff i {
+    color: #155724;
+  }
+  .row.d-flex {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .col-md-6.d-flex, .col-12.d-flex {
+    display: flex;
+    flex-direction: column;
+  }
+  .flex-grow-1 {
+    flex-grow: 1;
+  }
+  .custom-modal {
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+  .custom-modal .modal-header {
+    border-bottom: none;
+    background-color: #f1f1f1;
+    padding: 1rem;
+    border-radius: 15px 15px 0 0;
+  }
+  .custom-modal .modal-body {
+    padding: 1.5rem;
+  }
+  .tariff-details {
+    font-size: 0.9rem;
+    color: #007bff;
+    text-decoration: none;
+  }
+  .tariff-details:hover {
+    text-decoration: underline;
+  }
+  .form-check {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* Медиа-запросы для мобильных устройств */
+  @media (max-width: 767px) {
+    .container {
+      margin: 0.5rem 0;
+      padding: 0 0.5rem;
+    }
+    .row {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .col-md-6, .col-12 {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    .card-body {
+      padding: 0.75rem;
+    }
+    .form-check {
+      font-size: 0.85rem;
+    }
+    .duration-block {
+      padding: 0.75rem;
+    }
+    .btn {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
+    }
+    .btn-lg {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+    }
+    h5 {
+      font-size: 1rem;
+    }
+    p {
+      font-size: 0.85rem;
+    }
+    .tariff-details {
+      font-size: 0.75rem;
+    }
+    .modal-dialog {
+      margin: 0.5rem;
+    }
+    .modal-body {
+      padding: 0.75rem;
+    }
+    .modal-title {
+      font-size: 1rem;
+    }
+    .table th, .table td {
+      font-size: 0.85rem;
+    }
+    /* Уменьшение inline-шрифтов */
+    .card-body[style*="font-size:16px"] {
+      font-size: 0.85rem !important;
+    }
+    p[style*="font-size: 17px"] {
+      font-size: 0.9rem !important;
+    }
+    p[style*="font-size:18px"] {
+      font-size: 1rem !important;
+    }
+    #subscription-info[style*="font-size:16px"] {
+      font-size: 0.85rem !important;
+    }
+  }
 </style>
+
 {% endblock %}

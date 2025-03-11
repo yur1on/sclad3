@@ -7,17 +7,17 @@
 <style>
     /* Общие стили для полей ввода, кнопок и формы */
     input.form-control, select.form-control, textarea.form-control {
-        border-radius: 10px; /* скругленные углы */
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* легкая тень */
-        padding: 8px 12px; /* Уменьшенный padding */
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 8px 12px;
         transition: all 0.3s ease-in-out;
-        border: 0.5px solid #000; /* черная обводка */
-        font-size: 14px; /* Уменьшенный размер шрифта */
+        border: 0.5px solid #000;
+        font-size: 14px;
     }
 
     input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
-        border-color: #007bff; /* синий цвет при фокусе */
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* свечение при фокусе */
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
 
     /* Стили для кнопок */
@@ -25,9 +25,9 @@
         background-color: #28a745;
         border: none;
         color: white;
-        padding: 8px 16px; /* Уменьшенный padding */
-        border-radius: 8px; /* Слегка уменьшенные скругления */
-        font-size: 14px; /* Уменьшенный размер шрифта */
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
         cursor: pointer;
         transition: all 0.3s ease-in-out;
     }
@@ -40,9 +40,9 @@
         background-color: #6c757d;
         border: none;
         color: white;
-        padding: 8px 16px; /* Уменьшенный padding */
-        border-radius: 8px; /* Слегка уменьшенные скругления */
-        font-size: 14px; /* Уменьшенный размер шрифта */
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
         cursor: pointer;
         transition: all 0.3s ease-in-out;
     }
@@ -55,9 +55,9 @@
         background-color: #ffc107;
         border: none;
         color: black;
-        padding: 8px 16px; /* Уменьшенный padding */
-        border-radius: 8px; /* Слегка уменьшенные скругления */
-        font-size: 14px; /* Уменьшенный размер шрифта */
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
         cursor: pointer;
         transition: all 0.3s ease-in-out;
     }
@@ -71,7 +71,7 @@
         border: 1px solid #ddd;
         border-radius: 8px;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        padding: 15px; /* Уменьшенный padding */
+        padding: 15px;
     }
 
     .card:hover {
@@ -102,7 +102,7 @@
     .form-label {
         color: black;
         font-weight: bold;
-        font-size: 14px; /* Уменьшенный размер шрифта */
+        font-size: 14px;
     }
 
     /* Стили для кнопки "Расширенный поиск" */
@@ -110,8 +110,8 @@
         border-color: #007bff;
         color: #007bff;
         transition: all 0.3s ease-in-out;
-        padding: 8px 16px; /* Уменьшенный padding */
-        font-size: 14px; /* Уменьшенный размер шрифта */
+        padding: 8px 16px;
+        font-size: 14px;
     }
 
     .btn-outline-primary:hover {
@@ -123,10 +123,10 @@
     .input-group .form-select {
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 8px 12px; /* Уменьшенный padding */
+        padding: 8px 12px;
         transition: all 0.3s ease-in-out;
         border: 0.5px solid #000;
-        font-size: 14px; /* Уменьшенный размер шрифта */
+        font-size: 14px;
     }
 
     .input-group .form-select:focus {
@@ -134,44 +134,79 @@
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
 
-    /* Стили для кнопки написания уведомления */
-    .btn-warning {
-        background-color: #ffc107;
-        border: none;
-        color: black;
-        padding: 8px 16px; /* Уменьшенный padding */
-        border-radius: 8px; /* Слегка уменьшенные скругления */
-        font-size: 14px; /* Уменьшенный размер шрифта */
-        cursor: pointer;
-        transition: all 0.3s ease-in-out;
-    }
-
-    .btn-warning:hover {
-        background-color: #e0a800;
-    }
-
     /* Уменьшение размера блока дополнительных параметров */
     #advancedSearchCollapse .card {
-        padding: 10px; /* Уменьшенный padding */
+        padding: 10px;
     }
 
     #advancedSearchCollapse h5 {
-        font-size: 16px; /* Уменьшенный размер шрифта заголовка */
-        margin-bottom: 10px; /* Уменьшенный отступ */
+        font-size: 16px;
+        margin-bottom: 10px;
     }
 
     #advancedSearchCollapse .row {
-        margin-bottom: 10px; /* Уменьшенный отступ между строками */
+        margin-bottom: 10px;
     }
 
     #advancedSearchCollapse .form-control {
-        font-size: 13px; /* Уменьшенный размер шрифта */
-        padding: 6px 10px; /* Уменьшенный padding */
+        font-size: 13px;
+        padding: 6px 10px;
     }
 
     #advancedSearchCollapse .btn-secondary {
-        padding: 6px 12px; /* Уменьшенный padding */
-        font-size: 13px; /* Уменьшенный размер шрифта */
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 768px) {
+        #basic-search .row {
+            flex-direction: column;
+        }
+
+        #basic-search .col-md-4, #basic-search .col-md-2 {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        #basic-search .btn-primary {
+            width: 100%;
+        }
+
+        input[type="text"],
+        input[type="search"],
+        select,
+        textarea {
+            font-size: 16px !important;
+            width: 100%;
+            -webkit-appearance: none;
+        }
+
+        .form-control {
+            min-height: 38px;
+            max-height: 44px;
+        }
+    }
+
+    /* Предотвращаем сдвиг контента */
+    html, body {
+        height: 100%;
+        overflow-x: hidden;
+    }
+
+    .container {
+        min-height: 100%;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    @media (max-width: 768px) {
+        input.form-control:focus,
+        select.form-control:focus,
+        textarea.form-control:focus {
+            transition: none;
+            transform: none;
+        }
     }
 </style>
 
@@ -187,10 +222,10 @@
             </button>
         </div>
 
-        <!-- Расширенный поиск: панель, которая разворачивается при нажатии -->
+        <!-- Расширенный поиск -->
         <div class="collapse mb-4" id="advancedSearchCollapse">
-            <div class="card p-3"> <!-- Уменьшенный padding -->
-                <h5 class="text-center mb-2">Дополнительные параметры</h5> <!-- Уменьшенный отступ -->
+            <div class="card p-3">
+                <h5 class="text-center mb-2">Дополнительные параметры</h5>
                 <div class="row g-2 align-items-center">
                     <div class="col-md-3">
                         <input type="text" name="device" id="device" class="form-control" placeholder="Устройство" value="{{ request.GET.device }}" list="device-list">
@@ -213,8 +248,7 @@
                         <datalist id="part-type-list"></datalist>
                     </div>
                 </div>
-                <!-- Кнопка сброса параметров в расширенном поиске -->
-                <div class="row mt-2"> <!-- Уменьшенный отступ -->
+                <div class="row mt-2">
                     <div class="col text-end">
                         <button type="button" class="btn btn-secondary" id="reset-advanced-fields">Сбросить параметры</button>
                     </div>
@@ -253,7 +287,7 @@
         </div>
     </form>
 
-    <!-- Дополнительное уведомление -->
+    <!-- Уведомление -->
     <div class="text mt-4 text-center">
         <p class="fw-bold">Не нашли нужную запчасть? Отправьте уведомление всем пользователям!</p>
         <a href="{% url 'send_notification' %}" class="btn btn-warning">Написать уведомление</a>
@@ -261,7 +295,7 @@
 
     <hr>
 
-    <!-- Таблица результатов поиска -->
+    <!-- Таблица результатов -->
     {% include 'warehouse/search_table.html' %}
 </div>
 
@@ -269,7 +303,6 @@
 <link rel="stylesheet" href="{% static 'css/search.css' %}">
 <script src="{% static 'js/search.js' %}"></script>
 
-<!-- Скрипт для управления расширенным поиском и сбросом параметров -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const advancedSearch = document.getElementById("advancedSearchCollapse");
@@ -277,14 +310,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const resetAdvancedFieldsButton = document.getElementById("reset-advanced-fields");
     const form = document.getElementById("search-form");
 
-    // Восстановление состояния из localStorage
+    // Восстановление состояния
     const isAdvancedSearchOpen = localStorage.getItem("advancedSearchOpen") === "true";
     if (isAdvancedSearchOpen) {
         advancedSearch.classList.add("show");
         toggleBtn.textContent = "Скрыть расширенный поиск";
     }
 
-    // Функция сброса параметров расширенного поиска
+    // Сброс параметров
     function resetAdvancedFields() {
         document.getElementById("device").value = "";
         document.getElementById("brand").value = "";
@@ -292,12 +325,10 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("part_type").value = "";
     }
 
-    // Обработчик для кнопки "Расширенный поиск"
+    // Переключение расширенного поиска
     toggleBtn.addEventListener("click", function () {
         let isExpanded = advancedSearch.classList.contains("show");
-
         if (isExpanded) {
-            // Если открыт, скрываем, сбрасываем параметры и обновляем localStorage
             resetAdvancedFields();
             toggleBtn.textContent = "Расширенный поиск";
             localStorage.setItem("advancedSearchOpen", "false");
@@ -305,19 +336,40 @@ document.addEventListener("DOMContentLoaded", function () {
             toggleBtn.textContent = "Скрыть расширенный поиск";
             localStorage.setItem("advancedSearchOpen", "true");
         }
-
-        // Переключаем состояние collapse
-        new bootstrap.Collapse(advancedSearch, {
-            toggle: true
-        });
+        new bootstrap.Collapse(advancedSearch, { toggle: true });
     });
 
-    // Обработчик кнопки "Сбросить параметры"
+    // Сброс параметров
     if (resetAdvancedFieldsButton) {
-        resetAdvancedFieldsButton.addEventListener("click", function () {
-            resetAdvancedFields();
-        });
+        resetAdvancedFieldsButton.addEventListener("click", resetAdvancedFields);
     }
+
+    // Предотвращение зума на мобильных
+    function preventZoom(e) {
+        if (window.innerWidth <= 768) {
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            window.scrollTo(0, 0);
+        }
+    }
+
+    function resetPosition(e) {
+        document.body.style.position = '';
+        document.body.style.width = '';
+    }
+
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('focus', preventZoom);
+        input.addEventListener('blur', resetPosition);
+    });
+
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            document.body.style.width = '100%';
+            document.documentElement.style.width = '100%';
+        }
+    });
 });
 </script>
 

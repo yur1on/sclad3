@@ -3,51 +3,217 @@
 {% block title %}Запчасти пользователя {{ viewed_user_full_name }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4 text-center">Запчасти пользователя {{ viewed_user_full_name }}</h2>
+<div class="container mt-3">
+    <h2 class="mb-3 text-center">Запчасти пользователя {{ viewed_user_full_name }}</h2>
 
-<form method="get" action="{% url 'search_user_parts' viewed_user.id %}" class="mb-4 d-flex">
-    <input type="text" name="query" class="form-control form-control-sm" style="width: 25%;" placeholder="Поиск по модели или типу запчасти" value="{{ request.GET.query }}">
-    <button type="submit" class="btn btn-primary btn-sm" style="margin-left: 10px;">Искать</button>
-</form>
+    <form method="get" action="{% url 'search_user_parts' viewed_user.id %}" class="mb-3 search-form">
+        <div class="input-group">
+            <input type="text" name="query" class="form-control" placeholder="Поиск по модели или типу" value="{{ request.GET.query }}">
+            <button type="submit" class="btn btn-primary">Искать</button>
+        </div>
+    </form>
 
     {% if grouped_parts %}
         {% for device, brands in grouped_parts.items %}
-            <div class="device-section mb-5">
-                <h3 class="text-primary">{{ device }}</h3>
+            <div class="device-section mb-4">
+                <h3 class="text-primary mb-2">{{ device }}</h3>
                 {% for brand, parts in brands.items %}
-                    <div class="brand-section">
-                        <h4 class="ml-3 text-success">{{ brand }}</h4>
-                        <table class="table table-bordered table-striped table-hover">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>Модель</th>
-                                    <th>Тип запчасти</th>
-                                    <th>Цвет</th>
-                                    <th>Количество</th>
-                                    <th>Цена</th>
-                                    <th>Детали</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for part in parts %}
+                    <div class="brand-section mb-3">
+                        <h4 class="text-success mb-2">{{ brand }}</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead class="thead-dark">
                                     <tr>
-                                        <td>{{ part.display_model }}</td>
-                                        <td>{{ part.part_type }}</td>
-                                        <td>{{ part.color|default:"Не указан" }}</td>
-                                        <td>{{ part.quantity }}</td>
-                                        <td>{{ part.price }}</td>
-                                        <td><a href="{% url 'part_detail' part.id %}" class="btn btn-info btn-sm">Подробнее</a></td>
+                                        <th>Модель</th>
+                                        <th>Тип запчасти</th>
+                                        <th class="hide-on-mobile">Цвет</th>
+                                        <th class="hide-on-mobile">Кол-во</th>
+                                        <th class="hide-on-mobile">Цена</th>
+                                        <th>Детали</th>
                                     </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {% for part in parts %}
+                                        <tr>
+                                            <td>{{ part.display_model }}</td>
+                                            <td>{{ part.part_type }}</td>
+                                            <td class="hide-on-mobile">{{ part.color|default:"Не указан" }}</td>
+                                            <td class="hide-on-mobile">{{ part.quantity }}</td>
+                                            <td class="hide-on-mobile">{{ part.price }}</td>
+                                            <td>
+                                                <a href="{% url 'part_detail' part.id %}" class="btn btn-info btn-sm details-btn">
+                                                    <i class="fas fa-search"></i>
+                                                    <span class="btn-text">Подробнее</span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
         {% endfor %}
     {% else %}
-        <p>У пользователя {{ viewed_user.username }} нет добавленных запчастей.</p>
+        <p class="text-center">У пользователя {{ viewed_user.username }} нет добавленных запчастей.</p>
     {% endif %}
 </div>
+
+<style>
+    /* Базовые стили */
+    .container {
+        max-width: 1200px;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+    }
+
+    h3 {
+        font-size: 1.5rem;
+    }
+
+    h4 {
+        font-size: 1.25rem;
+    }
+
+    .search-form .input-group {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .search-form .form-control {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+        border-radius: 6px 0 0 6px;
+    }
+
+    .search-form .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        border-radius: 0 6px 6px 0;
+    }
+
+    .table {
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+
+    .table th, .table td {
+        padding: 0.5rem;
+        vertical-align: middle;
+    }
+
+    .table th {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .table .btn-sm {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 576px) {
+        .container {
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-form .input-group {
+            max-width: 100%;
+        }
+
+        .search-form .form-control {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .search-form .btn {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .device-section {
+            margin-bottom: 2rem;
+        }
+
+        .brand-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .table th, .table td {
+            padding: 0.4rem;
+        }
+
+        .table th {
+            white-space: nowrap;
+        }
+
+        .table td {
+            word-break: break-word;
+        }
+
+        /* Скрытие столбцов на мобильных устройствах */
+        .hide-on-mobile {
+            display: none;
+        }
+
+        /* Стили для кнопки с иконкой */
+        .table .btn-sm {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .details-btn {
+            justify-content: center;
+        }
+
+        .details-btn .btn-text {
+            display: none; /* Скрываем текст "Подробнее" на мобильных */
+        }
+
+        .details-btn i {
+            margin: 0; /* Убираем лишние отступы для иконки */
+        }
+    }
+
+    /* Десктопная версия: показываем текст кнопки */
+    @media (min-width: 577px) {
+        .details-btn .btn-text {
+            display: inline;
+        }
+    }
+</style>
 {% endblock %}

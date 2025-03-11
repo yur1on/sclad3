@@ -1,10 +1,9 @@
-from django.shortcuts import render, redirect, get_object_or_404
+
 from .forms import ProfileForm, ReviewForm
 from .models import Profile, Review, Bookmark
 from django.contrib.auth.decorators import login_required
 from warehouse.models import Part
 from chat.models import Chat
-from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -27,14 +26,21 @@ def profile(request):
 
     subscription_notification = None
     renew_subscription = False  # Флаг для предложения продления подписки
+
+    # Вычисляем, сколько дней осталось до окончания подписки
     if user.profile.subscription_end:
         days_left = (user.profile.subscription_end - timezone.now()).days
         if days_left < 0:
-            subscription_notification = "Ваша подписка истекла! Продлите подписку, чтобы продолжить пользоваться платными функциями."
-            renew_subscription = True
+            subscription_notification = "Ваша подписка истекла! Пожалуйста, продлите подписку, чтобы продолжить пользоваться платными функциями."
+            renew_subscription = False
         elif days_left < 7:
             subscription_notification = f"Ваша подписка заканчивается через {days_left} дней. Продлите подписку, чтобы не прерывать работу."
             renew_subscription = True
+
+    # Передаём даты подписки только если подписка ещё активна
+    subscription_period = None
+    if user.profile.subscription_end and user.profile.subscription_end > timezone.now():
+        subscription_period = (user.profile.subscription_start, user.profile.subscription_end)
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=user.profile)
@@ -55,7 +61,13 @@ def profile(request):
         'chats': chats,
         'subscription_notification': subscription_notification,
         'renew_subscription': renew_subscription,
+        'subscription_period': subscription_period,  # Новая переменная
     })
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .forms import ReviewForm
 
 @login_required
 def add_review(request, user_id):
@@ -66,13 +78,17 @@ def add_review(request, user_id):
             review = form.save(commit=False)
             review.reviewer = request.user
             review.user = reviewed_user
+            # Устанавливаем рейтинг 5 по умолчанию, если он не указан
+            if not review.rating:
+                review.rating = 5
             review.save()
             messages.success(request, "Отзыв добавлен.")
             return redirect('profile')
     else:
         form = ReviewForm(reviewer=request.user, user=reviewed_user)
+        # Устанавливаем начальное значение рейтинга 5 в форме
+        form.initial['rating'] = 5
     return render(request, 'user_profile/add_review.html', {'form': form, 'reviewed_user': reviewed_user})
-
 @login_required
 def view_reviews(request, user_id):
     user_obj = get_object_or_404(User, id=user_id)
