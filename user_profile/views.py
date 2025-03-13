@@ -6,17 +6,44 @@ from warehouse.models import Part
 from chat.models import Chat
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.conf import settings
+import os
 
 @login_required
 def profile(request):
     user = request.user
     edit_mode = request.GET.get('edit') == 'true'
 
+    days_since_expiry = None  # Инициализируем переменную
+
     # Автоматическая конвертация тарифа на "free", если подписка истекла
     if user.profile.subscription_end and user.profile.subscription_end < timezone.now():
         if user.profile.tariff != 'free':
             user.profile.tariff = 'free'
             user.profile.save()
+
+        # Проверяем, сколько дней прошло с момента истечения подписки
+        days_since_expiry = (timezone.now() - user.profile.subscription_end).days
+        if days_since_expiry >= 30:
+            # Удаляем запчасти, если прошло 30 дней, оставляя последние 30
+            parts = Part.objects.filter(user=user).order_by('-created_at')
+            if parts.count() > 30:
+                # Получаем ID последних 30 запчастей, которые нужно сохранить
+                parts_to_keep_ids = parts[:30].values_list('id', flat=True)
+                # Удаляем все запчасти, кроме последних 30
+                parts_to_delete = Part.objects.filter(user=user).exclude(id__in=parts_to_keep_ids)
+                for part in parts_to_delete:
+                    for image in part.images.all():
+                        if image.image:
+                            image_path = os.path.join(settings.MEDIA_ROOT, str(image.image))
+                            if os.path.exists(image_path):
+                                os.remove(image_path)
+                parts_to_delete.delete()  # Теперь работает корректно
+                messages.warning(request, "Ваша подписка истекла более 30 дней назад. Все запчасти, кроме последних 30, и их изображения были удалены.")
+        elif days_since_expiry >= 0:
+            # Предупреждение о предстоящем удалении
+            days_left_until_deletion = 30 - days_since_expiry
+            messages.info(request, f"Ваша подписка истекла {days_since_expiry} дней назад. Через {days_left_until_deletion} дней все запчасти, кроме последних 30, и их изображения будут удалены. Выберите новый тариф, чтобы сохранить данные.")
 
     reviews = Review.objects.filter(user=user).order_by('-created_at')
     given_reviews = user.given_reviews.all()
@@ -25,15 +52,14 @@ def profile(request):
     chats = Chat.objects.filter(user1=user) | Chat.objects.filter(user2=user)
 
     subscription_notification = None
-    renew_subscription = False  # Флаг для предложения продления подписки
+    renew_subscription = False
 
     # Вычисляем, сколько дней осталось до окончания подписки
     if user.profile.subscription_end:
         days_left = (user.profile.subscription_end - timezone.now()).days
-        if days_left < 0:
-            subscription_notification = "Ваша подписка истекла! Пожалуйста, продлите подписку, чтобы продолжить пользоваться платными функциями."
-            renew_subscription = False
-        elif days_left < 7:
+        if days_left < 0:  # Подписка истекла
+            subscription_notification = "Ваша подписка истекла! Вы переведены на бесплатный тариф."
+        elif days_left < 7 and days_left >= 0:  # Подписка скоро истекает
             subscription_notification = f"Ваша подписка заканчивается через {days_left} дней. Продлите подписку, чтобы не прерывать работу."
             renew_subscription = True
 
@@ -61,7 +87,8 @@ def profile(request):
         'chats': chats,
         'subscription_notification': subscription_notification,
         'renew_subscription': renew_subscription,
-        'subscription_period': subscription_period,  # Новая переменная
+        'subscription_period': subscription_period,
+        'days_since_expiry': days_since_expiry,
     })
 
 from django.contrib.auth.decorators import login_required

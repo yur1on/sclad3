@@ -177,12 +177,19 @@ def payment_notify(request):
 @login_required
 def choose_subscription(request):
     now = timezone.now()
+    profile = request.user.profile
+
+    # Автоматическая конвертация тарифа на "free", если подписка истекла
+    if profile.subscription_end and profile.subscription_end < now and profile.tariff != 'free':
+        profile.tariff = 'free'
+        profile.save()
+
     current_subscription = None
-    if request.user.profile.subscription_end and request.user.profile.subscription_end > now:
-        current_subscription = request.user.profile.subscription_end
+    if profile.subscription_end and profile.subscription_end > now:
+        current_subscription = profile.subscription_end
 
     renew = request.GET.get('renew') == 'true'
-    tariff = request.GET.get('tariff', request.user.profile.tariff) if renew else None
+    tariff = request.GET.get('tariff', profile.tariff) if renew else None
 
     tariff_options = [
         {

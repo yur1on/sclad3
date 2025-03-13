@@ -1,6 +1,7 @@
 {% extends 'warehouse/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% load custom_filters %}
 
 {% block title %}Профиль{% endblock %}
 
@@ -22,7 +23,7 @@
           </thead>
           <tfoot>
             <tr>
-              <td colspan="3">* При окончании подписки в поиске видны только 30 запчастей.</td>
+              <td colspan="3">* После окончания подписки в поиске видны только 30 последних запчастей. Через 30 дней все остальные запчасти и их изображения будут удалены.</td>
             </tr>
           </tfoot>
           <tbody>
@@ -40,7 +41,7 @@
                 data-tariff-name="Базовый"
                 data-tariff-cost="20 руб/30 дней"
                 data-tariff-limits="Добавить на склад можно до 500 запчастей."
-                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей."
+                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
                 {% if user.profile.tariff == 'lite' %}class="active-tariff"{% endif %}>
               <td><i class="fas fa-lightbulb"></i> Базовый</td>
               <td>20 руб/30 дней</td>
@@ -50,7 +51,7 @@
                 data-tariff-name="Стандартный"
                 data-tariff-cost="40 руб/30 дней"
                 data-tariff-limits="Добавить на склад можно до 2000 запчастей."
-                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей."
+                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
                 {% if user.profile.tariff == 'standard' %}class="active-tariff"{% endif %}>
               <td><i class="fas fa-wrench"></i> Стандартный</td>
               <td>40 руб/30 дней</td>
@@ -60,7 +61,7 @@
                 data-tariff-name="Продвинутый"
                 data-tariff-cost="70 руб/30 дней"
                 data-tariff-limits="Добавить на склад можно до 7000 запчастей."
-                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей."
+                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
                 {% if user.profile.tariff == 'standard2' %}class="active-tariff"{% endif %}>
               <td><i class="fas fa-tools"></i> Продвинутый</td>
               <td>70 руб/30 дней</td>
@@ -70,7 +71,7 @@
                 data-tariff-name="Профессиональный"
                 data-tariff-cost="120 руб/30 дней"
                 data-tariff-limits="Добавить на склад можно до 15000 запчастей."
-                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей."
+                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
                 {% if user.profile.tariff == 'standard3' %}class="active-tariff"{% endif %}>
               <td><i class="fas fa-microchip"></i> Профессиональный</td>
               <td>120 руб/30 дней</td>
@@ -80,7 +81,7 @@
                 data-tariff-name="Неограниченный"
                 data-tariff-cost="300 руб/30 дней"
                 data-tariff-limits="Без лимита"
-                data-tariff-description="Для максимальной активности."
+                data-tariff-description="Для максимальной активности. После окончания подписки в поиске видны 30 последних запчастей, через 30 дней остальные удаляются."
                 {% if user.profile.tariff == 'premium' %}class="active-tariff"{% endif %}>
               <td><i class="fas fa-infinity"></i> Неограниченный</td>
               <td>300 руб/30 дней</td>
@@ -122,16 +123,25 @@
               </li>
             {% endif %}
           </ul>
+
+          <!-- Уведомления о подписке -->
           {% if subscription_notification %}
             <div class="alert alert-warning mt-3" role="alert">
               {{ subscription_notification }}
+              {% if days_since_expiry is not None and days_since_expiry < 30 %}
+                <p class="mt-2">Через {{ 30|subtract:days_since_expiry }} дней все запчасти, кроме последних 30, и их изображения будут удалены, если вы не выберете новый тариф.</p>
+              {% endif %}
             </div>
           {% endif %}
+
+          <!-- Кнопка продления подписки -->
           {% if renew_subscription %}
             <div class="text-center mt-3">
               <a href="{% url 'payments:choose_subscription' %}?renew=true&tariff={{ user.profile.tariff }}" class="btn btn-warning btn-sm">Продлить подписку</a>
             </div>
           {% endif %}
+
+          <!-- Кнопки редактирования и смены тарифа -->
           <a href="?edit=true" class="btn btn-primary w-100 mt-3">Редактировать</a>
           <div class="mt-3">
             <a href="{% url 'payments:choose_subscription' %}" class="btn btn-success w-100">Сменить тариф</a>
@@ -482,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var modalTitle = tariffModal.querySelector('.modal-title');
     var modalCost = tariffModal.querySelector('#tariffCost');
     var modalLimits = tariffModal.querySelector('#tariffLimits');
-    var modalDescription = tariffModal.querySelector('#tariffModalDescription');
+    var modalDescription = tariffModal.querySelector('#tariffDescription');
 
     modalTitle.textContent = tariffName;
     modalCost.textContent = tariffCost;

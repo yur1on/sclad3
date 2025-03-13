@@ -40,6 +40,16 @@
                 ⚠ При смене тарифа неиспользованные дни и оставшаяся сумма не компенсируются!
               </p>
               <p style="font-size:18px; font-weight:600;">Выберите тариф:</p>
+              <!-- Бесплатный тариф остаётся для выбора и просмотра -->
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="tariff_type" id="tariff_free" value="free"
+                       {% if user.profile.tariff == 'free' %}checked{% endif %}>
+                <label class="form-check-label" for="tariff_free">Бесплатный (до 30 запчастей)</label>
+                <a href="#" class="tariff-details ms-2" data-bs-toggle="modal" data-bs-target="#tariffModal"
+                   data-tariff-name="Бесплатный" data-tariff-cost="0 руб"
+                   data-tariff-limits="- На склад можно добавить до 30 запчастей.<br>- Для каждой запчасти допустимо загрузить только одно фото.<br>- Отправка уведомлений возможна не чаще одного раза в 24 часа."
+                   data-tariff-description="Подходит для тех, кто разобрал своё устройство и хочет продать его запчасти.">Подробнее</a>
+              </div>
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="tariff_type" id="tariff_lite" value="lite"
                        {% if user.profile.tariff == 'lite' %}checked{% endif %}>
@@ -92,6 +102,10 @@
             </div>
 
             <!-- Блоки для выбора срока подписки для каждого тарифа -->
+            <div id="duration_free" class="duration-block mb-4" style="{% if renew %}{% if user.profile.tariff == 'free' %}display:block;{% else %}display:none;{% endif %}{% else %}{% if user.profile.tariff == 'free' %}display:block;{% else %}display:none;{% endif %}{% endif %}">
+              <p style="font-size:18px; font-weight:600;">Тариф Бесплатный не требует оплаты</p>
+            </div>
+
             <div id="duration_lite" class="duration-block mb-4" style="{% if renew %}{% if user.profile.tariff == 'lite' %}display:block;{% else %}display:none;{% endif %}{% else %}{% if user.profile.tariff == 'lite' %}display:block;{% else %}display:none;{% endif %}{% endif %}">
               <p style="font-size:18px; font-weight:600;">Выберите срок подписки для тарифа Базовый:</p>
               <div class="form-check">
@@ -195,8 +209,9 @@
             <!-- Блок предварительного расчёта итоговой подписки -->
             <div id="subscription-info" class="mb-4" style="font-size:16px; text-align:center;"></div>
 
-            <div class="text-center">
-              <button type="submit" class="btn btn-success btn-lg">Перейти к оплате</button>
+            <!-- Кнопка оплаты только для платных тарифов -->
+            <div class="text-center" id="action-buttons">
+              <button type="submit" class="btn btn-success btn-lg" id="payment-button">Перейти к оплате</button>
             </div>
           </form>
           <div class="mt-3 text-center">
@@ -329,12 +344,14 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const tariffRadios = document.getElementsByName("tariff_type");
+    const durationFree = document.getElementById("duration_free");
     const durationLite = document.getElementById("duration_lite");
     const durationStandard = document.getElementById("duration_standard");
     const durationStandard2 = document.getElementById("duration_standard2");
     const durationStandard3 = document.getElementById("duration_standard3");
     const durationPremium = document.getElementById("duration_premium");
     const subscriptionInfo = document.getElementById("subscription-info");
+    const paymentButton = document.getElementById("payment-button");
     const currentEndStr = document.getElementById("current-end").dataset.currentEnd;
     const currentEndDate = new Date(currentEndStr);
     const now = new Date();
@@ -357,15 +374,23 @@ document.addEventListener("DOMContentLoaded", function() {
     function updateSubscriptionInfo() {
         const selectedTariff = document.querySelector('input[name="tariff_type"]:checked') ?
                               document.querySelector('input[name="tariff_type"]:checked').value : '{{ user.profile.tariff }}';
-        const selectedDuration = parseInt(document.querySelector('input[name="duration"]:checked').value);
+        const selectedDuration = document.querySelector('input[name="duration"]:checked') ?
+                                 parseInt(document.querySelector('input[name="duration"]:checked').value) : 1;
         let baseDate = (currentEndDate > now && selectedTariff === '{{ user.profile.tariff }}') ? currentEndDate : now;
         let newEndDate = addDays(baseDate, 30 * selectedDuration);
-        subscriptionInfo.innerHTML = `<p>При выбранном варианте ваша подписка будет действовать до <strong>${formatDate(newEndDate)}</strong></p>`;
+        if (selectedTariff === 'free') {
+            subscriptionInfo.innerHTML = `<p>Тариф "Бесплатный" активен по умолчанию и не требует оплаты.</p>`;
+            paymentButton.style.display = "none";
+        } else {
+            subscriptionInfo.innerHTML = `<p>При выбранном варианте ваша подписка будет действовать до <strong>${formatDate(newEndDate)}</strong></p>`;
+            paymentButton.style.display = "inline-block";
+        }
     }
 
     {% if not renew %}
     function toggleDurationBlocks() {
         const selectedTariff = document.querySelector('input[name="tariff_type"]:checked').value;
+        durationFree.style.display = selectedTariff === "free" ? "block" : "none";
         durationLite.style.display = selectedTariff === "lite" ? "block" : "none";
         durationStandard.style.display = selectedTariff === "standard" ? "block" : "none";
         durationStandard2.style.display = selectedTariff === "standard2" ? "block" : "none";
@@ -410,10 +435,10 @@ document.addEventListener("DOMContentLoaded", function() {
       var modalLimits = tariffModal.querySelector('#tariffLimits');
       var modalDescription = tariffModal.querySelector('#tariffDescription');
 
-      modalTitle.textContent = tariffName;
-      modalCost.textContent = tariffCost;
-      modalLimits.innerHTML = tariffLimits;
-      modalDescription.textContent = tariffDescription;
+      modalTitle.textContent = tariffName || "Неизвестный тариф";
+      modalCost.textContent = tariffCost || "Не указано";
+      modalLimits.innerHTML = tariffLimits || "Не указано";
+      modalDescription.textContent = tariffDescription || "Нет описания";
     });
 });
 </script>
@@ -574,7 +599,6 @@ document.addEventListener("DOMContentLoaded", function() {
     .table th, .table td {
       font-size: 0.85rem;
     }
-    /* Уменьшение inline-шрифтов */
     .card-body[style*="font-size:16px"] {
       font-size: 0.85rem !important;
     }
