@@ -1,0 +1,71 @@
+{% extends "warehouse/base.html" %}
+
+{% block content %}
+<style>
+    /* Общие стили для полей ввода, кнопок и формы */
+    input.form-control, select.form-control, textarea.form-control {
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 8px 12px;
+        transition: all 0.3s ease-in-out;
+        border: 0.5px solid #000;
+        font-size: 14px;
+    }
+
+    input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    /* Стили для кнопок */
+    .btn-primary {
+        background-color: #28a745;
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        background-color: #218838;
+    }
+
+    /* Стили для заголовков */
+    h2 {
+        color: #333;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    /* Стили для меток формы */
+    .form-label {
+        color: black;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 768px) {
+        input.form-control, select.form-control, textarea.form-control {
+            font-size: 16px !important;
+            width: 100%;
+        }
+
+        .btn-primary {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container">
+    <h2>Добавить подписку пользователю</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-primary">Добавить подписку</button>
+    </form>
+</div>
+{% endblock %}

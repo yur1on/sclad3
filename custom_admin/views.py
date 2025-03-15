@@ -3,6 +3,13 @@ import os
 from django.contrib.auth.decorators import user_passes_test
 from django.conf import settings
 from .forms import JSONDataForm
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import user_passes_test
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth.models import User
+from user_profile.models import Profile  # Предполагается, что профиль привязан к пользователю
+from .forms import SubscriptionForm
 
 # Проверка, является ли пользователь админом
 def is_admin(user):
@@ -98,3 +105,41 @@ from chat.models import Chat
 def chat_list(request):
     chats = Chat.objects.all().select_related('user1', 'user2').prefetch_related('messages')  # Предзагружаем сообщения
     return render(request, "custom_admin/chat_list.html", {"chats": chats})
+
+
+
+def is_admin(user):
+    return user.is_superuser
+
+@user_passes_test(is_admin)
+def subscription_list(request):
+    """
+    Вывод списка всех подписок (информация берётся из профилей пользователей).
+    """
+    profiles = Profile.objects.select_related('user').all()
+    return render(request, "custom_admin/subscription_list.html", {"profiles": profiles})
+
+@user_passes_test(is_admin)
+def add_subscription(request):
+    """
+    Позволяет администратору добавить подписку пользователю без проведения оплаты.
+    """
+    if request.method == "POST":
+        form = SubscriptionForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            tariff = form.cleaned_data['tariff']
+            duration = form.cleaned_data['duration']
+            now = timezone.now()
+
+            # Обновляем профиль пользователя
+            profile = user.profile  # Если связь OneToOneField
+            profile.subscription_start = now
+            profile.subscription_end = now + timedelta(days=duration * 30)
+            profile.tariff = tariff
+            profile.save()
+
+            return redirect("custom_admin:subscription_list")
+    else:
+        form = SubscriptionForm()
+    return render(request, "custom_admin/add_subscription.html", {"form": form})
