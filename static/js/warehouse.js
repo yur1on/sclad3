@@ -150,13 +150,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // Функция для обновления таблицы с запчастями
-    function updateTable() {
-        fetch(`/get-parts/?device=${selectedDevice}&brand=${selectedBrand}&model=${selectedModel}&part_type=${selectedPartType}`)
-            .then(response => response.json())
-            .then(data => {
-                displayParts(data.parts);
-            });
+function updateTable(page = 1) {
+    const url = `/get-parts/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(selectedBrand)}&model=${encodeURIComponent(selectedModel)}&part_type=${encodeURIComponent(selectedPartType)}&page=${page}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            displayParts(data.parts);
+            updatePagination(data.paginator); // Новая функция для обновления пагинации
+        });
+}
+
+function updatePagination(paginator) {
+    const pagination = document.querySelector('.pagination');
+    pagination.innerHTML = '';
+
+    if (paginator.has_previous) {
+        pagination.innerHTML += `
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="updateTable(1); return false;" aria-label="First">«</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="updateTable(${paginator.previous_page_number}); return false;" aria-label="Previous">‹</a>
+            </li>
+        `;
     }
+
+    paginator.page_range.forEach(num => {
+        pagination.innerHTML += `
+            <li class="page-item ${paginator.current_page === num ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="updateTable(${num}); return false;">${num}</a>
+            </li>
+        `;
+    });
+
+    if (paginator.has_next) {
+        pagination.innerHTML += `
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="updateTable(${paginator.next_page_number}); return false;" aria-label="Next">›</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="updateTable(${paginator.num_pages}); return false;" aria-label="Last">»</a>
+            </li>
+        `;
+    }
+}
 
 
 // Функция для отображения запчастей в таблице

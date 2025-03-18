@@ -214,6 +214,20 @@
             .table {
                 font-size: 14px;
             }
+
+            /* Адаптация картинки в подвале */
+            .payment-image {
+                max-width: 100%; /* Картинка занимает всю доступную ширину на мобильных */
+                width: 100%; /* Уменьшает до ширины контейнера */
+            }
+
+            .payment-image-wrapper {
+                padding: 5px; /* Уменьшаем отступы на мобильных */
+            }
+
+            .payment-section {
+                padding: 10px 0; /* Уменьшаем вертикальные отступы для секции */
+            }
         }
     </style>
 </head>
@@ -222,7 +236,7 @@
     <header class="header py-3 fixed-top">
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-light">
-                <a class="navbar-brand" href="{% url 'home' %}"></i> MobiRazbor.by</a>
+                <a class="navbar-brand" href="{% url 'home' %}">MobiRazbor.by</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -370,6 +384,22 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Разделитель перед картинкой -->
+            <hr class="my-4">
+        </div>
+
+        <!-- Блок с картинкой платежных систем на всю ширину страницы -->
+        <div class="payment-section" style="background-color: #adb5bd; width: 100%;">
+            <div class="container">
+                <div class="row mt-4">
+                    <div class="col text-center">
+                        <div class="payment-image-wrapper" style="display: inline-block; padding: 10px;">
+                            <img src="{% static 'images/payment_systems.png' %}" alt="Платежные системы" class="img-fluid payment-image" style="max-width: 500px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -428,6 +458,5 @@
         setInterval(checkMessages, 10000);
         checkMessages();  // Проверить сразу при загрузке
     </script>
-
 </body>
 </html>

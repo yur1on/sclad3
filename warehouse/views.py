@@ -26,6 +26,8 @@ def home(request):
     return render(request, 'warehouse/home.html')
 
 
+from django.db.models import Q
+
 
 @login_required
 def warehouse_view(request):
@@ -37,16 +39,19 @@ def warehouse_view(request):
     # Фильтруем запчасти по пользователю
     parts = Part.objects.filter(user=request.user)
 
-    # Фильтрация по ключевым словам
+    # Улучшенный поиск: все слова должны присутствовать в одной запчасти
     if query:
-        parts = parts.filter(
-            Q(device__icontains=query) |
-            Q(brand__icontains=query) |
-            Q(model__icontains=query) |
-            Q(part_type__icontains=query) |
-            Q(color__icontains=query) |
-            Q(note__icontains=query)
-        )
+        words = query.split()  # Разбиваем запрос на слова
+
+        for word in words:
+            parts = parts.filter(
+                Q(device__icontains=word) |
+                Q(brand__icontains=word) |
+                Q(model__icontains=word) |
+                Q(part_type__icontains=word) |
+                Q(color__icontains=word) |
+                Q(note__icontains=word)
+            )
 
     # Фильтрация по бренду
     if brand:
