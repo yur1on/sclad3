@@ -7,41 +7,83 @@
 <style>
     body {
         font-family: 'Roboto', sans-serif;
+        background-color: #f4f6f9;
     }
     .notifications-wrapper {
         max-width: 1000px;
-        margin-left: 20px;
-        margin-right: auto;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        display: flex;
-        gap: 20px;
-    }
-    .notifications-list-container {
-        flex: 1;
-        background: #f9f9f9;
-        padding: 15px;
-        border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        max-height: 600px;
-        overflow-y: auto;
+        margin: 20px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     .notifications-header {
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 700;
-        margin-bottom: 15px;
         color: #007bff;
+        margin-bottom: 20px;
+    }
+    .notification-form {
+        margin-bottom: 20px;
+    }
+    .notification-form label {
+        font-size: 16px;
+        color: #555;
+    }
+    .tab-buttons {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .tab-button {
+        padding: 8px 16px;
+        background: #e9ecef;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s ease;
+    }
+    .tab-button.active {
+        background: #007bff;
+        color: #fff;
+    }
+    .tab-button:hover {
+        background: #ced4da;
+    }
+    .notification-badge {
+        background: #dc3545;
+        color: #fff;
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 12px;
+        margin-left: 5px;
+    }
+    .tab {
+        display: none;
+    }
+    .tab.active {
+        display: block;
     }
     .notifications-list {
         list-style: none;
         padding: 0;
     }
     .notification-item {
-        background: #fff;
-        padding: 10px;
-        border-radius: 10px;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
         margin-bottom: 10px;
-        border: 1px solid #ddd;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .notification-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .notification-item.unread {
+        background: #e7f3ff;
+        border-left: 4px solid #007bff;
     }
     .notification-item strong {
         color: #007bff;
@@ -50,62 +92,73 @@
         display: block;
         color: #555;
         font-size: 12px;
+        margin-top: 5px;
     }
     .new-label {
-        color: red;
+        color: #dc3545;
         font-weight: bold;
+        margin-left: 5px;
     }
-    .notification-form {
-        margin-bottom: 15px;
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
     }
-    .notification-form label {
-        font-size: 16px;
-        font-weight: 500;
+    .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+        animation: slideIn 0.3s ease;
     }
-    .notification-detail-container {
-        flex: 2;
-        background: #f9f9f9;
-        padding: 15px;
-        border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        max-height: 600px;
-        overflow-y: auto;
+    .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        color: #888;
+        cursor: pointer;
+    }
+    .modal-close:hover {
+        color: #dc3545;
     }
     .notification-header-detail {
         font-size: 22px;
         font-weight: 700;
-        margin-bottom: 15px;
         color: #007bff;
-    }
-    .notification-details {
-        background: #fff;
-        padding: 15px;
-        border-radius: 10px;
         margin-bottom: 15px;
-        border: 1px solid #ddd;
     }
     .notification-details p {
-        margin: 5px 0;
+        margin: 10px 0;
         font-size: 14px;
+        color: #444;
     }
     .notification-text {
         font-style: italic;
         font-size: 16px;
         padding: 10px;
-        background-color: #e7f3ff;
+        background: #e7f3ff;
         border: 1px dashed #007bff;
         border-radius: 8px;
-        margin: 10px 0;
     }
     .button-group {
         display: flex;
         gap: 10px;
-        margin-top: 15px;
+        margin-top: 20px;
     }
     .button-group button {
         padding: 10px 15px;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 16px;
     }
@@ -123,244 +176,208 @@
     .delete-button:hover {
         background: #c82333;
     }
-    .back-link {
-        display: block;
-        margin-top: 20px;
-        text-decoration: none;
-        color: #007bff;
-        font-size: 16px;
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-    .back-link:hover {
-        color: #0056b3;
+    @media (max-width: 768px) {
+        .notifications-wrapper {
+            margin: 10px;
+            padding: 15px;
+        }
+        .tab-buttons {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .button-group {
+            flex-direction: column;
+        }
+        .button-group button {
+            width: 100%;
+        }
     }
-.selected-notification {
-    background-color: #cce5ff !important;
-    border: 2px solid #007bff;
-    font-weight: bold;
-}
-
-/* Скрываем неактивные вкладки */
-.tab {
-    display: none;
-}
-.tab.active {
-    display: block;
-}
-
-/* Контейнер для кнопок вкладок */
-.tab-buttons {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-/* Стандартное оформление кнопок вкладок */
-.tab-button {
-    padding: 8px 10px;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 16px;
-    background: #007bff;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Расстояние между текстом и счетчиком */
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-/* Эффект при наведении */
-.tab-button:hover {
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Оформление активной кнопки */
-.tab-button.active {
-    background: #0056b3;
-    border: 2px solid #003f7f;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    color: #fff;
-    font-weight: bold;
-    transform: translateY(-2px);
-}
-
-/* Счетчик уведомлений (бейдж) */
-.notification-badge {
-    background: #dc3545; /* Красный цвет фона */
-    color: #fff; /* Белый цвет текста */
-    font-size: 12px;
-    padding: 3px 8px;
-    border-radius: 12px; /* Закругленные углы */
-    display: inline-block;
-    line-height: 1;
-    min-width: 20px; /* Минимальная ширина для круглой формы */
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Легкая тень */
-    transition: background 0.3s ease;
-}
-.notification-badge:hover {
-    background: #c82333; /* Темнее при наведении */
-}
-
 </style>
 
 <div class="notifications-wrapper">
-    <!-- Левая колонка: список уведомлений -->
-    <div class="notifications-list-container">
-        <div class="notifications-header">Уведомления</div>
+    <div class="notifications-header">Уведомления</div>
 
-        <form action="{% url 'toggle_notifications' %}" method="POST" class="notification-form">
-            {% csrf_token %}
-            <label>
-                <input type="checkbox" name="receive_notifications" onchange="this.form.submit()"
-                       {% if request.user.profile.receive_notifications %}checked{% endif %}>
-                Получать уведомления
-            </label>
-        </form>
+    <form action="{% url 'toggle_notifications' %}" method="POST" class="notification-form">
+        {% csrf_token %}
+        <label>
+            <input type="checkbox" name="receive_notifications" onchange="this.form.submit()"
+                   {% if request.user.profile.receive_notifications %}checked{% endif %}>
+            Получать уведомления
+        </label>
+    </form>
 
-<div class="tab-buttons">
-    <button class="tab-button active" onclick="openTab(event, 'incoming')">
-        Входящие
-        <span id="notification-badge" class="notification-badge" {% if unread_notifications_count == 0 %}style="display:none;"{% endif %}>
-            {{ unread_notifications_count }}
-        </span>
-    </button>
-    <button class="tab-button" onclick="openTab(event, 'sent')">Мои уведомления</button>
-</div>
-
-        <div id="incoming" class="tab active">
-
-            <ul class="notifications-list">
-                {% for notif in received_notifications %}
-                    <li class="notification-item {% if notification and notif.id == notification.id %}selected-notification{% endif %}">
-                        <a href="{% url 'notification_detail' notif.id %}">
-                            {% if not notif.is_read %}
-                                <strong>{{ notif.text|truncatechars:50 }}</strong> <span class="new-label">(Новое)</span>
-                            {% else %}
-                                {{ notif.text|truncatechars:50 }}
-                            {% endif %}
-                        </a>
-                        <br>
-                        <small>Отправитель: {{ notif.sender.profile.full_name|default:notif.sender.username }}</small>
-                        <br>
-                        <small>Дата: {{ notif.timestamp }}</small>
-                    </li>
-                {% empty %}
-                    <p>Уведомлений нет</p>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div id="sent" class="tab">
-
-            <ul class="notifications-list">
-                {% for notif in sent_notifications %}
-                    <li class="notification-item {% if notification and notif.id == notification.id %}selected-notification{% endif %}">
-                        <a href="{% url 'notification_detail' notif.id %}">
-                            {{ notif.text|truncatechars:50 }}
-                        </a>
-                        <br>
-                        <small>Дата: {{ notif.timestamp }}</small>
-                    </li>
-                {% empty %}
-                    <p>Уведомлений нет</p>
-                {% endfor %}
-            </ul>
-        </div>
+    <div class="tab-buttons">
+        <button class="tab-button active" onclick="openTab(event, 'incoming')">
+            Входящие
+            <span class="notification-badge" {% if unread_notifications_count == 0 %}style="display:none;"{% endif %}>
+                {{ unread_notifications_count }}
+            </span>
+        </button>
+        <button class="tab-button" onclick="openTab(event, 'sent')">Мои уведомления</button>
     </div>
 
-    <!-- Правая колонка: детали выбранного уведомления -->
-    <div class="notification-detail-container">
-        {% if notification %}
-            {% if notification.user == request.user and notification.sender != request.user %}
-                <!-- Детали входящего уведомления -->
-                <div class="notification-header-detail">Детали уведомления</div>
-                <div class="notification-details">
-                    <p><strong>Отправитель:</strong> {{ sender_name }}</p>
-                    <p><strong>Телефон:</strong> {{ sender_phone }}</p>
-                    <p><strong>Мастерская:</strong> {{ sender_workshop }}</p>
-                    <p><strong>Текст:</strong></p>
-                    <div class="notification-text">
-                        {{ notification.text }}
-                    </div>
-                    <p><strong>Дата:</strong> {{ notification.timestamp }}</p>
-                </div>
-                <div class="button-group">
-                    <form action="{% url 'reply_to_notification' notification.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="reply-button">Ответить</button>
-                    </form>
-                    <form action="{% url 'delete_notification' notification.id %}" method="post" onsubmit="return confirm('Удалить это уведомление?');">
-                        {% csrf_token %}
-                        <button type="submit" class="delete-button">Удалить</button>
-                    </form>
-                </div>
-            {% elif notification.user == request.user and notification.sender == request.user %}
-                <!-- Детали моего (отправленного) уведомления -->
-                <div class="notification-header-detail">Детали моего уведомления</div>
-                <div class="notification-details">
-                    <p><strong>Текст:</strong></p>
-                    <div class="notification-text">
-                        {{ notification.text }}
-                    </div>
-                    <p><strong>Дата:</strong> {{ notification.timestamp }}</p>
-                </div>
-                <div class="button-group">
-                    <form action="{% url 'delete_notification' notification.id %}" method="post" onsubmit="return confirm('Удалить это уведомление?');">
-                        {% csrf_token %}
-                        <button type="submit" class="delete-button">Удалить</button>
-                    </form>
-                </div>
-            {% endif %}
-        {% else %}
+    <div id="incoming" class="tab active">
+        <ul class="notifications-list">
+            {% for notif in received_notifications %}
+                <li class="notification-item {% if not notif.is_read %}unread{% endif %}"
+                    data-id="{{ notif.id }}"
+                    onclick="openModal('{{ notif.id }}')">
+                    <div>{{ notif.text|truncatechars:50 }}</div>
+                    {% if not notif.is_read %}<span class="new-label">(Новое)</span>{% endif %}
+                    <small>Отправитель: {{ notif.sender.profile.full_name|default:notif.sender.username }}</small>
+                    <small>Дата: {{ notif.timestamp }}</small>
+                </li>
+            {% empty %}
+                <p>Уведомлений нет</p>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div id="sent" class="tab">
+        <ul class="notifications-list">
+            {% for notif in sent_notifications %}
+                <li class="notification-item"
+                    data-id="{{ notif.id }}"
+                    onclick="openModal('{{ notif.id }}')">
+                    <div>{{ notif.text|truncatechars:50 }}</div>
+                    <small>Дата: {{ notif.timestamp }}</small>
+                </li>
+            {% empty %}
+                <p>Уведомлений нет</p>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div id="notification-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">×</span>
             <div class="notification-header-detail">Детали уведомления</div>
-            <p>Выберите уведомление слева для просмотра деталей.</p>
-        {% endif %}
+            <div class="notification-details" id="modal-body">
+                <!-- Содержимое будет заполнено через JavaScript -->
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-   document.addEventListener("DOMContentLoaded", function () {
-    // Получаем активную вкладку из sessionStorage
-    const activeTab = sessionStorage.getItem("activeTab") || 'incoming'; // По умолчанию "incoming"
+    const modal = document.getElementById('notification-modal');
+    const modalBody = document.getElementById('modal-body');
 
-    // Активируем соответствующую вкладку
-    openTab(null, activeTab);
+    function openModal(notifId) {
+        const item = document.querySelector(`.notification-item[data-id="${notifId}"]`);
+        const isSent = item.closest('#sent');
+        const replyUrl = `/notifications/${notifId}/reply/`;
+        const deleteUrl = `/notifications/${notifId}/delete/`;
+        let content = '';
 
-    // Сохраняем позицию прокрутки
-    if (sessionStorage.getItem("scrollPosition")) {
-        document.querySelector(".notifications-list-container").scrollTop = sessionStorage.getItem("scrollPosition");
+        // Получаем данные уведомления из атрибутов или контекста
+        {% for notif in received_notifications %}
+            if (notifId === '{{ notif.id }}' && !isSent) {
+                content = `
+                    <p><strong>Отправитель:</strong> {{ notif.sender.profile.full_name|default:notif.sender.username }}</p>
+                    <p><strong>Телефон:</strong> {{ notif.sender.profile.phone|default:'Не указан' }}</p>
+                    <p><strong>Мастерская:</strong> {{ notif.sender.profile.workshop_name|default:'Не указана' }}</p>
+                    <p><strong>Текст:</strong></p>
+                    <div class="notification-text">{{ notif.text }}</div>
+                    <p><strong>Дата:</strong> {{ notif.timestamp }}</p>
+                    <div class="button-group">
+                        <form action="${replyUrl}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="reply-button">Ответить</button>
+                        </form>
+                        <form action="${deleteUrl}" method="post" onsubmit="return confirm('Удалить это уведомление?');">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-button">Удалить</button>
+                        </form>
+                    </div>
+                `;
+                {% if not notif.is_read %}
+                    markAsRead(notifId, item);
+                {% endif %}
+            }
+        {% endfor %}
+        {% for notif in sent_notifications %}
+            if (notifId === '{{ notif.id }}' && isSent) {
+                content = `
+                    <p><strong>Текст:</strong></p>
+                    <div class="notification-text">{{ notif.text }}</div>
+                    <p><strong>Дата:</strong> {{ notif.timestamp }}</p>
+                    <div class="button-group">
+                        <form action="${deleteUrl}" method="post" onsubmit="return confirm('Удалить это уведомление?');">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-button">Удалить</button>
+                        </form>
+                    </div>
+                `;
+            }
+        {% endfor %}
+
+        modalBody.innerHTML = content;
+        modal.style.display = 'flex';
     }
 
-    // Добавляем обработчик клика на уведомления
-    document.querySelectorAll(".notification-item a").forEach(item => {
-        item.addEventListener("click", function () {
-            sessionStorage.setItem("scrollPosition", document.querySelector(".notifications-list-container").scrollTop);
-        });
+    function markAsRead(notifId, item) {
+        fetch(`/notifications/${notifId}/mark_as_read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ notification_id: notifId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                item.classList.remove('unread');
+                const newLabel = item.querySelector('.new-label');
+                if (newLabel) newLabel.remove();
+                updateBadgeCount();
+            }
+        })
+        .catch(error => console.error('Ошибка:', error));
+    }
+
+    function updateBadgeCount() {
+        const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+        const badge = document.querySelector('.notification-badge');
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount;
+            badge.style.display = 'inline';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    window.onclick = (event) => {
+        if (event.target === modal) closeModal();
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const activeTab = sessionStorage.getItem("activeTab") || 'incoming';
+        openTab(null, activeTab);
+        updateBadgeCount();
     });
-});
 
-function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tab");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+    function openTab(evt, tabName) {
+        const tabs = document.getElementsByClassName("tab");
+        const buttons = document.getElementsByClassName("tab-button");
+        for (let i = 0; i < tabs.length; i++) tabs[i].style.display = "none";
+        for (let i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
+        document.getElementById(tabName).style.display = "block";
+        if (evt) {
+            evt.currentTarget.classList.add("active");
+            sessionStorage.setItem("activeTab", tabName);
+        } else {
+            document.querySelector(`.tab-button[onclick*="${tabName}"]`).classList.add("active");
+        }
     }
-    tablinks = document.getElementsByClassName("tab-button");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(tabName).style.display = "block";
-    if (evt) {
-        evt.currentTarget.className += " active";
-        // Сохраняем активную вкладку в sessionStorage
-        sessionStorage.setItem("activeTab", tabName);
-    } else {
-        // Если evt отсутствует (при загрузке страницы), активируем кнопку вручную
-        document.querySelector(`.tab-button[onclick*="${tabName}"]`).className += " active";
-    }
-}
 </script>
-
 {% endblock %}

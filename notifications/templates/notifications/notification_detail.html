@@ -1,49 +1,56 @@
 {% extends "warehouse/base.html" %}
-
 {% block content %}
 {% load static %}
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
 <style>
     body {
         font-family: 'Roboto', sans-serif;
+        background-color: #f4f6f9;
     }
     .notification-container {
         max-width: 600px;
         margin: 20px auto;
-        background: #f9f9f9;
-        padding: 15px;
-        border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     .notification-header {
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 700;
-        margin-bottom: 15px;
         color: #007bff;
+        margin-bottom: 15px;
     }
     .notification-details {
-        background: #fff;
+        background: #f8f9fa;
         padding: 15px;
-        border-radius: 10px;
+        border-radius: 8px;
         margin-bottom: 15px;
-        border: 1px solid #ddd;
     }
     .notification-details p {
-        margin: 5px 0;
+        margin: 10px 0;
         font-size: 14px;
+        color: #444;
+    }
+    .notification-text {
+        font-style: italic;
+        font-size: 16px;
+        padding: 10px;
+        background: #e7f3ff;
+        border: 1px dashed #007bff;
+        border-radius: 8px;
     }
     .button-group {
         display: flex;
         gap: 10px;
-        margin-top: 15px;
+        margin-top: 20px;
     }
     .button-group button {
         padding: 10px 15px;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 16px;
     }
@@ -71,6 +78,18 @@
     .back-link:hover {
         color: #0056b3;
     }
+    @media (max-width: 768px) {
+        .notification-container {
+            margin: 10px;
+            padding: 15px;
+        }
+        .button-group {
+            flex-direction: column;
+        }
+        .button-group button {
+            width: 100%;
+        }
+    }
 </style>
 
 <div class="notification-container">
@@ -80,7 +99,8 @@
         <p><strong>Отправитель:</strong> {{ sender_name }}</p>
         <p><strong>Телефон:</strong> {{ sender_phone }}</p>
         <p><strong>Мастерская:</strong> {{ sender_workshop }}</p>
-        <p><strong>Текст:</strong> {{ notification.text }}</p>
+        <p><strong>Текст:</strong></p>
+        <div class="notification-text">{{ notification.text }}</div>
         <p><strong>Дата:</strong> {{ notification.timestamp }}</p>
     </div>
 
@@ -89,7 +109,6 @@
             {% csrf_token %}
             <button type="submit" class="reply-button">Ответить</button>
         </form>
-
         <form action="{% url 'delete_notification' notification.id %}" method="post" onsubmit="return confirm('Удалить это уведомление?');">
             {% csrf_token %}
             <button type="submit" class="delete-button">Удалить</button>
@@ -98,5 +117,4 @@
 
     <a href="{% url 'notifications_list' %}" class="back-link">Назад</a>
 </div>
-
 {% endblock %}

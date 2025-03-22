@@ -5,9 +5,9 @@
 
 {% block content %}
 <div class="container mt-5 mb-5">
-    <div class="container mt-4 d-flex justify-content-center">
-        <div class="bg-white p-4 rounded shadow-sm" style="max-width: 800px; width: 100%;">
-            <h2>Политика конфиденциальности</h2>
+    <div class="bg-white p-4 rounded shadow-sm mx-auto" style="max-width: 800px; width: 100%;">
+        <h2 class="text-center mb-4">Политика конфиденциальности</h2>
+        <div>
             <p>ИП "Антонов Ю.Е." (владелец сайта MobiRazbor.by), юридический адрес: Республика Беларусь, г. Гомель, ул. Гагарина, д. 55, настоящим информирует Пользователей сайта MobiRazbor.by о Политике конфиденциальности в отношении их личных данных. Данные условия в области защиты личных данных основаны на внутренней политике и принципах работы сайта MobiRazbor.by, а также принятых нормах законодательства Республики Беларусь и международного права.</p>
             <p>Используя сайт MobiRazbor.by, вы выражаете свое согласие с Политикой конфиденциальности. Если вы не согласны с Политикой конфиденциальности, вы можете воздержаться от посещения сайта MobiRazbor.by.</p>
             <p>Настоящая Политика конфиденциальности применяется только к сайту MobiRazbor.by. Сайт не контролирует и не несет ответственности за сайты третьих лиц, на которые Пользователь может перейти по ссылкам, доступным на сайте MobiRazbor.by.</p>
@@ -21,10 +21,46 @@
         </div>
     </div>
 </div>
+
 <style>
+    /* Стили для текста */
     .container p {
-        margin-bottom: 10px; /* Отступ между пунктами */
-        font-size: 14px; /* Размер шрифта */
+        margin-bottom: 15px;
+        font-size: 16px;
+        color: #000;
+        line-height: 1.5;
+    }
+
+    /* Стили для заголовков */
+    h2 {
+        color: #000;
+        font-weight: 700;
+    }
+
+    /* Эффект листка */
+    .bg-white {
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+        .bg-white {
+            padding: 15px;
+            margin: 0 5px; /* Минимальные боковые отступы */
+        }
+        .container p {
+            font-size: 14px; /* Уменьшенный шрифт для телефона */
+        }
+        h2 {
+            font-size: 1.75rem; /* Уменьшенный заголовок */
+        }
+        .container {
+            padding-left: 0;
+            padding-right: 0;
+        }
     }
 </style>
 {% endblock %}

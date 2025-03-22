@@ -1,22 +1,14 @@
-
-from chat.models import Chat
-from django.shortcuts import get_object_or_404, redirect
-from django.http import Http404
-import uuid
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from .models import Notification
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.contrib import messages
 import uuid
 from django.contrib.auth.models import User
 from .models import Notification
 from chat.models import Chat
 from tariff.utils import check_notifications_limit
+from django.views.decorators.csrf import csrf_protect
+
 
 @login_required
 def send_notification(request):
@@ -59,10 +51,14 @@ def send_notification(request):
 def notifications_list(request):
     received_notifications = Notification.objects.filter(user=request.user).exclude(sender=request.user).order_by("-timestamp")
     sent_notifications = Notification.objects.filter(user=request.user, sender=request.user).order_by("-timestamp")
-    return render(request, "notifications/notifications_list.html", {
+    unread_notifications_count = received_notifications.filter(is_read=False).count()
+
+    context = {
         "received_notifications": received_notifications,
         "sent_notifications": sent_notifications,
-    })
+        "unread_notifications_count": unread_notifications_count,
+    }
+    return render(request, "notifications/notifications_list.html", context)
 
 
 @login_required
@@ -81,6 +77,7 @@ def notification_detail(request, notification_id):
             "notification": notification,
             "received_notifications": Notification.objects.filter(user=request.user).exclude(sender=request.user).order_by("-timestamp"),
             "sent_notifications": Notification.objects.filter(user=request.user, sender=request.user).order_by("-timestamp"),
+            "unread_notifications_count": Notification.objects.filter(user=request.user, is_read=False).exclude(sender=request.user).count(),
             "sender_name": sender_profile.full_name if sender_profile and sender_profile.full_name else notification.sender.username,
             "sender_phone": sender_profile.phone if sender_profile else "Не указан",
             "sender_workshop": sender_profile.workshop_name if sender_profile and sender_profile.workshop_name else "Не указано",
@@ -91,6 +88,7 @@ def notification_detail(request, notification_id):
             "notification": notification,
             "received_notifications": Notification.objects.filter(user=request.user).exclude(sender=request.user).order_by("-timestamp"),
             "sent_notifications": Notification.objects.filter(user=request.user, sender=request.user).order_by("-timestamp"),
+            "unread_notifications_count": Notification.objects.filter(user=request.user, is_read=False).exclude(sender=request.user).count(),
         }
     return render(request, "notifications/notifications_list.html", context)
 
@@ -130,3 +128,18 @@ def toggle_notifications(request):
     profile.receive_notifications = not profile.receive_notifications
     profile.save()
     return redirect("notifications_list")
+
+
+@login_required
+@csrf_protect
+def mark_as_read(request, notification_id):
+    if request.method == 'POST':
+        try:
+            notification = Notification.objects.get(id=notification_id, user=request.user)
+            notification.is_read = True
+            notification.save()
+            print(f"Уведомление {notification_id} отмечено как прочитанное для пользователя {request.user.username}")
+            return JsonResponse({'success': True})
+        except Notification.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Notification not found'}, status=404)
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)

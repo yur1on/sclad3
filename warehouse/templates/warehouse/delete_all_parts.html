@@ -1,13 +1,15 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Удалить все запчасти{% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <h2>Удаление всех запчастей</h2>
-    <p>Вы уверены, что хотите удалить <strong>все запчасти</strong>?</p>
+<div class="container mt-4 mb-5">
+    <h2 class="text-center" style="color: #333; font-weight: 600;">Удаление всех запчастей</h2>
+    <p class="text-center" style="color: #666;">Вы уверены, что хотите удалить <strong>все запчасти</strong>?</p>
     <form method="POST">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Удалить все</button>
-        <a href="{% url 'warehouse' %}" class="btn btn-secondary">Отмена</a>
+        <div class="d-flex flex-column flex-md-row justify-content-center">
+            <button type="submit" class="btn btn-danger mb-2 mb-md-0 mr-md-2" style="background-color: #ff4d4d; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 20px;">Удалить все</button>
+            <a href="{% url 'warehouse' %}" class="btn btn-secondary" style="background-color: #6c757d; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 20px;">Отмена</a>
+        </div>
     </form>
 </div>
 {% endblock %}
