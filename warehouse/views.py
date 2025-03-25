@@ -19,6 +19,7 @@ from .forms import PartForm, PartImageFormSet
 from .models import Part, PartImage
 from tariff.utils import check_parts_limit, check_image_limit
 from .utils import compress_image
+from warehouse.utils import add_watermark_to_image
 
 
 
@@ -367,6 +368,7 @@ def delete_image(request, image_id):
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
+@login_required
 def add_image(request):
     if request.method == 'POST':
         part_id = request.POST.get('part_id')
@@ -379,11 +381,13 @@ def add_image(request):
 
         image_responses = []
         for image in images:
-            part_image = PartImage(part=part, image=image)  # Adjust according to your image model
+            compressed = compress_image(image)
+            watermarked = add_watermark_to_image(compressed)
+            part_image = PartImage(part=part, image=watermarked)
             part_image.save()
             image_responses.append({
                 'id': part_image.id,
-                'url': part_image.image.url,  # Adjust according to your image field
+                'url': part_image.image.url,
             })
 
         return JsonResponse({'status': 'success', 'images': image_responses})
@@ -633,7 +637,6 @@ def add_part(request):
             part_type = form.cleaned_data['part_type']
             condition = form.cleaned_data['condition']
 
-            # Проверка наличия аналогичной запчасти
             existing_part = Part.objects.filter(
                 user=request.user,
                 device=device,
@@ -650,7 +653,9 @@ def add_part(request):
                 for image_form in formset:
                     if image_form.cleaned_data and image_form.cleaned_data.get('image'):
                         image_obj = image_form.save(commit=False)
-                        image_obj.image = compress_image(image_obj.image)
+                        compressed = compress_image(image_obj.image)
+                        watermarked = add_watermark_to_image(compressed)
+                        image_obj.image = watermarked
                         image_obj.part = new_part
                         image_obj.save()
                 return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена повторно!'})
@@ -662,14 +667,15 @@ def add_part(request):
                     'existing_part': existing_part
                 })
 
-            # Сохранение новой запчасти
             part = form.save(commit=False)
             part.user = request.user
             part.save()
             for image_form in formset:
                 if image_form.cleaned_data and image_form.cleaned_data.get('image'):
                     image_obj = image_form.save(commit=False)
-                    image_obj.image = compress_image(image_obj.image)
+                    compressed = compress_image(image_obj.image)
+                    watermarked = add_watermark_to_image(compressed)
+                    image_obj.image = watermarked
                     image_obj.part = part
                     image_obj.save()
 
