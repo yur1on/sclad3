@@ -1,5 +1,5 @@
-
 from pillow_heif import register_heif_opener
+
 register_heif_opener()
 from django import forms
 from .models import Part, PartImage
@@ -10,6 +10,7 @@ import os
 # Разрешённые форматы изображений и максимальный размер файла (в МБ)
 ALLOWED_IMAGE_FORMATS = ['.jpeg', '.jpg', '.png', '.webp', '.heic']
 MAX_FILE_SIZE_MB = 5
+
 
 class PartForm(forms.ModelForm):
     price = forms.IntegerField(min_value=0, label="Цена")
@@ -24,15 +25,21 @@ class PartForm(forms.ModelForm):
         model = Part
         fields = ['device', 'brand', 'model', 'part_type', 'condition', 'color', 'quantity', 'price', 'note', 'chip_label']
 
+
 class PartImageForm(forms.ModelForm):
     class Meta:
         model = PartImage
         fields = ['image']
+        # Help text не задаётся здесь, так как он будет выведен один раз в шаблоне
 
     def clean_image(self):
         image = self.cleaned_data.get('image')
         if not image:
             return image
+
+        # Проверка длины имени файла
+        if len(image.name) > 200:
+            raise ValidationError("Имя файла не должно превышать 200 символов. Сейчас: {} символов.".format(len(image.name)))
 
         # Проверка размера файла
         if image.size > MAX_FILE_SIZE_MB * 1024 * 1024:
@@ -41,9 +48,10 @@ class PartImageForm(forms.ModelForm):
         # Проверка формата файла
         file_extension = os.path.splitext(image.name)[1].lower()
         if file_extension not in ALLOWED_IMAGE_FORMATS:
-            raise ValidationError("Допустимы только форматы JPEG, JPG, PNG, WEBP и HEIC.")
+            raise ValidationError("Допустимы только форматы: JPEG, JPG, PNG, WEBP, HEIC.")
 
         return image
+
 
 # Создание FormSet для загрузки до 5 изображений
 PartImageFormSet = modelformset_factory(
