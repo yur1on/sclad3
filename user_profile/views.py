@@ -14,7 +14,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 def profile(request):
     user = request.user
     edit_mode = request.GET.get('edit') == 'true'
-
     days_since_expiry = None
 
     # Автоматическая конвертация тарифа и удаление запчастей
@@ -27,19 +26,18 @@ def profile(request):
         if days_since_expiry >= 30:
             parts = Part.objects.filter(user=user).order_by('-created_at')
             if parts.count() > 30:
+                # Сохраняем последние 30 запчастей, остальные будем удалять
                 parts_to_keep_ids = parts[:30].values_list('id', flat=True)
                 parts_to_delete = Part.objects.filter(user=user).exclude(id__in=parts_to_keep_ids)
                 for part in parts_to_delete:
                     for image in part.images.all():
-                        if image.image:
-                            image_path = os.path.join(settings.MEDIA_ROOT, str(image.image))
-                            if os.path.exists(image_path):
-                                os.remove(image_path)
-                parts_to_delete.delete()
-                messages.warning(request, "Ваша подписка истекла более 30 дней назад. Все запчасти, кроме последних 30 были удалены.")
+                        # Метод delete() в модели PartImage удаляет файл из S3 через django-storages
+                        image.delete()
+                    part.delete()
+                messages.warning(request, "Ваша подписка истекла более 30 дней назад. Все запчасти, кроме последних 30, были удалены.")
         elif days_since_expiry >= 0:
             days_left_until_deletion = 30 - days_since_expiry
-            messages.info(request, f"Ваша подписка истекла {days_since_expiry} дней назад. Через { days_left_until_deletion } все запчасти, кроме последних 30 будут удалены. Оформите подписку, чтобы сохранить данные.")
+            messages.info(request, f"Ваша подписка истекла {days_since_expiry} дней назад. Через {days_left_until_deletion} дней все запчасти, кроме последних 30, будут удалены. Оформите подписку, чтобы сохранить данные.")
 
     reviews = Review.objects.filter(user=user).order_by('-created_at')
     given_reviews = user.given_reviews.all()
@@ -80,6 +78,7 @@ def profile(request):
         'days_since_expiry': days_since_expiry,
     })
 
+
 @login_required
 def add_review(request, user_id):
     reviewed_user = get_object_or_404(User, id=user_id)
@@ -99,11 +98,13 @@ def add_review(request, user_id):
         form.initial['rating'] = 5
     return render(request, 'user_profile/add_review.html', {'form': form, 'reviewed_user': reviewed_user})
 
+
 @login_required
 def view_reviews(request, user_id):
     user_obj = get_object_or_404(User, id=user_id)
     reviews = Review.objects.filter(user=user_obj).order_by('-created_at')
     return render(request, 'warehouse/view_reviews.html', {'user': user_obj, 'reviews': reviews})
+
 
 @login_required
 def toggle_bookmark(request, part_id):
@@ -119,10 +120,12 @@ def toggle_bookmark(request, part_id):
         return redirect(next_page)
     return redirect('part_detail', part_id=part.id)
 
+
 @login_required
 def bookmarks(request):
     user_bookmarks = Bookmark.objects.filter(user=request.user).select_related('part')
     return render(request, 'user_profile/bookmarks.html', {'bookmarks': user_bookmarks})
+
 
 @login_required
 def delete_review(request, review_id):
