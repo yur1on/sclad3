@@ -1,0 +1,45 @@
+/* Компактная форма и таблица */
+.profile-page {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Карточка профиля */
+.card {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Компактные списки */
+.list-group-item {
+    padding: 10px 15px;
+}
+
+/* Кнопки и форма */
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Отзывы */
+.reviews-section h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.list-group-item-action {
+    display: flex;
+    flex-direction: column;
+}
+
+.list-group-item .text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Стили для кнопок */
+.btn {
+    padding: 6px 12px;
+}
+

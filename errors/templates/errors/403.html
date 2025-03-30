@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Доступ запрещён (403)</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f9ecec 0%, #f8d7da 100%);
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .error-container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .error-container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            font-size: 96px;
+            font-weight: 600;
+            margin: 0;
+            color: #d9534f; /* Тёмно-красный для запрета */
+            line-height: 1;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 400;
+            margin: 10px 0 20px;
+            color: #555;
+        }
+
+        p {
+            font-size: 16px;
+            margin: 0 0 30px;
+            color: #777;
+        }
+
+        a {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #d9534f;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        a:hover {
+            background: #c9302c;
+            transform: scale(1.05);
+        }
+
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 30px;
+                max-width: 90%;
+            }
+
+            h1 {
+                font-size: 72px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            p {
+                font-size: 14px;
+            }
+
+            a {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 56px;
+            }
+
+            h2 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+
+            p {
+                font-size: 13px;
+                margin-bottom: 20px;
+            }
+
+            a {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>403</h1>
+        <h2>Доступ запрещён</h2>
+        <p>У вас нет прав для просмотра этой страницы.</p>
+        <a href="{% url 'home' %}">Вернуться на главную</a>
+    </div>
+</body>
+</html>

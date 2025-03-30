@@ -1,0 +1,137 @@
+/* Немного увеличенные компактные кнопки для моделей и типов запчастей */
+.btn-compact {
+    padding: 6px 12px; /* Увеличение padding */
+    font-size: 0.9rem;  /* Увеличение шрифта */
+    border-radius: 5px; /* Немного больше скругление */
+}
+
+/* Активная кнопка после нажатия */
+.btn-active {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+    color: white;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    line-height: 21px;
+    position: relative;
+}
+
+/* Увеличенные кнопки */
+.btn {
+    padding: 6px 12px;  /* Значение padding */
+    font-size: 13px;    /* Значение размера шрифта */
+    line-height: 20px;  /* Значение высоты строки */
+    border-radius: 5px; /* Значение скругление */
+    text-align: center;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: 1px solid #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border: 1px solid #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #565e64;
+    border-color: #565e64;
+}
+
+.btn-outline-success {
+    background-color: transparent;
+    border: 1px solid #28a745;
+    color: #28a745;
+}
+
+.btn-outline-success:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Звезды для отзыва */
+.rating-star {
+    font-size: 2.2rem; /* Немного увеличен размер звезды */
+    color: grey;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+    margin: 0 5px;
+}
+
+.rating-star:hover {
+    color: gold;
+    transform: scale(1.35); /* Чуть большее увеличение при наведении */
+}
+
+    /* Ограничение размеров изображения в карусели */
+    .carousel-item img {
+        max-width: 400px; /* Максимальная ширина */
+        max-height: 300px; /* Максимальная высота */
+        object-fit: contain; /* Сохранение пропорций */
+        margin: 0 auto; /* Центрирование */
+    }
+    .image-container {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    position: relative;
+}
+
+.img-thumbnail {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.no-image-text {
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+}
+
+
+    /* Ограничение размеров миниатюр */
+    .img-thumbnail {
+        width: 80px;
+        height: 80px;
+
+    }
+
+    /* Стили для таблиц */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white; /* Непрозрачный фон */
+    opacity: 1; /* Убираем прозрачность */
+    border: 1px solid #ddd; /* Граница таблицы */
+    border-radius: 8px; /* Закругленные углы */
+    overflow: hidden; /* Обрезка содержимого за границами */
+    margin-bottom: 20px; /* Отступ снизу */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Тень для таблицы */
+}

@@ -1,0 +1,72 @@
+.custom-alert {
+  border-radius: 16px; /* Более выраженные скругленные углы */
+  font-size: 1rem;
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.custom-alert.alert-success {
+  background: linear-gradient(45deg, #d4edda, #c3e6cb);
+  color: #155724;
+}
+
+.custom-alert.alert-error,
+.custom-alert.alert-danger {
+  background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+  color: #721c24;
+}
+
+.custom-alert.alert-warning {
+  background: linear-gradient(45deg, #fff3cd, #ffeeba);
+  color: #856404;
+}
+
+.custom-alert.alert-info {
+  background: linear-gradient(45deg, #d1ecf1, #bee5eb);
+  color: #0c5460;
+}
+
+
+.profile-page {
+    max-width: 800px; /* Максимальная ширина блока */
+    margin-left: 0;   /* Убираем автоматическое центрирование */
+}
+
+.card {
+    margin-bottom: 20px; /* Отступы между карточками */
+    border-radius: 10px; /* Сглаженные углы */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Лёгкая тень */
+}
+
+.nav-tabs {
+    justify-content: start; /* Выравнивание вкладок влево */
+}
+
+.nav-tabs .nav-link {
+    font-size: 16px; /* Уменьшение размера текста */
+    padding: 8px 12px; /* Компактные отступы */
+}
+
+.tab-content {
+    padding: 20px; /* Отступы внутри вкладок */
+    background: #f9f9f9; /* Лёгкий фон */
+    border: 1px solid #ddd; /* Обводка вкладки */
+    border-radius: 10px; /* Сглаженные углы */
+}
+
+/* Стили для таблиц */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white; /* Непрозрачный фон */
+    opacity: 1; /* Убираем прозрачность */
+    border: 1px solid #ddd; /* Граница таблицы */
+    border-radius: 8px; /* Закругленные углы */
+    overflow: hidden; /* Обрезка содержимого за границами */
+    margin-bottom: 20px; /* Отступ снизу */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Тень для таблицы */
+}
