@@ -3,9 +3,99 @@
 
 {% block title %}Регистрация{% endblock %}
 {% block content %}
-<div class="container mt-5 mb-5">
-    <h2 class="text-center mb-4">Регистрация</h2>
-    <div class="card shadow mx-auto" style="max-width: 430px;">
+<style>
+    /* Подключение шрифта Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+    /* Стили для main */
+    main {
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 60px - 150px);
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%);
+        box-sizing: border-box;
+    }
+
+    /* Стили для карточки регистрации */
+    .registration-card {
+        max-width: 430px;
+        width: 100%;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+        transition: transform 0.3s ease;
+        margin-bottom: 60px;
+    }
+
+    .registration-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    /* Заголовок */
+    h2 {
+        font-size: 32px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    /* Сообщение под полем email */
+    .email-info {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+        margin-bottom: 15px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        main {
+            padding: 30px 15px;
+            min-height: calc(100vh - 60px - 120px);
+        }
+        .registration-card {
+            max-width: 90%;
+            margin-bottom: 40px;
+        }
+        h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .card-body {
+            padding: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        main {
+            padding: 20px 10px;
+            min-height: calc(100vh - 60px - 100px);
+        }
+        .registration-card {
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        .card-body {
+            padding: 15px;
+        }
+    }
+</style>
+
+<main>
+    <h2>Регистрация</h2>
+    <div class="registration-card">
         <div class="card-body">
             <!-- Вывод сообщений -->
             {% if messages %}
@@ -37,6 +127,7 @@
                 <div class="form-group mb-3">
                     <label for="email" class="form-label">Email</label>
                     {{ form.email|add_class:"form-control" }}
+                    <p class="email-info">Email нужен для восстановления пароля.</p>
                     {% if form.email.errors %}
                         <div class="text-danger">
                             {% for error in form.email.errors %}
@@ -87,9 +178,9 @@
                     {% endif %}
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                <button type="submit" class="btn btn-primary w-100 register-btn">Зарегистрироваться</button>
             </form>
         </div>
     </div>
-</div>
+</main>
 {% endblock %}

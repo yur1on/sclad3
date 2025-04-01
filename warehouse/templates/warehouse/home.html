@@ -1,12 +1,68 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Главная{% endblock %}
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Подключение шрифта Roboto (если не подключен в base.html) -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<!-- Подключение Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-<div class="container py-5" style="font-family: 'Inter', sans-serif;">
+<style>
+    /* Стили для иконок и списка */
+    .main-icon {
+        font-size: 1.5rem;
+        color: #007bff;
+        margin-right: 10px;
+    }
+    .how-it-works li strong {
+        font-size: 1.1rem;
+        color: #333;
+        font-family: 'Roboto', sans-serif;
+    }
+    .how-it-works li {
+        font-size: 1rem;
+        color: #666;
+        font-family: 'Roboto', sans-serif;
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    /* Стили для заголовков */
+    h1, h2 {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 700;
+        color: #343a40;
+    }
+    p {
+        font-family: 'Roboto', sans-serif;
+        color: #666;
+    }
+    /* Стили для кнопок */
+    .btn-primary, .btn-dark {
+        border-radius: 30px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        font-family: 'Roboto', sans-serif;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    .btn-dark:hover {
+        background-color: #1d2124;
+    }
+    /* Адаптивность для списка */
+    @media (max-width: 768px) {
+        .how-it-works li {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .main-icon {
+            margin-bottom: 10px;
+        }
+    }
+</style>
+
+<div class="container py-5">
     <h1 class="fw-bold text-center mb-4" style="font-size: 2rem;">Добро пожаловать на MobiRazbor.by!</h1>
-    <p class="text-center mb-4" style="font-size: 1rem; color: #000;">
+    <p class="text-center mb-4" style="font-size: 1rem;">
         Управляйте своим складом и находите запчасти легко и быстро.
     </p>
     <div class="text-center mb-4">
@@ -23,16 +79,43 @@
         </button>
     </form>
 
-    <div class="text-center">
-        <p style="font-size: 1rem; color: #000;">
-            Здесь каждый пользователь, будь то мастерская или частное лицо, может создать свой собственный склад и добавлять туда запчасти от ненужных б/у или сломанных устройств.
-        </p>
-        <p style="font-size: 1rem; color: #000;">
-            Если вам нужна запчасть для ремонта вашего устройства, достаточно воспользоваться <a href="{% url 'search' %}">глобальным поиском</a>. Система проверит все склады пользователей, и, если нужная запчасть найдётся, вы сможете просмотреть её детали, узнать информацию о продавце и связаться с ним напрямую.
-        </p>
-        <p style="font-size: 1rem; color: #000;">
-                    Разбирайте ненужные гаджеты, добавляйте запчасти на свой склад — возможно, именно ваша деталь понадобится кому-то для ремонта его устройства.
-        </p>
-    </div>
+    <h2 class="text-center mb-4" style="font-size: 1.5rem;">Как это работает</h2>
+    <ul class="list-unstyled how-it-works">
+        <li>
+            <i class="bi bi-box-seam main-icon"></i>
+            <div>
+                <strong>Создайте свой склад</strong><br>
+                Зарегистрируйтесь и заполните свой профиль.
+            </div>
+        </li>
+        <li>
+            <i class="bi bi-wrench main-icon"></i>
+            <div>
+                <strong>Добавляйте запчасти</strong><br>
+                Разбирайте ненужные устройства и добавляйте запчасти на свой склад.
+            </div>
+        </li>
+        <li>
+            <i class="bi bi-search main-icon"></i>
+            <div>
+                <strong>Ищите нужную запчасть</strong><br>
+                Нужна запчасть? Используйте <a href="{% url 'search' %}" class="text-primary">глобальный поиск</a> — система найдёт её на складах всех пользователей.
+            </div>
+        </li>
+        <li>
+            <i class="bi bi-chat-dots main-icon"></i>
+            <div>
+                <strong>Свяжитесь с продавцом</strong><br>
+                Нашли запчасть? Договоритесь о покупке напрямую с владельцем.
+            </div>
+        </li>
+        <li>
+            <i class="bi bi-hand-thumbs-up main-icon"></i>
+            <div>
+                <strong>Помогайте друг другу</strong><br>
+                Даже самую мелкую запчасть, которая пылится у вас в коробках, возможно, сейчас кто-то очень ищет.
+            </div>
+        </li>
+    </ul>
 </div>
 {% endblock %}

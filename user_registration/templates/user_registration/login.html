@@ -1,9 +1,153 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Вход{% endblock %}
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Вход в систему</h2>
-    <div class="card shadow-sm mx-auto" style="max-width: 400px;"> <!-- Ограничиваем ширину карточки -->
+<style>
+    /* Подключение шрифта Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+    /* Стили для контейнера */
+    .login-container {
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 60px - 150px); /* Учитываем высоту шапки и подвала */
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%);
+        box-sizing: border-box;
+    }
+
+    /* Стили для карточки входа */
+    .login-card {
+        max-width: 400px;
+        width: 100%;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+        transition: transform 0.3s ease;
+        margin-bottom: 60px; /* Отступ от подвала */
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    /* Заголовок */
+    h2 {
+        font-size: 32px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    /* Стили для полей ввода */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+        outline: none;
+    }
+
+    /* Стили для кнопки */
+    .login-btn {
+        width: 100%;
+        padding: 12px;
+        background: #007bff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .login-btn:hover {
+        background: #0056b3;
+        transform: scale(1.02);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .login-container {
+            padding: 30px 15px;
+            min-height: calc(100vh - 60px - 120px);
+        }
+        .login-card {
+            max-width: 90%;
+            margin-bottom: 40px;
+        }
+        h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .form-control {
+            font-size: 14px;
+            padding: 8px;
+        }
+        .login-btn {
+            font-size: 14px;
+            padding: 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .login-container {
+            padding: 20px 10px;
+            min-height: calc(100vh - 60px - 100px);
+        }
+        .login-card {
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .form-control {
+            font-size: 13px;
+            padding: 6px;
+        }
+        .login-btn {
+            font-size: 13px;
+            padding: 8px;
+        }
+    }
+</style>
+
+<div class="login-container">
+    <h2>Вход в систему</h2>
+    <div class="login-card">
         <div class="card-body">
             <form method="POST" action="{% url 'login' %}">
                 {% csrf_token %}
@@ -15,7 +159,7 @@
                     <label for="password" class="form-label">Пароль:</label>
                     <input type="password" id="password" name="password" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Войти</button>
+                <button type="submit" class="login-btn">Войти</button>
             </form>
             <div class="text-center mt-3">
                 <p class="mb-1">Забыли пароль? <a href="{% url 'password_reset' %}" class="link-primary">Восстановите его</a></p>
