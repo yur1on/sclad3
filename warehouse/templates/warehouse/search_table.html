@@ -1,155 +1,164 @@
-<!-- Веб-версия таблицы (отображается на экранах больше 768px) -->
-<div class="table-responsive d-none d-md-block">
-    <table class="table table-striped table-bordered table-hover">
+
+    <!-- Веб-версия таблицы (отображается на экранах больше 768px) -->
+    <div class="table-responsive d-none d-md-block">
+      <table class="table table-hover">
         <thead class="table-dark">
-            <tr>
-                <th>Фото</th>
-                <th>Описание</th>
-                <th>Цена</th>
-                <th>Продавец</th>
-                <th>Город</th>
-            </tr>
+          <tr>
+            <th>Фото</th>
+            <th>Описание</th>
+            <th>Цена</th>
+            <th>Продавец</th>
+            <th>Город</th>
+          </tr>
         </thead>
         <tbody>
-            {% for result in page_obj %}
-            <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
-                <!-- Столбец с изображением -->
-                <td>
-                    <div class="image-container">
-                        {% if result.images.all %}
-                            <a href="{{ result.images.first.image.url }}" target="_blank">
-                                <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail">
-                            </a>
-                            {% if result.images.count > 1 %}
-                                <div class="extra-images">
-                                    <small>+{{ result.images.count|add:"-1" }} еще</small>
-                                </div>
-                            {% endif %}
-                        {% else %}
-                            <span class="no-image-text">Нет изображения</span>
-                        {% endif %}
-                    </div>
-                </td>
-
-                <!-- Столбец с описанием -->
-                <td>
-                    <strong style="font-size: 16px; color: #333;">{{ result.part_type }}</strong>
-                    {% if result.condition %}
-                        (Состояние {{ result.condition }})
-                    {% endif %}
-                    <br>
-                    <span>Для устройства: {{ result.device }} {{ result.brand }} {{ result.display_model }}</span>
-                    <br>
-                    {% if result.note %}
-                        <span style="color: rgba(0, 0, 0, 0.6);">Примечание: {{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>
-                    {% endif %}
-                </td>
-
-                <!-- Столбец с ценой -->
-                <td>{{ result.price|floatformat:0 }} BYN.</td>
-
-                <!-- Столбец с именем продавца -->
-                <td>{{ result.user.profile.workshop_name|default:"Частное лицо" }}</td>
-
-                <!-- Столбец с городом -->
-                <td>{{ result.user.profile.city }}</td>
-            </tr>
-            {% endfor %}
+          {% for result in page_obj %}
+          <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer; background-color: #fff; transition: background-color 0.3s;">
+            <td>
+              <div class="image-container">
+                {% if result.images.all %}
+                  <a href="{{ result.images.first.image.url }}" target="_blank">
+                    <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail">
+                  </a>
+                  {% if result.images.count > 1 %}
+                  <div class="extra-images">
+                    <span>+{{ result.images.count|add:"-1" }} еще</span>
+                  </div>
+                  {% endif %}
+                {% else %}
+                  <span class="no-image-text">Нет фото</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <strong style="font-size: 16px; color: #333;">{{ result.part_type }}</strong>
+              {% if result.condition %}
+                <span style="color: #6c757d;"> ({{ result.condition }})</span>
+              {% endif %}
+              <br>
+              <span style="font-size: 14px;">{{ result.device }} {{ result.brand }} {{ result.display_model }}</span>
+              {% if result.note %}
+                <br>
+                <span style="font-size: 13px; color: #868e96;">{{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>
+              {% endif %}
+            </td>
+            <td style="font-weight: 600; color: #28a745;">{{ result.price|floatformat:0 }} BYN</td>
+            <td style="color: #495057;">{{ result.user.profile.workshop_name|default:"Частное лицо" }}</td>
+            <td style="color: #495057;">{{ result.user.profile.city }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-4">Ничего не найдено.</td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
-</div>
+      </table>
+    </div>
 
-<!-- Мобильная версия (отображается на экранах меньше 768px) -->
-<div class="d-block d-md-none">
-    {% for result in page_obj %}
-    <div class="card mb-3" onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
-        <!-- Название запчасти и цена -->
+    <!-- Мобильная версия (отображается на экранах меньше 768px) -->
+    <div class="d-block d-md-none">
+      {% for result in page_obj %}
+      <div class="card mb-3" onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <strong style="font-size: 18px; color: #333; flex: 1; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ result.part_type }}</strong>
-            <span style="font-size: 18px; color: #28a745; white-space: nowrap;">{{ result.price|floatformat:0 }} BYN.</span>
+          <strong style="font-size: 18px; color: #333; flex: 1; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ result.part_type }}</strong>
+          <span style="font-size: 18px; color: #28a745; white-space: nowrap;">{{ result.price|floatformat:0 }} BYN</span>
         </div>
         <div class="row g-0">
-            <!-- Фото -->
-            <div class="col-4 d-flex align-items-center justify-content-center p-2">
-                <div class="image-container">
-                    {% if result.images.all %}
-                        <a href="{{ result.images.first.image.url }}" target="_blank">
-                            <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail">
-                        </a>
-                        {% if result.images.count > 1 %}
-                            <div class="extra-images">
-                                <small>+{{ result.images.count|add:"-1" }} еще</small>
-                            </div>
-                        {% endif %}
-                    {% else %}
-                        <span class="no-image-text">Нет изображения</span>
-                    {% endif %}
+          <div class="col-4 d-flex align-items-center justify-content-center p-2">
+            <div class="image-container">
+              {% if result.images.all %}
+                <a href="{{ result.images.first.image.url }}" target="_blank">
+                  <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail">
+                </a>
+                {% if result.images.count > 1 %}
+                <div class="extra-images">
+                  <span>+{{ result.images.count|add:"-1" }} еще</span>
                 </div>
+                {% endif %}
+              {% else %}
+                <span class="no-image-text">Нет фото</span>
+              {% endif %}
             </div>
-            <!-- Остальная информация -->
-            <div class="col-8">
-                <div class="card-body">
-                    <!-- Устройство и состояние -->
-                    <p class="mb-1">Для устройства: {{ result.device }} {{ result.brand }} {{ result.display_model }}</p>
-                    {% if result.condition %}
-                        <p class="mb-1">Состояние: {{ result.condition }}</p>
-                    {% endif %}
-                    <!-- Продавец и город -->
-                    <p class="mb-1"><strong>Продавец:</strong> {{ result.user.profile.workshop_name|default:"Частное лицо" }}</p>
-                    <p class="mb-1"><strong>Город:</strong> {{ result.user.profile.city }}</p>
-                    <!-- Примечание -->
-                    {% if result.note %}
-                        <p class="mb-0" style="color: rgba(0, 0, 0, 0.6);">Примечание: {{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</p>
-                    {% endif %}
-                </div>
+          </div>
+          <div class="col-8">
+            <div class="card-body">
+              <p class="mb-1" style="font-size: 14px;">{{ result.device }} {{ result.brand }} {{ result.display_model }}</p>
+              {% if result.condition %}
+              <p class="mb-1" style="font-size: 14px; color: #6c757d;">Состояние: {{ result.condition }}</p>
+              {% endif %}
+              <p class="mb-1" style="font-size: 14px;"><strong>Продавец:</strong> {{ result.user.profile.workshop_name|default:"Частное лицо" }}</p>
+              <p class="mb-1" style="font-size: 14px;"><strong>Город:</strong> {{ result.user.profile.city }}</p>
+              {% if result.note %}
+              <p class="mb-0" style="font-size: 13px; color: #868e96;">{{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</p>
+              {% endif %}
             </div>
+          </div>
         </div>
+      </div>
+      {% empty %}
+      <div class="text-center py-4">
+        <p>Ничего не найдено.</p>
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-</div>
 
-<!-- Пагинация (общая для обеих версий) -->
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
+    <!-- Пагинация -->
+    {% if page_obj.has_previous or page_obj.has_next %}
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="First">
-                    <span aria-hidden="true">«</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Previous">
-                    <span aria-hidden="true">‹</span>
-                </a>
-            </li>
+        <li class="page-item">
+          <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="First">
+            <span aria-hidden="true">«</span>
+          </a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Previous">
+            <span aria-hidden="true">‹</span>
+          </a>
+        </li>
         {% endif %}
-
         {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% else %}
-                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">{{ num }}</a></li>
-            {% endif %}
+          {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% else %}
+          <li class="page-item"><a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">{{ num }}</a></li>
+          {% endif %}
         {% endfor %}
-
         {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Next">
-                    <span aria-hidden="true">›</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Last">
-                    <span aria-hidden="true">»</span>
-                </a>
-            </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Next">
+            <span aria-hidden="true">›</span>
+          </a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Last">
+            <span aria-hidden="true">»</span>
+          </a>
+        </li>
         {% endif %}
-    </ul>
-</nav>
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+
+  <!-- Подключение Bootstrap JS (если требуется для пагинации) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
 
 <!-- Стили для улучшения внешнего вида -->
 <style>
     /* Общие стили для карточек и таблицы */
+body {
+    display: flex;
+    justify-content: center; /* Центрирование по горизонтали */
+}
+.table-responsive.d-none.d-md-block {
+    width: 80%;
+    margin-left: 20px; /* Можно комбинировать с другими отступами, если нужно */
+}
+
     .card {
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -160,43 +169,46 @@
         transform: scale(1.02);
     }
 
+    /* Изображения */
     .image-container {
-        width: 100px; /* Фиксированный размер квадрата */
-        height: 100px; /* Фиксированный размер квадрата */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        background-color: #f8f9fa; /* Фон для пустого пространства */
+      width: 100px;
+      height: 100px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e9ecef;
+      border-radius: 8px;
+      overflow: hidden;
     }
-
     .img-thumbnail {
-        max-width: 100%; /* Ограничивает ширину до размера контейнера */
-        max-height: 100%; /* Ограничивает высоту до размера контейнера */
-        object-fit: contain; /* Уменьшает изображение, сохраняя пропорции */
-        object-position: center; /* Центрирует изображение */
-        border-radius: 8px;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border: none;
+      border-radius: 8px;
     }
-
-    .no-image-text {
-        font-size: 14px;
-        color: #666;
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-    }
-
     .extra-images {
-        margin-top: 5px;
-        text-align: center;
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .no-image-text {
+      font-size: 14px;
+      color: #6c757d;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e9ecef;
+      border-radius: 8px;
     }
 
     .card-body {
