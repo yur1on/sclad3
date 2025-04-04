@@ -137,6 +137,7 @@ INSTALLED_APPS = [
     'payments',
     'storages',
     'errors',
+    'advertisements',
 ]
 
 MIDDLEWARE = [
@@ -166,6 +167,7 @@ TEMPLATES = [
                 'warehouse.context_processors.counts',
                 'notifications.context_processors.unread_notifications',
                 'warehouse.context_processors.subscription_status',
+                'advertisements.context_processors.active_advertisements',
             ],
         },
     },

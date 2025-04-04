@@ -1,0 +1,7 @@
+{% if advertisement %}
+<div class="advertisement-block">
+    <a href="{{ advertisement.url }}" target="_blank">
+        <img src="{{ advertisement.image.url }}" alt="Реклама" class="img-fluid">
+    </a>
+</div>
+{% endif %}

@@ -1,59 +1,74 @@
 
-    <!-- Веб-версия таблицы (отображается на экранах больше 768px) -->
-    <div class="table-responsive d-none d-md-block">
-      <table class="table table-hover">
-        <thead class="table-dark">
-          <tr>
-            <th>Фото</th>
-            <th>Описание</th>
-            <th>Цена</th>
-            <th>Продавец</th>
-            <th>Город</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for result in page_obj %}
-          <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer; background-color: #fff; transition: background-color 0.3s;">
-            <td>
-              <div class="image-container">
-                {% if result.images.all %}
-                  <a href="{{ result.images.first.image.url }}" target="_blank">
-                    <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail">
-                  </a>
-                  {% if result.images.count > 1 %}
-                  <div class="extra-images">
-                    <span>+{{ result.images.count|add:"-1" }} еще</span>
-                  </div>
+<div class="container">
+  <div class="row d-none d-md-flex">
+    <!-- Таблица результатов (9 колонок) -->
+    <div class="col-md-9">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Фото</th>
+              <th>Описание</th>
+              <th>Цена</th>
+              <th>Продавец</th>
+              <th>Город</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for result in page_obj %}
+            <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer; background-color: #fff; transition: background-color 0.3s;">
+              <td>
+                <div class="image-container">
+                  {% if result.images.all %}
+                    <a href="{{ result.images.first.image.url }}" target="_blank">
+                      <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail">
+                    </a>
+                    {% if result.images.count > 1 %}
+                    <div class="extra-images">
+                      <span>+{{ result.images.count|add:"-1" }} еще</span>
+                    </div>
+                    {% endif %}
+                  {% else %}
+                    <span class="no-image-text">Нет фото</span>
                   {% endif %}
-                {% else %}
-                  <span class="no-image-text">Нет фото</span>
+                </div>
+              </td>
+              <td>
+                <strong style="font-size: 16px; color: #333;">{{ result.part_type }}</strong>
+                {% if result.condition %}
+                  <span style="color: #6c757d;"> ({{ result.condition }})</span>
                 {% endif %}
-              </div>
-            </td>
-            <td>
-              <strong style="font-size: 16px; color: #333;">{{ result.part_type }}</strong>
-              {% if result.condition %}
-                <span style="color: #6c757d;"> ({{ result.condition }})</span>
-              {% endif %}
-              <br>
-              <span style="font-size: 14px;">{{ result.device }} {{ result.brand }} {{ result.display_model }}</span>
-              {% if result.note %}
                 <br>
-                <span style="font-size: 13px; color: #868e96;">{{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>
-              {% endif %}
-            </td>
-            <td style="font-weight: 600; color: #28a745;">{{ result.price|floatformat:0 }} BYN</td>
-            <td style="color: #495057;">{{ result.user.profile.workshop_name|default:"Частное лицо" }}</td>
-            <td style="color: #495057;">{{ result.user.profile.city }}</td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="5" class="text-center py-4">Ничего не найдено.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                <span style="font-size: 14px;">{{ result.device }} {{ result.brand }} {{ result.display_model }}</span>
+                {% if result.note %}
+                  <br>
+                  <span style="font-size: 13px; color: #868e96;">{{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>
+                {% endif %}
+              </td>
+              <td style="font-weight: 600; color: #28a745;">{{ result.price|floatformat:0 }} BYN</td>
+              <td style="color: #495057;">{{ result.user.profile.workshop_name|default:"Частное лицо" }}</td>
+              <td style="color: #495057;">{{ result.user.profile.city }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center py-4">Ничего не найдено.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
+    <!-- Рекламные блоки (3 колонки) -->
+    <div class="col-md-3">
+      {% for ad in advertisements %}
+      <div class="advertisement-block {% if not forloop.first %}mt-4{% endif %}">
+        <a href="{{ ad.url }}" target="_blank">
+          <img src="{{ ad.image.url }}" alt="Рекламный баннер {{ ad.partner_name }}" class="img-fluid">
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 
     <!-- Мобильная версия (отображается на экранах меньше 768px) -->
     <div class="d-block d-md-none">
@@ -147,12 +162,14 @@
 </body>
 </html>
 
-<!-- Стили для улучшения внешнего вида -->
+
+<!-- Стили для улучшения внешнего вида (без изменений) -->
+
 <style>
     /* Общие стили для карточек и таблицы */
 body {
     display: flex;
-    justify-content: center; /* Центрирование по горизонтали */
+<!--    justify-content: center; /* Центрирование по горизонтали */-->
 }
 .table-responsive.d-none.d-md-block {
     width: 80%;
