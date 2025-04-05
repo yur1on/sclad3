@@ -51,7 +51,8 @@ def warehouse_view(request):
                 Q(model__icontains=word) |
                 Q(part_type__icontains=word) |
                 Q(color__icontains=word) |
-                Q(note__icontains=word)
+                Q(note__icontains=word) |
+                Q(part_number__icontains=word)
             )
 
     # Фильтрация по бренду

@@ -8,6 +8,13 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
+                <div class="form-group mb-3 row">
+            <label for="id_part_number" class="col-sm-2 col-form-label">Номер запчасти:</label>
+            <div class="col-sm-8">
+                {{ form.part_number }}
+            </div>
+        </div>
+
         <!-- Устройство -->
         <div class="form-group mb-3 row">
             <label for="id_device" class="col-sm-2 col-form-label">Устройство:</label>

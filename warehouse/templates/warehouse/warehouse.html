@@ -82,6 +82,9 @@
                     <td data-label="Тип запчасти">{{ part.part_type }}</td>
                     <td class="desktop-only" data-label="Прочее">
                         <div>
+                            <strong>Номер запчасти:</strong> {{ part.part_number|default:"-" }}
+                        </div>
+                        <div>
                             <strong>Цвет:</strong> {{ part.color|default:"Не указан" }},
                             <strong>Цена:</strong> {{ part.price }},
                             <strong>Кол-во:</strong> {{ part.quantity }}
@@ -116,6 +119,7 @@
                     <td colspan="6" class="p-0">
                         <div id="collapse-{{ part.id }}" class="collapse">
                             <div class="p-2 bg-light">
+                                <strong>Номер запчасти:</strong> {{ part.part_number|default:"-" }}<br>
                                 <strong>Устройство:</strong> {{ part.device }}<br>
                                 <strong>Модель:</strong> {{ part.brand }} {{ part.display_model }}<br>
                                 <strong>Тип запчасти:</strong> {{ part.part_type }}<br>
@@ -538,6 +542,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${removeParenthesesText(part.part_type)}</td>
                 <td>
                     <div>
+                        <strong>Номер запчасти:</strong> ${part.part_number || '-'}
+                    </div>
+                    <div>
                         <strong>Цвет:</strong> ${part.color || 'Не указан'} |
                         <strong>Цена:</strong> ${part.price} |
                         <strong>Кол-во:</strong> ${part.quantity}
@@ -571,6 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
             detailsCell.innerHTML = `
                 <div id="collapse-${part.id}" class="collapse">
                     <div class="p-2 bg-light">
+                        <strong>Номер запчасти:</strong> ${part.part_number || '-'}<br>
                         <strong>Устройство:</strong> ${part.device}<br>
                         <strong>Модель:</strong> ${part.brand} ${part.model}<br>
                         <strong>Тип запчасти:</strong> ${part.part_type}<br>

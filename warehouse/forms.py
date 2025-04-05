@@ -6,11 +6,18 @@ from .models import Part, PartImage
 from django.forms import modelformset_factory
 from django.core.exceptions import ValidationError
 import os
-
+from django import forms
+from .models import Part, PartImage
+from pillow_heif import register_heif_opener
 # Разрешённые форматы изображений и максимальный размер файла (в МБ)
 ALLOWED_IMAGE_FORMATS = ['.jpeg', '.jpg', '.png', '.webp', '.heic']
 MAX_FILE_SIZE_MB = 5
 
+
+# warehouse/forms.py
+
+
+register_heif_opener()
 
 class PartForm(forms.ModelForm):
     price = forms.IntegerField(min_value=0, label="Цена")
@@ -20,10 +27,21 @@ class PartForm(forms.ModelForm):
         label="Маркировка микросхемы",
         widget=forms.TextInput(attrs={'class': 'chip-label', 'style': 'display:none;'})
     )
+    # Добавляем поле для номера запчасти
+    part_number = forms.CharField(
+        max_length=100,
+        required=False,
+        label="Номер запчасти (штрих-код)",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Отсканируйте штрих-код',
+            'autofocus': 'autofocus'
+        })
+    )
 
     class Meta:
         model = Part
-        fields = ['device', 'brand', 'model', 'part_type', 'condition', 'color', 'quantity', 'price', 'note', 'chip_label']
+        fields = ['part_number', 'device', 'brand', 'model', 'part_type', 'condition', 'color', 'quantity', 'price', 'note', 'chip_label']
 
 
 class PartImageForm(forms.ModelForm):

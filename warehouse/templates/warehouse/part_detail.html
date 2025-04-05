@@ -490,6 +490,11 @@
                     </div>
 
                     <div class="specs-grid">
+                        <!-- Добавляем номер запчасти -->
+                        <div class="spec-item">
+                            <div class="spec-label">Номер запчасти:</div>
+                            <div class="spec-value">{{ part.part_number|default:"-" }}</div>
+                        </div>
                         <div class="spec-item">
                             <div class="spec-label">Доступное количество:</div>
                             <div class="spec-value">{{ part.quantity }} шт.</div>
