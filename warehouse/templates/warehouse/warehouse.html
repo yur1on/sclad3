@@ -4,12 +4,18 @@
 {% load static %}
 
 <div class="container my-4 warehouse-content">
-    <!-- Заголовок и кнопки в одной строке -->
-    <div class="d-flex justify-content-between align-items-center header-row mb-4">
-        <h2 class="mb-0">Мои запчасти</h2>
-        <div class="button-group d-flex gap-2">
-            <a href="{% url 'add_part' %}" class="btn btn-success">Добавить запчасть</a>
-            <div class="dropdown">
+    <!-- Заголовок "Мои запчасти" -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h2 class="text-center">Мои запчасти</h2>
+        </div>
+    </div>
+
+    <!-- Ряд с кнопками и формой поиска -->
+    <div class="row align-items-center mb-4 header-row">
+        <div class="col-auto controls-group">
+            <a href="{% url 'add_part' %}" class="btn btn-success me-2">Добавить запчасть</a>
+            <div class="dropdown d-inline-block me-2">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="optionsMenu" data-bs-toggle="dropdown" aria-expanded="false">
                     Опции
                 </button>
@@ -21,15 +27,13 @@
                 </ul>
             </div>
         </div>
-    </div>
-
-    <!-- Форма поиска -->
-    <form method="get" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Введите ключевые слова для поиска" value="{{ query|default_if_none:'' }}">
-            <button type="submit" class="btn btn-primary">Поиск</button>
+        <div class="col">
+            <form method="get" class="d-flex" style="max-width: 800px;">
+                <input type="text" name="q" class="form-control me-2" placeholder="Введите ключевые слова для поиска" value="{{ query|default_if_none:'' }}">
+                <button type="submit" class="btn btn-primary">Поиск</button>
+            </form>
         </div>
-    </form>
+    </div>
 
     <!-- Контейнеры для кнопочного поиска -->
     <div id="device-buttons-container" class="mb-4">
@@ -60,7 +64,7 @@
         <div id="part-type-buttons" class="mb-3"></div>
     </div>
 
-    <!-- Таблица запчастей, занимающая всю ширину экрана -->
+    <!-- Таблица запчастей -->
     <div id="parts-table-container" class="table-responsive">
         <table id="parts-table" class="table table-striped table-hover table-bordered w-100">
             <thead class="table-dark">
@@ -110,11 +114,13 @@
                         {% endif %}
                     </td>
                     <td class="desktop-only" data-label="Действия">
-                        <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm mb-1">✏️</a>
-                        <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm">🗑️</a>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm action-btn">✏️</a>
+                            <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm action-btn">🗑️</a>
+                        </div>
                     </td>
                 </tr>
-                <!-- Строка с подробной информацией (раскрывается только для мобильных) -->
+                <!-- Строка с подробной информацией (мобильная версия) -->
                 <tr class="mobile-only">
                     <td colspan="6" class="p-0">
                         <div id="collapse-{{ part.id }}" class="collapse">
@@ -150,7 +156,7 @@
                         </div>
                     </td>
                 </tr>
-                <!-- Модальное окно для фото (используется для веб-версии) -->
+                <!-- Модальное окно для фото (веб версия) -->
                 {% if part.images.all %}
                 <div class="modal fade" id="imageModal-{{ part.id }}" tabindex="-1" aria-labelledby="imageModalLabel-{{ part.id }}" aria-hidden="true">
                     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -228,7 +234,7 @@
     </nav>
 </div>
 
-<!-- Единое модальное окно для увеличения фото (лайтбокс) для мобильной версии -->
+<!-- Модальное окно для увеличения фото (лайтбокс) для мобильной версии -->
 <div class="modal fade" id="imageEnlargeModal" tabindex="-1" aria-labelledby="imageEnlargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -242,7 +248,7 @@
     </div>
 </div>
 
-<!-- Стили для адаптивного дизайна с префиксом .warehouse-content -->
+<!-- Стили адаптивности -->
 <style>
     /* Стили для веб-версии */
     .warehouse-content .desktop-only {
@@ -251,11 +257,20 @@
     .warehouse-content .mobile-only {
         display: none;
     }
-    /* Контейнер для таблицы на всю ширину */
     .warehouse-content .table-responsive {
         width: 100%;
     }
-    /* Медиа-запрос для мобильных устройств (до 768px) */
+    /* Для мобильной версии: добавляем отступ между блоком с кнопками и формой поиска */
+    @media (max-width: 576px) {
+        .header-row .controls-group {
+            margin-bottom: 10px;
+        }
+        /* Обновляем контейнер, чтобы таблица занимала всю ширину */
+        .warehouse-content .table-responsive {
+            padding: 0;
+            margin: 0;
+        }
+    }
     @media (max-width: 768px) {
         .warehouse-content .desktop-only {
             display: none;
@@ -263,7 +278,6 @@
         .warehouse-content .mobile-only {
             display: table-row;
         }
-        /* Показываем только 1-3 столбцы основной строки */
         .warehouse-content .table thead th:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)) {
             display: none;
         }
@@ -279,7 +293,6 @@
         .warehouse-content .container {
             padding: 15px;
         }
-        /* Для мобильной версии делаем header в колонку, а отступ добавляем только к заголовку */
         .warehouse-content .header-row {
             flex-direction: column;
             align-items: center;
@@ -308,7 +321,6 @@
             max-height: 60px;
         }
     }
-    /* Медиа-запрос для телефонов (до 576px) */
     @media (max-width: 576px) {
         .warehouse-content .container {
             padding: 10px;
@@ -347,7 +359,6 @@
 <!-- Скрипты для динамического фильтра и обновления таблицы -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Если окно шире 768px (десктоп), отключаем раскрытие деталей
     if(window.innerWidth >= 768){
         document.querySelectorAll('.accordion-toggle').forEach(function(el){
             el.removeAttribute('data-bs-toggle');
@@ -374,7 +385,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return text.replace(/\s*\(.*?\)\s*/g, '');
     }
 
-    // Загружаем кнопки для устройств
     fetch('/get-devices/')
         .then(response => response.json())
         .then(data => {
@@ -482,7 +492,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Обновление таблицы с запчастями
     function updateTable(page = 1) {
         const url = `/get-parts/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(selectedBrand)}&model=${encodeURIComponent(selectedModel)}&part_type=${encodeURIComponent(selectedPartType)}&page=${page}`;
         fetch(url)
@@ -526,12 +535,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Функция для отображения запчастей (две строки – краткая информация и, для мобильных, раскрывающийся блок)
     function displayParts(parts) {
         const tbody = document.querySelector('#parts-table-body');
         tbody.innerHTML = '';
         parts.forEach(part => {
-            // Строка с краткой информацией
             const summaryRow = document.createElement('tr');
             summaryRow.classList.add('accordion-toggle');
             summaryRow.setAttribute('data-bs-toggle', 'collapse');
@@ -562,13 +569,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     ` : 'Нет фото'}
                 </td>
                 <td>
-                    <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm mb-1">✏️</a>
-                    <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm">🗑️</a>
+                    <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm action-btn">✏️</a>
+                    <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm action-btn">🗑️</a>
                 </td>
             `;
             tbody.appendChild(summaryRow);
 
-            // Строка с подробной информацией (раскрывается только для мобильных)
             const detailsRow = document.createElement('tr');
             detailsRow.classList.add('mobile-only');
             const detailsCell = document.createElement('td');
@@ -591,7 +597,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <strong>Фото:</strong><br>
                             ${part.images.map(image => `
                                 <a href="#" onclick="enlargeImage('${image.image_url}', event);">
-                                    <img src="${image.image_url}" alt="${part.model}" class="img-thumbnail mb-2" style="max-width:100px; max-height:100px;">
+                                    <img src="${image.image.url}" alt="${part.model}" class="img-thumbnail mb-2" style="max-width:100px; max-height:100px;">
                                 </a>
                             `).join('')}
                         </div>` : ''}
@@ -608,10 +614,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Функция для увеличения изображения в едином модальном окне (лайтбокс) для мобильной версии -->
+<!-- Функция для увеличения изображения (лайтбокс) для мобильной версии -->
 <script>
 function enlargeImage(imageSrc, event) {
-    event.preventDefault(); // Отменяем переход по ссылке, чтобы не прокручивалось вверх
+    event.preventDefault();
     event.stopPropagation();
     document.getElementById("enlargedImage").src = imageSrc;
     var modalEl = document.getElementById("imageEnlargeModal");
