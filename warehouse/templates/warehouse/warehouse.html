@@ -11,6 +11,13 @@
         </div>
     </div>
 
+    <!-- Подсчет запчастей -->
+    <div class="row mb-3">
+        <div class="col-1 text-center">
+            <span class="badge bg-info text-dark">Всего запчастей: {{ total_parts }}</span>
+        </div>
+    </div>
+
     <!-- Ряд с кнопками и формой поиска -->
     <div class="row align-items-center mb-4 header-row">
         <div class="col-auto controls-group">
@@ -84,7 +91,7 @@
                     <td data-label="Устройство">{{ part.device }}</td>
                     <td data-label="Модель">{{ part.brand }} {{ part.display_model }}</td>
                     <td data-label="Тип запчасти">{{ part.part_type }}</td>
-                    <td class="desktop-only" data-label="Прочее">
+                    <td class="desktop-opacity" data-label="Прочее">
                         <div>
                             <strong>Номер запчасти:</strong> {{ part.part_number|default:"-" }}
                         </div>
@@ -156,7 +163,7 @@
                         </div>
                     </td>
                 </tr>
-                <!-- Модальное окно для фото (веб версия) -->
+                <!-- Модальное окно для фото (веб-версия) -->
                 {% if part.images.all %}
                 <div class="modal fade" id="imageModal-{{ part.id }}" tabindex="-1" aria-labelledby="imageModalLabel-{{ part.id }}" aria-hidden="true">
                     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -265,7 +272,6 @@
         .header-row .controls-group {
             margin-bottom: 10px;
         }
-        /* Обновляем контейнер, чтобы таблица занимала всю ширину */
         .warehouse-content .table-responsive {
             padding: 0;
             margin: 0;
@@ -547,7 +553,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${removeParenthesesText(part.device)}</td>
                 <td>${removeParenthesesText(part.brand)} ${removeParenthesesText(part.model)}</td>
                 <td>${removeParenthesesText(part.part_type)}</td>
-                <td>
+                <td class="desktop-only">
                     <div>
                         <strong>Номер запчасти:</strong> ${part.part_number || '-'}
                     </div>
@@ -561,14 +567,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${part.note ? `<strong>, Примечание:</strong> ${part.note}` : '<strong>, Примечание:</strong> Нет примечаний'}
                     </div>
                 </td>
-                <td>
-                    ${part.images.length ? `
+                <td class="desktop-only">
+                    ${part.images && part.images.length ? `
                         <a href="#" onclick="enlargeImage('${part.images[0].image_url}', event);">
                             <img src="${part.images[0].image_url}" alt="${part.model}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
                         </a>
                     ` : 'Нет фото'}
                 </td>
-                <td>
+                <td class="desktop-only">
                     <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm action-btn">✏️</a>
                     <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm action-btn">🗑️</a>
                 </td>
@@ -593,11 +599,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <strong>Количество:</strong> ${part.quantity}<br>
                         <strong>Состояние:</strong> ${part.condition || 'Не указано'}<br>
                         ${part.note ? `<strong>Примечание:</strong> ${part.note}<br>` : `<strong>Примечание:</strong> Нет примечаний<br>`}
-                        ${part.images.length ? `<div class="mt-2">
+                        ${part.images && part.images.length ? `<div class="mt-2">
                             <strong>Фото:</strong><br>
                             ${part.images.map(image => `
                                 <a href="#" onclick="enlargeImage('${image.image_url}', event);">
-                                    <img src="${image.image.url}" alt="${part.model}" class="img-thumbnail mb-2" style="max-width:100px; max-height:100px;">
+                                    <img src="${image.image_url}" alt="${part.model}" class="img-thumbnail mb-2" style="max-width:100px; max-height:100px;">
                                 </a>
                             `).join('')}
                         </div>` : ''}

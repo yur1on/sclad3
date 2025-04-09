@@ -70,6 +70,9 @@ def warehouse_view(request):
     # Сортировка от новых к старым
     parts = parts.order_by('-created_at')
 
+    # Получаем общее количество запчастей после фильтрации
+    total_parts = parts.count()
+
     # Пагинация: 30 запчастей на странице
     paginator = Paginator(parts, 30)
     page_number = request.GET.get('page')
@@ -86,7 +89,8 @@ def warehouse_view(request):
         'model': model,
         'part_type': part_type,
         'devices': devices,
-        'brands': brands
+        'brands': brands,
+        'total_parts': total_parts,
     })
 
 

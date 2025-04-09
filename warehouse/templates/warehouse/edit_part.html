@@ -11,43 +11,53 @@
     <form method="post" enctype="multipart/form-data" id="edit-part-form">
         {% csrf_token %}
 
-        <!-- Устройство -->
+                <!-- Номер запчасти (readonly) -->
+        <div class="form-group mb-3 row">
+            <label for="part_number" class="col-sm-2 col-form-label">Номер запчасти:</label>
+            <div class="col-sm-8">
+                <input type="text" name="part_number" id="part_number" class="form-control shadow-sm" value="{{ part.part_number }}" readonly>
+            </div>
+        </div>
+
+        <!-- Устройство (readonly) -->
         <div class="form-group mb-3 row">
             <label for="device" class="col-sm-2 col-form-label">Устройство:</label>
             <div class="col-sm-8">
-                <input type="text" name="device" id="device" class="form-control shadow-sm" value="{{ part.device }}" required>
+                <input type="text" name="device" id="device" class="form-control shadow-sm" value="{{ part.device }}" readonly>
             </div>
         </div>
 
-        <!-- Бренд -->
+        <!-- Бренд (readonly) -->
         <div class="form-group mb-3 row">
             <label for="brand" class="col-sm-2 col-form-label">Бренд:</label>
             <div class="col-sm-8">
-                <input type="text" name="brand" id="brand" class="form-control shadow-sm" value="{{ part.brand }}" required>
+                <input type="text" name="brand" id="brand" class="form-control shadow-sm" value="{{ part.brand }}" readonly>
             </div>
         </div>
 
-        <!-- Модель -->
+        <!-- Модель (readonly) -->
         <div class="form-group mb-3 row">
             <label for="model" class="col-sm-2 col-form-label">Модель:</label>
             <div class="col-sm-8">
-                <input type="text" name="model" id="model" class="form-control shadow-sm" value="{{ part.model }}" required>
+                <input type="text" name="model" id="model" class="form-control shadow-sm" value="{{ part.model }}" readonly>
             </div>
         </div>
 
-        <!-- Тип запчасти -->
+        <!-- Тип запчасти (readonly) -->
         <div class="form-group mb-3 row">
             <label for="part_type" class="col-sm-2 col-form-label">Тип запчасти:</label>
             <div class="col-sm-8">
-                <input type="text" name="part_type" id="part_type" class="form-control shadow-sm" value="{{ part.part_type }}" required>
+                <input type="text" name="part_type" id="part_type" class="form-control shadow-sm" value="{{ part.part_type }}" readonly>
             </div>
         </div>
 
-        <!-- Цвет -->
+
+
+        <!-- Цвет (readonly) -->
         <div class="form-group mb-3 row">
             <label for="color" class="col-sm-2 col-form-label">Цвет:</label>
             <div class="col-sm-8">
-                <input type="text" name="color" id="color" class="form-control shadow-sm" value="{{ part.color|default:"не выбран" }}">
+                <input type="text" name="color" id="color" class="form-control shadow-sm" value="{{ part.color|default:"не выбран" }}" readonly>
             </div>
         </div>
 
@@ -93,6 +103,7 @@
     </form>
 </div>
 
+<!-- Скрипты для работы с изображениями -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 function uploadImage(input) {
