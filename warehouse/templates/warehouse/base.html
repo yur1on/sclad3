@@ -334,60 +334,49 @@
 
     <!-- Нижний колонтитул -->
     <footer class="footer">
-        <div class="container">
-            <!-- Верхняя часть -->
-            <div class="row mb-4">
-                <!-- Колонка для запчастей -->
-                <div class="col-md-6 text-center">
-                    <div class="counter bordered">
-                        <i class="fas fa-cogs"></i>
-                        <strong>Запчастей:</strong> <span class="text-danger">{{ part_count }}</span>
-                    </div>
-                </div>
-                <!-- Колонка для пользователей -->
-                <div class="col-md-6 text-center">
-                    <div class="counter bordered">
-                        <i class="fas fa-users"></i>
-                        <strong>Пользователей:</strong> <span class="text-danger">{{ user_count }}</span>
-                    </div>
-                </div>
+
+  <div class="container">
+    <!-- Первый ряд: Счётчики -->
+    <div class="row mb-4">
+        <div class="col-md-6 text-center">
+            <div class="counter bordered" style="font-size: 1.2rem;">
+                <i class="fas fa-cogs"></i>
+                <strong>Запчастей:</strong> <span class="text-danger">{{ part_count }}</span>
             </div>
-
-            <!-- Разделитель -->
-            <hr class="my-4">
-
-            <!-- Нижняя часть -->
-            <div class="row">
-                <!-- Контакты -->
-                <div class="col-md-6 text-center">
-                    <div class="contacts">
-                        <h5>Контакты</h5>
-                        <p><i class="fas fa-envelope"></i> Email: <a href="mailto:info@example.com">info@example.com</a></p>
-                        <p><i class="fas fa-phone"></i> Телефон: <a href="tel:+123456789">+375(29)3069555</a></p>
-                    </div>
-                </div>
-                <!-- О проекте -->
-                <div class="col-md-6 text-center">
-                    <div class="about">
-                        <p>
-                            <a href="{% url 'about_project' %}" class="btn btn-link">
-                                О проекте
-                            </a>
-                            <div class="row">
-                                <div class="col text-center">
-                                    <a href="{% url 'user_agreement' %}" class="btn btn-link">Пользовательское соглашение</a>
-                                    <span>|</span>
-                                    <a href="{% url 'privacy_policy' %}" class="btn btn-link">Политика конфиденциальности</a>
-                                </div>
-                            </div>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Разделитель перед картинкой -->
-            <hr class="my-4">
         </div>
+        <div class="col-md-6 text-center">
+            <div class="counter bordered" style="font-size: 1.2rem;">
+                <i class="fas fa-users"></i>
+                <strong>Пользователей:</strong> <span class="text-danger">{{ user_count }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+            <hr class="my-4">
+<!-- Второй ряд: три колонки -->
+<div class="row">
+    <!-- Левый блок: контакты -->
+    <div class="col-md-4 text-center">
+        <h6 style="color: #adb5bd;">Контакты</h6>
+        <p style="color: #adb5bd;"><i class="fas fa-phone"></i> <a href="tel:+375293069555" style="color: #adb5bd;">+375 (29) 3069555</a></p>
+        <p style="color: #adb5bd;"><i class="fas fa-envelope"></i> <a href="mailto:info@example.com" style="color: #adb5bd;">info@example.com</a></p>
+    </div>
+    <!-- Средний блок: ссылки -->
+    <div class="col-md-4 text-center">
+        <p style="color: #adb5bd; font-size: 0.8rem; line-height: 1; margin-bottom: 0.5rem;"><a href="{% url 'about_project' %}" style="color: #adb5bd;">О проекте</a></p>
+        <p style="color: #adb5bd; font-size: 0.8rem; line-height: 1; margin-bottom: 0.5rem;"><a href="{% url 'user_agreement' %}" style="color: #adb5bd;">Пользовательское соглашение</a></p>
+        <p style="color: #adb5bd; font-size: 0.8rem; line-height: 1; margin-bottom: 0.5rem;"><a href="{% url 'privacy_policy' %}" style="color: #adb5bd;">Политика конфиденциальности</a></p>
+    </div>
+    <!-- Правый блок: реквизиты организации -->
+<div class="col-md-4 text-center">
+    <div class="org-info" style="font-size: 0.5rem; line-height: 1; color: #adb5bd;">
+        <p class="mb-1">ИП "Антонов Ю. Е.", УНП 490788687</p>
+        <p class="mb-1">Пн-Сб: 10:00 - 18:00, Вс - Выходной.</p>
+        <p class="mb-1">г. Гомель, ул. Гагарина, д. 55, каб. 50</p>
+        <p class="mb-1"></p>
+    </div>
+</div>
+</div>
 
         <!-- Блок с картинкой платежных систем на всю ширину страницы -->
         <div class="payment-section" style="background-color: #adb5bd; width: 100%;">
