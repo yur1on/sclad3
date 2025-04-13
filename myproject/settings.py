@@ -56,17 +56,19 @@
 
 import os
 from pathlib import Path
+from decouple import config  # Импортируем python-decouple
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-8cdukni$6v87iktt)&++hbj7(2fldm0-9@px#fwth*ycmjz=7@'
+# Секретный ключ из .env
+SECRET_KEY = config('SECRET_KEY')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Или 'bootstrap5', в зависимости от версии
 
 
 
-# DEBUG = False
-DEBUG = True
+DEBUG = False
+# DEBUG = True
 # ALLOWED_HOSTS = []
 # ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.5']
 ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.26']
@@ -191,16 +193,7 @@ AWS_S3_FILE_OVERWRITE = False
 # Формируем MEDIA_URL для доступа к файлам через веб
 MEDIA_URL = "https://s3-website-minsk-dc2.cloud.mts.by/parts-images/"
 
-# --------------------------
-# Email Settings
-# --------------------------
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.mail.ru'
-# EMAIL_PORT = 465
-# EMAIL_USE_SSL = True
-# EMAIL_HOST_USER = '9604871@mail.ru'
-# EMAIL_HOST_PASSWORD = 'j4Cy2rgYCj70K6SWcnU3'
-# DEFAULT_FROM_EMAIL = '9604871@mail.ru'
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.mail.ru'
