@@ -67,9 +67,9 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Или 'bootstrap5', в зависимо�
 
 # DEBUG = False
 DEBUG = True
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
 # ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.5']
-# ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.26']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.26']
 LOGIN_URL = 'login'
 
 INSTALLED_APPS = [

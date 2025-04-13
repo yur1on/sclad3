@@ -34,7 +34,7 @@ class PartForm(forms.ModelForm):
         label="Номер запчасти (штрих-код)",
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Отсканируйте штрих-код',
+            'placeholder': 'Сканируйте или сгенерируется автоматически',
             'autofocus': 'autofocus'
         })
     )

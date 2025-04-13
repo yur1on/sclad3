@@ -29,7 +29,6 @@
                 <ul class="dropdown-menu" aria-labelledby="optionsMenu">
                     <li><a class="dropdown-item" href="{% url 'user_parts2' user.id %}">Все запчасти (Сортированные)</a></li>
                     <li><a class="dropdown-item" href="{% url 'export_excel' %}">Экспорт в Excel</a></li>
-                    <li><a class="dropdown-item" href="{% url 'import_parts' %}">Импорт Excel</a></li>
                     <li><a class="dropdown-item text-danger" href="{% url 'delete_all_parts' %}">Удалить все запчасти</a></li>
                 </ul>
             </div>

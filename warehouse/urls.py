@@ -2,7 +2,7 @@ from .views import logout_view
 from .views import add_part, get_dynamic_data
 from . import views
 from .views import add_image
-from .views import import_excel
+
 from django.urls import path
 from .views import get_regions_and_cities
 from .views import user_agreement_view, privacy_policy_view
@@ -26,8 +26,7 @@ urlpatterns = [
     path('get-models/', views.get_models, name='get_models'),
     path('get-part-types/', views.get_part_types, name='get_part_types'),
     path('get-parts/', views.get_parts, name='get_parts'),
-    path('import-excel/', import_excel, name='import_parts'),
-    path('import-excel/', views.import_excel, name='import_excel'),
+
     path('', views.base_view, name='home'),
     path('user/<int:user_id>/parts/', views.user_parts, name='user_parts'),
     path('user_parts2/<int:user_id>/', views.user_parts, {'template_name': 'warehouse/user_parts2.html'}, name='user_parts2'),
