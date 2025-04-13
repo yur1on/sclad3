@@ -451,16 +451,16 @@ def get_parts(request):
         'brand': part.brand,
         'model': part.model,
         'part_type': part.part_type,
+        'part_number': part.part_number or '',  # Добавляем part_number
         'color': part.color,
         'quantity': part.quantity,
-        'price': part.price,
-        'note': part.note,  # Поле должно существовать в модели
-        'condition': part.condition,  # Поле должно существовать в модели
+        'price': str(part.price),  # Преобразуем Decimal в строку для JSON
+        'note': part.note,
+        'condition': part.condition,
         'images': [{'image_url': image.image.url} for image in part.images.all()]
     } for part in parts]
 
     return JsonResponse({'parts': parts_data})
-
 
 
 def base_view(request):
