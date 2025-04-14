@@ -1,11 +1,10 @@
-{% load static %}
+<!-- errors/500.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Внутренняя ошибка сервера (500)</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
@@ -39,7 +38,7 @@
             font-size: 96px;
             font-weight: 600;
             margin: 0;
-            color: #dc3545; /* Красный для ошибки сервера */
+            color: #dc3545;
             line-height: 1;
         }
 
@@ -73,7 +72,6 @@
             transform: scale(1.05);
         }
 
-        /* Адаптивность для мобильных устройств */
         @media (max-width: 768px) {
             .error-container {
                 padding: 30px;
@@ -126,10 +124,10 @@
 </head>
 <body>
 <div class="error-container">
-    <img src="{% static 'images/500.png' %}" alt="Ошибка 404" style="max-width: 100%; height: auto; margin-bottom: 20px;">
-        <h2>Внутренняя ошибка сервера</h2>
-        <p>Приносим извинения, произошла внутренняя ошибка. Пожалуйста, попробуйте позже.</p>
-        <a href="{% url 'home' %}">Вернуться на главную</a>
-    </div>
+    <h1>500</h1>
+    <h2>Внутренняя ошибка сервера</h2>
+    <p>Приносим извинения, произошла внутренняя ошибка. Пожалуйста, попробуйте позже.</p>
+    <a href="/">Вернуться на главную</a>
+</div>
 </body>
 </html>
