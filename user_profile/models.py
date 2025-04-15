@@ -34,6 +34,7 @@ class Profile(models.Model):
     delivery_methods = models.TextField(max_length=300, blank=True, null=True)
     receive_notifications = models.BooleanField(default=True, verbose_name="Получать уведомления")
     tariff = models.CharField(max_length=10, choices=TARIFF_CHOICES, default='free', verbose_name="Тарифный план")
+    email_confirmed = models.BooleanField(default=False, verbose_name="Email подтвержден")  # Новое поле
 
     def __str__(self):
         return f"{self.full_name or self.user.username} - {self.city} - {self.phone}"
