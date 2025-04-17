@@ -29,7 +29,7 @@
             </thead>
             <tfoot>
               <tr>
-                <td colspan="3">* После окончания подписки в глобальном поиске видны только 30 последних ваших запчастей. Если подписка не продливаеться 30 дней, на вашем складе остануться только 30 запчастей, которые вы добавили последними, все остальные будут удалены</td>
+                <td colspan="3">* После окончания подписки в глобальном поиске видны только 30 последних ваших запчастей. Если подписка не продливается 30 дней, на вашем складе останутся только 30 запчастей, которые вы добавили последними, все остальные будут удалены</td>
               </tr>
             </tfoot>
             <tbody>
@@ -47,7 +47,7 @@
                   data-tariff-name="Базовый"
                   data-tariff-cost="20 руб/30 дней"
                   data-tariff-limits="Добавить на склад можно до 500 запчастей."
-                  data-tariff-description="После окончания подписки в глобальном поиске видны только 30 последних ваших запчастей. Если подписка не продливаеться 30 дней, на вашем складе остануться только 30 запчастей, которые вы добавили последними, все остальные будут удалены."
+                  data-tariff-description="После окончания подписки в глобальном поиске видны только 30 последних ваших запчастей. Если подписка не продливается 30 дней, на вашем складе останутся только 30 запчастей, которые вы добавили последними, все остальные будут удалены."
                   {% if user.profile.tariff == 'lite' %}class="active-tariff"{% endif %}>
                 <td><i class="fas fa-lightbulb"></i> Базовый</td>
                 <td>20 руб/30 дней</td>
@@ -155,8 +155,8 @@
             <!-- Отображение профиля -->
             <ul class="list-group list-group-flush">
               <li class="list-group-item"><strong>Имя:</strong> {{ user.profile.full_name|default:"Не указано" }}</li>
-              <li class="list-group-item"><strong>Телефон:</strong> {{ user.profile.phone }}</li>
-              <li class="list-group-item"><strong>Город:</strong> {{ user.profile.city }}</li>
+              <li class="list-group-item"><strong>Телефон:</strong> {{ user.profile.phone|default:"Не указан" }}</li>
+              <li class="list-group-item"><strong>Город:</strong> {{ user.profile.city|default:"Не указан" }}</li>
               <li class="list-group-item"><strong>Магазин / мастерская:</strong> {{ user.profile.workshop_name|default:"Не указано" }}</li>
               <li class="list-group-item"><strong>Рейтинг:</strong> {{ user.profile.average_rating|default:"0.0" }} / 5</li>
               <li class="list-group-item"><strong>Отправка:</strong> {{ user.profile.delivery_methods|default:"Не указано" }}</li>
@@ -190,7 +190,7 @@
                   {% with days_left_until_deletion=30|subtract:days_since_expiry %}
                     <p class="mt-2">
                       Через {{ days_left_until_deletion }} {{ days_left_until_deletion|get_day_word }}
-                      все запчасти, кроме последних 30 будут удалены, если вы не оформите подписку.
+                      все запчасти, кроме последних 30, будут удалены, если вы не оформите подписку.
                     </p>
                   {% endwith %}
                 {% endif %}
@@ -348,11 +348,10 @@
     background-color: #e9ecef;
     cursor: pointer;
   }
-  /* Увеличиваем специфичность для .card-header */
   .tariff-table-container .card-header {
-    border-radius: 15px; /* Увеличили радиус для наглядности */
+    border-radius: 15px;
     padding: 1rem;
-    background-color: #007bff; /* Убеждаемся, что фон применяется */
+    background-color: #007bff;
   }
   .card-body {
     padding: 1rem;
@@ -399,7 +398,6 @@
   .custom-modal .modal-body {
     padding: 1.5rem;
   }
-
   @media (max-width: 767px) {
     .container {
       margin: 0.5rem 0;
@@ -423,10 +421,9 @@
     .tariff-table th, .tariff-table td {
       padding: 0.5rem;
     }
-    /* Увеличиваем специфичность и для мобильных устройств */
     .tariff-table-container .card-header {
       padding: 0.75rem;
-      border-radius: 15px; /* Увеличили радиус для наглядности */
+      border-radius: 15px;
       background-color: #007bff;
     }
     .card-body {
@@ -488,12 +485,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var tariffCost = trigger.getAttribute('data-tariff-cost');
     var tariffLimits = trigger.getAttribute('data-tariff-limits');
     var tariffDescription = trigger.getAttribute('data-tariff-description');
-
     var modalTitle = tariffModal.querySelector('.modal-title');
     var modalCost = tariffModal.querySelector('#tariffCost');
     var modalLimits = tariffModal.querySelector('#tariffLimits');
     var modalDescription = tariffModal.querySelector('#tariffDescription');
-
     modalTitle.textContent = tariffName;
     modalCost.textContent = tariffCost;
     modalLimits.innerHTML = tariffLimits;
@@ -501,6 +496,5 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-
 <script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}

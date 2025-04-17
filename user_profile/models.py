@@ -27,17 +27,19 @@ class Profile(models.Model):
     full_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="Полное имя")
     subscription_start = models.DateTimeField(blank=True, null=True, verbose_name="Начало подписки")
     subscription_end = models.DateTimeField(blank=True, null=True, verbose_name="Окончание подписки")
-    phone = models.CharField(max_length=15)
+    phone = models.CharField(max_length=15, blank=True, null=True)
     region = models.CharField(max_length=100, choices=BELARUS_REGIONS, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     workshop_name = models.CharField(max_length=100, blank=True, null=True)
     delivery_methods = models.TextField(max_length=300, blank=True, null=True)
     receive_notifications = models.BooleanField(default=True, verbose_name="Получать уведомления")
     tariff = models.CharField(max_length=10, choices=TARIFF_CHOICES, default='free', verbose_name="Тарифный план")
-    email_confirmed = models.BooleanField(default=False, verbose_name="Email подтвержден")  # Новое поле
+    email_confirmed = models.BooleanField(default=False, verbose_name="Email подтвержден")
 
     def __str__(self):
-        return f"{self.full_name or self.user.username} - {self.city} - {self.phone}"
+        # Если phone пустой, можно возвращать "Не указан"
+        phone_str = self.phone if self.phone else "Не указан"
+        return f"{self.full_name or self.user.username} - {self.city or 'Город не указан'} - {phone_str}"
 
     @property
     def average_rating(self):

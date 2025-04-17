@@ -6,708 +6,539 @@
 
 {% block content %}
 <div class="product-page">
-    <style>
-        :root {
-            --primary: #2ecc71;
-            --secondary: #3498db;
-            --text-dark: #1a1a1a;
-            --text-muted: #666;
-            --shadow: 0 3px 10px rgba(0,0,0,0.1);
-            --shadow-light: 0 1px 5px rgba(0,0,0,0.06);
-        }
-        .product-page .product-container {
-            max-width: 1100px;
-            margin: 1rem auto;
-            padding: 0 0.5rem;
-        }
-        /* Основной блок */
-        .product-page .product-section {
-            background: #fff;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: var(--shadow);
-        }
-        /* Заголовок */
-        .product-page .part-title-block {
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-        .product-page .part-title-text {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            line-height: 1.2;
-            margin: 0.5rem 0;
-        }
-        .product-page .part-subtitle {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            font-weight: 400;
-        }
-        /* Сетка для фото и описания */
-        .product-page .main-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1rem;
-            align-items: start;
-            margin-bottom: 1rem;
-        }
-        /* Фото */
-        .product-page .main-image-wrapper {
-            position: relative;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 8px;
-            padding: 0.5rem;
-            overflow: hidden;
-            width: 100%;
-            height: 370px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .product-page .main-image {
-            width: 100%;
-            height: 350px;
-            object-fit: contain;
-            border-radius: 6px;
-            transition: transform 0.2s ease;
-        }
-        .product-page .main-image:hover {
-            transform: scale(1.02);
-        }
-        .product-page .image-zoom-hint {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
-        }
-        .product-page .no-image-placeholder {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            padding: 1rem;
-        }
-        .product-page .no-image-placeholder i {
-            font-size: 2rem;
-            color: #dee2e6;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-        .product-page .thumbnails-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, 70px);
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .product-page .thumbnail-item {
-            width: 70px;
-            height: 70px;
-            border: 2px solid transparent;
-            border-radius: 6px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: #fff;
-        }
-        .product-page .thumbnail-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-light);
-        }
-        .product-page .thumbnail-item.active {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 1px var(--primary);
-        }
-        .product-page .thumbnail-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        /* Описание */
-        .product-page .price-block {
-            font-size: 1.8rem;
-            color: var(--primary);
-            font-weight: 700;
-            margin: 0.5rem 0;
-            background: linear-gradient(45deg, rgba(46,204,113,0.1), transparent);
-            padding: 0.3rem 0.6rem;
-            border-radius: 8px;
-            display: inline-block;
-        }
-        .product-page .specs-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-            margin: 0.5rem 0;
-        }
-        .product-page .spec-item {
-            background: #f8f9fa;
-            padding: 0.5rem;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-        .product-page .spec-item:hover {
-            background: #f1f3f5;
-            transform: translateY(-1px);
-        }
-        .product-page .spec-label {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            margin-bottom: 0.2rem;
-        }
-        .product-page .spec-value {
-            font-weight: 500;
-            color: var(--text-dark);
-            font-size: 0.9rem;
-        }
-        .product-page .description-text {
-            color: #444;
-            line-height: 1.4;
-            padding: 0.8rem;
-            background: #f8f9fa;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-        /* Продавец */
-        .product-page .seller-header {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 0.8rem;
-            flex-wrap: wrap;
-        }
-        .product-page .seller-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--secondary);
-            color: white;
-            font-size: 1.2rem;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .product-page .seller-avatar::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: rgba(255,255,255,0.1);
-            transform: rotate(30deg);
-            transition: all 0.4s ease;
-        }
-        .product-page .seller-avatar:hover::after {
-            left: 100%;
-        }
-        .product-page .seller-info {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .product-page .seller-name {
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-        .product-page .seller-rating {
-            color: #f1c40f;
-            font-size: 0.85rem;
-            background: rgba(241,196,15,0.1);
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 0.2rem;
-        }
-        .product-page .seller-rating span {
-            color: var(--text-dark);
-            font-weight: 500;
-        }
-        .product-page .seller-details {
-            display: grid;
-            gap: 0.5rem;
-        }
-        .product-page .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #eee;
-        }
-        .product-page .detail-item:last-child {
-            border-bottom: none;
-        }
-        .product-page .detail-icon {
-            width: 20px;
-            color: var(--text-muted);
-        }
-        .product-page .detail-content {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            flex: 1;
-        }
-        .product-page .detail-label {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            width: 80px;
-        }
-        .product-page .detail-value {
-            font-weight: 500;
-            color: var(--text-dark);
-            font-size: 0.85rem;
-            flex: 1;
-        }
-        /* Кнопки */
-        .product-page .btn {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 0.85rem;
-            text-transform: none;
-            letter-spacing: 0.1px;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            min-width: 0;
-        }
-        .product-page .btn-primary {
-            background: var(--primary);
-            border: none;
-            color: #fff;
-            box-shadow: 0 1px 4px rgba(46,204,113,0.3);
-        }
-        .product-page .btn-primary:hover {
-            background: #27ae60;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(46,204,113,0.4);
-            color: #fff;
-        }
-        .product-page .btn-outline-primary {
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            background: transparent;
-        }
-        .product-page .btn-outline-primary:hover {
-            background: var(--primary);
-            color: #fff;
-            transform: translateY(-1px);
-            box-shadow: 0 1px 4px rgba(46,204,113,0.2);
-        }
-        .product-page .btn-outline-secondary {
-            border: 1px solid var(--text-muted);
-            color: var(--text-muted);
-            background: transparent;
-        }
-        .product-page .btn-outline-secondary:hover {
-            background: var(--text-muted);
-            color: #fff;
-            transform: translateY(-1px);
-            box-shadow: 0 1px 4px rgba(102,102,102,0.2);
-        }
-        /* Адаптивность для мобильных устройств */
-        @media (max-width: 768px) {
-            .product-page .main-layout {
-                grid-template-columns: 1fr;
-            }
-            .product-page .main-image-wrapper {
-                height: 300px;
-            }
-            .product-page .main-image {
-                height: 280px;
-            }
-            .product-page .thumbnails-grid {
-                grid-template-columns: repeat(auto-fill, 60px);
-            }
-            .product-page .thumbnail-item {
-                width: 60px;
-                height: 60px;
-            }
-        }
-        @media (max-width: 576px) {
-            .product-page .product-container {
-                padding: 0 0.25rem;
-            }
-            .product-page .product-section {
-                padding: 0.75rem;
-                border-radius: 8px;
-            }
-            .product-page .part-title-text {
-                font-size: 1.4rem;
-                margin: 0.3rem 0;
-            }
-            .product-page .part-subtitle {
-                font-size: 0.9rem;
-            }
-            .product-page .main-image-wrapper {
-                height: 250px;
-            }
-            .product-page .main-image {
-                height: 230px;
-            }
-            .product-page .thumbnails-grid {
-                grid-template-columns: repeat(auto-fill, 50px);
-                gap: 0.3rem;
-            }
-            .product-page .thumbnail-item {
-                width: 50px;
-                height: 50px;
-            }
-            .product-page .price-block {
-                font-size: 1.5rem;
-                padding: 0.2rem 0.5rem;
-            }
-            .product-page .specs-grid {
-                gap: 0.3rem;
-            }
-            .product-page .spec-item {
-                padding: 0.4rem;
-            }
-            .product-page .spec-label {
-                font-size: 0.75rem;
-            }
-            .product-page .spec-value {
-                font-size: 0.85rem;
-            }
-            .product-page .description-text {
-                padding: 0.6rem;
-                font-size: 0.85rem;
-            }
-            .product-page .seller-header {
-                gap: 0.5rem;
-                margin-bottom: 0.5rem;
-            }
-            .product-page .seller-avatar {
-                width: 35px;
-                height: 35px;
-                font-size: 1rem;
-            }
-            .product-page .seller-name {
-                font-size: 0.9rem;
-            }
-            .product-page .seller-rating {
-                font-size: 0.8rem;
-                padding: 0.1rem 0.4rem;
-            }
-            .product-page .seller-info {
-                gap: 0.3rem;
-            }
-            .product-page .detail-item {
-                padding: 0.4rem 0;
-                gap: 0.4rem;
-            }
-            .product-page .detail-icon {
-                width: 18px;
-            }
-            .product-page .detail-label {
-                font-size: 0.75rem;
-                width: 70px;
-            }
-            .product-page .detail-value {
-                font-size: 0.8rem;
-            }
-            .product-page .btn {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.8rem;
-                gap: 0.2rem;
-            }
-            .product-page .btn-group {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.3rem;
-            }
-            .product-page .text-start {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.3rem;
-            }
-        }
-    </style>
+  <style>
+    :root {
+      --primary: #27ae60;
+      --secondary: #3498db;
+      --bg: #f7f7f7;
+      --card-bg: #fff;
+      --text-primary: #333;
+      --text-muted: #777;
+      --border-radius: 8px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --transition: all 0.2s ease;
+      --font: 'Arial', sans-serif;
+    }
+    body {
+      font-family: var(--font);
 
-    <div class="product-container">
-        <div class="product-section">
-            <!-- Название запчасти -->
-            <div class="part-title-block">
-                <h1 class="part-title-text">
-                    {{ part.part_type|upper }}
-                </h1>
-                <div class="part-subtitle">
-                    Для {{ part.device|device_declension }} | {{ part.brand }} {{ part.model }}
-                </div>
-            </div>
+    }
+    .product-page .container {
+      max-width: 1100px;
+      margin: 1.5rem auto 3rem auto; /* 3rem bottom margin for footer spacing */
+      padding: 0 1rem;
+    }
+    .product-section {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 0, 0, 0.6); /* Subtle black border */
+    }
+    /* Заголовок */
+    .part-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .part-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.3rem;
+    }
+    .part-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+    /* Основной блок: Фотографии и описание */
+    .main-content {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    /* Фотосекция */
+    .photo-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .main-image-wrapper {
+      position: relative;
+      background: #eaeaea;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .main-image {
+      max-height: 300px;
+      width: auto;
+      object-fit: contain;
+      transition: var(--transition);
+    }
+    .main-image:hover {
+      transform: scale(1.02);
+    }
+    .image-zoom-hint {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+    }
+    .thumbnails {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+    }
+    .thumbnail {
+      flex: 0 0 60px;
+      height: 60px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+      background: #fff;
+    }
+    .thumbnail:hover, .thumbnail.active {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    .thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .no-image {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      padding: 1rem;
+    }
+    /* Описание и характеристики */
+    .details-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .price {
+      font-size: 2rem;
+      color: var(--primary);
+      font-weight: bold;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+    .spec {
+      background: #f0f0f0;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .spec:hover {
+      background: #e0e0e0;
+    }
+    .spec-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.2rem;
+    }
+    .spec-value {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .description {
+      background: #f0f0f0;
+      padding: 0.8rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: var(--text-primary);
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .actions .btn {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      min-width: 0;
+    }
+    .btn-primary {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(39,174,96,0.3);
+    }
+    .btn-primary:hover {
+      background: #229954;
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+    }
+    .btn-outline:hover {
+      background: var(--primary);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    /* Продавец */
+    .seller {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-top: 1px solid #ccc;
+      margin-top: 2rem;
+    }
+    .seller-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .seller-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .seller-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .seller-rating {
+      font-size: 0.9rem;
+      color: #00ffff; /* Light text color */
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(0, 0, 0, 0.7); /* Dark semi-transparent background */
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+    .seller-rating i {
+      font-size: 1rem;
+      color: #f1c40f; /* Retain yellow star */
+    }
+    .seller-rating span {
+      font-weight: 500;
+    }
+    .seller-details {
+      display: grid;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .detail-icon {
+      font-size: 1rem;
+      color: var(--text-muted);
+      width: 20px;
+    }
+.detail-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  width: 120px; /* Увеличенная ширина */
+  margin-right: 10px; /* Отступ справа */
+}
 
-            <!-- Фото и описание -->
-            <div class="main-layout">
-                <!-- Фото -->
-                <div>
-                    {% if part.images.all %}
-                        <div class="main-image-wrapper">
-                            <img src="{{ part.images.first.image.url }}"
-                                 class="main-image"
-                                 alt="{{ part.part_type }}"
-                                 id="mainImage"
-                                 style="cursor:pointer;">
-                            <span class="image-zoom-hint">Нажмите для увеличения</span>
-                        </div>
 
-                        {% if part.images.count > 1 %}
-                        <div class="thumbnails-grid">
-                            {% for image in part.images.all %}
-                            <div class="thumbnail-item {% if forloop.first %}active{% endif %}"
-                                 onclick="changeMainImage(this, '{{ image.image.url }}', {{ forloop.counter0 }})">
-                                <img src="{{ image.image.url }}"
-                                     alt="Thumbnail {{ forloop.counter }}">
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                    {% else %}
-                        <div class="main-image-wrapper">
-                            <div class="no-image-placeholder">
-                                <i class="bi bi-image"></i>
-                                <div>Изображения отсутствуют</div>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
+    .detail-value {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
 
-                <!-- Описание -->
-                <div>
-                    <div class="price-block">
-                        {{ part.price }} BYN
-                    </div>
+    /* Мобильная адаптация */
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+      .main-image-wrapper {
+        height: 260px;
+      }
+      .main-image {
+        max-height: 240px;
+      }
+      .specs {
+        grid-template-columns: 1fr;
+      }
+      .seller-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      .product-page .container {
+        width: 100%;
+        max-width: none; /* Remove max-width constraint */
+        margin: 1.5rem 0 3rem 0; /* Zero side margins, retain top/bottom */
+        padding: 0; /* Remove side padding */
+      }
+      .product-section {
+        width: 100%;
+        border-radius: 0; /* No border radius for edge-to-edge look */
+        box-shadow: none; /* Cleaner mobile look */
+        border-left: none; /* Remove border on sides */
+        border-right: none;
+      }
+    }
+  </style>
 
-                    <div class="specs-grid">
-                        <!-- Добавляем номер запчасти -->
-                        <div class="spec-item">
-                            <div class="spec-label">Номер запчасти:</div>
-                            <div class="spec-value">{{ part.part_number|default:"-" }}</div>
-                        </div>
-                        <div class="spec-item">
-                            <div class="spec-label">Доступное количество:</div>
-                            <div class="spec-value">{{ part.quantity }} шт.</div>
-                        </div>
-
-                        <div class="spec-item">
-                            <div class="spec-label">Состояние:</div>
-                            <div class="spec-value">{{ part.condition }}</div>
-                        </div>
-
-                        {% if part.color %}
-                        <div class="spec-item">
-                            <div class="spec-label">Цвет:</div>
-                            <div class="spec-value">{{ part.color }}</div>
-                        </div>
-                        {% endif %}
-
-                        <div class="spec-item">
-                            <div class="spec-label">Дата добавления:</div>
-                            <div class="spec-value">{{ part.created_at|date:"d.m.Y H:i" }}</div>
-                        </div>
-                    </div>
-
-                    <div class="description-text">
-                        {{ part.note|default:"Продавец не предоставил описание"|linebreaks }}
-                    </div>
-
-                    {% if part.user != request.user %}
-                    <div class="btn-group mt-2">
-                        <a href="{% url 'toggle_bookmark' part.id %}" class="btn btn-outline-primary">
-                            <i class="bi {% if is_bookmarked %}bi-bookmark-dash{% else %}bi-bookmark-plus{% endif %}"></i>
-                            {% if is_bookmarked %}Удалить из закладок{% else %}Добавить в закладки{% endif %}
-                        </a>
-                        <a href="{% url 'user_parts' part.user.id %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-list-ul"></i> Все запчасти продавца
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Продавец -->
-            <div>
-                <div class="seller-header">
-                    <div class="seller-avatar">
-                        {{ part.user.profile.full_name|default:"П"|slice:":1" }}
-                    </div>
-                    <div class="seller-info">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <div class="seller-name">
-                                {{ part.user.profile.full_name|default:"Продавец" }}
-                            </div>
-                            <div class="seller-rating">
-                                <i class="bi bi-star-fill"></i>
-                                <span>Рейтинг:</span>
-                                {{ part.user.profile.average_rating|default:"5.0" }}
-                            </div>
-                        </div>
-                        {% if part.user != request.user %}
-                        <a href="{% url 'start_chat' part.id part.user.id %}" class="btn btn-primary">
-                            <i class="bi bi-chat"></i> Написать продавцу
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="seller-details">
-                    <div class="detail-item">
-                        <div class="detail-icon">
-                            <i class="bi bi-geo-alt"></i>
-                        </div>
-                        <div class="detail-content">
-                            <span class="detail-label">Город:</span>
-                            <span class="detail-value">
-                                {{ part.user.profile.city|default:"Не указан" }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="detail-item">
-                        <div class="detail-icon">
-                            <i class="bi bi-telephone"></i>
-                        </div>
-                        <div class="detail-content">
-                            <span class="detail-label">Телефон:</span>
-                            <span class="detail-value">
-                                {{ part.user.profile.phone|default:"Не указан" }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="detail-item">
-                        <div class="detail-icon">
-                            <i class="bi bi-building"></i>
-                        </div>
-                        <div class="detail-content">
-                            <span class="detail-label">Мастерская:</span>
-                            <span class="detail-value">
-                                {{ part.user.profile.workshop_name|default:"Частное лицо" }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="detail-item">
-                        <div class="detail-icon">
-                            <i class="bi bi-truck"></i>
-                        </div>
-                        <div class="detail-content">
-                            <span class="detail-label">Доставка:</span>
-                            <span class="detail-value">
-                                {{ part.user.profile.delivery_methods|default:"Не указано" }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="detail-item">
-                        <div class="detail-icon">
-                            <i class="bi bi-calendar-check"></i>
-                        </div>
-                        <div class="detail-content">
-                            <span class="detail-label">На сайте с:</span>
-                            <span class="detail-value">
-                                {{ part.user.date_joined|date:"d.m.Y" }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {% if part.user != request.user %}
-                <div class="text-start mt-2">
-                    <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline-primary">
-                        <i class="bi bi-star"></i> Оставить отзыв
-                    </a>
-                    <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline-secondary">
-                        <i class="bi bi-eye"></i> Просмотреть отзывы
-                    </a>
-                </div>
-                {% endif %}
-            </div>
+  <div class="container">
+    <div class="product-section">
+      <!-- Заголовок продукта -->
+      <div class="part-header">
+        <h1 class="part-title">{{ part.part_type|upper }}</h1>
+        <div class="part-subtitle">
+          Для {{ part.device|device_declension }} | {{ part.brand }} {{ part.model }}
         </div>
+      </div>
+
+      <!-- Основной контент -->
+      <div class="main-content">
+        <!-- Фотосекция -->
+        <div class="photo-section">
+          {% if part.images.all %}
+            <div class="main-image-wrapper">
+              <img src="{{ part.images.first.image.url }}"
+                   alt="{{ part.part_type }}"
+                   class="main-image"
+                   id="mainImage"
+                   style="cursor:pointer;">
+              <span class="image-zoom-hint">Увеличить</span>
+            </div>
+            {% if part.images.count > 1 %}
+              <div class="thumbnails">
+                {% for image in part.images.all %}
+                  <div class="thumbnail {% if forloop.first %}active{% endif %}"
+                       onclick="changeMainImage(this, '{{ image.image.url }}', {{ forloop.counter0 }})">
+                    <img src="{{ image.image.url }}" alt="Thumbnail {{ forloop.counter }}">
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% else %}
+            <div class="main-image-wrapper">
+              <div class="no-image">
+                <i class="bi bi-image"></i>
+                <p>Нет изображений</p>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Детальная информация -->
+        <div class="details-section">
+          <div class="price">{{ part.price }} BYN</div>
+          <div class="specs">
+            <div class="spec">
+              <div class="spec-label">Номер:</div>
+              <div class="spec-value">{{ part.part_number|default:"-" }}</div>
+            </div>
+            <div class="spec">
+              <div class="spec-label">Количество:</div>
+              <div class="spec-value">{{ part.quantity }} шт.</div>
+            </div>
+            <div class="spec">
+              <div class="spec-label">Состояние:</div>
+              <div class="spec-value">{{ part.condition }}</div>
+            </div>
+            {% if part.color %}
+            <div class="spec">
+              <div class="spec-label">Цвет:</div>
+              <div class="spec-value">{{ part.color }}</div>
+            </div>
+            {% endif %}
+            <div class="spec">
+              <div class="spec-label">Дата:</div>
+              <div class="spec-value">{{ part.created_at|date:"d.m.Y H:i" }}</div>
+            </div>
+          </div>
+          <div class="description">
+            {{ part.note|default:"Описание отсутствует" |linebreaks }}
+          </div>
+
+          {% if part.user != request.user %}
+            <div class="actions">
+              <a href="{% url 'toggle_bookmark' part.id %}" class="btn btn-outline">
+                <i class="bi {% if is_bookmarked %}bi-bookmark-dash{% else %}bi-bookmark-plus{% endif %}"></i>
+                {% if is_bookmarked %}Удалить{% else %}Добавить{% endif %} в закладки
+              </a>
+              <a href="{% url 'user_parts' part.user.id %}" class="btn btn-outline">
+                <i class="bi bi-list-ul"></i> Запчасти продавца
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Продавец -->
+      <div class="seller">
+        <div class="seller-avatar">
+          {{ part.user.profile.full_name|default:"П"|slice:":1" }}
+        </div>
+        <div class="seller-info">
+          <div class="seller-name">{{ part.user.profile.full_name|default:"Продавец" }}</div>
+          <div class="seller-rating">
+            <span>Рейтинг:</span>
+            <i class="bi bi-star-fill"></i>
+            <span>{{ part.user.profile.average_rating|default:"5.0" }} / 5</span>
+          </div>
+          {% if part.user != request.user %}
+            <a href="{% url 'start_chat' part.id part.user.id %}" class="btn btn-primary" style="font-size:0.8rem; padding:0.3rem 0.6rem;">
+              <i class="bi bi-chat"></i> Написать продавцу
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Детали продавца -->
+      <div class="seller-details">
+        <div class="detail-item">
+          <div class="detail-icon"><i class="bi bi-geo-alt"></i></div>
+          <div class="detail-content">
+            <span class="detail-label">Город:</span>
+            <span class="detail-value">{{ part.user.profile.city|default:"Не указан" }}</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><i class="bi bi-telephone"></i></div>
+          <div class="detail-content">
+            <span class="detail-label">Телефон:</span>
+            <span class="detail-value">{{ part.user.profile.phone|default:"Не указан" }}</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><i class="bi bi-building"></i></div>
+          <div class="detail-content">
+            <span class="detail-label">Мастерская:</span>
+            <span class="detail-value">{{ part.user.profile.workshop_name|default:"Частное лицо" }}</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><i class="bi bi-truck"></i></div>
+          <div class="detail-content">
+            <span class="detail-label">Доставка:</span>
+            <span class="detail-value">{{ part.user.profile.delivery_methods|default:"Не указано" }}</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><i class="bi bi-calendar-check"></i></div>
+          <div class="detail-content">
+            <span class="detail-label">На сайте с:</span>
+            <span class="detail-value">{{ part.user.date_joined|date:"d.m.Y" }}</span>
+          </div>
+        </div>
+      </div>
+
+      {% if part.user != request.user %}
+        <div class="actions" style="margin-top: 1rem;">
+          <a href="{% url 'add_review' part.user.id %}" class="btn btn-outline">
+            <i class="bi bi-star"></i> Оставить отзыв
+          </a>
+          <a href="{% url 'view_reviews' part.user.id %}" class="btn btn-outline">
+            <i class="bi bi-eye"></i> Просмотреть отзывы
+          </a>
+        </div>
+      {% endif %}
     </div>
-<!-- Модальное окно для увеличения изображения с навигацией -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+  </div>
+
+  <!-- Модальное окно для увеличения изображения -->
+  <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-body text-center p-1">
-                <img id="modalImage" src="" class="img-fluid" style="max-height: 90vh;">
-            </div>
-            <div class="modal-footer justify-content-center border-0">
-                <button type="button" class="btn btn-secondary" id="prevImage">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" class="btn btn-secondary" id="nextImage">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-body text-center p-2">
+          <img id="modalImage" src="" class="img-fluid" style="max-height: 90vh;">
         </div>
+        <div class="modal-footer justify-content-center border-0">
+          <button type="button" class="btn btn-secondary btn-sm" id="prevImage">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="nextImage">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    let currentImageIndex = 0;
-    // Массив с URL изображений
-    const images = [
+  <!-- Скрипт для модального окна и управления изображениями -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let currentImageIndex = 0;
+      const images = [
         {% for image in part.images.all %}
-            "{{ image.image.url|escapejs }}"{% if not forloop.last %},{% endif %}
+          "{{ image.image.url|escapejs }}"{% if not forloop.last %},{% endif %}
         {% endfor %}
-    ];
-    console.log("Images:", images);
+      ];
 
-    // Функция переключения основного изображения при клике на миниатюру
-    window.changeMainImage = function(element, fullSizeUrl, index) {
+      window.changeMainImage = function(element, fullSizeUrl, index) {
         const mainImage = document.getElementById('mainImage');
         if (mainImage) {
-            mainImage.src = fullSizeUrl;
-            currentImageIndex = index;
-            document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
-            console.log("Main image changed. currentImageIndex =", currentImageIndex);
+          mainImage.src = fullSizeUrl;
+          currentImageIndex = index;
+          document.querySelectorAll('.thumbnail').forEach(item => item.classList.remove('active'));
+          element.classList.add('active');
         }
-    };
+      };
 
-    // Функция навигации в модальном окне
-    function changeImage(direction) {
+      function changeImage(direction) {
         currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
         const modalImage = document.getElementById('modalImage');
         if (modalImage) {
-            console.log("Modal image changed. currentImageIndex =", currentImageIndex, "URL:", images[currentImageIndex]);
-            modalImage.src = images[currentImageIndex];
-            // Также можно обновить основное изображение, если нужно:
-            document.getElementById('mainImage').src = images[currentImageIndex];
+          modalImage.src = images[currentImageIndex];
+          document.getElementById('mainImage').src = images[currentImageIndex];
         }
-    }
+      }
 
-    // Привязка событий для модального окна
-    const mainImage = document.getElementById('mainImage');
-    if (mainImage) {
+      const mainImage = document.getElementById('mainImage');
+      if (mainImage) {
         mainImage.addEventListener('click', () => {
-            const modalImage = document.getElementById('modalImage');
-            if (modalImage && images.length > 0) {
-                modalImage.src = images[currentImageIndex];
-                new bootstrap.Modal(document.getElementById('imageModal')).show();
-            } else {
-                console.log('Нет изображений или modalImage не найден');
-            }
+          if (images.length > 0) {
+            document.getElementById('modalImage').src = images[currentImageIndex];
+            new bootstrap.Modal(document.getElementById('imageModal')).show();
+          }
         });
-    }
-
-    document.getElementById('prevImage')?.addEventListener('click', () => changeImage(-1));
-    document.getElementById('nextImage')?.addEventListener('click', () => changeImage(1));
-});
-</script>
+      }
+      document.getElementById('prevImage')?.addEventListener('click', () => changeImage(-1));
+      document.getElementById('nextImage')?.addEventListener('click', () => changeImage(1));
+    });
+  </script>
 </div>
 {% endblock %}

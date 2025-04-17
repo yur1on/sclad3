@@ -24,7 +24,10 @@ class ProfileForm(forms.ModelForm):
     phone = forms.CharField(label="Телефон", required=True)
     city = forms.CharField(label="Город", required=True)
     full_name = forms.CharField(label="Имя", required=True)
-    workshop_name = forms.CharField(label="Название магазина или мастерской (не заполняйте, если магазина, мастерской нет)", required=False)
+    workshop_name = forms.CharField(
+        label="Название магазина или мастерской (не заполняйте, если магазина, мастерской нет)",
+        required=False
+    )
     delivery_methods = forms.CharField(
         label="Способы отправки",
         widget=forms.Textarea(attrs={"rows": 3}),
@@ -40,6 +43,12 @@ class ProfileForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['tariff'].widget = forms.HiddenInput()
         self.fields['tariff'].disabled = True
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone', '')
+        # Удаляем все пробелы из номера
+        phone_clean = phone.replace(" ", "")
+        return phone_clean
 
 class ReviewForm(forms.ModelForm):
     rating = forms.IntegerField(required=False, initial=5)  # Делаем поле необязательным с начальным значением 5
