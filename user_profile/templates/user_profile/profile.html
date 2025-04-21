@@ -5,495 +5,949 @@
 
 {% block title %}Профиль{% endblock %}
 
+{% block messages %}
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                {% if "chat" not in message.tags %}
+                    <div class="alert alert-{{ message.tags|default:'warning' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-<div class="container my-4">
-  <div class="row">
-    <!-- Условия тарифов (слева) -->
-    <div class="col-lg-4 mb-4">
-      <div class="tariff-table-container compact">
-        <h5>Условия тарифов</h5>
-        <!-- Кнопка для мобильных устройств -->
-        <button class="btn btn-outline-primary w-100 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#tariffTableCollapse" aria-expanded="false" aria-controls="tariffTableCollapse">
-          Показать условия тарифов
-        </button>
-        <!-- Таблица тарифов -->
-        <div class="collapse d-lg-block" id="tariffTableCollapse">
-          <p>Нажмите на тариф, чтобы увидеть подробности.</p>
-          <table class="tariff-table">
-            <thead>
-              <tr>
-                <th>Тариф</th>
-                <th>Стоимость</th>
-                <th>Лимиты</th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <td colspan="3">* После окончания подписки в глобальном поиске видны только 30 последних ваших запчастей. Если подписка не продливается 30 дней, на вашем складе останутся только 30 запчастей, которые вы добавили последними, все остальные будут удалены</td>
-              </tr>
-            </tfoot>
-            <tbody>
-              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
-                  data-tariff-name="Бесплатный"
-                  data-tariff-cost="0 руб"
-                  data-tariff-limits="- На склад можно добавить до 30 запчастей.<br>- Для каждой запчасти допустимо загрузить только одно фото.<br>- Отправка уведомлений возможна не чаще одного раза в 24 часа."
-                  data-tariff-description="Подходит для тех, кто разобрал своё устройство и хочет продать его запчасти."
-                  {% if user.profile.tariff == 'free' %}class="active-tariff"{% endif %}>
-                <td><i class="fas fa-gift"></i> Бесплатный</td>
-                <td>0 руб</td>
-                <td>До 30<br>1 фото</td>
-              </tr>
-              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
-                  data-tariff-name="Базовый"
-                  data-tariff-cost="20 руб/30 дней"
-                  data-tariff-limits="Добавить на склад можно до 500 запчастей."
-                  data-tariff-description="После окончания подписки в глобальном поиске видны только 30 последних ваших запчастей. Если подписка не продливается 30 дней, на вашем складе останутся только 30 запчастей, которые вы добавили последними, все остальные будут удалены."
-                  {% if user.profile.tariff == 'lite' %}class="active-tariff"{% endif %}>
-                <td><i class="fas fa-lightbulb"></i> Базовый</td>
-                <td>20 руб/30 дней</td>
-                <td>До 500</td>
-              </tr>
-              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
-                  data-tariff-name="Стандартный"
-                  data-tariff-cost="40 руб/30 дней"
-                  data-tariff-limits="Добавить на склад можно до 2000 запчастей."
-                  data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
-                  {% if user.profile.tariff == 'standard' %}class="active-tariff"{% endif %}>
-                <td><i class="fas fa-wrench"></i> Стандартный</td>
-                <td>40 руб/30 дней</td>
-                <td>До 2000</td>
-              </tr>
-              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
-                  data-tariff-name="Продвинутый"
-                  data-tariff-cost="70 руб/30 дней"
-                  data-tariff-limits="Добавить на склад можно до 7000 запчастей."
-                  data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
-                  {% if user.profile.tariff == 'standard2' %}class="active-tariff"{% endif %}>
-                <td><i class="fas fa-tools"></i> Продвинутый</td>
-                <td>70 руб/30 дней</td>
-                <td>До 7000</td>
-              </tr>
-              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
-                  data-tariff-name="Профессиональный"
-                  data-tariff-cost="120 руб/30 дней"
-                  data-tariff-limits="Добавить на склад можно до 15000 запчастей."
-                  data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
-                  {% if user.profile.tariff == 'standard3' %}class="active-tariff"{% endif %}>
-                <td><i class="fas fa-microchip"></i> Профессиональный</td>
-                <td>120 руб/30 дней</td>
-                <td>До 15000</td>
-              </tr>
-              <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
-                  data-tariff-name="Неограниченный"
-                  data-tariff-cost="300 руб/30 дней"
-                  data-tariff-limits="Без лимита"
-                  data-tariff-description="Для максимальной активности. После окончания подписки в поиске видны 30 последних запчастей, через 30 дней остальные удаляются."
-                  {% if user.profile.tariff == 'premium' %}class="active-tariff"{% endif %}>
-                <td><i class="fas fa-infinity"></i> Неограниченный</td>
-                <td>300 руб/30 дней</td>
-                <td>Без лимита</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Боковая колонка профиля (справа) -->
-    <div class="col-lg-4 mb-4 profile-settings-container">
-      <div class="tariff-table-container compact">
-        <div class="card-header bg-primary text-white">
-          <h5 class="mb-0">Мой профиль</h5>
-        </div>
-        <div class="card-body">
-          {% if edit_mode %}
-            <!-- Форма редактирования профиля -->
-            <form method="post" class="form">
-              {% csrf_token %}
-              {% for field in form.visible_fields %}
-                {% if field.name == "tariff" %}
-                  <div class="mb-2">
-                    <label class="form-label">{{ field.label }}:</label>
-                    <input type="text" class="form-control" value="{{ user.profile.get_tariff_display }}" readonly>
-                    <input type="hidden" name="tariff" value="{{ user.profile.tariff }}">
-                  </div>
-                {% else %}
-                  <div class="mb-2">
-                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}:</label>
-                    {% if field.name == "region" %}
-                      <select id="id_region" name="region" class="form-control {% if field.errors %}is-invalid{% endif %}">
-                        <option value="">Выберите область</option>
-                        {% for region in form.region.field.choices %}
-                          <option value="{{ region.0 }}" {% if region.0 == form.region.value %}selected{% endif %}>{{ region.1 }}</option>
-                        {% endfor %}
-                      </select>
-                      {% if field.errors %}
-                        <div class="invalid-feedback">{{ field.errors|join:", " }}</div>
-                      {% endif %}
-                    {% elif field.name == "city" %}
-                      <select id="id_city" name="city" class="form-control {% if field.errors %}is-invalid{% endif %}">
-                        <option value="">Выберите город</option>
-                      </select>
-                      {% if field.errors %}
-                        <div class="invalid-feedback">{{ field.errors|join:", " }}</div>
-                      {% endif %}
-                    {% else %}
-                      {{ field|add_class:"form-control {% if field.errors %}is-invalid{% endif %}" }}
-                      {% if field.errors %}
-                        <div class="invalid-feedback">{{ field.errors|join:", " }}</div>
-                      {% endif %}
-                    {% endif %}
-                  </div>
-                {% endif %}
-              {% endfor %}
-              <div class="d-flex justify-content-between mt-3">
-                <button type="submit" class="btn btn-success btn-sm">Сохранить</button>
-                <a href="{% url 'profile' %}" class="btn btn-secondary btn-sm">Отменить</a>
-              </div>
-            </form>
-          {% else %}
-            <!-- Отображение профиля -->
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item"><strong>Имя:</strong> {{ user.profile.full_name|default:"Не указано" }}</li>
-              <li class="list-group-item"><strong>Телефон:</strong> {{ user.profile.phone|default:"Не указан" }}</li>
-              <li class="list-group-item"><strong>Город:</strong> {{ user.profile.city|default:"Не указан" }}</li>
-              <li class="list-group-item"><strong>Магазин / мастерская:</strong> {{ user.profile.workshop_name|default:"Не указано" }}</li>
-              <li class="list-group-item"><strong>Рейтинг:</strong> {{ user.profile.average_rating|default:"0.0" }} / 5</li>
-              <li class="list-group-item"><strong>Отправка:</strong> {{ user.profile.delivery_methods|default:"Не указано" }}</li>
-              <li class="list-group-item">
-                <strong>Тариф:</strong>
-                {% if user.profile.tariff == 'free' %}Бесплатный (до 30 запчастей)
-                {% elif user.profile.tariff == 'lite' %}Базовый (до 500 запчастей)
-                {% elif user.profile.tariff == 'standard' %}Стандартный (до 2000 запчастей)
-                {% elif user.profile.tariff == 'standard2' %}Продвинутый (до 7000 запчастей)
-                {% elif user.profile.tariff == 'standard3' %}Профессиональный (до 15000 запчастей)
-                {% elif user.profile.tariff == 'premium' %}Неограниченный (без ограничений)
-                {% endif %}
-              </li>
-              {% if subscription_period %}
-                <li class="list-group-item">
-                  <strong>Подписка:</strong>
-                  {{ subscription_period.0|date:"d M Y" }} – {{ subscription_period.1|date:"d M Y" }}
-                </li>
-              {% endif %}
-            </ul>
-
-            <!-- Уведомления о подписке -->
-            {% if subscription_notification %}
-              <div class="alert alert-warning mt-3" role="alert">
-                {% if subscription_expired %}
-                  Ваша подписка истекла! Вы переведены на бесплатный тариф.
-                {% else %}
-                  {{ subscription_notification }}
-                {% endif %}
-                {% if days_since_expiry is not None and days_since_expiry < 30 %}
-                  {% with days_left_until_deletion=30|subtract:days_since_expiry %}
-                    <p class="mt-2">
-                      Через {{ days_left_until_deletion }} {{ days_left_until_deletion|get_day_word }}
-                      все запчасти, кроме последних 30, будут удалены, если вы не оформите подписку.
+<div class="container-fluid">
+    <div class="row">
+        <!-- Боковая панель -->
+        <div class="col-lg-3 col-xl-2 sidebar">
+            <div class="sidebar-content">
+                <!-- Информация о тарифе -->
+                <div class="tariff-info mb-3">
+                    <h6 class="fw-bold">Ваш тариф</h6>
+                    <p class="mb-1">
+                        <strong>
+                            {% if user.profile.tariff == 'free' %}Бесплатный (до 30 запчастей)
+                            {% elif user.profile.tariff == 'lite' %}Базовый (до 500 запчастей)
+                            {% elif user.profile.tariff == 'standard' %}Стандартный (до 2000 запчастей)
+                            {% elif user.profile.tariff == 'standard2' %}Продвинутый (до 7000 запчастей)
+                            {% elif user.profile.tariff == 'standard3' %}Профессиональный (до 15000 запчастей)
+                            {% elif user.profile.tariff == 'premium' %}Неограниченный (без ограничений)
+                            {% endif %}
+                        </strong>
                     </p>
-                  {% endwith %}
-                {% endif %}
-              </div>
-            {% endif %}
+                    {% if subscription_period %}
+                        <p class="small text-muted">
+                            Срок: {{ subscription_period.0|date:"d M Y" }} – {{ subscription_period.1|date:"d M Y" }}
+                        </p>
+                    {% endif %}
+                </div>
 
-            <!-- Кнопка продления подписки -->
-            {% if renew_subscription %}
-              <div class="text-center mt-3">
-                <a href="{% url 'payments:choose_subscription' %}?renew=true&tariff={{ user.profile.tariff }}" class="btn btn-warning btn-sm">Продлить подписку</a>
-              </div>
-            {% endif %}
-
-            <!-- Кнопки редактирования и смены тарифа -->
-            <a href="?edit=true" class="btn btn-primary w-100 mt-3">Редактировать</a>
-            <div class="mt-3">
-              <a href="{% url 'payments:choose_subscription' %}" class="btn btn-success w-100">Сменить тариф</a>
+                <!-- Навигация -->
+                <h5 class="sidebar-title">Навигация</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle active" data-content="profile-content">Профиль</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="tariff-content">Условия тарифов</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'payments:choose_subscription' %}" class="nav-link btn btn-success w-100 mb-2">Сменить тариф</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="bookmarks-content">
+                            Закладки <span class="badge bg-secondary">{{ bookmarks_count }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="reviews-content">Отзывы обо мне</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="given-reviews-content">Мои отзывы</a>
+                    </li>
+                </ul>
             </div>
-          {% endif %}
         </div>
-      </div>
-    </div>
 
-    <!-- Основной блок (справа под профилем) -->
-    <div class="col-lg-4 mb-4">
-      <div class="tariff-table-container compact">
-        <div class="card-body">
-          <div class="d-flex flex-column gap-3">
-            <a href="{% url 'bookmarks' %}" class="btn btn-outline-primary w-100">
-              Закладки <span class="badge bg-secondary">{{ bookmarks_count }}</span>
-            </a>
-            <a href="#reviews-content" class="btn btn-outline-primary w-100" data-bs-toggle="collapse" aria-expanded="false" aria-controls="reviews-content">
-              Отзывы обо мне
-            </a>
-            <a href="#given-reviews-content" class="btn btn-outline-primary w-100" data-bs-toggle="collapse" aria-expanded="false" aria-controls="given-reviews-content">
-              Мои отзывы
-            </a>
-          </div>
-
-          <!-- Контент отзывов обо мне -->
-          <div class="collapse mt-4" id="reviews-content">
-            <h4>Отзывы обо мне</h4>
-            {% if reviews %}
-              <div class="list-group">
-                {% for review in reviews %}
-                  <div class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                      <span><strong>{{ review.rating }}/5</strong></span>
-                      <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
-                    </div>
-                    <p>{{ review.comment }}</p>
-                  </div>
-                {% endfor %}
-              </div>
-            {% else %}
-              <p class="text-muted">Нет отзывов.</p>
-            {% endif %}
-          </div>
-
-          <!-- Контент моих отзывов -->
-          <div class="collapse mt-4" id="given-reviews-content">
-            <h4>Мои отзывы</h4>
-            {% if given_reviews %}
-              <div class="list-group">
-                {% for review in given_reviews %}
-                  <div class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                      <span><strong>{{ review.user.profile.full_name }}</strong></span>
-                      <span><strong>{{ review.rating }}/5</strong></span>
-                    </div>
-                    <p>{{ review.comment }}</p>
-                    <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
-                    <form method="post" action="{% url 'delete_review' review.id %}" style="display:inline;">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
-                    </form>
-                  </div>
-                {% endfor %}
-              </div>
-            {% else %}
-              <p class="text-muted">Вы ещё не оставили отзывов.</p>
-            {% endif %}
-          </div>
+        <!-- Кнопка для мобильной боковой панели -->
+        <div class="d-lg-none mobile-sidebar-toggle">
+            <button class="btn btn-primary" type="button" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
-      </div>
+
+        <!-- Основной контент -->
+        <div class="col-lg-9 col-xl-10 main-content">
+            <div class="container my-4">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <!-- Контейнер для переключаемого контента -->
+                        <div class="content-container">
+
+                            <!-- Профиль (по умолчанию) -->
+                            <div class="content-section tariff-table-container compact active" id="profile-content">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Мой профиль</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if edit_mode %}
+                                        <!-- Форма редактирования профиля -->
+                                        <form method="post" class="form">
+                                            {% csrf_token %}
+                                            {% for field in form.visible_fields %}
+                                                {% if field.name == "tariff" %}
+                                                    <div class="mb-2">
+                                                        <label class="form-label">{{ field.label }}:</label>
+                                                        <input type="text" class="form-control" value="{{ user.profile.get_tariff_display }}" readonly>
+                                                        <input type="hidden" name="tariff" value="{{ user.profile.tariff }}">
+                                                    </div>
+                                                {% else %}
+                                                    <div class="mb-2">
+                                                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}:</label>
+                                                        {% if field.name == "region" %}
+                                                            <select id="id_region" name="region" class="form-control {% if field.errors %}is-invalid{% endif %}">
+                                                                <option value="">Выберите область</option>
+                                                                {% for region in form.region.field.choices %}
+                                                                    <option value="{{ region.0 }}" {% if region.0 == form.region.value %}selected{% endif %}>{{ region.1 }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                            {% if field.errors %}
+                                                                <div class="invalid-feedback">{{ field.errors|join:", " }}</div>
+                                                            {% endif %}
+                                                        {% elif field.name == "city" %}
+                                                            <select id="id_city" name="city" class="form-control {% if field.errors %}is-invalid{% endif %}">
+                                                                <option value="">Выберите город</option>
+                                                            </select>
+                                                            {% if field.errors %}
+                                                                <div class="invalid-feedback">{{ field.errors|join:", " }}</div>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            {{ field|add_class:"form-control {% if field.errors %}is-invalid{% endif %}" }}
+                                                            {% if field.errors %}
+                                                                <div class="invalid-feedback">{{ field.errors|join:", " }}</div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <button type="submit" class="btn btn-success btn-sm">Сохранить</button>
+                                                <a href="{% url 'profile' %}" class="btn btn-secondary btn-sm">Отменить</a>
+                                            </div>
+                                        </form>
+                                    {% else %}
+                                        <!-- Отображение профиля -->
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item"><strong>Имя:</strong> {{ user.profile.full_name|default:"Не указано" }}</li>
+                                            <li class="list-group-item"><strong>Телефон:</strong> {{ user.profile.phone|default:"Не указан" }}</li>
+                                            <li class="list-group-item"><strong>Город:</strong> {{ user.profile.city|default:"Не указан" }}</li>
+                                            <li class="list-group-item"><strong>Магазин / мастерская:</strong> {{ user.profile.workshop_name|default:"Не указано" }}</li>
+                                            <li class="list-group-item"><strong>Рейтинг:</strong> {{ user.profile.average_rating|default:"0.0" }} / 5</li>
+                                            <li class="list-group-item"><strong>Отправка:</strong> {{ user.profile.delivery_methods|default:"Не указано" }}</li>
+                                            <li class="list-group-item">
+                                                <strong>Тариф:</strong>
+                                                {% if user.profile.tariff == 'free' %}Бесплатный (до 30 запчастей)
+                                                {% elif user.profile.tariff == 'lite' %}Базовый (до 500 запчастей)
+                                                {% elif user.profile.tariff == 'standard' %}Стандартный (до 2000 запчастей)
+                                                {% elif user.profile.tariff == 'standard2' %}Продвинутый (до 7000 запчастей)
+                                                {% elif user.profile.tariff == 'standard3' %}Профессиональный (до 15000 запчастей)
+                                                {% elif user.profile.tariff == 'premium' %}Неограниченный (без ограничений)
+                                                {% endif %}
+                                            </li>
+                                            {% if subscription_period %}
+                                                <li class="list-group-item">
+                                                    <strong>Подписка:</strong>
+                                                    {{ subscription_period.0|date:"d M Y" }} – {{ subscription_period.1|date:"d M Y" }}
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+
+                                        <!-- Уведомления о подписке -->
+                                        {% if subscription_notification %}
+                                            <div class="alert alert-warning mt-3" role="alert">
+                                                {% if subscription_expired %}
+                                                    Ваша подписка истекла! Вы переведены на бесплатный тариф.
+                                                {% else %}
+                                                    {{ subscription_notification }}
+                                                {% endif %}
+                                                {% if days_since_expiry is not None and days_since_expiry < 30 %}
+                                                    {% with days_left_until_deletion=30|subtract:days_since_expiry %}
+                                                        <p class="mt-2">
+                                                            Через {{ days_left_until_deletion }} {{ days_left_until_deletion|get_day_word }}
+                                                            все запчасти, кроме последних 30, будут удалены, если вы не оформите подписку.
+                                                        </p>
+                                                    {% endwith %}
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+
+                                        <!-- Кнопка продления подписки -->
+                                        {% if renew_subscription %}
+                                            <div class="text-center mt-3">
+                                                <a href="{% url 'payments:choose_subscription' %}?renew=true&tariff={{ user.profile.tariff }}" class="btn btn-warning btn-sm">Продлить подписку</a>
+                                            </div>
+                                        {% endif %}
+
+                                        <!-- Кнопка редактирования -->
+                                        <a href="?edit=true" class="btn btn-primary w-100 mt-3">Редактировать</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Условия тарифов -->
+                            <div class="content-section tariff-table-container compact" id="tariff-content">
+                                <h5>Условия тарифов</h5>
+                                <!-- Кнопка для мобильных устройств -->
+                                <button class="btn btn-outline-primary w-100 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#tariffTableCollapse" aria-expanded="false" aria-controls="tariffTableCollapse">
+                                    Показать условия тарифов
+                                </button>
+                                <!-- Таблица тарифов -->
+                                <div class="collapse d-lg-block" id="tariffTableCollapse">
+                                    <p>Нажмите на тариф, чтобы увидеть подробности.</p>
+                                    <table class="tariff-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Тариф</th>
+                                                <th>Стоимость</th>
+                                                <th>Лимиты</th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="3">* После окончания подписки в глобальном поиске видны только 30 последних ваших запчастей. Если подписка не продливается 30 дней, на вашем складе останутся только 30 запчастей, которые вы добавили последними, все остальные будут удалены</td>
+                                            </tr>
+                                        </tfoot>
+                                        <tbody>
+                                            <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                                                data-tariff-name="Бесплатный"
+                                                data-tariff-cost="0 руб"
+                                                data-tariff-limits="- На склад можно добавить до 30 запчастей.<br>- Для каждой запчасти допустимо загрузить только одно фото.<br>- Отправка уведомлений возможна не чаще одного раза в 24 часа."
+                                                data-tariff-description="Подходит для тех, кто разобрал своё устройство и хочет продать его запчасти."
+                                                {% if user.profile.tariff == 'free' %}class="active-tariff"{% endif %}>
+                                                <td><i class="fas fa-gift"></i> Бесплатный</td>
+                                                <td>0 руб</td>
+                                                <td>До 30<br>1 фото</td>
+                                            </tr>
+                                            <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                                                data-tariff-name="Базовый"
+                                                data-tariff-cost="20 руб/30 дней"
+                                                data-tariff-limits="Добавить на склад можно до 500 запчастей."
+                                                data-tariff-description="После окончания подписки в глобальном поиске видны только 30 последних ваших запчастей. Если подписка не продливается 30 дней, на вашем складе останутся только 30 запчастей, которые вы добавили последними, все остальные будут удалены."
+                                                {% if user.profile.tariff == 'lite' %}class="active-tariff"{% endif %}>
+                                                <td><i class="fas practices-lightbulb"></i> Базовый</td>
+                                                <td>20 руб/30 дней</td>
+                                                <td>До 500</td>
+                                            </tr>
+                                            <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                                                data-tariff-name="Стандартный"
+                                                data-tariff-cost="40 руб/30 дней"
+                                                data-tariff-limits="Добавить на склад можно до 2000 запчастей."
+                                                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
+                                                {% if user.profile.tariff == 'standard' %}class="active-tariff"{% endif %}>
+                                                <td><i class="fas fa-wrench"></i> Стандартный</td>
+                                                <td>40 руб/30 дней</td>
+                                                <td>До 2000</td>
+                                            </tr>
+                                            <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                                                data-tariff-name="Продвинутый"
+                                                data-tariff-cost="70 руб/30 дней"
+                                                data-tariff-limits="Добавить на склад можно до 7000 запчастей."
+                                                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
+                                                {% if user.profile.tariff == 'standard2' %}class="active-tariff"{% endif %}>
+                                                <td><i class="fas fa-tools"></i> Продвинутый</td>
+                                                <td>70 руб/30 дней</td>
+                                                <td>До 7000</td>
+                                            </tr>
+                                            <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                                                data-tariff-name="Профессиональный"
+                                                data-tariff-cost="120 руб/30 дней"
+                                                data-tariff-limits="Добавить на склад можно до 15000 запчастей."
+                                                data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей. Через 30 дней все остальные будут удалены."
+                                                {% if user.profile.tariff == 'standard3' %}class="active-tariff"{% endif %}>
+                                                <td><i class="fas fa-microchip"></i> Профессиональный</td>
+                                                <td>120 руб/30 дней</td>
+                                                <td>До 15000</td>
+                                            </tr>
+                                            <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
+                                                data-tariff-name="Неограниченный"
+                                                data-tariff-cost="300 руб/30 дней"
+                                                data-tariff-limits="Без лимита"
+                                                data-tariff-description="Для максимальной активности. После окончания подписки в поиске видны 30 последних запчастей, через 30 дней остальные удаляются."
+                                                {% if user.profile.tariff == 'premium' %}class="active-tariff"{% endif %}>
+                                                <td><i class="fas fa-infinity"></i> Неограниченный</td>
+                                                <td>300 руб/30 дней</td>
+                                                <td>Без лимита</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Закладки -->
+                            <div class="content-section" id="bookmarks-content">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h2 class="fw-bold" style="font-size: 1.8rem;">Мои закладки</h2>
+                                </div>
+                                <div class="row g-4">
+                                    {% for bookmark in bookmarks %}
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="card shadow-sm h-100">
+                                                <div class="image-container">
+                                                    {% if bookmark.part.images.first.image.url %}
+                                                        <img src="{{ bookmark.part.images.first.image.url }}" class="card-img-top" alt="Фото запчасти">
+                                                    {% else %}
+                                                        <div class="no-image-text">Нет фото</div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="card-body d-flex flex-column">
+                                                    <h5 class="card-title text-truncate">{{ bookmark.part.part_type }}</h5>
+                                                    <p class="card-text mb-2">
+                                                        {{ bookmark.part.device }} {{ bookmark.part.brand }} {{ bookmark.part.model }}<br>
+                                                        <strong>Цена:</strong> {{ bookmark.part.price }} ₽<br>
+                                                        <strong>Кол-во:</strong> {{ bookmark.part.quantity }}
+                                                    </p>
+                                                    <div class="mt-auto d-flex justify-content-between">
+                                                        <a href="{% url 'part_detail' bookmark.part.id %}" class="btn btn-primary btn-sm">Подробно</a>
+                                                        <a href="{% url 'toggle_bookmark' bookmark.part.id %}?next={% url 'profile' %}" class="btn btn-danger btn-sm">Удалить</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% empty %}
+                                        <div class="col-12 text-center">
+                                            <div class="alert alert-warning" role="alert">
+                                                <h4 class="alert-heading">У вас пока нет закладок</h4>
+                                                <p>Добавьте интересующие запчасти в закладки, чтобы быстро к ним возвращаться.</p>
+                                                <a href="{% url 'search' %}" class="btn btn-primary">Перейти к поиску</a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Отзывы обо мне -->
+                            <div class="content-section tariff-table-container compact" id="reviews-content">
+                                <h4>Отзывы обо мне</h4>
+                                {% if reviews %}
+                                    <div class="list-group">
+                                        {% for review in reviews %}
+                                            <div class="list-group-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <span><strong>{{ review.rating }}/5</strong></span>
+                                                    <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                                                </div>
+                                                <p>{{ review.comment }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">Нет отзывов.</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Мои отзывы -->
+                            <div class="content-section tariff-table-container compact" id="given-reviews-content">
+                                <h4>Мои отзывы</h4>
+                                {% if given_reviews %}
+                                    <div class="list-group">
+                                        {% for review in given_reviews %}
+                                            <div class="list-group-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <span><strong>{{ review.user.profile.full_name }}</strong></span>
+                                                    <span><strong>{{ review.rating }}/5</strong></span>
+                                                </div>
+                                                <p>{{ review.comment }}</p>
+                                                <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                                                <form method="post" action="{% url 'delete_review' review.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                                </form>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">Вы ещё не оставили отзывов.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Модальное окно для подробностей тарифа -->
 <div class="modal fade" id="tariffModal" tabindex="-1" aria-labelledby="tariffModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content custom-modal">
-      <div class="modal-header">
-        <h5 class="modal-title" id="tariffModalLabel"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-      </div>
-      <div class="modal-body">
-        <table class="table">
-          <tbody>
-            <tr>
-              <th>Стоимость</th>
-              <td id="tariffCost"></td>
-            </tr>
-            <tr>
-              <th>Лимиты</th>
-              <td id="tariffLimits"></td>
-            </tr>
-            <tr>
-              <th>Описание</th>
-              <td id="tariffDescription"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content custom-modal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tariffModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Стоимость</th>
+                            <td id="tariffCost"></td>
+                        </tr>
+                        <tr>
+                            <th>Лимиты</th>
+                            <td id="tariffLimits"></td>
+                        </tr>
+                        <tr>
+                            <th>Описание</th>
+                            <td id="tariffDescription"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Стили -->
 <style>
-  .tariff-table-container {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border: 1px solid #dee2e6;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .tariff-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .tariff-table th, .tariff-table td {
-    padding: 8px;
-    text-align: center;
-    border-bottom: 1px solid #dee2e6;
-  }
-  .tariff-table th {
-    background-color: #007bff;
-    color: white;
-    font-weight: 600;
-  }
-  .tariff-table td {
-    background-color: #fff;
-  }
-  .tariff-table tr.active-tariff td {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  .tariff-table tbody tr:hover {
-    transform: scale(1.02);
-    background-color: #e9ecef;
-    cursor: pointer;
-  }
-  .tariff-table-container .card-header {
-    border-radius: 15px;
-    padding: 1rem;
-    background-color: #007bff;
-  }
-  .card-body {
-    padding: 1rem;
-    border-radius: 0 0 10px 10px;
-  }
-  .list-group-item {
-    border-radius: 10px;
-    margin-bottom: 5px;
-  }
-  .alert {
-    border-radius: 10px;
-  }
-  .btn {
-    border-radius: 10px;
-  }
-  .btn-sm {
-    border-radius: 8px;
-  }
-  .btn-outline-primary {
-    border-radius: 10px;
-  }
-  .collapse.show + .collapse:not(.show) {
-    margin-top: 0;
-  }
-  .tab-content {
-    padding: 1rem;
-    border-radius: 10px;
-    background-color: #fff;
-  }
-  .form-control, select {
-    border-radius: 10px;
-  }
-  .custom-modal {
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-  }
-  .custom-modal .modal-header {
-    border-bottom: none;
-    background-color: #f1f1f1;
-    padding: 1rem;
-    border-radius: 15px 15px 0 0;
-  }
-  .custom-modal .modal-body {
-    padding: 1.5rem;
-  }
-  @media (max-width: 767px) {
-    .container {
-      margin: 0.5rem 0;
-      padding: 0 0.5rem;
+    /* Скрытие подвала на странице профиля */
+    footer, .footer, [class*="footer"], [id*="footer"] {
+        display: none !important;
     }
-    .row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+
+    /* Стили для сообщений */
+    .messages {
+        max-width: 67%;
+        margin: 0 auto 1rem auto;
     }
-    .col-lg-4 {
-      width: 100%;
-      margin-bottom: 0.5rem;
+
+    /* Стили боковой панели */
+    .sidebar {
+        width: 250px;
+        background: linear-gradient(to bottom, #e7f0fd, #d3e3fc);
+        padding: 10px;
+        position: fixed;
+        top: 60px;
+        bottom: 0;
+        left: 0;
+        overflow-y: auto;
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        border-right: 1px solid #dee2e6;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     }
+    .sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        color: #333;
+    }
+
+    .nav-link.active {
+        background-color: #007bff;
+        color: #fff;
+    }
+    .btn-success.nav-link {
+        color: #fff;
+    }
+    .btn-success.nav-link:hover {
+        background-color: #218838;
+        color: #fff;
+        transform: scale(1.05);
+    }
+    @media (max-width: 991px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+        .sidebar.show {
+            transform: translateX(0);
+        }
+    }
+    @media (min-width: 992px) {
+        .sidebar {
+            transform: translateX(0);
+        }
+    }
+
+    /* Стили для информации о тарифе в боковой панели */
+    .tariff-info {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    .tariff-info h6 {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    .tariff-info p {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+    .tariff-info .text-muted {
+        font-size: 0.8rem;
+    }
+
+    /* Кнопка мобильной боковой панели */
+    .mobile-sidebar-toggle {
+        position: fixed;
+        top: 70px;
+        left: 10px;
+        z-index: 1100;
+    }
+    .mobile-sidebar-toggle .btn {
+        padding: 6px 10px;
+    }
+
+    /* Основной контент */
+    .main-content {
+        margin-left: 0;
+        transition: margin-left 0.3s ease;
+    }
+    @media (min-width: 992px) {
+        .main-content {
+            margin-left: 250px;
+        }
+    }
+
+    /* Стили для переключаемого контента */
+    .content-container {
+        min-height: 250px;
+        margin: 0 auto;
+    }
+    .content-section {
+        display: none;
+    }
+    .content-section.active {
+        display: block;
+    }
+    #bookmarks-content {
+        max-width: 90%;
+    }
+    #profile-content, #tariff-content, #reviews-content, #given-reviews-content {
+        max-width: 67%;
+    }
+
+    /* Стили для тарифов и профиля */
     .tariff-table-container {
-      padding: 0.75rem;
+        background-color: #f8f9fa;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
     }
     .tariff-table {
-      font-size: 0.9rem;
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        overflow: hidden;
     }
     .tariff-table th, .tariff-table td {
-      padding: 0.5rem;
+        padding: 6px;
+        text-align: center;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .tariff-table th {
+        background-color: #007bff;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .tariff-table td {
+        background-color: #fff;
+        font-size: 0.85rem;
+    }
+    .tariff-table tr.active-tariff td {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .tariff-table tbody tr:hover {
+        transform: scale(1.02);
+        background-color: #e9ecef;
+        cursor: pointer;
     }
     .tariff-table-container .card-header {
-      padding: 0.75rem;
-      border-radius: 15px;
-      background-color: #007bff;
+        border-radius: 10px;
+        padding: 0.8rem;
+        background-color: #007bff;
     }
     .card-body {
-      padding: 0.75rem;
+        padding: 0.8rem;
+        border-radius: 0 0 8px 8px;
     }
     .list-group-item {
-      font-size: 0.9rem;
-      padding: 0.5rem;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+    .alert {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        padding: 8px;
     }
     .btn {
-      padding: 0.3rem 0.6rem;
-      font-size: 0.9rem;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 0.85rem;
     }
     .btn-sm {
-      padding: 0.2rem 0.4rem;
-      font-size: 0.8rem;
+        border-radius: 6px;
+        padding: 3px 8px;
+        font-size: 0.8rem;
     }
     .btn-outline-primary {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.9rem;
-    }
-    .tab-content {
-      padding: 0.75rem;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 0.85rem;
     }
     .form-control, select {
-      padding: 0.3rem 0.5rem;
-      font-size: 0.9rem;
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 0.85rem;
     }
-    .modal-dialog {
-      margin: 0.5rem;
+    .form-label {
+        font-size: 0.85rem;
     }
-    .modal-content {
-      padding: 0.75rem;
+    .invalid-feedback {
+        font-size: 0.8rem;
     }
-    .modal-header {
-      padding: 0.5rem;
-    }
-    .modal-body {
-      padding: 0.75rem;
+    h4 {
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
     }
     h5 {
-      font-size: 1.1rem;
+        font-size: 1rem;
+        margin-bottom: 0.8rem;
     }
     p, small {
-      font-size: 0.9rem;
+        font-size: 0.85rem;
     }
-    #tariffTableCollapse:not(.show) + p {
-      display: none;
+    .custom-modal {
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
     }
-  }
+    .custom-modal .modal-header {
+        border-bottom: none;
+        background-color: #f1f1f1;
+        padding: 0.8rem;
+        border-radius: 10px 10px 0 0;
+    }
+    .custom-modal .modal-body {
+        padding: 1rem;
+    }
+    .custom-modal .modal-title {
+        font-size: 1rem;
+    }
+    .custom-modal .table {
+        font-size: 0.85rem;
+    }
+
+    /* Стили для карточек закладок */
+    .card {
+        border-radius: 6px;
+        overflow: hidden;
+        transition: transform 0.2s ease;
+    }
+    .card:hover {
+        transform: scale(1.02);
+    }
+    .image-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 75%;
+        background-color: #f8f9fa;
+    }
+    .card-img-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+    }
+    .no-image-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #888;
+        font-size: 1.1rem;
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    .card-text {
+        font-size: 0.9rem;
+        color: #555;
+        line-height: 1.4;
+    }
+    .btn-primary.btn-sm,
+    .btn-danger.btn-sm {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        line-height: 1.3;
+    }
+    .alert-warning {
+        padding: 2rem;
+        border-radius: 8px;
+    }
+    .alert-heading {
+        font-size: 1.5rem;
+    }
+    .alert p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .alert .btn-primary {
+        font-size: 1rem;
+        padding: 0.6rem 1.2rem;
+    }
+
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 767px) {
+        .container {
+            margin: 0.5rem 0;
+            padding: 0 0.5rem;
+        }
+        .row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .col-lg-12 {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .content-container {
+            max-width: 100%;
+        }
+        .messages {
+            max-width: 100%;
+        }
+        #bookmarks-content {
+            max-width: 100%;
+        }
+        #profile-content, #tariff-content, #reviews-content, #given-reviews-content {
+            max-width: 100%;
+        }
+        .tariff-table-container {
+            padding: 8px;
+        }
+        .tariff-table {
+            font-size: 0.8rem;
+        }
+        .tariff-table th, .tariff-table td {
+            padding: 4px;
+        }
+        .tariff-table-container .card-header {
+            padding: 0.6rem;
+            border-radius: 10px;
+            background-color: #007bff;
+        }
+        .card-body {
+            padding: 0.6rem;
+        }
+        .list-group-item {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+        .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        .btn-sm {
+            padding: 2px 6px;
+            font-size: 0.75rem;
+        }
+        .btn-outline-primary {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        .form-control, select {
+            padding: 3px 6px;
+            font-size: 0.8rem;
+        }
+        .form-label {
+            font-size: 0.8rem;
+        }
+        .invalid-feedback {
+            font-size: 0.75rem;
+        }
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+        .modal-content {
+            padding: 0.5rem;
+        }
+        .modal-header {
+            padding: 0.5rem;
+        }
+        .modal-body {
+            padding: 0.8rem;
+        }
+        h4 {
+            font-size: 1rem;
+        }
+        h5 {
+            font-size: 0.9rem;
+        }
+        p, small {
+            font-size: 0.8rem;
+        }
+        #tariffTableCollapse:not(.show) + p {
+            display: none;
+        }
+        .sidebar {
+            padding: 8px;
+        }
+        .sidebar-title {
+            font-size: 1rem;
+        }
+        .nav-link {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        .mobile-sidebar-toggle .btn {
+            padding: 5px 8px;
+        }
+        .card-title {
+            font-size: 1rem;
+        }
+        .card-text {
+            font-size: 0.85rem;
+        }
+        .no-image-text {
+            font-size: 1rem;
+        }
+        .alert-heading {
+            font-size: 1.3rem;
+        }
+        .alert p {
+            font-size: 0.9rem;
+        }
+        .alert .btn-primary {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        .tariff-info {
+            padding: 8px;
+        }
+        .tariff-info h6 {
+            font-size: 0.9rem;
+        }
+        .tariff-info p {
+            font-size: 0.8rem;
+        }
+        .tariff-info .text-muted {
+            font-size: 0.75rem;
+        }
+    }
 </style>
-<!-- Скрипт для модального окна -->
+
+<!-- Скрипты -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  var tariffModal = document.getElementById('tariffModal');
-  tariffModal.addEventListener('show.bs.modal', function (event) {
-    var trigger = event.relatedTarget;
-    var tariffName = trigger.getAttribute('data-tariff-name');
-    var tariffCost = trigger.getAttribute('data-tariff-cost');
-    var tariffLimits = trigger.getAttribute('data-tariff-limits');
-    var tariffDescription = trigger.getAttribute('data-tariff-description');
-    var modalTitle = tariffModal.querySelector('.modal-title');
-    var modalCost = tariffModal.querySelector('#tariffCost');
-    var modalLimits = tariffModal.querySelector('#tariffLimits');
-    var modalDescription = tariffModal.querySelector('#tariffDescription');
-    modalTitle.textContent = tariffName;
-    modalCost.textContent = tariffCost;
-    modalLimits.innerHTML = tariffLimits;
-    modalDescription.textContent = tariffDescription;
-  });
+    // Скрипт для модального окна тарифов
+    var tariffModal = document.getElementById('tariffModal');
+    tariffModal.addEventListener('show.bs.modal', function (event) {
+        var trigger = event.relatedTarget;
+        var tariffName = trigger.getAttribute('data-tariff-name');
+        var tariffCost = trigger.getAttribute('data-tariff-cost');
+        var tariffLimits = trigger.getAttribute('data-tariff-limits');
+        var tariffDescription = trigger.getAttribute('data-tariff-description');
+        var modalTitle = tariffModal.querySelector('.modal-title');
+        var modalCost = tariffModal.querySelector('#tariffCost');
+        var modalLimits = tariffModal.querySelector('#tariffLimits');
+        var modalDescription = tariffModal.querySelector('#tariffDescription');
+        modalTitle.textContent = tariffName;
+        modalCost.textContent = tariffCost;
+        modalLimits.innerHTML = tariffLimits;
+        modalDescription.textContent = tariffDescription;
+    });
+
+    // Скрипт для переключения боковой панели на мобильных устройствах
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const mainContent = document.querySelector('.main-content');
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function(event) {
+            event.stopPropagation();
+            sidebar.classList.toggle('show');
+            if (sidebar.classList.contains('show')) {
+                mainContent.style.marginLeft = '250px';
+            } else {
+                mainContent.style.marginLeft = '0';
+            }
+        });
+    }
+
+    // Закрытие боковой панели при клике вне её
+    document.addEventListener('click', function(event) {
+        if (sidebar.classList.contains('show') && !sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+            sidebar.classList.remove('show');
+            mainContent.style.marginLeft = '0';
+        }
+    });
+
+    // Предотвратить закрытие при клике внутри боковой панели
+    sidebar.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    // Скрипт для переключения контента
+    const reviewToggles = document.querySelectorAll('.reviews-toggle');
+    const contentSections = document.querySelectorAll('.content-section');
+    const messagesDiv = document.querySelector('.messages');
+
+    reviewToggles.forEach(toggle => {
+        toggle.addEventListener('click', function(event) {
+            event.preventDefault();
+            const contentId = this.getAttribute('data-content');
+
+            // Скрыть все секции и убрать активный класс с кнопок
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+            });
+            reviewToggles.forEach(t => {
+                t.classList.remove('active');
+            });
+
+            // Показать выбранную секцию и сделать кнопку активной
+            document.getElementById(contentId).classList.add('active');
+            this.classList.add('active');
+
+            // Динамически обновлять ширину сообщений
+            if (messagesDiv) {
+                if (contentId === 'bookmarks-content') {
+                    messagesDiv.style.maxWidth = '90%';
+                } else {
+                    messagesDiv.style.maxWidth = '67%';
+                }
+            }
+        });
+    });
 });
 </script>
 <script src="{% static 'js/profile.js' %}"></script>

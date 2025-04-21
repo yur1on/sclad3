@@ -134,7 +134,7 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sklad',
+        'NAME': 'sklad_new',
         'USER': 'yura',
         'PASSWORD': '',
         'HOST': 'localhost',
