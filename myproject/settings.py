@@ -87,6 +87,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'warehouse.context_processors.counts',
                 'notifications.context_processors.unread_notifications',
+                'warehouse.context_processors.subscription_status',
 
             ],
         },

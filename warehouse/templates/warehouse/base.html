@@ -134,6 +134,26 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
+        /* Анимация пульсации для бейджа */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .subscription-badge {
+            animation: pulse 1.5s infinite;
+        }
+
         /* Адаптация для мобильных устройств */
         @media (max-width: 768px) {
             .navbar-collapse {
@@ -209,13 +229,33 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         {% if user.is_authenticated %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'chat_list' %}">
-                                <i class="fas fa-envelope"></i> Сообщения<span id="message-notification" class="badge bg-danger" style="display:none;"></span></a>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'chat_list' %}">
+                                    <i class="fas fa-envelope"></i> Сообщения
+                                    <span id="message-notification" class="badge bg-danger" style="display:none;"></span>
+                                </a>
                             </li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}"><i class="fas fa-user"></i> Профиль</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'warehouse' %}"><i class="fas fa-box"></i> Мой склад</a></li>
+                            <li class="nav-item position-relative">
+                                <a class="nav-link" href="{% url 'profile' %}">
+                                    <i class="fas fa-user"></i> Профиль
+                                    {% if subscription_notification %}
+                                        <span class="badge bg-{% if subscription_expired %}danger{% else %}warning{% endif %} ms-2 subscription-badge" data-bs-toggle="tooltip" title="{{ subscription_notification }}">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'warehouse' %}">
+                                    <i class="fas fa-box"></i> Мой склад
+                                </a>
+                            </li>
                         {% endif %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'search' %}"><i class="fas fa-search"></i> Поиск глобальный</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'search' %}">
+                                <i class="fas fa-search"></i> Поиск глобальный
+                            </a>
+                        </li>
                     </ul>
 
                     {% if user.is_authenticated %}
@@ -241,6 +281,27 @@
 
     <!-- Основной контент с отступом сверху -->
     <main class="content-padding">
+        <!-- Toast для уведомления о подписке -->
+        {% if subscription_notification %}
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+            <div id="subscriptionToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+                <div class="toast-header {% if subscription_expired %}bg-danger text-white{% else %}bg-warning text-dark{% endif %}">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong class="me-auto">Уведомление о подписке</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                </div>
+                <div class="toast-body">
+                    {{ subscription_notification }}
+                    <br>
+                    <div class="mt-2">
+                        <a href="{% url 'profile' %}" class="btn btn-sm btn-primary me-2">Перейти в профиль</a>
+                        <button id="hideSubscriptionToast" class="btn btn-sm btn-secondary">Не показывать</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="container mt-4">
             {% if messages %}
                 <div class="messages">
@@ -318,26 +379,55 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Подключаем пользовательские скрипты -->
     <script src="{% static 'js/scripts.js' %}" defer></script>
-</body>
 
-<script>
-    function checkMessages() {
-        fetch("{% url 'check_new_messages' %}")
-            .then(response => response.json())
-            .then(data => {
-                let notificationBadge = document.getElementById("message-notification");
-                if (data.new_messages > 0) {
-                    notificationBadge.style.display = "inline-block";
-                    notificationBadge.textContent = data.new_messages;
-                } else {
-                    notificationBadge.style.display = "none";
-                }
+    <script>
+        // Инициализация tooltip и Toast
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
-    }
 
-    // Запуск проверки каждые 10 секунд
-    setInterval(checkMessages, 10000);
-    checkMessages();  // Проверить сразу при загрузке
-</script>
+            // Инициализация Toast, если он есть и не скрыт в текущей сессии
+            var toastEl = document.getElementById('subscriptionToast');
+            if (toastEl && !sessionStorage.getItem('hideSubscriptionToast')) {
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
 
+            // Обработка кнопки "Больше не показывать"
+            var hideButton = document.getElementById('hideSubscriptionToast');
+            if (hideButton) {
+                hideButton.addEventListener('click', function () {
+                    sessionStorage.setItem('hideSubscriptionToast', 'true');
+                    var toast = bootstrap.Toast.getInstance(toastEl);
+                    if (toast) {
+                        toast.hide();
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script>
+        function checkMessages() {
+            fetch("{% url 'check_new_messages' %}")
+                .then(response => response.json())
+                .then(data => {
+                    let notificationBadge = document.getElementById("message-notification");
+                    if (data.new_messages > 0) {
+                        notificationBadge.style.display = "inline-block";
+                        notificationBadge.textContent = data.new_messages;
+                    } else {
+                        notificationBadge.style.display = "none";
+                    }
+                });
+        }
+
+        // Запуск проверки каждые 10 секунд
+        setInterval(checkMessages, 10000);
+        checkMessages();  // Проверить сразу при загрузке
+    </script>
+
+</body>
 </html>

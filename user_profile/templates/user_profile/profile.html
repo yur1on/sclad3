@@ -23,7 +23,7 @@
           </thead>
           <tfoot>
             <tr>
-              <td colspan="3">* После окончания подписки в поиске видны только 30 последних запчастей. Через 30 дней все остальные запчасти и их изображения будут удалены.</td>
+              <td colspan="3">* После окончания подписки в поиске видны только 30 последних запчастей. Через 30 дней все остальные запчасти будут удалены.</td>
             </tr>
           </tfoot>
           <tbody>
@@ -127,9 +127,18 @@
           <!-- Уведомления о подписке -->
           {% if subscription_notification %}
             <div class="alert alert-warning mt-3" role="alert">
-              {{ subscription_notification }}
+              {% if subscription_expired %}
+                Ваша подписка истекла! Вы переведены на бесплатный тариф.
+              {% else %}
+                {{ subscription_notification }}
+              {% endif %}
               {% if days_since_expiry is not None and days_since_expiry < 30 %}
-                <p class="mt-2">Через {{ 30|subtract:days_since_expiry }} дней все запчасти, кроме последних 30, и их изображения будут удалены, если вы не выберете новый тариф.</p>
+                {% with days_left_until_deletion=30|subtract:days_since_expiry %}
+                  <p class="mt-2">
+                    Через {{ days_left_until_deletion }} {{ days_left_until_deletion|get_day_word }}
+                    все запчасти, кроме последних 30 будут удалены, если вы не оформите подписку.
+                  </p>
+                {% endwith %}
               {% endif %}
             </div>
           {% endif %}
@@ -309,7 +318,6 @@
 
 <!-- Стили -->
 <style>
-  /* Исходные стили для веб-версии */
   .tariff-table-container {
     background-color: #f8f9fa;
     padding: 15px;
@@ -398,7 +406,6 @@
     padding: 1.5rem;
   }
 
-  /* Адаптация для мобильных устройств */
   @media (max-width: 767px) {
     .container {
       margin: 0.5rem 0;
