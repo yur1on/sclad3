@@ -15,7 +15,7 @@ jobs:
       - name: Publish
         uses: nogsantos/scp-deploy@master
         with:
-          src: .
+          src: ./*
           host: 5.44.44.188
           remote: /opt/sclad3test
           port: 22
