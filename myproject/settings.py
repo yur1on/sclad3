@@ -1,59 +1,3 @@
-
-
-# # Database
-# # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-#
-# # DATABASES = {
-# #     'default': {
-# #         'ENGINE': 'django.db.backends.sqlite3',
-# #         'NAME': BASE_DIR / 'db.sqlite3',
-# #     }
-# # }
-#
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'sklad',       # Имя вашей базы данных
-#         'USER': 'yura',        # Имя системного пользователя
-#         'PASSWORD': '',        # Пароль не требуется для локальной работы
-#         'HOST': 'localhost',   # Локальный сервер
-#         'PORT': '5432',        # Порт по умолчанию
-#     }
-# }
-#
-#
-# # DATABASES = {
-# #     'default': {
-# #         'ENGINE': 'django.db.backends.postgresql',
-# #         'NAME': 'django-app-db',
-# #         'USER': 'admin',
-# #         'PASSWORD': '12345678',
-# #         'HOST': os.environ.get('DB_HOST'),
-# #         'PORT': '5432',
-# #     }
-# # }
-#
-#
-#
-#
-
-#
-# # Internationalization
-# # https://docs.djangoproject.com/en/4.2/topics/i18n/
-#
-
-
-# # Static files (CSS, JavaScript, Images)
-# # https://docs.djangoproject.com/en/4.2/howto/static-files/
-#
-
-#
-# # Default primary key field type
-# # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-#
-
-
-
 import os
 from pathlib import Path
 from decouple import config  # Импортируем python-decouple
@@ -65,13 +9,14 @@ SECRET_KEY = config('SECRET_KEY')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Или 'bootstrap5', в зависимости от версии
 
+# Для работы https.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
-# DEBUG = False
 DEBUG = True
-ALLOWED_HOSTS = []
+# DEBUG = True
+# ALLOWED_HOSTS = []
 # ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.5']
-# ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.26']
+ALLOWED_HOSTS = ['mobirazbor.by']
 LOGIN_URL = 'login'
 
 INSTALLED_APPS = [
@@ -131,13 +76,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'sklad_new',
+#         'USER': 'yura',
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sklad_new',
-        'USER': 'yura',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'NAME': 'django-app-db',
+        'USER': 'app_user',
+        'PASSWORD': '89U1JKpkBQVTErtpIgfi',
+        'HOST': 'postgres',
         'PORT': '5432',
     }
 }
