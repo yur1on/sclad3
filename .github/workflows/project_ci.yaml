@@ -7,7 +7,22 @@ on:
       - 'feature/test-ci'
 
 jobs:
-  deploy:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Publish
+        uses: nogsantos/scp-deploy@master
+        with:
+          src: .
+          host: 5.44.44.188
+          remote: /opt/sclad3test
+          port: 22
+          user: github
+          key: ${{ secrets.SSH_KEY }}
+        
+  launch:
     runs-on: ubuntu-latest
     # needs: build
     steps:
@@ -19,4 +34,7 @@ jobs:
           username: github
           key: ${{ secrets.SSH_KEY }}
           # port: 22
-          script: whoami
+          script: |
+            cd /opt/sclad3test
+            docker-compose ps -a
+
