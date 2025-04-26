@@ -12,15 +12,15 @@
                 <h3 class="text-primary">{{ device }}</h3>
                 {% for brand, parts in brands.items %}
                     <div class="brand-section">
-                        <h4 class="ml-3 text-success">{{ brand }}</h4>
+                        <h4 class="ms-3 text-success">{{ brand }}</h4>
                         <table class="table table-bordered table-striped table-hover">
                             <thead class="thead-dark">
                                 <tr>
-                                    <th>Модель</th>
-                                    <th>Тип запчасти</th>
-                                    <th>Цвет</th>
-                                    <th>Количество</th>
-                                    <th>Цена</th>
+                                    <th scope="col">Модель</th>
+                                    <th scope="col">Тип запчасти</th>
+                                    <th scope="col">Цвет</th>
+                                    <th scope="col">Количество</th>
+                                    <th scope="col">Цена</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -29,9 +29,14 @@
                                         <td>{{ part.display_model }}</td>
                                         <td>{{ part.part_type }}</td>
                                         <td>{{ part.color|default:"Не указан" }}</td>
-                                        <td>{{ part.quantity }}</td>
+                                        <td>
+                                            {{ part.quantity }}
+                                            <a href="{% url 'edit_part' part.id %}"
+                                               class="btn btn-warning btn-sm ms-2">
+                                                Изменить
+                                            </a>
+                                        </td>
                                         <td>{{ part.price }}</td>
-
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -44,4 +49,61 @@
         <p>Еще нет добавленных запчастей.</p>
     {% endif %}
 </div>
+
+<!-- Стили -->
+<style>
+    /* Стили для кнопки */
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.85rem;
+        line-height: 1.2; /* Уменьшенная высота строки */
+        vertical-align: middle; /* Выравнивание с текстом */
+    }
+
+    /* Общие стили таблицы */
+    .table th,
+    .table td {
+        padding: 8px;
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    /* Колонка количества */
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        min-width: 150px; /* Достаточно места для количества и кнопки */
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 576px) {
+        .btn-sm {
+            padding: 3px 6px;
+            font-size: 0.75rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 6px;
+            font-size: 0.8rem;
+        }
+
+        .table th:nth-child(4),
+        .table td:nth-child(4) {
+            min-width: 120px; /* Уменьшенная ширина для мобильных */
+        }
+
+        .container {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .device-section h3 {
+            font-size: 1.25rem;
+        }
+
+        .brand-section h4 {
+            font-size: 1rem;
+        }
+    }
+</style>
 {% endblock %}
