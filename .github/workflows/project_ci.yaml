@@ -1,0 +1,16 @@
+name: project sclad3 CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'feature/test-ci'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Build
+          run: |
+           echo "Test CI Build"
+
