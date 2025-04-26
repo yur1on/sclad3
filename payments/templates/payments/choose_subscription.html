@@ -1,4 +1,3 @@
-
 {% extends "warehouse/base.html" %}
 {% load static %}
 {% block title %}Выбор подписки{% endblock %}
@@ -32,6 +31,11 @@
           </h5>
         </div>
         <div class="card-body">
+          {% if temporary_payment_restriction %}
+            <p style="color: red; font-weight: bold; font-size: 16px; text-align: center;">
+              Оплата временно недоступна. Пожалуйста, попробуйте позже.
+            </p>
+          {% endif %}
           <form method="post" id="subscription-form">
             {% csrf_token %}
             <!-- Предупреждение -->
@@ -41,7 +45,7 @@
                 ⚠ При смене тарифа неиспользованные дни и оставшаяся сумма не компенсируются!
               </p>
               <p style="font-size:18px; font-weight:600;">Выберите тариф:</p>
-              <!-- Бесплатный тариф остаётся для выбора и просмотра -->
+              <!-- Бесплатный тариф -->
               <div class="form-check">
                 <input type="radio" class="form-check-input" name="tariff_type" id="tariff_free" value="free"
                        {% if user.profile.tariff == 'free' %}checked{% endif %}>
@@ -102,7 +106,7 @@
               {% endif %}
             </div>
 
-            <!-- Блоки для выбора срока подписки для каждого тарифа -->
+            <!-- Блоки для выбора срока подписки -->
             <div id="duration_free" class="duration-block mb-4" style="{% if renew %}{% if user.profile.tariff == 'free' %}display:block;{% else %}display:none;{% endif %}{% else %}{% if user.profile.tariff == 'free' %}display:block;{% else %}display:none;{% endif %}{% endif %}">
               <p style="font-size:18px; font-weight:600;">Тариф Бесплатный не требует оплаты</p>
             </div>
@@ -210,9 +214,15 @@
             <!-- Блок предварительного расчёта итоговой подписки -->
             <div id="subscription-info" class="mb-4" style="font-size:16px; text-align:center;"></div>
 
-            <!-- Кнопка оплаты только для платных тарифов -->
+            <!-- Кнопка действия -->
             <div class="text-center" id="action-buttons">
-              <button type="submit" class="btn btn-success btn-lg" id="payment-button">Перейти к оплате</button>
+              {% if temporary_payment_restriction %}
+                <p style="color: red; font-weight: bold; font-size: 16px;">
+                  Оплата временно недоступна. Пожалуйста, попробуйте позже.
+                </p>
+              {% else %}
+                <button type="submit" class="btn btn-success btn-lg" id="payment-button">Перейти к оплате</button>
+              {% endif %}
             </div>
           </form>
           <div class="mt-3 text-center">
@@ -227,7 +237,8 @@
       <div class="tariff-table-container card shadow-sm flex-grow-1">
         <div class="card-body">
           <h5>Условия тарифов и ограничения</h5>
-          <p>Нажмите на тариф, чтобы увидеть подробности.</p>
+          <p>Нажмите на тариф, чтобы увидеть подробности. <a href="{% url 'about_project' %}#tariffs"> Тарифы</a></p>
+
           <table class="tariff-table">
             <thead>
               <tr>
@@ -264,7 +275,7 @@
                   data-tariff-description="После окончания подписки в поиске видны 30 последних запчастей."
                   {% if user.profile.tariff == 'standard' %}class="active-tariff"{% endif %}>
                 <td><i class="fas fa-wrench"></i> Стандартный</td>
-                <td>40 руб/30 дней</td>
+                <td>40 руб/30 дней Lattice
                 <td>До 2000</td>
               </tr>
               <tr data-bs-toggle="modal" data-bs-target="#tariffModal"
@@ -353,9 +364,17 @@ document.addEventListener("DOMContentLoaded", function() {
     const durationPremium = document.getElementById("duration_premium");
     const subscriptionInfo = document.getElementById("subscription-info");
     const paymentButton = document.getElementById("payment-button");
+    const temporaryRestriction = {{ temporary_payment_restriction|yesno:"true,false" }};
     const currentEndStr = document.getElementById("current-end").dataset.currentEnd;
     const currentEndDate = new Date(currentEndStr);
     const now = new Date();
+
+    // Отключение кнопки оплаты, если активен флаг ограничения
+    if (temporaryRestriction && paymentButton) {
+        paymentButton.disabled = true;
+        paymentButton.style.opacity = "0.6";
+        paymentButton.style.cursor = "not-allowed";
+    }
 
     function addDays(date, days) {
         let d = new Date(date);
@@ -381,10 +400,20 @@ document.addEventListener("DOMContentLoaded", function() {
         let newEndDate = addDays(baseDate, 30 * selectedDuration);
         if (selectedTariff === 'free') {
             subscriptionInfo.innerHTML = `<p>Тариф "Бесплатный" активен по умолчанию и не требует оплаты.</p>`;
-            paymentButton.style.display = "none";
+            if (paymentButton) {
+                paymentButton.textContent = "Активировать";
+                paymentButton.disabled = false;
+                paymentButton.style.opacity = "1";
+                paymentButton.style.cursor = "pointer";
+            }
         } else {
             subscriptionInfo.innerHTML = `<p>При выбранном варианте ваша подписка будет действовать до <strong>${formatDate(newEndDate)}</strong></p>`;
-            paymentButton.style.display = "inline-block";
+            if (paymentButton && !temporaryRestriction) {
+                paymentButton.textContent = "Перейти к оплате";
+                paymentButton.disabled = false;
+                paymentButton.style.opacity = "1";
+                paymentButton.style.cursor = "pointer";
+            }
         }
     }
 
@@ -463,7 +492,7 @@ document.addEventListener("DOMContentLoaded", function() {
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 10px;
-    margin-bottom: 15px;
+    margin  margin-bottom: 15px;
   }
   .tariff-table-container {
     margin-top: 0;

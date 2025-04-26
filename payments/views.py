@@ -22,6 +22,13 @@ WSB_PAYMENT_URL = "https://securesandbox.webpay.by/"  # URL тестовой с�
 
 @login_required
 def initiate_payment(request):
+    # Флаг временного ограничения оплаты
+    temporary_payment_restriction = True  # Установите False, чтобы включить оплату
+
+    if temporary_payment_restriction:
+        messages.error(request, "Оплата временно недоступна. Пожалуйста, попробуйте позже.")
+        return redirect('payments:choose_subscription')
+
     tariff_type = request.GET.get('tariff', 'standard')
     try:
         duration = int(request.GET.get('duration', 1))
@@ -67,7 +74,6 @@ def initiate_payment(request):
         duration=duration,
         tariff_type=tariff_type
     )
-
 
     wsb_seed = str(int(time.time()))
     wsb_order_num = order.order_number
@@ -182,6 +188,7 @@ def choose_subscription(request):
     # Автоматическая конвертация тарифа на "free", если подписка истекла
     if profile.subscription_end and profile.subscription_end < now and profile.tariff != 'free':
         profile.tariff = 'free'
+        profile.subscription_end = None
         profile.save()
 
     current_subscription = None
@@ -190,6 +197,9 @@ def choose_subscription(request):
 
     renew = request.GET.get('renew') == 'true'
     tariff = request.GET.get('tariff', profile.tariff) if renew else None
+
+    # Флаг временного ограничения оплаты
+    temporary_payment_restriction = True  # Установите False, чтобы включить оплату
 
     tariff_options = [
         {
@@ -204,7 +214,7 @@ def choose_subscription(request):
         },
         {
             'type': 'standard',
-            'label': 'Cтандартный (до 2000 запчастей)',
+            'label': 'Стандартный (до 2000 запчастей)',
             'durations': [
                 {'duration': 1, 'price': 40.00, 'label': '30 дней – 40 руб'},
                 {'duration': 3, 'price': 120.00, 'label': '90 дней – 120 руб'},
@@ -243,16 +253,34 @@ def choose_subscription(request):
             ]
         },
     ]
+
     if request.method == 'POST':
         tariff_type = request.POST.get('tariff_type', 'standard')
         try:
             duration = int(request.POST.get('duration', 1))
         except ValueError:
             duration = 1
+
+        # Обработка бесплатного тарифа
+        if tariff_type == 'free':
+            profile.tariff = 'free'
+            profile.subscription_start = now
+            profile.subscription_end = None  # Бесплатный тариф не имеет срока окончания
+            profile.save()
+            messages.success(request, "Бесплатный тариф успешно активирован.")
+            return redirect('profile')
+
+        # Проверка ограничения оплаты
+        if temporary_payment_restriction:
+            messages.error(request, "Оплата временно недоступна. Пожалуйста, попробуйте позже.")
+            return redirect('payments:choose_subscription')
+
         return redirect(f"{reverse('payments:initiate_payment')}?tariff={tariff_type}&duration={duration}")
+
     return render(request, 'payments/choose_subscription.html', {
         'tariff_options': tariff_options,
         'current_subscription': current_subscription,
         'now': now,
         'renew': renew,
+        'temporary_payment_restriction': temporary_payment_restriction,
     })
