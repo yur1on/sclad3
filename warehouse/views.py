@@ -70,6 +70,9 @@ def warehouse_view(request):
     # Сортировка от новых к старым
     parts = parts.order_by('-created_at')
 
+    # Получаем общее количество запчастей после фильтрации
+    total_parts = parts.count()
+
     # Пагинация: 30 запчастей на странице
     paginator = Paginator(parts, 30)
     page_number = request.GET.get('page')
@@ -86,7 +89,8 @@ def warehouse_view(request):
         'model': model,
         'part_type': part_type,
         'devices': devices,
-        'brands': brands
+        'brands': brands,
+        'total_parts': total_parts,
     })
 
 
@@ -447,92 +451,16 @@ def get_parts(request):
         'brand': part.brand,
         'model': part.model,
         'part_type': part.part_type,
+        'part_number': part.part_number or '',  # Добавляем part_number
         'color': part.color,
         'quantity': part.quantity,
-        'price': part.price,
-        'note': part.note,  # Поле должно существовать в модели
-        'condition': part.condition,  # Поле должно существовать в модели
+        'price': str(part.price),  # Преобразуем Decimal в строку для JSON
+        'note': part.note,
+        'condition': part.condition,
         'images': [{'image_url': image.image.url} for image in part.images.all()]
     } for part in parts]
 
     return JsonResponse({'parts': parts_data})
-
-@login_required
-def import_excel(request):
-    if request.method == 'POST':
-        file = request.FILES.get('file')
-
-        # Проверяем, является ли файл формата .xlsx
-        if not file.name.endswith('.xlsx'):
-            messages.error(request, 'Неверный формат файла. Пожалуйста, загрузите файл Excel с расширением .xlsx.')
-            return redirect('import_excel')
-
-        try:
-            wb = openpyxl.load_workbook(file)
-            ws = wb.active
-
-            current_device = None
-            current_brand = None
-            current_model = None
-
-            errors = []  # Список для хранения ошибок
-
-            for row in ws.iter_rows(min_row=2, values_only=True):  # Пропускаем заголовок
-                try:
-                    device, brand, model, part_type, color, quantity, price = row
-
-                    # Если в строке указаны устройство, бренд, модель, обновляем их
-                    if device and brand and model:
-                        current_device = device
-                        current_brand = brand
-                        current_model = model
-
-                    # Если не указаны устройство, бренд или модель, используем последние известные значения
-                    if not current_device or not current_brand or not current_model:
-                        raise ValueError('Ошибка: строка содержит незаполненные поля для устройства, бренда или модели.')
-
-                    # Проверяем, чтобы обязательные поля запчасти были заполнены
-                    if not all([part_type, quantity, price]):
-                        raise ValueError(f'Некоторые обязательные поля отсутствуют для строки: {current_device} {current_brand} {current_model}')
-
-                    # Проверяем, существует ли запчасть с такими же параметрами в базе данных
-                    existing_part = Part.objects.filter(
-                        user=request.user,
-                        device=current_device,
-                        brand=current_brand,
-                        model=current_model,
-                        part_type=part_type
-                    ).exists()
-
-                    if existing_part:
-                        continue  # Пропускаем уже существующие запчасти
-
-                    # Создаем новую запись о запчасти, если ее нет в базе
-                    Part.objects.create(
-                        user=request.user,
-                        device=current_device,
-                        brand=current_brand,
-                        model=current_model,
-                        part_type=part_type,
-                        color=color if color else "Не указан",  # Обрабатываем пустой цвет
-                        quantity=int(quantity),  # Количество запчастей
-                        price=float(price)  # Цена запчастей
-                    )
-                except Exception as e:
-                    errors.append(str(e))
-
-            if errors:
-                messages.error(request, f'Обнаружены ошибки при импорте: {"; ".join(errors)}')
-            else:
-                messages.success(request, 'Данные успешно импортированы!')
-
-            return redirect('warehouse')  # Перенаправляем на склад
-
-        except Exception as e:
-            messages.error(request, f'Ошибка при импорте данных: {str(e)}')
-            return redirect('import_excel')
-
-    return render(request, 'warehouse/import_parts.html')
 
 
 def base_view(request):

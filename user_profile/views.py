@@ -1,14 +1,14 @@
+
 from .forms import ProfileForm, ReviewForm
 from .models import Profile, Review, Bookmark
-from django.contrib.auth.decorators import login_required
 from warehouse.models import Part
 from chat.models import Chat
-from django.contrib.auth.models import User
 from django.utils import timezone
-from django.conf import settings
-import os
 from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.models import User
+
 
 @login_required
 def profile(request):
@@ -35,9 +35,8 @@ def profile(request):
                         image.delete()
                     part.delete()
                 messages.warning(request, "Ваша подписка истекла более 30 дней назад. Все запчасти, кроме последних 30, были удалены.")
-        elif days_since_expiry >= 0:
-            days_left_until_deletion = 30 - days_since_expiry
-            messages.info(request, f"Ваша подписка истекла {days_since_expiry} дней назад. Через {days_left_until_deletion} дней все запчасти, кроме последних 30, будут удалены. Оформите подписку, чтобы сохранить данные.")
+
+
 
     reviews = Review.objects.filter(user=user).order_by('-created_at')
     given_reviews = user.given_reviews.all()
@@ -60,7 +59,6 @@ def profile(request):
         form = ProfileForm(request.POST, instance=user.profile)
         if form.is_valid():
             form.save()
-            messages.success(request, "Профиль успешно обновлен.")
             return redirect('profile')
     else:
         form = ProfileForm(instance=user.profile)
@@ -82,6 +80,7 @@ def profile(request):
 @login_required
 def add_review(request, user_id):
     reviewed_user = get_object_or_404(User, id=user_id)
+    part_id = request.GET.get('part_id')  # Получаем part_id из GET
     if request.method == 'POST':
         form = ReviewForm(request.POST, reviewer=request.user, user=reviewed_user)
         if form.is_valid():
@@ -91,12 +90,18 @@ def add_review(request, user_id):
             if not review.rating:
                 review.rating = 5
             review.save()
-            messages.success(request, "Отзыв добавлен.")
+            part_id = request.POST.get('part_id') or part_id
+            if part_id:
+                return redirect('part_detail', part_id=part_id)
             return redirect('profile')
     else:
         form = ReviewForm(reviewer=request.user, user=reviewed_user)
         form.initial['rating'] = 5
-    return render(request, 'user_profile/add_review.html', {'form': form, 'reviewed_user': reviewed_user})
+    return render(request, 'user_profile/add_review.html', {
+        'form': form,
+        'reviewed_user': reviewed_user,
+        'part_id': part_id  # Передаем part_id в шаблон
+    })
 
 
 @login_required
@@ -112,9 +117,6 @@ def toggle_bookmark(request, part_id):
     bookmark, created = Bookmark.objects.get_or_create(user=request.user, part=part)
     if not created:
         bookmark.delete()
-        messages.success(request, f'Запчасть "{part.part_type}" для устройства {part.device} {part.brand} {part.model} удалена из закладок.')
-    else:
-        messages.success(request, f'Запчасть "{part.part_type}" для устройства {part.device} {part.brand} {part.model} добавлена в закладки.')
     next_page = request.GET.get('next')
     if next_page:
         return redirect(next_page)
@@ -131,5 +133,4 @@ def bookmarks(request):
 def delete_review(request, review_id):
     review = get_object_or_404(Review, id=review_id, reviewer=request.user)
     review.delete()
-    messages.success(request, "Отзыв был успешно удален.")
     return redirect('profile')

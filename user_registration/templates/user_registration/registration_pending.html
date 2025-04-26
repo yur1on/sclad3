@@ -1,0 +1,11 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Подтверждение Email{% endblock %}
+{% block content %}
+<div class="container">
+  <h3>Спасибо за регистрацию!</h3>
+  <p>
+    На ваш email <strong>{{ email }}</strong> отправлено письмо с инструкциями для подтверждения аккаунта.
+  </p>
+  <p>Пожалуйста, проверьте ваш почтовый ящик и перейдите по ссылке из письма для завершения регистрации.</p>
+</div>
+{% endblock %}
