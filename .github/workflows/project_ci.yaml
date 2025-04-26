@@ -24,7 +24,7 @@ jobs:
         
   launch:
     runs-on: ubuntu-latest
-    # needs: build
+    needs: build
     steps:
       # Checkout the code.
       - name: executing remote ssh commands using ssh key
