@@ -1,11 +1,11 @@
 #!/bin/bash
 
-
 echo "Ждем БД"
 
 sleep 10
 
 echo "Применяем миграции"
+python ./manage.py makemigrations
 python ./manage.py migrate
 
 echo "Запускаемся"

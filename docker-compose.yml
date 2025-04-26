@@ -1,44 +1,58 @@
+networks:
+  sclad_net:
+    name: sclad_net
+    driver: bridge
+
 services:
-  postgres-db:
-    image: postgres
-    container_name: my-postgres-db
-    ports:
-      - 6000:5432
-    environment: # исправлено с "environtent"
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=12345678
-      - POSTGRES_DB=django-app-db
-
+  postgres:
+    container_name: postgres
+    image: postgres:14.17-alpine3.21
+    environment:
+      POSTGRES_DB: "django-app-db"
+      POSTGRES_USER: "app_user"
+      POSTGRES_PASSWORD: "89U1JKpkBQVTErtpIgfi"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
-      - db-data:/var/lib/postgresql/data
-
+      - ./data/psql/data:/var/lib/postgresql/data
+    ports:
+      - target: 5432
+        published: 5432
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 700M
+        reservations:
+          memory: 700M
+    restart: unless-stopped
+    networks:
+      sclad_net:
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: udp://0.0.0.0:12201  #"udp://10.10.15.118:12201"  #udp://0.0.0.0:12201 #localhost:24224
+        tag: postgress
 
   django-app:
     container_name: my_docker_blog
     build: .
     ports:
-      - 4567:8000
+      - 8000:8000
     depends_on:
-      - postgres-db
+      - postgres
     environment:
-      - DB_HOST=postgres-db
+      - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=django-app-db
-      - DB_USER=admin
-      - DB_PASSWORD=12345678
-
+      - DB_USER=app_user
+      - DB_PASSWORD=89U1JKpkBQVTErtpIgfi
     volumes:
+      - ./data/sclad3/:/app/
       - image-store:/etc/data/images
-
-networks:
-  default:
-    driver: bridge
-
+      - ./settings.py:/app/myproject/settings.py
+      - ./entry.sh:/app/entry.sh
+    networks:
+      sclad_net:
 
 volumes:
-  db-data:
-    name: "Database_volume"
-
   image-store:
-    name: "django-app-image-store"
-
