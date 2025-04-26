@@ -7,10 +7,16 @@ on:
       - 'feature/test-ci'
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    # needs: build
     steps:
-        - name: Build
-          run: |
-           echo "Test CI Build"
-
+      # Checkout the code.
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 5.44.44.188
+          username: github
+          key: ${{ secrets.SSH_KEY }}
+          # port: 22
+          script: whoami
