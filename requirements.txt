@@ -71,6 +71,7 @@ pyheif==0.8.0
 pyngrok==7.2.3
 python-dateutil==2.9.0.post0
 python-decouple==3.8
+python-dotenv==1.1.0
 python-utils==3.8.2
 pytz==2024.1
 PyYAML==6.0.2
