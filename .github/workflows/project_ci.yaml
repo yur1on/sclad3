@@ -25,6 +25,7 @@ jobs:
         
   launch:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     needs: build
     steps:
       # Checkout the code.
