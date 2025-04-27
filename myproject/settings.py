@@ -19,11 +19,35 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Или 'bootstrap5', в зависимо�
 # Для работы https.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-DEBUG = True
+
+DEBUG = False
+ALLOWED_HOSTS = ['mobirazbor.by']
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django-app-db',
+        'USER': 'app_user',
+        'PASSWORD': '89U1JKpkBQVTErtpIgfi',
+        'HOST': 'postgres',
+        'PORT': '5432',
+    }
+}
+
+
 # DEBUG = True
 # ALLOWED_HOSTS = []
-# ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.5']
-ALLOWED_HOSTS = ['mobirazbor.by']
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'sklad_new',
+#         'USER': 'yura',
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
+
 LOGIN_URL = 'login'
 
 INSTALLED_APPS = [
@@ -83,27 +107,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'sklad_new',
-#         'USER': 'yura',
-#         'PASSWORD': '',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django-app-db',
-        'USER': 'app_user',
-        'PASSWORD': '89U1JKpkBQVTErtpIgfi',
-        'HOST': 'postgres',
-        'PORT': '5432',
-    }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
