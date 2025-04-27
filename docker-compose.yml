@@ -47,10 +47,8 @@ services:
       - DB_USER=app_user
       - DB_PASSWORD=89U1JKpkBQVTErtpIgfi
     volumes:
-      - ./data/sclad3/:/app/
+      - ./:/app/
       - image-store:/etc/data/images
-      - ./settings.py:/app/myproject/settings.py
-      - ./entry.sh:/app/entry.sh
     networks:
       sclad_net:
 

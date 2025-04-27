@@ -4,13 +4,49 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - 'master'
       - 'feature/test-ci'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-        - name: Build
-          run: |
-           echo "Test CI Build"
+      - uses: actions/checkout@master
 
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v1
+        with:
+          host: 5.44.44.188
+          username: github
+          key: ${{ secrets.SSH_KEY }}
+          # port: 22
+          source: "./*,.dockerignore"
+          target: /opt/sclad3test
+
+      # - name: Publish
+      #   uses: nogsantos/scp-deploy@master
+      #   with:
+      #     src: ./*,
+      #     host: 5.44.44.188
+      #     remote: /opt/sclad3test
+      #     port: 22
+      #     user: github
+      #     key: ${{ secrets.SSH_KEY }}
+        
+  launch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: build
+    steps:
+      # Checkout the code.
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 5.44.44.188
+          username: github
+          key: ${{ secrets.SSH_KEY }}
+          # port: 22
+          script: |
+            cd /opt/sclad3test
+            docker compose down --rmi local django-app
+            docker compose up -d

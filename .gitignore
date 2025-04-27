@@ -3,6 +3,4 @@ __pycache__/
 *.pyc
 *.pyo
 *.log
-
-
-
+**/__pycache__
