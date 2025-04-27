@@ -13,15 +13,25 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - name: Publish
-        uses: nogsantos/scp-deploy@master
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v1
         with:
-          src: ./*
           host: 5.44.44.188
-          remote: /opt/sclad3test
-          port: 22
-          user: github
+          username: github
           key: ${{ secrets.SSH_KEY }}
+          # port: 22
+          source: "./*,.dockerignore"
+          target: /opt/sclad3test
+
+      # - name: Publish
+      #   uses: nogsantos/scp-deploy@master
+      #   with:
+      #     src: ./*,
+      #     host: 5.44.44.188
+      #     remote: /opt/sclad3test
+      #     port: 22
+      #     user: github
+      #     key: ${{ secrets.SSH_KEY }}
         
   launch:
     runs-on: ubuntu-latest
