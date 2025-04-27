@@ -1,11 +1,18 @@
+
+from decouple import config  # Импортируем python-decouple
 import os
 from pathlib import Path
-from decouple import config  # Импортируем python-decouple
+from dotenv import load_dotenv
 
+
+# Путь до корня проекта (там, где лежит manage.py и .env)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Секретный ключ из .env
-SECRET_KEY = config('SECRET_KEY')
+# загружаем .env
+load_dotenv(BASE_DIR / '.env')
+
+# теперь SECRET_KEY берётся из окружения
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Или 'bootstrap5', в зависимости от версии
 
