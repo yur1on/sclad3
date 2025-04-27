@@ -37,5 +37,5 @@ jobs:
           # port: 22
           script: |
             cd /opt/sclad3test
-            docker compose down --rmi django-app
+            docker compose down --rmi local django-app
             docker compose up -d
