@@ -2,6 +2,7 @@
 {% block title %}Добавить запчасть{% endblock %}
 {% block content %}
 {% load static %}
+    <link rel="stylesheet" href="{% static 'css/add_part.css' %}">
 <div class="container mt-3 mb-4"> <!-- Уменьшен верхний и нижний отступы контейнера -->
     <h2 class="mb-3 text-center ">Добавить запчасть</h2> <!-- Уменьшен нижний отступ для заголовка -->
 
@@ -141,59 +142,6 @@
         </div>
     </form>
 </div>
-<style>
-    /* Улучшение внешнего вида полей ввода */
-    input.form-control, select.form-control, textarea.form-control {
-        border-radius: 10px; /* скругленные углы */
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* легкая тень */
-        padding: 10px 13px;
-        transition: all 0.3s ease-in-out;
-        border: 0.5px solid #000; /* черная обводка */
-    }
-
-    input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
-        border-color: #007bff; /* синий цвет при фокусе */
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* свечение при фокусе */
-    }
-
-    /* Стиль кнопки отправки */
-    button[type="submit"] {
-        background-color: #28a745;
-        border: none;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 10px;
-        font-size: 18px;
-        cursor: pointer;
-        transition: all 0.3s ease-in-out;
-    }
-
-    button[type="submit"]:hover {
-        background-color: #218838;
-    }
-
-    /* Для улучшения кнопок выбора устройств */
-    input[list] {
-        background-image: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/svgs/solid/search.svg');
-        background-position: right 10px center;
-        background-repeat: no-repeat;
-        padding-right: 40px; /* добавим отступ для иконки */
-    }
-
-    /* Стили для разделителей */
-    .row {
-        margin-bottom: 15px;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    /* Применить черный цвет только к меткам в форме */
-    .form-group label {
-        color: black;
-    }
-</style>
 
 <script src="{% static 'js/add_part.js' %}"></script>
 {% endblock %}

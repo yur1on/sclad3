@@ -34,10 +34,16 @@ class ProfileForm(forms.ModelForm):
         required=False
     )
     tariff = forms.ChoiceField(choices=TARIFF_CHOICES, label="Тарифный план", required=True)
+    telegram_username = forms.CharField(
+        label="Telegram username",
+        required=False,
+        help_text="Ваш Telegram username будет виден другим пользователям. Введите без @.",
+        widget=forms.TextInput(attrs={'placeholder': 'Введите ваш Telegram username без @'})
+    )
 
     class Meta:
         model = Profile
-        fields = ['full_name', 'phone', 'region', 'city', 'workshop_name', 'delivery_methods', 'tariff']
+        fields = ['full_name', 'phone', 'region', 'city', 'workshop_name', 'delivery_methods', 'tariff', 'telegram_username']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,9 +52,14 @@ class ProfileForm(forms.ModelForm):
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone', '')
-        # Удаляем все пробелы из номера
         phone_clean = phone.replace(" ", "")
         return phone_clean
+
+    def clean_telegram_username(self):
+        telegram_username = self.cleaned_data.get('telegram_username', '')
+        if telegram_username.startswith('@'):
+            telegram_username = telegram_username[1:]  # Удаляем @, если пользователь его ввел
+        return telegram_username
 
 class ReviewForm(forms.ModelForm):
     rating = forms.IntegerField(required=False, initial=5)  # Делаем поле необязательным с начальным значением 5

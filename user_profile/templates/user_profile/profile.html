@@ -145,6 +145,14 @@
                                         <ul class="list-group list-group-flush">
                                             <li class="list-group-item"><strong>Имя:</strong> {{ user.profile.full_name|default:"Не указано" }}</li>
                                             <li class="list-group-item"><strong>Телефон:</strong> {{ user.profile.phone|default:"Не указан" }}</li>
+                                            <li class="list-group-item">
+                                                <strong>Telegram:</strong>
+                                                {% if user.profile.telegram_username %}
+                                                    <a href="https://t.me/{{ user.profile.telegram_username }}" target="_blank">@{{ user.profile.telegram_username }}</a>
+                                                {% else %}
+                                                    Не указан
+                                                {% endif %}
+                                            </li>
                                             <li class="list-group-item"><strong>Город:</strong> {{ user.profile.city|default:"Не указан" }}</li>
                                             <li class="list-group-item"><strong>Магазин / мастерская:</strong> {{ user.profile.workshop_name|default:"Не указано" }}</li>
                                             <li class="list-group-item"><strong>Рейтинг:</strong> {{ user.profile.average_rating|default:"0.0" }} / 5</li>
@@ -330,95 +338,103 @@
                                 </div>
                             </div>
 
-<!-- Отзывы обо мне -->
-<div class="content-section tariff-table-container compact" id="reviews-content">
-    <h4>Отзывы обо мне</h4>
-    {% if reviews %}
-        <div class="reviews-list">
-            {% for review in reviews %}
-                <div class="review-item">
-                    <div class="review-header">
-                        <div class="review-avatar">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <div class="review-info">
-                            <strong>{{ review.reviewer.profile.full_name|default:"Аноним" }}</strong>
-                            <span class="review-rating">
-                                {% for i in "12345" %}
-                                    <i class="fas fa-star {% if i|add:0 <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
-                                {% endfor %}
-                            </span>
-                        </div>
-                        <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
-                    </div>
-                    <p class="review-comment">{{ review.comment }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="text-muted">Нет отзывов.</p>
-    {% endif %}
-</div>
+                            <!-- Отзывы обо мне -->
+                            <div class="content-section tariff-table-container compact" id="reviews-content">
+                                <h4>Отзывы обо мне</h4>
+                                {% if reviews %}
+                                    <div class="reviews-list">
+                                        {% for review in reviews %}
+                                            <div class="review-item">
+                                                <div class="review-header">
+                                                    <div class="review-avatar">
+                                                        <i class="fas fa-user-circle"></i>
+                                                    </div>
+                                                    <div class="review-info">
+                                                        <strong>{{ review.reviewer.profile.full_name|default:"Аноним" }}</strong>
+                                                        <span class="review-rating">
+                                                            {% for i in "12345" %}
+                                                                <i class="fas fa-star {% if i|add:0 <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                                            {% endfor %}
+                                                        </span>
+                                                    </div>
+                                                    <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                                                </div>
+                                                <p class="review-comment">{{ review.comment }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">Нет отзывов.</p>
+                                {% endif %}
+                            </div>
 
-   <!-- Мои отзывы -->
-<div class="content-section tariff-table-container compact" id="given-reviews-content">
-    <h4>Мои отзывы</h4>
-    {% if given_reviews %}
-        <div class="reviews-list">
-            {% for review in given_reviews %}
-                <div class="review-item">
-                    <div class="review-header">
-                        <div class="review-avatar">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <div class="review-info">
-                            <strong>{{ review.user.profile.full_name }}</strong>
-                            <span class="review-rating">
-                                {% for i in "12345" %}
-                                    <i class="fas fa-star {% if i|add:0 <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
-                                {% endfor %}
-                            </span>
-                        </div>
-                        <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
-                    </div>
-                    <p class="review-comment">{{ review.comment }}</p>
-                    <form method="post" action="{% url 'delete_review' review.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm mt-2">Удалить</button>
-                    </form>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="text-muted">Вы ещё не оставили отзывов.</p>
-    {% endif %}
-</div>
+                            <!-- Мои отзывы -->
+                            <div class="content-section tariff-table-container compact" id="given-reviews-content">
+                                <h4>Мои отзывы</h4>
+                                {% if given_reviews %}
+                                    <div class="reviews-list">
+                                        {% for review in given_reviews %}
+                                            <div class="review-item">
+                                                <div class="review-header">
+                                                    <div class="review-avatar">
+                                                        <i class="fas fa-user-circle"></i>
+                                                    </div>
+                                                    <div class="review-info">
+                                                        <strong>{{ review.user.profile.full_name }}</strong>
+                                                        <span class="review-rating">
+                                                            {% for i in "12345" %}
+                                                                <i class="fas fa-star {% if i|add:0 <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                                            {% endfor %}
+                                                        </span>
+                                                    </div>
+                                                    <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                                                </div>
+                                                <p class="review-comment">{{ review.comment }}</p>
+                                                <form method="post" action="{% url 'delete_review' review.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm mt-2">Удалить</button>
+                                                </form>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">Вы ещё не оставили отзывов.</p>
+                                {% endif %}
+                            </div>
 
-<!-- Модальное окно для подробностей тарифа -->
-<div class="modal fade" id="tariffModal" tabindex="-1" aria-labelledby="tariffModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content custom-modal">
-            <div class="modal-header">
-                <h5 class="modal-title" id="tariffModalLabel"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-            </div>
-            <div class="modal-body">
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <th>Стоимость</th>
-                            <td id="tariffCost"></td>
-                        </tr>
-                        <tr>
-                            <th>Лимиты</th>
-                            <td id="tariffLimits"></td>
-                        </tr>
-                        <tr>
-                            <th>Описание</th>
-                            <td id="tariffDescription"></td>
-                        </tr>
-                    </tbody>
-                </table>
+                            <!-- Модальное окно для подробностей тарифа -->
+                            <div class="modal fade" id="tariffModal" tabindex="-1" aria-labelledby="tariffModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content custom-modal">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="tariffModalLabel"></h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <table class="table">
+                                                <tbody>
+                                                    <tr>
+                                                        <th>Стоимость</th>
+                                                        <td id="tariffCost"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Лимиты</th>
+                                                        <td id="tariffLimits"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Описание</th>
+                                                        <td id="tariffDescription"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -736,49 +752,48 @@
         padding: 0.6rem 1.2rem;
     }
 
-
- /* Стили для отзывов */
-.reviews-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-.review-item {
-    background-color: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-.review-avatar {
-    font-size: 2rem;
-    color: #6c757d;
-    margin-right: 1rem;
-}
-.review-info {
-    display: flex;
-    flex-direction: column;
-}
-.review-rating {
-    margin-top: 0.25rem;
-}
-.review-comment {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    color: #333;
-}
-.text-warning {
-    color: #ffc107;
-}
-.text-muted {
-    color: #6c757d;
-}
+    /* Стили для отзывов */
+    .reviews-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .review-item {
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .review-avatar {
+        font-size: 2rem;
+        color: #6c757d;
+        margin-right: 1rem;
+    }
+    .review-info {
+        display: flex;
+        flex-direction: column;
+    }
+    .review-rating {
+        margin-top: 0.25rem;
+    }
+    .review-comment {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #333;
+    }
+    .text-warning {
+        color: #ffc107;
+    }
+    .text-muted {
+        color: #6c757d;
+    }
 
     /* Адаптация для мобильных устройств */
     @media (max-width: 767px) {
@@ -920,21 +935,21 @@
         }
     }
     @media (max-width: 767px) {
-    .review-header {
-        flex-direction: column;
-        align-items: flex-start;
+        .review-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .review-avatar {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .review-info {
+            margin-bottom: 0.5rem;
+        }
+        .review-comment {
+            font-size: 0.85rem;
+        }
     }
-    .review-avatar {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-    }
-    .review-info {
-        margin-bottom: 0.5rem;
-    }
-    .review-comment {
-        font-size: 0.85rem;
-    }
-}
 </style>
 
 <!-- Скрипты -->

@@ -24,6 +24,7 @@ TARIFF_CHOICES = (
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    telegram_username = models.CharField(max_length=100, blank=True, null=True, verbose_name="Telegram username")
     full_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="Полное имя")
     subscription_start = models.DateTimeField(blank=True, null=True, verbose_name="Начало подписки")
     subscription_end = models.DateTimeField(blank=True, null=True, verbose_name="Окончание подписки")

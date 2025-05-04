@@ -12,7 +12,6 @@
 <div class="product-page">
     <link rel="stylesheet" href="{% static 'css/part_detail.css' %}">
 
-
     <div class="container">
         <div class="product-section">
             <!-- Заголовок продукта -->
@@ -117,6 +116,11 @@
                         <a href="{% url 'start_chat' part.id part.user.id %}" class="btn btn-primary">
                             <i class="bi bi-chat"></i> Написать продавцу
                         </a>
+                        {% if part.user.profile.telegram_username %}
+                            <a href="https://t.me/{{ part.user.profile.telegram_username }}" class="btn btn-telegram" target="_blank" title="Написать в Telegram">
+                                <i class="bi bi-telegram"></i> Написать в Telegram
+                            </a>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -137,6 +141,17 @@
                         <span class="detail-value">{{ part.user.profile.phone|default:"Не указан" }}</span>
                     </div>
                 </div>
+                {% if part.user.profile.telegram_username %}
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="bi bi-telegram"></i></div>
+                        <div class="detail-content">
+                            <span class="detail-label">Telegram:</span>
+                            <span class="detail-value">
+                                <a href="https://t.me/{{ part.user.profile.telegram_username }}" target="_blank">@{{ part.user.profile.telegram_username }}</a>
+                            </span>
+                        </div>
+                    </div>
+                {% endif %}
                 <div class="detail-item">
                     <div class="detail-icon"><i class="bi bi-building"></i></div>
                     <div class="detail-content">
