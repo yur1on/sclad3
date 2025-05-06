@@ -25,7 +25,7 @@ class ProfileForm(forms.ModelForm):
     city = forms.CharField(label="Город", required=True)
     full_name = forms.CharField(label="Имя", required=True)
     workshop_name = forms.CharField(
-        label="Название магазина или мастерской (не заполняйте, если магазина, мастерской нет)",
+        label="Название мастерской (не заполняйте, если мастерской нет)",
         required=False
     )
     delivery_methods = forms.CharField(

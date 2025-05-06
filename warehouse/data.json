@@ -34,6 +34,7 @@
             "Meizu",
             "Micromax",
             "Motorola",
+            "Nothing",
             "Nokia",
             "Nubia",
             "Oukitel",
@@ -2904,6 +2905,16 @@
                 "Edge 2022",
                 "Edge 2021 (XT2141-1)"
             ],
+            "Nothing": [
+                "Phone 3a Pro (A059P)",
+                "Phone 3a (A059)",
+                "Phone 2a (A142)",
+                "Phone 2a Plus",
+                "CMF Phone 2 Pro (A001)",
+                "Phone 2 (A065)",
+                "CMF Phone 1",
+                "Phone 1 (A063)"
+            ],
             "Nokia": [
                 "XR21",
                 "XR20 (TA-1368, TA-1362)",
@@ -4025,7 +4036,8 @@
             "Nokia": [
                 "T21",
                 "T20",
-                "T10"
+                "T10",
+                "N1"
             ],
             "Nubia": [
                 "Red Magic Tab Pro",
