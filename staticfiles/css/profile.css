@@ -1,45 +1,509 @@
-/* Компактная форма и таблица */
-.profile-page {
-    max-width: 900px;
-    margin: 0 auto;
-}
+   /* Скрытие подвала на странице профиля */
+    footer, .footer, [class*="footer"], [id*="footer"] {
+        display: none !important;
+    }
 
-/* Карточка профиля */
-.card {
+    /* Стили для сообщений */
+    .messages {
+        max-width: 67%;
+        margin: 0 auto 1rem auto;
+    }
+
+    /* Стили боковой панели */
+    .sidebar {
+        width: 250px;
+        background: linear-gradient(to bottom, #e7f0fd, #d3e3fc);
+        padding: 10px;
+        position: fixed;
+        top: 60px;
+        bottom: 0;
+        left: 0;
+        overflow-y: auto;
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        border-right: 1px solid #dee2e6;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        color: #333;
+    }
+
+    .nav-link.active {
+        background-color: #007bff;
+        color: #fff;
+    }
+    .btn-success.nav-link {
+        color: #fff;
+    }
+    .btn-success.nav-link:hover {
+        background-color: #218838;
+        color: #fff;
+        transform: scale(1.05);
+    }
+    @media (max-width: 991px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+        .sidebar.show {
+            transform: translateX(0);
+        }
+    }
+    @media (min-width: 992px) {
+        .sidebar {
+            transform: translateX(0);
+        }
+    }
+
+    /* Стили для информации о тарифе в боковой панели */
+    .tariff-info {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    .tariff-info h6 {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    .tariff-info p {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+    .tariff-info .text-muted {
+        font-size: 0.8rem;
+    }
+
+    /* Кнопка мобильной боковой панели */
+    .mobile-sidebar-toggle {
+        position: fixed;
+        top: 70px;
+        left: 10px;
+        z-index: 1100;
+    }
+    .mobile-sidebar-toggle .btn {
+        padding: 6px 10px;
+    }
+
+    /* Основной контент */
+    .main-content {
+        margin-left: 0;
+        transition: margin-left 0.3s ease;
+    }
+    @media (min-width: 992px) {
+        .main-content {
+            margin-left: 250px;
+        }
+    }
+
+    /* Стили для переключаемого контента */
+    .content-container {
+        min-height: 250px;
+        margin: 0 auto;
+    }
+    .content-section {
+        display: none;
+    }
+    .content-section.active {
+        display: block;
+    }
+    #bookmarks-content {
+        max-width: 90%;
+    }
+    #profile-content, #tariff-content, #reviews-content, #given-reviews-content {
+        max-width: 67%;
+    }
+
+    /* Стили для тарифов и профиля */
+    .tariff-table-container {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .tariff-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .tariff-table th, .tariff-table td {
+        padding: 6px;
+        text-align: center;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .tariff-table th {
+        background-color: #007bff;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .tariff-table td {
+        background-color: #fff;
+        font-size: 0.85rem;
+    }
+    .tariff-table tr.active-tariff td {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .tariff-table tbody tr:hover {
+        transform: scale(1.02);
+        background-color: #e9ecef;
+        cursor: pointer;
+    }
+    .tariff-table-container .card-header {
+        border-radius: 10px;
+        padding: 0.8rem;
+        background-color: #007bff;
+    }
+    .card-body {
+        padding: 0.8rem;
+        border-radius: 0 0 8px 8px;
+    }
+    .list-group-item {
+        border-radius: 8px;
+        margin-bottom: 4px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+    .alert {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    .btn {
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
+    .btn-sm {
+        border-radius: 6px;
+        padding: 3px 8px;
+        font-size: 0.8rem;
+    }
+    .btn-outline-primary {
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
+    .form-control, select {
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 0.85rem;
+    }
+    .form-label {
+        font-size: 0.85rem;
+    }
+    .invalid-feedback {
+        font-size: 0.8rem;
+    }
+    h4 {
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+    }
+    h5 {
+        font-size: 1rem;
+        margin-bottom: 0.8rem;
+    }
+    p, small {
+        font-size: 0.85rem;
+    }
+    .custom-modal {
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+    .custom-modal .modal-header {
+        border-bottom: none;
+        background-color: #f1f1f1;
+        padding: 0.8rem;
+        border-radius: 10px 10px 0 0;
+    }
+    .custom-modal .modal-body {
+        padding: 1rem;
+    }
+    .custom-modal .modal-title {
+        font-size: 1rem;
+    }
+    .custom-modal .table {
+        font-size: 0.85rem;
+    }
+
+    /* Стили для карточек закладок */
+    .card {
+        border-radius: 6px;
+        overflow: hidden;
+        transition: transform 0.2s ease;
+    }
+    .card:hover {
+        transform: scale(1.02);
+    }
+    .image-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 75%;
+        background-color: #f8f9fa;
+    }
+    .card-img-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+    }
+    .no-image-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #888;
+        font-size: 1.1rem;
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    .card-text {
+        font-size: 0.9rem;
+        color: #555;
+        line-height: 1.4;
+    }
+    .btn-primary.btn-sm,
+    .btn-danger.btn-sm {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        line-height: 1.3;
+    }
+    .alert-warning {
+        padding: 2rem;
+        border-radius: 8px;
+    }
+    .alert-heading {
+        font-size: 1.5rem;
+    }
+    .alert p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .alert .btn-primary {
+        font-size: 1rem;
+        padding: 0.6rem 1.2rem;
+    }
+
+
+ /* Стили для отзывов */
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.review-item {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
     border-radius: 8px;
-    overflow: hidden;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-
-/* Компактные списки */
-.list-group-item {
-    padding: 10px 15px;
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
 }
-
-/* Кнопки и форма */
-.form-group {
-    margin-bottom: 15px;
+.review-avatar {
+    font-size: 2rem;
+    color: #6c757d;
+    margin-right: 1rem;
 }
-
-/* Отзывы */
-.reviews-section h4 {
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.list-group-item-action {
+.review-info {
     display: flex;
     flex-direction: column;
 }
-
-.list-group-item .text-truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
+.review-rating {
+    margin-top: 0.25rem;
+}
+.review-comment {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #333;
+}
+.text-warning {
+    color: #ffc107;
+}
+.text-muted {
+    color: #6c757d;
 }
 
-/* Стили для кнопок */
-.btn {
-    padding: 6px 12px;
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 767px) {
+        .container {
+            margin: 0.5rem 0;
+            padding: 0 0.5rem;
+        }
+        .row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .col-lg-12 {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .content-container {
+            max-width: 100%;
+        }
+        .messages {
+            max-width: 100%;
+        }
+        #bookmarks-content {
+            max-width: 100%;
+        }
+        #profile-content, #tariff-content, #reviews-content, #given-reviews-content {
+            max-width: 100%;
+        }
+        .tariff-table-container {
+            padding: 8px;
+        }
+        .tariff-table {
+            font-size: 0.8rem;
+        }
+        .tariff-table th, .tariff-table td {
+            padding: 4px;
+        }
+        .tariff-table-container .card-header {
+            padding: 0.6rem;
+            border-radius: 10px;
+            background-color: #007bff;
+        }
+        .card-body {
+            padding: 0.6rem;
+        }
+        .list-group-item {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+        .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        .btn-sm {
+            padding: 2px 6px;
+            font-size: 0.75rem;
+        }
+        .btn-outline-primary {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        .form-control, select {
+            padding: 3px 6px;
+            font-size: 0.8rem;
+        }
+        .form-label {
+            font-size: 0.8rem;
+        }
+        .invalid-feedback {
+            font-size: 0.75rem;
+        }
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+        .modal-content {
+            padding: 0.5rem;
+        }
+        .modal-header {
+            padding: 0.5rem;
+        }
+        .modal-body {
+            padding: 0.8rem;
+        }
+        h4 {
+            font-size: 1rem;
+        }
+        h5 {
+            font-size: 0.9rem;
+        }
+        p, small {
+            font-size: 0.8rem;
+        }
+        #tariffTableCollapse:not(.show) + p {
+            display: none;
+        }
+        .sidebar {
+            padding: 8px;
+        }
+        .sidebar-title {
+            font-size: 1rem;
+        }
+        .nav-link {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        .mobile-sidebar-toggle .btn {
+            padding: 5px 8px;
+        }
+        .card-title {
+            font-size: 1rem;
+        }
+        .card-text {
+            font-size: 0.85rem;
+        }
+        .no-image-text {
+            font-size: 1rem;
+        }
+        .alert-heading {
+            font-size: 1.3rem;
+        }
+        .alert p {
+            font-size: 0.9rem;
+        }
+        .alert .btn-primary {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        .tariff-info {
+            padding: 8px;
+        }
+        .tariff-info h6 {
+            font-size: 0.9rem;
+        }
+        .tariff-info p {
+            font-size: 0.8rem;
+        }
+        .tariff-info .text-muted {
+            font-size: 0.75rem;
+        }
+    }
+    @media (max-width: 767px) {
+    .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .review-avatar {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .review-info {
+        margin-bottom: 0.5rem;
+    }
+    .review-comment {
+        font-size: 0.85rem;
+    }
 }
-

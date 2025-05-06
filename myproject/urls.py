@@ -5,7 +5,7 @@ from django.urls import include, path
 from errors import views as errors_views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('01011990-admin-panel/', admin.site.urls),
     path('', include('user_profile.urls')),
     path('', include('warehouse.urls')),
     path('user/', include('user_registration.urls')),
