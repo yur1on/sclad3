@@ -88,7 +88,7 @@
                 "iPhone 5c",
                 "iPhone 5"
             ],
-             "Samsung": [
+            "Samsung": [
                 "A90 5G (SM-A908B, SM-A908N, SM-A9080)",
                 "A80 (SM-A805F, SM-A8050, SM-A805X, SM-A805N)",
                 "A73 5G (SM-A736B, SM-A736B/DS)",
@@ -313,9 +313,7 @@
                 "C9 Pro (SM-C9000)",
                 "C7 2016 (SM-C7000)",
                 "C5 2016 (SM-C5000)"
-
             ],
-
             "Huawei": [
                 "Nova Flip (PSD-AL00)",
                 "Nova Y91 (STG-LX1, STG-LX2)",
@@ -545,8 +543,7 @@
                 "Enjoy 6s (DIG-L01, DIG-L21HN, DIG-TL10, DIG-L03, DIG-L21, DIG-AL00, DIG-L23)",
                 "Enjoy 6 (NCE-AL00, NCE-TL00, NCE-AL10, NCE-TL10)"
             ],
-
-             "Honor": [
+            "Honor": [
                 "GT (AMG-AN00)",
                 "X60 Pro (BRP-AN00)",
                 "X60i (LYN-AN00)",
@@ -701,7 +698,6 @@
                 "5A (CAM-AL00, CAM-TL00, CAM-TL00H)",
                 "5X (KII-L21, KII-L22, KII-L23, KIW-AL10, KIW-CL00, KIW-TL00, KIW-TL00H, KIW-UL00, KIW-L21, KIW-L22, KIW-L24, KII-L05)"
             ],
-
             "Xiaomi": [
                 "Redmi Note 14S (2502FRA65G)",
                 "Redmi Note 14 Pro Plus 5G (24094RAD4G)",
@@ -816,6 +812,7 @@
                 "Redmi 3s Prime",
                 "Redmi 3s (2016031)",
                 "Redmi 3 (2015816)",
+                "Redmi S2 (M1803E6G, M1803E6H, M1803E6I)",
                 "Mi Note 10 Lite (M2002F4LG, M1910F4G)",
                 "Mi Note 10 Pro (M1910F4S)",
                 "Mi Note 10 (M1910F4G)",
@@ -1534,8 +1531,6 @@
                 "iQOO Pro 5G (V1916A, V1916T)",
                 "iQOO (V1824A, V1824BA)"
             ],
-
-
             "Tecno": [
                 "Spark 30 Pro (KL7)",
                 "Spark 30C 5G (KL8H)",
@@ -2554,8 +2549,6 @@
                 "Blade 10 Max",
                 "Blade 10"
             ],
-
-
             "Elephone": [
                 "Z1",
                 "U Pro",
@@ -3366,7 +3359,6 @@
                 "Axon 20 4G",
                 "Angel Care X13"
             ]
-
         },
         "part_types": [
             "Аккумулятор",
@@ -3571,7 +3563,6 @@
             "ZTE"
         ],
         "models": {
-
             "Apple": [
                 "iPad Pro 13 2024",
                 "iPad Pro 12.9 2024",
@@ -4191,7 +4182,6 @@
                 "BLADE X10 II",
                 "Axon Pad"
             ]
-
         },
         "part_types": [
             "Аккумулятор",
@@ -4276,7 +4266,6 @@
             "Oppo"
         ],
         "models": {
-
             "Apple": [
                 "Watch Series 10 46mm (A2999, A3000, A3003, A3006)",
                 "Watch Series 10 42mm (A2997, A2998, A3001, A3002)",
@@ -4570,7 +4559,6 @@
                 "Unite",
                 "Grit X Pro"
             ]
-
         },
         "part_types": [
             "Аккумулятор",
