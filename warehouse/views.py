@@ -134,7 +134,7 @@ def search(request):
 
     now = timezone.now()
     # Определяем пользователей с активной платной подпиской:
-    active_paid = Q(user__profile__tariff__in=['standard', 'premium']) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
+    active_paid = Q(user__profile__tariff__in=['lite', 'standard', 'standard2', 'standard3', 'premium']) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
     # Все остальные (free, либо подписка истекла, либо не оформлена)
     non_active = Q(user__profile__tariff='free') | Q(user__profile__subscription_end__lt=now) | Q(user__profile__subscription_end__isnull=True)
 
@@ -307,8 +307,8 @@ def get_brands_for_device(request):
 def filter_parts(request):
     device = request.GET.get('device')
     brand = request.GET.get('brand')
-    model = request.GET.get('model')  # Добавлено
-    part_type = request.GET.get('part_type')  # Добавлено
+    model = request.GET.get('model')
+    part_type = request.GET.get('part_type')
 
     # Фильтрация запчастей по устройству, бренду, модели и типу
     parts = Part.objects.filter(user=request.user, device=device, brand=brand)
@@ -545,8 +545,15 @@ def add_part(request):
             messages.error(request, error_message)
             return redirect('profile')
 
-        form = PartForm(request.POST, request.FILES)
-        formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
+        # Сохранение данных формы и файлов в сессии, если они есть
+        if 'form_data' in request.session:
+            form_data = request.session.pop('form_data')
+            form_files = request.session.pop('form_files', {})
+            form = PartForm(form_data, form_files)
+            formset = PartImageFormSet(form_data, form_files, queryset=PartImage.objects.none())
+        else:
+            form = PartForm(request.POST, request.FILES)
+            formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
 
         if form.is_valid() and formset.is_valid():
             images = [img_form for img_form in formset if img_form.cleaned_data and img_form.cleaned_data.get('image')]
@@ -565,17 +572,23 @@ def add_part(request):
             model = form.cleaned_data['model']
             part_type = form.cleaned_data['part_type']
             condition = form.cleaned_data['condition']
+            color = form.cleaned_data.get('color')
+            if color == '':
+                color = None
 
+            # Проверка на существование запчасти с учетом цвета
             existing_part = Part.objects.filter(
                 user=request.user,
                 device=device,
                 brand=brand,
                 model=model,
                 part_type=part_type,
-                condition=condition
+                condition=condition,
+                color=color
             ).first()
 
             if existing_part and 'confirm_add' in request.POST:
+                # Добавление дубликата, если пользователь подтвердил
                 new_part = form.save(commit=False)
                 new_part.user = request.user
                 new_part.save()
@@ -587,15 +600,20 @@ def add_part(request):
                         image_obj.image = watermarked
                         image_obj.part = new_part
                         image_obj.save()
-                return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена повторно!'})
+
+                return render(request, 'warehouse/success.html')
 
             if existing_part:
+                # Сохранение данных формы и файлов в сессии
+                request.session['form_data'] = request.POST.dict()
+                request.session['form_files'] = request.FILES.dict()
                 return render(request, 'warehouse/confirm_add_part.html', {
                     'form': form,
                     'formset': formset,
                     'existing_part': existing_part
                 })
 
+            # Сохранение новой запчасти
             part = form.save(commit=False)
             part.user = request.user
             part.save()
@@ -608,14 +626,23 @@ def add_part(request):
                     image_obj.part = part
                     image_obj.save()
 
+
             return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена!'})
+
+        else:
+            # Отладка ошибок валидации
+            messages.error(request, 'Ошибка валидации формы. Проверьте введенные данные.')
+            if form.errors:
+                messages.error(request, f'Ошибки формы: {form.errors}')
+            if formset.errors:
+                messages.error(request, f'Ошибки formset: {formset.errors}')
+            return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
 
     else:
         form = PartForm()
         formset = PartImageFormSet(queryset=PartImage.objects.none())
 
     return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
-
 
 def get_regions_and_cities(request):
     file_path = os.path.join(settings.BASE_DIR, 'static/json/belarus_regions_and_cities.json')
