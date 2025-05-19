@@ -20,14 +20,15 @@ from .models import Part, PartImage
 from tariff.utils import check_parts_limit, check_image_limit
 from .utils import compress_image
 from warehouse.utils import add_watermark_to_image
-
+import os
+from django.conf import settings
 
 
 def home(request):
     return render(request, 'warehouse/home.html')
 
 
-from django.db.models import Q
+
 
 
 @login_required
@@ -134,7 +135,7 @@ def search(request):
 
     now = timezone.now()
     # Определяем пользователей с активной платной подпиской:
-    active_paid = Q(user__profile__tariff__in=['standard', 'premium']) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
+    active_paid = Q(user__profile__tariff__in=['lite', 'standard', 'standard2', 'standard3', 'premium']) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
     # Все остальные (free, либо подписка истекла, либо не оформлена)
     non_active = Q(user__profile__tariff='free') | Q(user__profile__subscription_end__lt=now) | Q(user__profile__subscription_end__isnull=True)
 
@@ -210,6 +211,8 @@ def warehouse(request):
     return render(request, 'warehouse/warehouse.html')
 
 
+
+
 @login_required
 def export_excel(request):
     # Создаем новый Excel файл
@@ -230,53 +233,60 @@ def export_excel(request):
     # Получаем данные из модели, сортируем по устройству, бренду и модели
     user_parts = Part.objects.filter(user=request.user).order_by('device', 'brand', 'model')
 
-    # Группируем данные по устройству, бренду и модели
-    grouped_parts = {}
+    # Определяем цвета заливки
+    phone_fill = PatternFill(start_color="ADD8E6", end_color="ADD8E6", fill_type="solid")  # Светло-голубой
+    tablet_fill = PatternFill(start_color="90EE90", end_color="90EE90", fill_type="solid")  # Светло-зелёный
+    watch_fill = PatternFill(start_color="FFFFE0", end_color="FFFFE0", fill_type="solid")   # Светло-жёлтый
+    separator_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")  # Светло-серый
+
+    row_num = 2  # Начинаем со второй строки (первая — заголовки)
+
+    # Группируем данные только по устройству
     for device, device_parts in groupby(user_parts, lambda x: x.device):
-        grouped_parts[device] = {}
-        for brand, brand_parts in groupby(device_parts, lambda x: x.brand):
-            grouped_parts[device][brand] = list(brand_parts)
+        # Определяем цвет заливки для столбца "Устройство"
+        if device == "Телефон":
+            fill = phone_fill
+        elif device == "Планшет":
+            fill = tablet_fill
+        elif device == "Смарт-часы":
+            fill = watch_fill
+        else:
+            fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")  # Белый по умолчанию
 
-    row_num = 2  # Начинаем со второй строки (первая строка — заголовки)
+        # Записываем все запчасти для текущего устройства
+        for part in device_parts:
+            ws.append([
+                part.device,
+                part.brand,
+                part.model,
+                part.part_type,
+                part.color or "Не указан",
+                part.quantity,
+                part.price
+            ])
 
-    # Цвет заливки для строк-разделителей
-    separator_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+            # Применяем заливку только к ячейке в столбце "Устройство" (первый столбец)
+            device_cell = ws.cell(row=row_num, column=1)
+            device_cell.fill = fill
 
-    # Заполняем Excel-файл
-    for device, brands in grouped_parts.items():
-        for brand, parts in brands.items():
-            for part in parts:
-                # Заполняем строку данными
-                ws.append([
-                    part.device,
-                    part.brand,
-                    part.model,
-                    part.part_type,
-                    part.color or "Не указан",
-                    part.quantity,
-                    part.price
-                ])
+            # Форматируем столбцы "Количество" и "Цена"
+            quantity_cell = ws.cell(row=row_num, column=6)
+            quantity_cell.number_format = '#,##0 "шт."'
+            price_cell = ws.cell(row=row_num, column=7)
+            price_cell.number_format = '#,##0 "руб."'
 
-                # Форматируем столбец "Количество (шт.)"
-                quantity_cell = ws.cell(row=row_num, column=6)
-                quantity_cell.number_format = '#,##0 "шт."'
-
-                # Форматируем столбец "Цена (руб.)"
-                price_cell = ws.cell(row=row_num, column=7)
-                price_cell.number_format = '#,##0 "руб."'
-
-                row_num += 1
-
-            # Добавляем строку-разделитель после каждой группы бренда
-            for col_num in range(1, 8):
-                separator_cell = ws.cell(row=row_num, column=col_num)
-                separator_cell.fill = separator_fill
             row_num += 1
+
+        # Добавляем разделительную строку после группы устройств
+        for col_num in range(1, 8):
+            separator_cell = ws.cell(row=row_num, column=col_num)
+            separator_cell.fill = separator_fill
+        row_num += 1
 
     # Настройка ширины столбцов
     for col in ws.columns:
         max_length = 0
-        column = col[0].column_letter  # Получаем букву столбца
+        column = col[0].column_letter
         for cell in col:
             try:
                 if cell.value:
@@ -285,7 +295,7 @@ def export_excel(request):
                         max_length = cell_length
             except:
                 pass
-        adjusted_width = max_length + 2  # Добавляем небольшой запас
+        adjusted_width = max_length + 2
         ws.column_dimensions[column].width = adjusted_width
 
     # Создаем HTTP ответ с Excel файлом
@@ -294,7 +304,6 @@ def export_excel(request):
     wb.save(response)
 
     return response
-
 
 @login_required
 def get_brands_for_device(request):
@@ -307,8 +316,8 @@ def get_brands_for_device(request):
 def filter_parts(request):
     device = request.GET.get('device')
     brand = request.GET.get('brand')
-    model = request.GET.get('model')  # Добавлено
-    part_type = request.GET.get('part_type')  # Добавлено
+    model = request.GET.get('model')
+    part_type = request.GET.get('part_type')
 
     # Фильтрация запчастей по устройству, бренду, модели и типу
     parts = Part.objects.filter(user=request.user, device=device, brand=brand)
@@ -545,8 +554,15 @@ def add_part(request):
             messages.error(request, error_message)
             return redirect('profile')
 
-        form = PartForm(request.POST, request.FILES)
-        formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
+        # Сохранение данных формы и файлов в сессии, если они есть
+        if 'form_data' in request.session:
+            form_data = request.session.pop('form_data')
+            form_files = request.session.pop('form_files', {})
+            form = PartForm(form_data, form_files)
+            formset = PartImageFormSet(form_data, form_files, queryset=PartImage.objects.none())
+        else:
+            form = PartForm(request.POST, request.FILES)
+            formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
 
         if form.is_valid() and formset.is_valid():
             images = [img_form for img_form in formset if img_form.cleaned_data and img_form.cleaned_data.get('image')]
@@ -565,17 +581,23 @@ def add_part(request):
             model = form.cleaned_data['model']
             part_type = form.cleaned_data['part_type']
             condition = form.cleaned_data['condition']
+            color = form.cleaned_data.get('color')
+            if color == '':
+                color = None
 
+            # Проверка на существование запчасти с учетом цвета
             existing_part = Part.objects.filter(
                 user=request.user,
                 device=device,
                 brand=brand,
                 model=model,
                 part_type=part_type,
-                condition=condition
+                condition=condition,
+                color=color
             ).first()
 
             if existing_part and 'confirm_add' in request.POST:
+                # Добавление дубликата, если пользователь подтвердил
                 new_part = form.save(commit=False)
                 new_part.user = request.user
                 new_part.save()
@@ -587,15 +609,20 @@ def add_part(request):
                         image_obj.image = watermarked
                         image_obj.part = new_part
                         image_obj.save()
-                return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена повторно!'})
+
+                return render(request, 'warehouse/success.html')
 
             if existing_part:
+                # Сохранение данных формы и файлов в сессии
+                request.session['form_data'] = request.POST.dict()
+                request.session['form_files'] = request.FILES.dict()
                 return render(request, 'warehouse/confirm_add_part.html', {
                     'form': form,
                     'formset': formset,
                     'existing_part': existing_part
                 })
 
+            # Сохранение новой запчасти
             part = form.save(commit=False)
             part.user = request.user
             part.save()
@@ -608,14 +635,23 @@ def add_part(request):
                     image_obj.part = part
                     image_obj.save()
 
+
             return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена!'})
+
+        else:
+            # Отладка ошибок валидации
+            messages.error(request, 'Ошибка валидации формы. Проверьте введенные данные.')
+            if form.errors:
+                messages.error(request, f'Ошибки формы: {form.errors}')
+            if formset.errors:
+                messages.error(request, f'Ошибки formset: {formset.errors}')
+            return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
 
     else:
         form = PartForm()
         formset = PartImageFormSet(queryset=PartImage.objects.none())
 
     return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
-
 
 def get_regions_and_cities(request):
     file_path = os.path.join(settings.BASE_DIR, 'static/json/belarus_regions_and_cities.json')
@@ -668,8 +704,7 @@ def user_parts(request, user_id, template_name='warehouse/user_parts.html'):
 
 
 
-import os
-from django.conf import settings
+
 
 @login_required
 def delete_all_parts_page(request):
