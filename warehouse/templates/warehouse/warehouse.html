@@ -363,6 +363,11 @@ document.addEventListener('DOMContentLoaded', function() {
         handlePartTypeClick(partType);
     };
 
+    // Вызов функции обновления таблицы доступен глобально
+    window.updateTable = function(page = 1) {
+        updateTableData(page);
+    };
+
     fetch('/get-devices/')
         .then(response => response.json())
         .then(data => {
@@ -391,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error fetching brands:', error));
 
         setActiveButton(deviceButtons, device);
-        updateTable();
+        updateTableData();
     }
 
     function handleBrandClick(brand) {
@@ -412,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error fetching models:', error));
 
         setActiveButton(brandButtons, brand);
-        updateTable();
+        updateTableData();
     }
 
     function handleModelClick(model) {
@@ -430,21 +435,13 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error fetching part types:', error));
 
         setActiveButton(modelButtons, model);
-        updateTable();
+        updateTableData();
     }
 
     function handlePartTypeClick(partType) {
         selectedPartType = partType;
-
-        fetch(`/get-parts/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(selectedBrand)}&model=${encodeURIComponent(selectedModel)}&part_type=${encodeURIComponent(partType)}`)
-            .then(response => response.json())
-            .then(data => {
-                displayParts(data.parts);
-            })
-            .catch(error => console.error('Error fetching parts:', error));
-
         setActiveButton(partTypeButtons, partType);
-        updateTable();
+        updateTableData();
     }
 
     function populateButtons(container, items, clickHandler, isCompact = false) {
@@ -476,7 +473,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function updateTable(page = 1) {
+    function updateTableData(page = 1) {
         const url = `/get-parts/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(selectedBrand)}&model=${encodeURIComponent(selectedModel)}&part_type=${encodeURIComponent(selectedPartType)}&page=${page}`;
         fetch(url)
             .then(response => response.json())
@@ -489,6 +486,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updatePagination(paginator) {
         const pagination = document.querySelector('.pagination');
+        if (!pagination) return;
+
         pagination.innerHTML = '';
 
         if (paginator.has_previous) {
@@ -501,6 +500,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </li>
             `;
         }
+
         paginator.page_range.forEach(num => {
             pagination.innerHTML += `
                 <li class="page-item ${paginator.current_page === num ? 'active' : ''}">
@@ -508,6 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </li>
             `;
         });
+
         if (paginator.has_next) {
             pagination.innerHTML += `
                 <li class="page-item">
@@ -521,24 +522,43 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayParts(parts) {
-        const tbody = document.querySelector('#parts-table-body');
+        const tbody = document.getElementById('parts-table-body');
+        if (!tbody) return;
+
         tbody.innerHTML = '';
+
+        if (parts.length === 0) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `<td colspan="6" class="text-center">Запчасти не найдены</td>`;
+            tbody.appendChild(emptyRow);
+            return;
+        }
+
         parts.forEach(part => {
+            // Создаем уникальные ID для каждого элемента коллапса
+            const collapseId = `collapse-dyn-${part.id}`;
+
+            // Создаем основную строку с информацией
             const summaryRow = document.createElement('tr');
             summaryRow.classList.add('accordion-toggle');
-            summaryRow.setAttribute('data-bs-toggle', 'collapse');
-            summaryRow.setAttribute('data-bs-target', `#collapse-${part.id}`);
+
+            // Добавляем атрибуты для мобильной версии
+            if(window.innerWidth < 768) {
+                summaryRow.setAttribute('data-bs-toggle', 'collapse');
+                summaryRow.setAttribute('data-bs-target', `#${collapseId}`);
+            }
+
             summaryRow.innerHTML = `
-                <td>${removeParenthesesText(part.device)}</td>
-                <td>${removeParenthesesText(part.brand)} ${removeParenthesesText(part.model)}</td>
-                <td>${removeParenthesesText(part.part_type)}</td>
-                <td class="desktop-only">
+                <td data-label="Устройство">${removeParenthesesText(part.device)}</td>
+                <td data-label="Модель">${removeParenthesesText(part.brand)} ${removeParenthesesText(part.model)}</td>
+                <td data-label="Тип запчасти">${removeParenthesesText(part.part_type)}</td>
+                <td class="desktop-only" data-label="Прочее">
                     <div>
                         <strong>Номер запчасти:</strong> ${part.part_number || '-'}
                     </div>
                     <div>
-                        <strong>Цвет:</strong> ${part.color || 'Не указан'} |
-                        <strong>Цена:</strong> ${part.price} |
+                        <strong>Цвет:</strong> ${part.color || 'Не указан'},
+                        <strong>Цена:</strong> ${part.price},
                         <strong>Кол-во:</strong> ${part.quantity}
                     </div>
                     <div>
@@ -546,14 +566,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${part.note ? `<strong>, Примечание:</strong> ${part.note}` : '<strong>, Примечание:</strong> Нет примечаний'}
                     </div>
                 </td>
-                <td class="desktop-only">
+                <td class="desktop-only" data-label="Фото">
                     ${part.images && part.images.length ? `
-                        <a href="#" onclick="enlargeImage('${part.images[0].image_url}', event);">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal-dyn-${part.id}" onclick="event.stopPropagation();">
                             <img src="${part.images[0].image_url}" alt="${part.model}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
                         </a>
                     ` : 'Нет фото'}
                 </td>
-                <td class="desktop-only">
+                <td class="desktop-only" data-label="Действия">
                     <div class="d-flex gap-2">
                         <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm action-btn">✏️</a>
                         <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm action-btn">🗑️</a>
@@ -562,40 +582,85 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             tbody.appendChild(summaryRow);
 
+            // Создаем строку с подробной информацией для мобильной версии
             const detailsRow = document.createElement('tr');
             detailsRow.classList.add('mobile-only');
-            const detailsCell = document.createElement('td');
-            detailsCell.colSpan = 6;
-            detailsCell.classList.add('p-0');
-            detailsRow.appendChild(detailsCell);
-            detailsCell.innerHTML = `
-                <div id="collapse-${part.id}" class="collapse">
-                    <div class="p-2 bg-light">
-                        <strong>Номер запчасти:</strong> ${part.part_number || '-'}<br>
-                        <strong>Устройство:</strong> ${part.device}<br>
-                        <strong>Модель:</strong> ${part.brand} ${part.model}<br>
-                        <strong>Тип запчасти:</strong> ${part.part_type}<br>
-                        <strong>Цвет:</strong> ${part.color || 'Не указан'}<br>
-                        <strong>Цена:</strong> ${part.price}<br>
-                        <strong>Количество:</strong> ${part.quantity}<br>
-                        <strong>Состояние:</strong> ${part.condition || 'Не указано'}<br>
-                        ${part.note ? `<strong>Примечание:</strong> ${part.note}<br>` : `<strong>Примечание:</strong> Нет примечаний<br>`}
-                        ${part.images && part.images.length ? `<div class="mt-2">
-                            <strong>Фото:</strong><br>
-                            ${part.images.map(image => `
-                                <a href="#" onclick="enlargeImage('${image.image_url}', event);">
-                                    <img src="${image.image_url}" alt="${part.model}" class="img-thumbnail mb-2" style="max-width:100px; max-height:100px;">
-                                </a>
-                            `).join('')}
-                        </div>` : ''}
-                        <div class="mt-2">
-                            <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm">✏️ Редактировать</a>
-                            <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm">🗑️ Удалить</a>
+            detailsRow.innerHTML = `
+                <td colspan="6" class="p-0">
+                    <div id="${collapseId}" class="collapse">
+                        <div class="p-2 bg-light">
+                            <strong>Номер запчасти:</strong> ${part.part_number || '-'}<br>
+                            <strong>Устройство:</strong> ${part.device}<br>
+                            <strong>Модель:</strong> ${part.brand} ${part.model}<br>
+                            <strong>Тип запчасти:</strong> ${part.part_type}<br>
+                            <strong>Цвет:</strong> ${part.color || 'Не указан'}<br>
+                            <strong>Цена:</strong> ${part.price}<br>
+                            <strong>Количество:</strong> ${part.quantity}<br>
+                            <strong>Состояние:</strong> ${part.condition || 'Не указано'}<br>
+                            ${part.note ? `<strong>Примечание:</strong> ${part.note}<br>` : `<strong>Примечание:</strong> Нет примечаний<br>`}
+                            ${part.images && part.images.length ? `<div class="mt-2">
+                                <strong>Фото:</strong><br>
+                                ${part.images.map(image => `
+                                    <a href="#" onclick="enlargeImage('${image.image_url}', event);">
+                                        <img src="${image.image_url}" alt="${part.model}" class="img-thumbnail mb-2" style="max-width:100px; max-height:100px;">
+                                    </a>
+                                `).join('')}
+                            </div>` : ''}
+                            <div class="mt-2">
+                                <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm">✏️ Редактировать</a>
+                                <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm">🗑️ Удалить</a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </td>
             `;
             tbody.appendChild(detailsRow);
+
+            // Создаем модальное окно для фотографий (только если есть фотографии)
+            if (part.images && part.images.length) {
+                // Создаем модальное окно
+                const modal = document.createElement('div');
+                modal.classList.add('modal', 'fade');
+                modal.id = `imageModal-dyn-${part.id}`;
+                modal.setAttribute('tabindex', '-1');
+                modal.setAttribute('aria-labelledby', `imageModalLabel-dyn-${part.id}`);
+                modal.setAttribute('aria-hidden', 'true');
+
+                // Создаем HTML для модального окна
+                modal.innerHTML = `
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div id="carouselPartImages-dyn-${part.id}" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        ${part.images.map((image, index) => `
+                                            <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                                <img src="${image.image_url}" class="d-block w-100" alt="${part.model}" style="max-height: 500px; object-fit: contain;">
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    ${part.images.length > 1 ? `
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPartImages-dyn-${part.id}" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: black; padding: 10px;"></span>
+                                            <span class="visually-hidden">Предыдущий</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselPartImages-dyn-${part.id}" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: black; padding: 10px;"></span>
+                                            <span class="visually-hidden">Следующий</span>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Добавляем модальное окно в DOM
+                document.body.appendChild(modal);
+            }
         });
     }
 });

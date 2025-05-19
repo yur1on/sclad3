@@ -20,14 +20,15 @@ from .models import Part, PartImage
 from tariff.utils import check_parts_limit, check_image_limit
 from .utils import compress_image
 from warehouse.utils import add_watermark_to_image
-
+import os
+from django.conf import settings
 
 
 def home(request):
     return render(request, 'warehouse/home.html')
 
 
-from django.db.models import Q
+
 
 
 @login_required
@@ -210,6 +211,8 @@ def warehouse(request):
     return render(request, 'warehouse/warehouse.html')
 
 
+
+
 @login_required
 def export_excel(request):
     # Создаем новый Excel файл
@@ -230,53 +233,60 @@ def export_excel(request):
     # Получаем данные из модели, сортируем по устройству, бренду и модели
     user_parts = Part.objects.filter(user=request.user).order_by('device', 'brand', 'model')
 
-    # Группируем данные по устройству, бренду и модели
-    grouped_parts = {}
+    # Определяем цвета заливки
+    phone_fill = PatternFill(start_color="ADD8E6", end_color="ADD8E6", fill_type="solid")  # Светло-голубой
+    tablet_fill = PatternFill(start_color="90EE90", end_color="90EE90", fill_type="solid")  # Светло-зелёный
+    watch_fill = PatternFill(start_color="FFFFE0", end_color="FFFFE0", fill_type="solid")   # Светло-жёлтый
+    separator_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")  # Светло-серый
+
+    row_num = 2  # Начинаем со второй строки (первая — заголовки)
+
+    # Группируем данные только по устройству
     for device, device_parts in groupby(user_parts, lambda x: x.device):
-        grouped_parts[device] = {}
-        for brand, brand_parts in groupby(device_parts, lambda x: x.brand):
-            grouped_parts[device][brand] = list(brand_parts)
+        # Определяем цвет заливки для столбца "Устройство"
+        if device == "Телефон":
+            fill = phone_fill
+        elif device == "Планшет":
+            fill = tablet_fill
+        elif device == "Смарт-часы":
+            fill = watch_fill
+        else:
+            fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")  # Белый по умолчанию
 
-    row_num = 2  # Начинаем со второй строки (первая строка — заголовки)
+        # Записываем все запчасти для текущего устройства
+        for part in device_parts:
+            ws.append([
+                part.device,
+                part.brand,
+                part.model,
+                part.part_type,
+                part.color or "Не указан",
+                part.quantity,
+                part.price
+            ])
 
-    # Цвет заливки для строк-разделителей
-    separator_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+            # Применяем заливку только к ячейке в столбце "Устройство" (первый столбец)
+            device_cell = ws.cell(row=row_num, column=1)
+            device_cell.fill = fill
 
-    # Заполняем Excel-файл
-    for device, brands in grouped_parts.items():
-        for brand, parts in brands.items():
-            for part in parts:
-                # Заполняем строку данными
-                ws.append([
-                    part.device,
-                    part.brand,
-                    part.model,
-                    part.part_type,
-                    part.color or "Не указан",
-                    part.quantity,
-                    part.price
-                ])
+            # Форматируем столбцы "Количество" и "Цена"
+            quantity_cell = ws.cell(row=row_num, column=6)
+            quantity_cell.number_format = '#,##0 "шт."'
+            price_cell = ws.cell(row=row_num, column=7)
+            price_cell.number_format = '#,##0 "руб."'
 
-                # Форматируем столбец "Количество (шт.)"
-                quantity_cell = ws.cell(row=row_num, column=6)
-                quantity_cell.number_format = '#,##0 "шт."'
-
-                # Форматируем столбец "Цена (руб.)"
-                price_cell = ws.cell(row=row_num, column=7)
-                price_cell.number_format = '#,##0 "руб."'
-
-                row_num += 1
-
-            # Добавляем строку-разделитель после каждой группы бренда
-            for col_num in range(1, 8):
-                separator_cell = ws.cell(row=row_num, column=col_num)
-                separator_cell.fill = separator_fill
             row_num += 1
+
+        # Добавляем разделительную строку после группы устройств
+        for col_num in range(1, 8):
+            separator_cell = ws.cell(row=row_num, column=col_num)
+            separator_cell.fill = separator_fill
+        row_num += 1
 
     # Настройка ширины столбцов
     for col in ws.columns:
         max_length = 0
-        column = col[0].column_letter  # Получаем букву столбца
+        column = col[0].column_letter
         for cell in col:
             try:
                 if cell.value:
@@ -285,7 +295,7 @@ def export_excel(request):
                         max_length = cell_length
             except:
                 pass
-        adjusted_width = max_length + 2  # Добавляем небольшой запас
+        adjusted_width = max_length + 2
         ws.column_dimensions[column].width = adjusted_width
 
     # Создаем HTTP ответ с Excel файлом
@@ -294,7 +304,6 @@ def export_excel(request):
     wb.save(response)
 
     return response
-
 
 @login_required
 def get_brands_for_device(request):
@@ -695,8 +704,7 @@ def user_parts(request, user_id, template_name='warehouse/user_parts.html'):
 
 
 
-import os
-from django.conf import settings
+
 
 @login_required
 def delete_all_parts_page(request):
