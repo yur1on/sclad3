@@ -1,8 +1,5 @@
 from pillow_heif import register_heif_opener
-
 register_heif_opener()
-from django import forms
-from .models import Part, PartImage
 from django.forms import modelformset_factory
 from django.core.exceptions import ValidationError
 import os
@@ -12,9 +9,6 @@ from pillow_heif import register_heif_opener
 # Разрешённые форматы изображений и максимальный размер файла (в МБ)
 ALLOWED_IMAGE_FORMATS = ['.jpeg', '.jpg', '.png', '.webp', '.heic']
 MAX_FILE_SIZE_MB = 5
-
-
-# warehouse/forms.py
 
 
 register_heif_opener()
@@ -34,7 +28,7 @@ class PartForm(forms.ModelForm):
         label="Номер запчасти (штрих-код)",
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Сканируйте или сгенерируется автоматически',
+            'placeholder': 'Сгенерируется автоматически или сканируйте',
             'autofocus': 'autofocus'
         })
     )
