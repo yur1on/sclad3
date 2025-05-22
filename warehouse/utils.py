@@ -15,7 +15,7 @@ def compress_image(image):
       - Удаление метаданных (EXIF, GPS и т.д.).
     """
     img = Image.open(image)
-    max_resolution = 1280  # Было 1920
+    max_resolution = 1280
 
     if img.width > max_resolution or img.height > max_resolution:
         ratio = min(max_resolution / img.width, max_resolution / img.height)
