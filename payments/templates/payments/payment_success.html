@@ -1,13 +1,16 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Оплата прошла успешно</title>
-</head>
-<body>
-    <h1>Оплата прошла успешно</h1>
-    <p>Ваш заказ {{ order.order_number }} оплачен.</p>
-    <p>Спасибо за оплату!</p>
-    <a href="/">Вернуться на сайт</a>
-</body>
-</html>
+{% extends "warehouse/base.html" %}
+{% block title %}Оплата прошла успешно{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+      <h5 class="mb-0 text-center">Оплата прошла успешно</h5>
+    </div>
+    <div class="card-body text-center">
+      <p>Ваш заказ {{ order.order_number }} оплачен.</p>
+      <p>Спасибо за оплату!</p>
+      <a href="{% url 'profile' %}" class="btn btn-secondary">Вернуться в профиль</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

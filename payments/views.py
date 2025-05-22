@@ -1,7 +1,8 @@
 from datetime import timedelta
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
-import time, uuid
+import time
+import uuid
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -10,38 +11,174 @@ from django.contrib import messages
 from .models import PaymentOrder, TARIFF_TYPE_CHOICES
 from .utils import compute_wsb_signature, verify_notify_signature
 
-# Конфигурация Webpay.by
-WSB_STOREID = "791241990"  # Ваш Billing ID
-WSB_SECRET_KEY = "1q2w3e4r5t6y7u8i9o0"  # Ваш секретный ключ
+# Webpay.by configuration
+WSB_STOREID = "548275588"
+WSB_SECRET_KEY = "1q2w3e4r5t6y7u8i9o0"
 WSB_VERSION = "2"
-WSB_TEST = "1"  # Тестовый режим
+WSB_TEST = "0"
 WSB_CURRENCY_ID = "BYN"
 WSB_LANGUAGE_ID = "russian"
-WSB_STORE_NAME = "My Shop"  # Название магазина
-WSB_PAYMENT_URL = "https://securesandbox.webpay.by/"  # URL тестовой среды
+WSB_STORE_NAME = "Mobirazbor"
+WSB_PAYMENT_URL = "https://payment.webpay.by/"
+
+
+
+
+
+# Valid durations for subscriptions
+VALID_DURATIONS = [1, 3, 6, 12]
+
+# Base prices per 30 days (halved from original)
+BASE_PRICE_PER_30_DAYS = {
+    'lite': 10.00,  # Was 20.00
+    'standard': 20.00,  # Was 40.00
+    'standard2': 35.00,  # Was 70.00
+    'standard3': 60.00,  # Was 120.00
+    'premium': 150.00  # Was 300.00
+}
+
+
+@login_required
+def choose_subscription(request):
+    """
+    View for selecting a tariff and subscription duration.
+    """
+    now = timezone.now()
+    profile = request.user.profile
+
+    # Auto-switch to free tariff if subscription expired
+    if profile.subscription_end and profile.subscription_end < now and profile.tariff != 'free':
+        profile.tariff = 'free'
+        profile.subscription_start = None
+        profile.subscription_end = None
+        profile.save()
+
+    current_subscription = profile.subscription_end if profile.subscription_end and profile.subscription_end > now else None
+    renew = request.GET.get('renew') == 'true'
+
+    # Tariff options for template
+    tariff_options = [
+        {
+            'type': 'lite',
+            'label': 'Базовый (до 500 запчастей)',
+            'durations': [
+                {'duration': 1, 'price': 10.00, 'label': '30 дней – 10 руб'},
+                {'duration': 3, 'price': 30.00, 'label': '90 дней – 30 руб'},
+                {'duration': 6, 'price': 60.00, 'label': '180 дней – 60 руб'},
+                {'duration': 12, 'price': 120.00, 'label': '360 дней – 120 руб'},
+            ]
+        },
+        {
+            'type': 'standard',
+            'label': 'Стандартный (до 2000 запчастей)',
+            'durations': [
+                {'duration': 1, 'price': 20.00, 'label': '30 дней – 20 руб'},
+                {'duration': 3, 'price': 60.00, 'label': '90 дней – 60 руб'},
+                {'duration': 6, 'price': 120.00, 'label': '180 дней – 120 руб'},
+                {'duration': 12, 'price': 240.00, 'label': '360 дней – 240 руб'},
+            ]
+        },
+        {
+            'type': 'standard2',
+            'label': 'Продвинутый (до 7000 запчастей)',
+            'durations': [
+                {'duration': 1, 'price': 35.00, 'label': '30 дней – 35 руб'},
+                {'duration': 3, 'price': 105.00, 'label': '90 дней – 105 руб'},
+                {'duration': 6, 'price': 210.00, 'label': '180 дней – 210 руб'},
+                {'duration': 12, 'price': 420.00, 'label': '360 дней – 420 руб'},
+            ]
+        },
+        {
+            'type': 'standard3',
+            'label': 'Профессиональный (до 15000 запчастей)',
+            'durations': [
+                {'duration': 1, 'price': 60.00, 'label': '30 дней – 60 руб'},
+                {'duration': 3, 'price': 180.00, 'label': '90 дней – 180 руб'},
+                {'duration': 6, 'price': 360.00, 'label': '180 дней – 360 руб'},
+                {'duration': 12, 'price': 720.00, 'label': '360 дней – 720 руб'},
+            ]
+        },
+        {
+            'type': 'premium',
+            'label': 'Неограниченный (без ограничений)',
+            'durations': [
+                {'duration': 1, 'price': 150.00, 'label': '30 дней – 150 руб'},
+                {'duration': 3, 'price': 450.00, 'label': '90 дней – 450 руб'},
+                {'duration': 6, 'price': 900.00, 'label': '180 дней – 900 руб'},
+                {'duration': 12, 'price': 1800.00, 'label': '360 дней – 1800 руб'},
+            ]
+        },
+    ]
+
+    if request.method == 'POST':
+        tariff_type = request.POST.get('tariff_type')
+        try:
+            duration = int(request.POST.get('duration', 1))
+        except ValueError:
+            duration = 1
+
+        # Validate input
+        valid_tariffs = [choice[0] for choice in TARIFF_TYPE_CHOICES]
+        if tariff_type not in valid_tariffs:
+            messages.error(request, "Недопустимый тариф")
+            return redirect('payments:choose_subscription')
+        if duration not in VALID_DURATIONS and tariff_type != 'free':
+            messages.error(request, "Недопустимый срок подписки")
+            return redirect('payments:choose_subscription')
+
+        # Handle free tariff
+        if tariff_type == 'free':
+            profile.tariff = 'free'
+            profile.subscription_start = None
+            profile.subscription_end = None
+            profile.save()
+            messages.success(request, "Бесплатный тариф успешно активирован")
+            return redirect('profile')
+
+        # Store payment data in session
+        request.session['payment_data'] = {
+            'tariff_type': tariff_type,
+            'duration': duration
+        }
+        return redirect('payments:initiate_payment')
+
+    return render(request, 'payments/choose_subscription.html', {
+        'tariff_options': tariff_options,
+        'current_subscription': current_subscription,
+        'now': now,
+        'renew': renew,
+    })
+
 
 @login_required
 def initiate_payment(request):
-    # Флаг временного ограничения оплаты
-    temporary_payment_restriction = True  # Установите False, чтобы включить оплату
-
-    if temporary_payment_restriction:
-        messages.error(request, "Оплата временно недоступна. Пожалуйста, попробуйте позже.")
+    """
+    Initiate payment using session data.
+    """
+    payment_data = request.session.get('payment_data')
+    if not payment_data:
+        messages.error(request, "Данные о платеже не найдены")
         return redirect('payments:choose_subscription')
 
-    tariff_type = request.GET.get('tariff', 'standard')
-    try:
-        duration = int(request.GET.get('duration', 1))
-    except ValueError:
-        duration = 1
+    tariff_type = payment_data['tariff_type']
+    duration = payment_data['duration']
+
+    # Re-validate for security
+    valid_tariffs = [choice[0] for choice in TARIFF_TYPE_CHOICES]
+    if tariff_type not in valid_tariffs:
+        messages.error(request, "Недопустимый тариф")
+        return redirect('payments:choose_subscription')
+    if duration not in VALID_DURATIONS:
+        messages.error(request, "Недопустимый срок подписки")
+        return redirect('payments:choose_subscription')
 
     profile = request.user.profile
     now = timezone.now()
 
-    # Проверяем, есть ли активная подписка и меняется ли тариф
+    # Check for tariff change with active subscription
     if profile.subscription_end and profile.subscription_end > now and profile.tariff != tariff_type and profile.tariff != 'free':
         if request.method == 'POST' and request.POST.get('confirm_change') == 'yes':
-            pass
+            pass  # Proceed with payment
         else:
             return render(request, 'payments/confirm_tariff_change.html', {
                 'current_tariff': profile.get_tariff_display(),
@@ -51,21 +188,10 @@ def initiate_payment(request):
                 'tariff_type': tariff_type,
             })
 
-    # Цены для тарифов (за 30 дней как база)
-    if tariff_type == 'lite':
-        price_lookup = {1: 20.00, 3: 60.00, 6: 120.00, 12: 240.00}
-    elif tariff_type == 'standard':
-        price_lookup = {1: 40.00, 3: 120.00, 6: 240.00, 12: 480.00}
-    elif tariff_type == 'standard2':
-        price_lookup = {1: 70.00, 3: 210.00, 6: 420.00, 12: 840.00}
-    elif tariff_type == 'standard3':
-        price_lookup = {1: 120.00, 3: 360.00, 6: 720.00, 12: 1440.00}
-    elif tariff_type == 'premium':
-        price_lookup = {1: 300.00, 3: 900.00, 6: 1800.00, 12: 3600.00}
-    else:
-        price_lookup = {1: 0.00}  # Для бесплатного тарифа
-    total = price_lookup.get(duration, 20.00)  # По умолчанию Lite, если что-то не так
+    # Calculate total based on tariff and duration
+    total = BASE_PRICE_PER_30_DAYS.get(tariff_type, 0.00) * duration
 
+    # Create payment order
     order_number = f"ORDER-{uuid.uuid4().hex[:10].upper()}"
     order = PaymentOrder.objects.create(
         user=request.user,
@@ -75,6 +201,7 @@ def initiate_payment(request):
         tariff_type=tariff_type
     )
 
+    # Prepare Webpay.by payment data
     wsb_seed = str(int(time.time()))
     wsb_order_num = order.order_number
     wsb_test = WSB_TEST
@@ -86,9 +213,9 @@ def initiate_payment(request):
 
     user_profile = request.user.profile
     wsb_customer_name = user_profile.full_name if user_profile.full_name else request.user.username
-    wsb_customer_address = user_profile.city
+    wsb_customer_address = user_profile.city if user_profile.city else ""
     wsb_email = request.user.email
-    wsb_phone = user_profile.phone
+    wsb_phone = user_profile.phone if user_profile.phone else ""
 
     wsb_return_url = request.build_absolute_uri(reverse('payments:payment_success'))
     wsb_cancel_return_url = request.build_absolute_uri(reverse('payments:payment_cancel'))
@@ -117,10 +244,17 @@ def initiate_payment(request):
         'wsb_total': wsb_total,
         'wsb_signature': wsb_signature,
     }
+
+    # Clear session data after initiating payment
+    request.session.pop('payment_data', None)
     return render(request, 'payments/payment_form.html', context)
+
 
 @login_required
 def payment_success(request):
+    """
+    Handle successful payment.
+    """
     order_num = request.GET.get('wsb_order_num')
     try:
         order = PaymentOrder.objects.get(order_number=order_num, status='pending')
@@ -130,33 +264,42 @@ def payment_success(request):
 
         profile = request.user.profile
         now = timezone.now()
-
-        # Новый период в днях
         new_period_days = order.duration * 30
 
-        # Применяем новый тариф сразу
         profile.subscription_start = now
         profile.subscription_end = now + timedelta(days=new_period_days)
         profile.tariff = order.tariff_type
         profile.save()
 
+        messages.success(request, "Оплата успешно завершена. Ваш тариф обновлен.")
         return render(request, 'payments/payment_success.html', {'order': order})
     except PaymentOrder.DoesNotExist:
-        return HttpResponse("Заказ не найден или уже обработан.", status=404)
+        messages.error(request, "Заказ не найден или уже обработан.")
+        return redirect('profile')
+
 
 @login_required
 def payment_cancel(request):
+    """
+    Handle payment cancellation.
+    """
     order_num = request.GET.get('wsb_order_num')
     try:
         order = PaymentOrder.objects.get(order_number=order_num, status='pending')
         order.status = 'cancelled'
         order.save()
+        messages.warning(request, "Оплата была отменена.")
         return render(request, 'payments/payment_cancel.html', {'order': order})
     except PaymentOrder.DoesNotExist:
-        return HttpResponse("Заказ не найден или уже обработан.", status=404)
+        messages.error(request, "Заказ не найден или уже обработан.")
+        return redirect('profile')
+
 
 @csrf_exempt
 def payment_notify(request):
+    """
+    Handle payment notification from Webpay.by.
+    """
     if request.method != "POST":
         return HttpResponseBadRequest("Метод не поддерживается")
     if not verify_notify_signature(request.POST, WSB_SECRET_KEY):
@@ -170,8 +313,13 @@ def payment_notify(request):
             order.transaction_id = request.POST.get('transaction_id', '')
             order.invoice_number = request.POST.get('order_id', '')
             order.save()
-            order.user.profile.tariff = order.tariff_type
-            order.user.profile.save()
+            profile = order.user.profile
+            now = timezone.now()
+            new_period_days = order.duration * 30
+            profile.tariff = order.tariff_type
+            profile.subscription_start = now
+            profile.subscription_end = now + timedelta(days=new_period_days)
+            profile.save()
             return HttpResponse("OK", status=200)
         else:
             order.status = 'cancelled'
@@ -179,108 +327,3 @@ def payment_notify(request):
             return HttpResponse("Платеж неуспешный", status=400)
     except PaymentOrder.DoesNotExist:
         return HttpResponse("Заказ не найден", status=404)
-
-@login_required
-def choose_subscription(request):
-    now = timezone.now()
-    profile = request.user.profile
-
-    # Автоматическая конвертация тарифа на "free", если подписка истекла
-    if profile.subscription_end and profile.subscription_end < now and profile.tariff != 'free':
-        profile.tariff = 'free'
-        profile.subscription_end = None
-        profile.save()
-
-    current_subscription = None
-    if profile.subscription_end and profile.subscription_end > now:
-        current_subscription = profile.subscription_end
-
-    renew = request.GET.get('renew') == 'true'
-    tariff = request.GET.get('tariff', profile.tariff) if renew else None
-
-    # Флаг временного ограничения оплаты
-    temporary_payment_restriction = True  # Установите False, чтобы включить оплату
-
-    tariff_options = [
-        {
-            'type': 'lite',
-            'label': 'Базовый (до 500 запчастей)',
-            'durations': [
-                {'duration': 1, 'price': 20.00, 'label': '30 дней – 20 руб'},
-                {'duration': 3, 'price': 60.00, 'label': '90 дней – 60 руб'},
-                {'duration': 6, 'price': 120.00, 'label': '180 дней – 120 руб'},
-                {'duration': 12, 'price': 240.00, 'label': '360 дней – 240 руб'},
-            ]
-        },
-        {
-            'type': 'standard',
-            'label': 'Стандартный (до 2000 запчастей)',
-            'durations': [
-                {'duration': 1, 'price': 40.00, 'label': '30 дней – 40 руб'},
-                {'duration': 3, 'price': 120.00, 'label': '90 дней – 120 руб'},
-                {'duration': 6, 'price': 240.00, 'label': '180 дней – 240 руб'},
-                {'duration': 12, 'price': 480.00, 'label': '360 дней – 480 руб'},
-            ]
-        },
-        {
-            'type': 'standard2',
-            'label': 'Продвинутый (до 7000 запчастей)',
-            'durations': [
-                {'duration': 1, 'price': 70.00, 'label': '30 дней – 70 руб'},
-                {'duration': 3, 'price': 210.00, 'label': '90 дней – 210 руб'},
-                {'duration': 6, 'price': 420.00, 'label': '180 дней – 420 руб'},
-                {'duration': 12, 'price': 840.00, 'label': '360 дней – 840 руб'},
-            ]
-        },
-        {
-            'type': 'standard3',
-            'label': 'Профессиональный (до 15000 запчастей)',
-            'durations': [
-                {'duration': 1, 'price': 120.00, 'label': '30 дней – 120 руб'},
-                {'duration': 3, 'price': 360.00, 'label': '90 дней – 360 руб'},
-                {'duration': 6, 'price': 720.00, 'label': '180 дней – 720 руб'},
-                {'duration': 12, 'price': 1440.00, 'label': '360 дней – 1440 руб'},
-            ]
-        },
-        {
-            'type': 'premium',
-            'label': 'Неограниченный (без ограничений)',
-            'durations': [
-                {'duration': 1, 'price': 300.00, 'label': '30 дней – 300 руб'},
-                {'duration': 3, 'price': 900.00, 'label': '90 дней – 900 руб'},
-                {'duration': 6, 'price': 1800.00, 'label': '180 дней – 1800 руб'},
-                {'duration': 12, 'price': 3600.00, 'label': '360 дней – 3600 руб'},
-            ]
-        },
-    ]
-
-    if request.method == 'POST':
-        tariff_type = request.POST.get('tariff_type', 'standard')
-        try:
-            duration = int(request.POST.get('duration', 1))
-        except ValueError:
-            duration = 1
-
-        # Обработка бесплатного тарифа
-        if tariff_type == 'free':
-            profile.tariff = 'free'
-            profile.subscription_start = now
-            profile.subscription_end = None  # Бесплатный тариф не имеет срока окончания
-            profile.save()
-            messages.success(request, "Бесплатный тариф успешно активирован.")
-            return redirect('profile')
-
-        # Проверка ограничения оплаты
-        if temporary_payment_restriction:
-            messages.error(request, "Оплата временно недоступна. Пожалуйста, попробуйте позже.")
-            return redirect('payments:choose_subscription')
-
-        return redirect(f"{reverse('payments:initiate_payment')}?tariff={tariff_type}&duration={duration}")
-
-    return render(request, 'payments/choose_subscription.html', {
-        'tariff_options': tariff_options,
-        'current_subscription': current_subscription,
-        'now': now,
-        'renew': renew,
-        'temporary_payment_restriction': temporary_payment_restriction,
-    })
