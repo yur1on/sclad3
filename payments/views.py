@@ -13,13 +13,13 @@ from .utils import compute_wsb_signature, verify_notify_signature
 
 # Webpay.by configuration
 WSB_STOREID = "548275588"
-WSB_SECRET_KEY = "1q2w3e4r5t6y7u8i9o0"
+WSB_SECRET_KEY = "MyS3cr3tK3y_f0rW3bpayBy_!@#789"
 WSB_VERSION = "2"
 WSB_TEST = "0"
 WSB_CURRENCY_ID = "BYN"
 WSB_LANGUAGE_ID = "russian"
 WSB_STORE_NAME = "Mobirazbor"
-WSB_PAYMENT_URL = "https://payment.webpay.by/"
+WSB_PAYMENT_URL = "https://payment.webpay.by"
 
 
 
