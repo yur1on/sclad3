@@ -1,6 +1,5 @@
 
 from django.contrib.auth import logout
-import openpyxl
 from pathlib import Path
 import json
 from django.http import JsonResponse
@@ -24,8 +23,11 @@ import os
 from django.conf import settings
 
 
+
 def home(request):
     return render(request, 'warehouse/home.html')
+
+
 
 
 
@@ -38,13 +40,11 @@ def warehouse_view(request):
     model = request.GET.get('model')
     part_type = request.GET.get('part_type')
 
-    # Фильтруем запчасти по пользователю
     parts = Part.objects.filter(user=request.user)
 
-    # Улучшенный поиск: все слова должны присутствовать в одной запчасти
+    # Умный AND-поиск: каждое слово должно встречаться хотя бы в одном из полей
     if query:
-        words = query.split()  # Разбиваем запрос на слова
-
+        words = query.strip().lower().split()
         for word in words:
             parts = parts.filter(
                 Q(device__icontains=word) |
@@ -56,30 +56,22 @@ def warehouse_view(request):
                 Q(part_number__icontains=word)
             )
 
-    # Фильтрация по бренду
     if brand:
         parts = parts.filter(brand__icontains=brand)
 
-    # Фильтрация по модели
     if model:
         parts = parts.filter(model__icontains=model)
 
-    # Фильтрация по типу запчасти
     if part_type:
         parts = parts.filter(part_type__icontains=part_type)
 
-    # Сортировка от новых к старым
     parts = parts.order_by('-created_at')
-
-    # Получаем общее количество запчастей после фильтрации
     total_parts = parts.count()
 
-    # Пагинация: 30 запчастей на странице
     paginator = Paginator(parts, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Получаем уникальные устройства и бренды для отображения кнопок
     devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
     brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct()
 
@@ -111,15 +103,21 @@ def search(request):
 
     results = Part.objects.all().order_by('-created_at')
 
+    # === УМНЫЙ ПОИСК ===
     if query:
-        keywords = query.split()
-        q_objects = Q()
+        keywords = query.lower().split()
         for keyword in keywords:
-            q_objects &= (Q(device__icontains=keyword) |
-                          Q(brand__icontains=keyword) |
-                          Q(model__icontains=keyword) |
-                          Q(part_type__icontains=keyword))
-        results = results.filter(q_objects)
+            results = results.filter(
+                Q(device__icontains=keyword) |
+                Q(brand__icontains=keyword) |
+                Q(model__icontains=keyword) |
+                Q(part_type__icontains=keyword) |
+                Q(color__icontains=keyword) |
+                Q(note__icontains=keyword) |
+                Q(part_number__icontains=keyword)
+            )
+
+    # === Дополнительные фильтры ===
     if device:
         results = results.filter(device__icontains=device)
     if brand:
@@ -132,7 +130,6 @@ def search(request):
         results = results.filter(user__profile__region__icontains=region)
     if city:
         results = results.filter(user__profile__city__icontains=city)
-
     now = timezone.now()
     # Определяем пользователей с активной платной подпиской:
     active_paid = Q(user__profile__tariff__in=['lite', 'standard', 'standard2', 'standard3', 'premium']) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
