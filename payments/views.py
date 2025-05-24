@@ -19,24 +19,19 @@ WSB_TEST = "0"
 WSB_CURRENCY_ID = "BYN"
 WSB_LANGUAGE_ID = "russian"
 WSB_STORE_NAME = "Mobirazbor"
-WSB_PAYMENT_URL = "https://payment.webpay.by"
-
-
-
-
+WSB_PAYMENT_URL = "https://payment.webpay.by/"
 
 # Valid durations for subscriptions
 VALID_DURATIONS = [1, 3, 6, 12]
 
 # Base prices per 30 days (halved from original)
 BASE_PRICE_PER_30_DAYS = {
-    'lite': 10.00,  # Was 20.00
-    'standard': 20.00,  # Was 40.00
+    'lite': 10.00,       # Was 20.00
+    'standard': 20.00,   # Was 40.00
     'standard2': 35.00,  # Was 70.00
     'standard3': 60.00,  # Was 120.00
-    'premium': 150.00  # Was 300.00
+    'premium': 150.00    # Was 300.00
 }
-
 
 @login_required
 def choose_subscription(request):
@@ -149,7 +144,6 @@ def choose_subscription(request):
         'renew': renew,
     })
 
-
 @login_required
 def initiate_payment(request):
     """
@@ -238,9 +232,7 @@ def initiate_payment(request):
         'wsb_notify_url': wsb_notify_url,
         'wsb_email': wsb_email,
         'wsb_phone': wsb_phone,
-        'invoice_item_name': "Подписка на платный тариф",
-        'invoice_item_quantity': "1",
-        'invoice_item_price': wsb_total,
+        'wsb_invoice_item_name': "Подписка на платный тариф",
         'wsb_total': wsb_total,
         'wsb_signature': wsb_signature,
     }
@@ -248,7 +240,6 @@ def initiate_payment(request):
     # Clear session data after initiating payment
     request.session.pop('payment_data', None)
     return render(request, 'payments/payment_form.html', context)
-
 
 @login_required
 def payment_success(request):
@@ -277,7 +268,6 @@ def payment_success(request):
         messages.error(request, "Заказ не найден или уже обработан.")
         return redirect('profile')
 
-
 @login_required
 def payment_cancel(request):
     """
@@ -293,7 +283,6 @@ def payment_cancel(request):
     except PaymentOrder.DoesNotExist:
         messages.error(request, "Заказ не найден или уже обработан.")
         return redirect('profile')
-
 
 @csrf_exempt
 def payment_notify(request):
