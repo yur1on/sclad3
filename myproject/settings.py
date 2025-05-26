@@ -20,6 +20,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Или 'bootstrap5', в зависимо�
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
+
 DEBUG = False
 ALLOWED_HOSTS = ['mobirazbor.by']
 DATABASES = {
