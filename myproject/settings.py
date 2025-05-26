@@ -19,12 +19,6 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Или 'bootstrap5', в зависимо�
 # Для работы https.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-SECURE_SSL_REDIRECT = True  # Перенаправляет HTTP на HTTPS
-SESSION_COOKIE_SECURE = True  # Куки только по HTTPS
-CSRF_COOKIE_SECURE = True  # CSRF-токены только по HTTPS
-SECURE_HSTS_SECONDS = 31536000  # Включает HSTS на год
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
 
 
 DEBUG = False
