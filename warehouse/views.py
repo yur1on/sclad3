@@ -109,25 +109,14 @@ def search(request):
 
     results = Part.objects.all().order_by('-created_at')
 
-    # === ТОЧНЫЙ УМНЫЙ ПОИСК ===
     if query:
-        keywords = query.lower().split()
-        combined_query = Q()
-        for word in keywords:
-            regex = rf'\m{re.escape(word)}'  # \m — граница начала слова
-            word_query = (
-                Q(device__iregex=regex) |
-                Q(brand__iregex=regex) |
-                Q(model__iregex=regex) |
-                Q(part_type__iregex=regex) |
-                Q(color__iregex=regex) |
-                Q(note__iregex=regex) |
-                Q(part_number__iregex=regex)
-            )
-            combined_query &= word_query
-        results = results.filter(combined_query)
+        results = results.filter(
+            Q(device__icontains=query) |
+            Q(brand__icontains=query) |
+            Q(model__icontains=query) |
+            Q(part_type__icontains=query)
+        )
 
-    # === Дополнительные фильтры ===
     if device:
         results = results.filter(device__icontains=device)
     if brand:
@@ -141,7 +130,7 @@ def search(request):
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
-    # === Ограничение на отображение в зависимости от подписки ===
+    # Ограничения по подписке — оставляем как есть
     now = timezone.now()
     active_paid = Q(user__profile__tariff__in=[
         'lite', 'standard', 'standard2', 'standard3', 'premium'
@@ -152,7 +141,6 @@ def search(request):
     subquery = Part.objects.filter(user=OuterRef('user_id')).order_by('-created_at').values('pk')[:30]
     results = results.filter(active_paid | Q(pk__in=Subquery(subquery)))
 
-    # === Пагинация ===
     paginator = Paginator(results, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
