@@ -15,14 +15,9 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Или 'bootstrap5', в зависимости от версии
-
-# Для работы https.
+#
+# # Для работы https.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-
-
-
-
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 
@@ -40,7 +35,7 @@ DATABASES = {
     }
 }
 
-# #
+#
 # DEBUG = True
 # ALLOWED_HOSTS = []
 # DATABASES = {

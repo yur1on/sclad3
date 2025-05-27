@@ -98,6 +98,9 @@ def logout_view(request):
     return redirect('home')  # Перенаправление на главную страницу после выхода
 
 
+from django.db.models import Q
+import re
+
 def search(request):
     query = request.GET.get('q', '').strip()
     device = request.GET.get('device', '').strip()
@@ -109,14 +112,19 @@ def search(request):
 
     results = Part.objects.all().order_by('-created_at')
 
+    # === УМНЫЙ ПОИСК ТОЛЬКО ПО device, brand, model, part_type ===
     if query:
-        results = results.filter(
-            Q(device__icontains=query) |
-            Q(brand__icontains=query) |
-            Q(model__icontains=query) |
-            Q(part_type__icontains=query)
-        )
+        keywords = query.lower().split()
+        for word in keywords:
+            regex = rf'\m{re.escape(word)}'  # граница начала слова
+            results = results.filter(
+                Q(device__iregex=regex) |
+                Q(brand__iregex=regex) |
+                Q(model__iregex=regex) |
+                Q(part_type__iregex=regex)
+            )
 
+    # === Остальные фильтры ===
     if device:
         results = results.filter(device__icontains=device)
     if brand:
@@ -130,17 +138,16 @@ def search(request):
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
-    # Ограничения по подписке — оставляем как есть
+    # === Ограничения по подписке ===
     now = timezone.now()
     active_paid = Q(user__profile__tariff__in=[
         'lite', 'standard', 'standard2', 'standard3', 'premium'
     ]) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
 
-    non_active = Q(user__profile__tariff='free') | Q(user__profile__subscription_end__lt=now) | Q(user__profile__subscription_end__isnull=True)
-
     subquery = Part.objects.filter(user=OuterRef('user_id')).order_by('-created_at').values('pk')[:30]
     results = results.filter(active_paid | Q(pk__in=Subquery(subquery)))
 
+    # === Пагинация ===
     paginator = Paginator(results, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -155,6 +162,7 @@ def search(request):
         'region': region,
         'city': city,
     })
+
 
 
 
