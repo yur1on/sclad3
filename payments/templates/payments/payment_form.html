@@ -1,8 +1,6 @@
 <form action="https://payment.webpay.by/" method="post" id="payment-form">
   <!-- Обязательное поле *scart -->
-  <input type="hidden" name="*scart">
-
-  <!-- Основные поля -->
+  <input type="hidden" name="*scart">  <!-- Основные поля -->
   <input type="hidden" name="wsb_storeid" value="{{ wsb_storeid }}">
   <input type="hidden" name="wsb_store" value="{{ wsb_store }}">
   <input type="hidden" name="wsb_order_num" value="{{ wsb_order_num }}">
@@ -29,9 +27,9 @@
 
   <!-- Общая сумма -->
   <input type="hidden" name="wsb_total" value="{{ wsb_total }}">
-
-  <!-- Кнопка "Оплатить" -->
-  <div style="text-align: center; margin-top: 20px;">
-    <button type="submit" class="btn btn-primary">Оплатить</button>
-  </div>
 </form>
+
+<script>
+  document.getElementById("payment-form").submit();
+</script>
+
