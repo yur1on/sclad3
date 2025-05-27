@@ -1,4 +1,6 @@
 
+
+import re
 from django.contrib.auth import logout
 from pathlib import Path
 import json
@@ -42,19 +44,23 @@ def warehouse_view(request):
 
     parts = Part.objects.filter(user=request.user)
 
-    # Умный AND-поиск: каждое слово должно встречаться хотя бы в одном из полей
     if query:
         words = query.strip().lower().split()
+        combined_query = Q()
         for word in words:
-            parts = parts.filter(
-                Q(device__icontains=word) |
-                Q(brand__icontains=word) |
-                Q(model__icontains=word) |
-                Q(part_type__icontains=word) |
-                Q(color__icontains=word) |
-                Q(note__icontains=word) |
-                Q(part_number__icontains=word)
+            # Проверка, что слово находится в начале слова или является отдельным словом
+            regex = rf'\m{re.escape(word)}'
+            word_query = (
+                Q(device__iregex=regex) |
+                Q(brand__iregex=regex) |
+                Q(model__iregex=regex) |
+                Q(part_type__iregex=regex) |
+                Q(color__iregex=regex) |
+                Q(note__iregex=regex) |
+                Q(part_number__iregex=regex)
             )
+            combined_query &= word_query
+        parts = parts.filter(combined_query)
 
     if brand:
         parts = parts.filter(brand__icontains=brand)
@@ -103,19 +109,23 @@ def search(request):
 
     results = Part.objects.all().order_by('-created_at')
 
-    # === УМНЫЙ ПОИСК ===
+    # === ТОЧНЫЙ УМНЫЙ ПОИСК ===
     if query:
         keywords = query.lower().split()
-        for keyword in keywords:
-            results = results.filter(
-                Q(device__icontains=keyword) |
-                Q(brand__icontains=keyword) |
-                Q(model__icontains=keyword) |
-                Q(part_type__icontains=keyword) |
-                Q(color__icontains=keyword) |
-                Q(note__icontains=keyword) |
-                Q(part_number__icontains=keyword)
+        combined_query = Q()
+        for word in keywords:
+            regex = rf'\m{re.escape(word)}'  # \m — граница начала слова
+            word_query = (
+                Q(device__iregex=regex) |
+                Q(brand__iregex=regex) |
+                Q(model__iregex=regex) |
+                Q(part_type__iregex=regex) |
+                Q(color__iregex=regex) |
+                Q(note__iregex=regex) |
+                Q(part_number__iregex=regex)
             )
+            combined_query &= word_query
+        results = results.filter(combined_query)
 
     # === Дополнительные фильтры ===
     if device:
@@ -130,20 +140,19 @@ def search(request):
         results = results.filter(user__profile__region__icontains=region)
     if city:
         results = results.filter(user__profile__city__icontains=city)
+
+    # === Ограничение на отображение в зависимости от подписки ===
     now = timezone.now()
-    # Определяем пользователей с активной платной подпиской:
-    active_paid = Q(user__profile__tariff__in=['lite', 'standard', 'standard2', 'standard3', 'premium']) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
-    # Все остальные (free, либо подписка истекла, либо не оформлена)
+    active_paid = Q(user__profile__tariff__in=[
+        'lite', 'standard', 'standard2', 'standard3', 'premium'
+    ]) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
+
     non_active = Q(user__profile__tariff='free') | Q(user__profile__subscription_end__lt=now) | Q(user__profile__subscription_end__isnull=True)
 
-    # Для пользователей без активной платной подписки показываем только последние 30 запчастей.
-    # Создаем подзапрос, который для каждого пользователя выбирает последние 30 запчастей.
     subquery = Part.objects.filter(user=OuterRef('user_id')).order_by('-created_at').values('pk')[:30]
+    results = results.filter(active_paid | Q(pk__in=Subquery(subquery)))
 
-    results = results.filter(
-        active_paid | Q(pk__in=Subquery(subquery))
-    )
-
+    # === Пагинация ===
     paginator = Paginator(results, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
