@@ -221,7 +221,7 @@
                   Оплата временно недоступна. Пожалуйста, попробуйте позже.
                 </p>
               {% else %}
-                <button type="submit" class="btn btn-success btn-lg" id="payment-button">Перейти к оплате</button>
+                <button type="submit" class="btn btn-success btn-lg" id="payment-button" style="display: {% if user.profile.tariff == 'free' and not renew %}none{% endif %};">Перейти к оплате</button>
               {% endif %}
             </div>
           </form>
@@ -366,7 +366,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const paymentButton = document.getElementById("payment-button");
     const temporaryRestriction = {{ temporary_payment_restriction|yesno:"true,false" }};
     const currentEndStr = document.getElementById("current-end").dataset.currentEnd;
-    const currentEndDate = new Date(currentEndStr);
     const now = new Date();
 
     // Отключение кнопки оплаты, если активен флаг ограничения
@@ -396,19 +395,19 @@ document.addEventListener("DOMContentLoaded", function() {
                               document.querySelector('input[name="tariff_type"]:checked').value : '{{ user.profile.tariff }}';
         const selectedDuration = document.querySelector('input[name="duration"]:checked') ?
                                  parseInt(document.querySelector('input[name="duration"]:checked').value) : 1;
+        const currentEndDate = new Date(currentEndStr);
         let baseDate = (currentEndDate > now && selectedTariff === '{{ user.profile.tariff }}') ? currentEndDate : now;
         let newEndDate = addDays(baseDate, 30 * selectedDuration);
+
         if (selectedTariff === 'free') {
             subscriptionInfo.innerHTML = `<p>Тариф "Бесплатный" активен по умолчанию и не требует оплаты.</p>`;
             if (paymentButton) {
-                paymentButton.textContent = "Активировать";
-                paymentButton.disabled = false;
-                paymentButton.style.opacity = "1";
-                paymentButton.style.cursor = "pointer";
+                paymentButton.style.display = 'none'; // Скрываем кнопку для бесплатного тарифа
             }
         } else {
             subscriptionInfo.innerHTML = `<p>При выбранном варианте ваша подписка будет действовать до <strong>${formatDate(newEndDate)}</strong></p>`;
             if (paymentButton && !temporaryRestriction) {
+                paymentButton.style.display = 'block'; // Показываем кнопку для платных тарифов
                 paymentButton.textContent = "Перейти к оплате";
                 paymentButton.disabled = false;
                 paymentButton.style.opacity = "1";
@@ -492,7 +491,7 @@ document.addEventListener("DOMContentLoaded", function() {
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 10px;
-    margin  margin-bottom: 15px;
+    margin-bottom: 15px;
   }
   .tariff-table-container {
     margin-top: 0;
