@@ -1,5 +1,5 @@
 
-from decouple import config  # Импортируем python-decouple
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -14,14 +14,13 @@ load_dotenv(BASE_DIR / '.env')
 # теперь SECRET_KEY берётся из окружения
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Или 'bootstrap5', в зависимости от версии
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 #
 # # Для работы https.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 
-#
 DEBUG = False
 ALLOWED_HOSTS = ['mobirazbor.by']
 DATABASES = {
@@ -102,6 +101,7 @@ TEMPLATES = [
                 'notifications.context_processors.unread_notifications',
                 'warehouse.context_processors.subscription_status',
                 'advertisements.context_processors.active_advertisements',
+                'warehouse.context_processors.debug_mode',
             ],
         },
     },
