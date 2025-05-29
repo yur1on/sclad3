@@ -3,7 +3,7 @@ from .models import Part
 from django.contrib.auth.models import User
 from django.utils import timezone
 from notifications.models import Notification  # Если модель в user_profile
-
+from django.conf import settings
 def counts(request):
     return {
         'part_count': Part.objects.count(),
@@ -44,4 +44,11 @@ def subscription_status(request):
         'subscription_notification': subscription_notification,
         'days_left': days_left,
         'subscription_expired': subscription_expired,
+    }
+
+
+
+def debug_mode(request):
+    return {
+        'debug': settings.DEBUG
     }
