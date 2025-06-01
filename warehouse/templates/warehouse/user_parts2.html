@@ -25,7 +25,7 @@
                             </thead>
                             <tbody>
                                 {% for part in parts %}
-                                    <tr>
+                                    <tr {% if part.quantity == 0 %}class="table-danger"{% endif %}>
                                         <td>{{ part.display_model }}</td>
                                         <td>{{ part.part_type }}</td>
                                         <td>{{ part.color|default:"Не указан" }}</td>

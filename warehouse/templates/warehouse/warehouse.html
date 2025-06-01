@@ -28,7 +28,7 @@
                     <i class="bi bi-trash me-2"></i>Удалить все запчасти
                 </a>
             </div>
-                        <!-- Информация о тарифе -->
+            <!-- Информация о тарифе -->
             <div class="tariff-info mb-3">
                 <h6 class="fw-bold">Ваш тариф</h6>
                 <p class="mb-1">
@@ -123,11 +123,11 @@
                 <tbody id="parts-table-body">
                     {% for part in page_obj %}
                     <!-- Строка с краткой информацией -->
-                    <tr class="accordion-toggle" data-bs-toggle="collapse" data-bs-target="#collapse-{{ part.id }}">
+                    <tr class="accordion-toggle {% if part.quantity == 0 %}table-danger{% endif %}" data-bs-toggle="collapse" data-bs-target="#collapse-{{ part.id }}">
                         <td data-label="Устройство">{{ part.device }}</td>
                         <td data-label="Модель">{{ part.brand }} {{ part.display_model }}</td>
                         <td data-label="Тип запчасти">{{ part.part_type }}</td>
-                        <td class="desktop-opacity" data-label="Прочее">
+                        <td class="desktop-only" data-label="Прочее">
                             <div>
                                 <strong>Номер запчасти:</strong> {{ part.part_number|default:"-" }}
                             </div>
@@ -158,13 +158,13 @@
                         </td>
                         <td class="desktop-only" data-label="Действия">
                             <div class="d-flex gap-2">
-                                <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm action-btn">✏️</a>
-                                <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm action-btn">🗑️</a>
+                                <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm action-btn" onclick="event.stopPropagation();">✏️</a>
+                                <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm action-btn" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️</a>
                             </div>
                         </td>
                     </tr>
                     <!-- Строка с подробной информацией (мобильная версия) -->
-                    <tr class="mobile-only">
+                    <tr class="mobile-only {% if part.quantity == 0 %}table-danger{% endif %}">
                         <td colspan="6" class="p-0">
                             <div id="collapse-{{ part.id }}" class="collapse">
                                 <div class="p-2 bg-light">
@@ -192,8 +192,8 @@
                                         </div>
                                     {% endif %}
                                     <div class="mt-2">
-                                        <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm">✏️ Редактировать</a>
-                                        <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm">🗑️ Удалить</a>
+                                        <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm" onclick="event.stopPropagation();">✏️ Редактировать</a>
+                                        <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️ Удалить</a>
                                     </div>
                                 </div>
                             </div>
@@ -292,7 +292,6 @@
     </div>
 </div>
 
-
 <!-- Скрипты -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -316,6 +315,13 @@
             }
         });
     });
+</script>
+
+<!-- Передача URL для JavaScript -->
+<script>
+    // Передаём Django URL в JavaScript для динамической генерации ссылок
+    const editPartUrl = "{% url 'edit_part' 0 %}".replace('0', '{id}');
+    const deletePartUrl = "{% url 'delete_part' 0 %}".replace('0', '{id}');
 </script>
 
 <!-- Скрипты для динамического фильтра и обновления таблицы -->
@@ -363,7 +369,6 @@ document.addEventListener('DOMContentLoaded', function() {
         handlePartTypeClick(partType);
     };
 
-    // Вызов функции обновления таблицы доступен глобально
     window.updateTable = function(page = 1) {
         updateTableData(page);
     };
@@ -535,14 +540,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         parts.forEach(part => {
-            // Создаем уникальные ID для каждого элемента коллапса
             const collapseId = `collapse-dyn-${part.id}`;
 
-            // Создаем основную строку с информацией
             const summaryRow = document.createElement('tr');
             summaryRow.classList.add('accordion-toggle');
+            if (part.quantity == 0) {
+                summaryRow.classList.add('table-danger');
+            }
 
-            // Добавляем атрибуты для мобильной версии
             if(window.innerWidth < 768) {
                 summaryRow.setAttribute('data-bs-toggle', 'collapse');
                 summaryRow.setAttribute('data-bs-target', `#${collapseId}`);
@@ -575,16 +580,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
                 <td class="desktop-only" data-label="Действия">
                     <div class="d-flex gap-2">
-                        <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm action-btn">✏️</a>
-                        <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm action-btn">🗑️</a>
+                        <a href="${editPartUrl.replace('{id}', part.id)}" class="btn btn-warning btn-sm action-btn" onclick="event.stopPropagation();">✏️</a>
+                        <a href="${deletePartUrl.replace('{id}', part.id)}" class="btn btn-danger btn-sm action-btn" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️</a>
                     </div>
                 </td>
             `;
             tbody.appendChild(summaryRow);
 
-            // Создаем строку с подробной информацией для мобильной версии
             const detailsRow = document.createElement('tr');
             detailsRow.classList.add('mobile-only');
+            if (part.quantity == 0) {
+                detailsRow.classList.add('table-danger');
+            }
             detailsRow.innerHTML = `
                 <td colspan="6" class="p-0">
                     <div id="${collapseId}" class="collapse">
@@ -607,8 +614,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 `).join('')}
                             </div>` : ''}
                             <div class="mt-2">
-                                <a href="/edit-part/${part.id}/" class="btn btn-warning btn-sm">✏️ Редактировать</a>
-                                <a href="/delete-part/${part.id}/" class="btn btn-danger btn-sm">🗑️ Удалить</a>
+                                <a href="${editPartUrl.replace('{id}', part.id)}" class="btn btn-warning btn-sm" onclick="event.stopPropagation();">✏️ Редактировать</a>
+                                <a href="${deletePartUrl.replace('{id}', part.id)}" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️ Удалить</a>
                             </div>
                         </div>
                     </div>
@@ -616,9 +623,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             tbody.appendChild(detailsRow);
 
-            // Создаем модальное окно для фотографий (только если есть фотографии)
             if (part.images && part.images.length) {
-                // Создаем модальное окно
                 const modal = document.createElement('div');
                 modal.classList.add('modal', 'fade');
                 modal.id = `imageModal-dyn-${part.id}`;
@@ -626,7 +631,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 modal.setAttribute('aria-labelledby', `imageModalLabel-dyn-${part.id}`);
                 modal.setAttribute('aria-hidden', 'true');
 
-                // Создаем HTML для модального окна
                 modal.innerHTML = `
                     <div class="modal-dialog modal-lg modal-dialog-centered">
                         <div class="modal-content">
@@ -658,7 +662,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
 
-                // Добавляем модальное окно в DOM
                 document.body.appendChild(modal);
             }
         });

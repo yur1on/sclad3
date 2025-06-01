@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 #
-# # Для работы https.
+# Для работы https.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
