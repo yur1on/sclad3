@@ -110,7 +110,8 @@ def search(request):
     region = request.GET.get('region', '').strip()
     city = request.GET.get('city', '').strip()
 
-    results = Part.objects.all().order_by('-created_at')
+    # Исключаем запчасти с количеством 0
+    results = Part.objects.filter(quantity__gt=0).order_by('-created_at')
 
     # === УМНЫЙ ПОИСК ТОЛЬКО ПО device, brand, model, part_type ===
     if query:
@@ -144,7 +145,8 @@ def search(request):
         'lite', 'standard', 'standard2', 'standard3', 'premium'
     ]) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
 
-    subquery = Part.objects.filter(user=OuterRef('user_id')).order_by('-created_at').values('pk')[:30]
+    # Подзапрос для выбора последних 30 запчастей с количеством > 0
+    subquery = Part.objects.filter(user=OuterRef('user_id'), quantity__gt=0).order_by('-created_at').values('pk')[:30]
     results = results.filter(active_paid | Q(pk__in=Subquery(subquery)))
 
     # === Пагинация ===
@@ -162,7 +164,6 @@ def search(request):
         'region': region,
         'city': city,
     })
-
 
 
 
@@ -664,7 +665,7 @@ def get_regions_and_cities(request):
 
 def user_parts_list(request, user_id):
     user = get_object_or_404(User, id=user_id)
-    user_parts = Part.objects.filter(user_id=user_id).order_by('device', 'brand', 'model')
+    user_parts = Part.objects.filter(user_id=user_id, quantity__gt=0).order_by('device', 'brand', 'model')
 
     grouped_parts = {}
     for device, device_parts in groupby(user_parts, lambda x: x.device):
@@ -676,16 +677,6 @@ def user_parts_list(request, user_id):
         'grouped_parts': grouped_parts,
         'viewed_user': user,
     })
-
-# @login_required
-# def user_parts(request, user_id):
-#     user = get_object_or_404(User, id=user_id)
-#     parts = Part.objects.filter(user=user)  # Получаем все запчасти этого пользователя
-#
-#     return render(request, 'warehouse/user_parts.html', {
-#         'user': user,
-#         'parts': parts
-#     })
 
 @login_required
 def user_parts(request, user_id, template_name='warehouse/user_parts.html'):
@@ -700,10 +691,9 @@ def user_parts(request, user_id, template_name='warehouse/user_parts.html'):
 
     return render(request, template_name, {
         'grouped_parts': grouped_parts,
-        'viewed_user': user,  # Передаём просмотренного пользователя
+        'viewed_user': user,
         'viewed_user_full_name': user.profile.full_name,
     })
-
 
 
 
@@ -736,7 +726,7 @@ def about_project(request):
 
 def search_user_parts(request, user_id):
     viewed_user = get_object_or_404(User, id=user_id)
-    parts = Part.objects.filter(user=viewed_user)
+    parts = Part.objects.filter(user=viewed_user, quantity__gt=0)
 
     # Обработка параметров поиска
     query = request.GET.get('query', '').strip()
@@ -755,7 +745,6 @@ def search_user_parts(request, user_id):
         'viewed_user': viewed_user,
         'grouped_parts': grouped_parts,
     })
-
 
 
 def user_agreement_view(request):

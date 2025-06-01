@@ -1,6 +1,6 @@
 {% extends 'warehouse/base.html' %}
 
-{% block title %}Запчасти пользователя {{ viewed_user_full_name }}{% endblock %}
+{% block title %}, user_parts.html - Запчасти пользователя {{ viewed_user_full_name }}{% endblock %}
 
 {% block content %}
 <div class="container mt-3">
@@ -9,7 +9,7 @@
     <form method="get" action="{% url 'search_user_parts' viewed_user.id %}" class="mb-3 search-form">
         <div class="input-group">
             <input type="text" name="query" class="form-control" placeholder="Поиск по модели или типу" value="{{ request.GET.query }}">
-            <button type="submit" class="btn btn-primary">Искать</button>
+            <button type="submit" class="btn btn-primary">Поиск</button>
         </div>
     </form>
 
@@ -34,19 +34,21 @@
                                 </thead>
                                 <tbody>
                                     {% for part in parts %}
-                                        <tr>
-                                            <td>{{ part.display_model }}</td>
-                                            <td>{{ part.part_type }}</td>
-                                            <td class="hide-on-mobile">{{ part.color|default:"Не указан" }}</td>
-                                            <td class="hide-on-mobile">{{ part.quantity }}</td>
-                                            <td class="hide-on-mobile">{{ part.price }}</td>
-                                            <td>
-                                                <a href="{% url 'part_detail' part.id %}" class="btn btn-info btn-sm details-btn">
-                                                    <i class="fas fa-search"></i>
-                                                    <span class="btn-text">Подробнее</span>
-                                                </a>
-                                            </td>
-                                        </tr>
+                                        {% if part.quantity > 0 %}
+                                            <tr>
+                                                <td>{{ part.display_model }}</td>
+                                                <td>{{ part.part_type }}</td>
+                                                <td class="hide-on-mobile">{{ part.color|default:"Не указан" }}</td>
+                                                <td class="hide-on-mobile">{{ part.quantity }}</td>
+                                                <td class="hide-on-mobile">{{ part.price }}</td>
+                                                <td>
+                                                    <a href="{% url 'part_detail' part.id %}" class="btn btn-info btn-sm details-btn">
+                                                        <i class="fas fa-search"></i>
+                                                        <span class="btn-text">Подробнее</span>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -56,7 +58,7 @@
             </div>
         {% endfor %}
     {% else %}
-        <p class="text-center">У пользователя {{ viewed_user.username }} нет добавленных запчастей.</p>
+        <p class="text-center">нет таких запчастей.</p>
     {% endif %}
 </div>
 
