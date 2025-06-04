@@ -51,24 +51,34 @@
                 <h5 class="sidebar-title">Навигация</h5>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle active" data-content="profile-content">Профиль</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="tariff-content">Условия тарифов</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'payments:choose_subscription' %}" class="nav-link btn btn-success w-100 mb-2">Сменить тариф</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="bookmarks-content">
-                            Закладки <span class="badge bg-secondary">{{ bookmarks_count }}</span>
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle active" data-content="profile-content">
+                            <i class="fas fa-id-card me-2"></i>Профиль
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="reviews-content">Отзывы обо мне</a>
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="tariff-content">
+                            <i class="fas fa-clipboard-list me-2"></i>Условия тарифов
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="given-reviews-content">Мои отзывы</a>
+                        <a href="{% url 'payments:choose_subscription' %}" class="nav-link btn btn-success w-100 mb-2">
+                            <i class="fas fa-credit-card me-2"></i>Сменить тариф
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="bookmarks-content">
+                            <i class="fas fa-bookmark me-2"></i>Закладки <span class="badge bg-secondary">{{ bookmarks_count }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="reviews-content">
+                            <i class="fas fa-comments me-2"></i>Отзывы обо мне
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link btn btn-outline-primary w-100 mb-2 reviews-toggle" data-content="given-reviews-content">
+                            <i class="fas fa-comment-dots me-2"></i>Мои отзывы
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -247,7 +257,7 @@
                                                 data-tariff-limits="Добавить на склад можно до 500 запчастей."
                                                 data-tariff-description="После окончания подписки в глобальном поиске видны только 30 последних ваших запчастей. Если подписка не продливается 30 дней, на вашем складе останутся только 30 запчастей, которые вы добавили последними, все остальные будут удалены."
                                                 {% if user.profile.tariff == 'lite' %}class="active-tariff"{% endif %}>
-                                                <td><i class="fas practices-lightbulb"></i> Базовый</td>
+                                                <td><i class="fas fa-lightbulb"></i> Базовый</td>
                                                 <td>10 руб/30 дней</td>
                                                 <td>До 500</td>
                                             </tr>
@@ -506,7 +516,7 @@
         background-color: #fff;
         padding: 10px;
         border-radius: 8px;
-        border: 1px solid #dee2e6;
+        border: 2px solid #000; /* Updated to black border */
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     .tariff-info h6 {
@@ -923,15 +933,7 @@
         }
         .tariff-info {
             padding: 8px;
-        }
-        .tariff-info h6 {
-            font-size: 0.9rem;
-        }
-        .tariff-info p {
-            font-size: 0.8rem;
-        }
-        .tariff-info .text-muted {
-            font-size: 0.75rem;
+            border: 1px solid #000; /* Thinner black border for mobile */
         }
     }
     @media (max-width: 767px) {
