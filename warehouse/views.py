@@ -1,5 +1,7 @@
 
-
+from django.db.models import Value, IntegerField, F
+from django.db.models.functions import Lower, Replace
+from django.db.models import Case, When, Q
 import re
 from django.contrib.auth import logout
 from pathlib import Path
@@ -30,54 +32,157 @@ def home(request):
     return render(request, 'warehouse/home.html')
 
 
-
-
-
-
-
 @login_required
 def warehouse_view(request):
-    query = request.GET.get('q')
-    brand = request.GET.get('brand')
-    model = request.GET.get('model')
-    part_type = request.GET.get('part_type')
+    query = request.GET.get('q', '').strip()
+    brand = request.GET.get('brand', '')
+    model = request.GET.get('model', '')
+    part_type = request.GET.get('part_type', '')
 
+    # Базовый фильтр по пользователю
     parts = Part.objects.filter(user=request.user)
 
-    if query:
-        words = query.strip().lower().split()
-        combined_query = Q()
-        for word in words:
-            # Проверка, что слово находится в начале слова или является отдельным словом
-            regex = rf'\m{re.escape(word)}'
-            word_query = (
-                Q(device__iregex=regex) |
-                Q(brand__iregex=regex) |
-                Q(model__iregex=regex) |
-                Q(part_type__iregex=regex) |
-                Q(color__iregex=regex) |
-                Q(note__iregex=regex) |
-                Q(part_number__iregex=regex)
-            )
-            combined_query &= word_query
-        parts = parts.filter(combined_query)
+    # Список типов запчастей
+    known_part_types = [
+        'дисплей', 'аккумулятор', 'Вибромотор', 'Датчик', 'приближения', 'полифонический', 'музыкальный', 'Buzzer',
+        'слуховой', 'speaker', 'основная', 'фронтальная', 'Катушка', 'беспроводной', 'зарядки', 'Коннектор', 'АКБ', 'дисплея',
+        'межплатный', 'Крышка', 'задняя',  'Пластина', 'прижимная', 'зарядки', 'Плата', 'SUB', 'системная', 'Разъем', 'гарнитуры', 'зарядки', 'Рама', 'Рамка', 'дисплея', 'Резинка', 'датчика', 'приближения', 'Сетка', 'Сеточка', 'динамика',
+        'Сим-лоток', 'Сим', 'Лоток', 'Сим-считыватель', 'считыватель', 'Сканер', 'отпечатка', 'сенсорный', 'оптический', 'отпечаток', 'Стекло', 'камеры', 'для', 'переклейки', 'Тачскрин', 'Микросхема', 'Микрофон', 'Шлейф', 'антенна', 'Wi-Fi', 'беспроводной', 'зарядка',
+        'боковых', 'кнопок',  'кнопка', 'вспышки', 'вспышка', 'дисплея', 'межплатный', 'сканера', 'NFC', 'камера',
+        'корпус', 'динамик', 'микрофон',
+        'материнская плата', 'шлейф', 'стекло', 'модуль', 'экран', 'зарядное устройство'
+    ]
 
+    # Список брендов
+    known_brands = [
+        'xiaomi', 'samsung', 'apple', 'huawei', 'honor', 'oppo', 'vivo', 'realme',
+        'nokia', 'lg', 'sony', 'asus', 'lenovo', 'meizu', 'tecno', 'infinix', 'oppo',
+        'TCL', 'Google', 'OnePlus', 'Alcatel', 'Amigoo', 'Archos', 'Asus', 'Black Shark', 'BlackBerry',
+        'BLU', 'Cat', 'Caterpillar',  'Coolpad', 'Cubot',  'Doogee', 'Elephone',  'HTC', 'Lenovo',
+        'LG', 'Micromax', 'Motorola', 'Nothing',  'Nubia', 'Oukitel',  'Sharp', 'Sony', 'Amazfit',
+        'Chuwi', 'Hotwav', 'Teclast', 'UMiDIGI', 'UMiDIGI', 'Garmin', 'Wiko', 'ZTE', 'Poco'
+    ]
+
+    def normalize_text(text):
+        """Нормализация текста: убираем пробелы и приводим к нижнему регистру."""
+        return ''.join(text.split()).lower()
+
+    def split_query(query):
+        """Разделение запроса на бренд, модель/номер запчасти и тип запчасти."""
+        query_words = query.lower().split()
+        brand_words = []
+        model_or_part_words = []
+        part_type_words = []
+
+        for word in query_words:
+            if any(pt.lower() in word.lower() for pt in known_part_types):
+                part_type_words.append(word)
+            elif any(b.lower() in word.lower() for b in known_brands):
+                brand_words.append(word)
+            else:
+                model_or_part_words.append(word)
+
+        return ' '.join(brand_words).strip(), ' '.join(model_or_part_words).strip(), ' '.join(part_type_words).strip()
+
+    # Обработка поискового запроса
+    if query:
+        # Разделяем запрос на бренд, модель/номер запчасти и тип запчасти
+        brand_query, model_or_part_query, part_type_query = split_query(query)
+        normalized_model_query = normalize_text(model_or_part_query) if model_or_part_query else ''
+        original_model_query = model_or_part_query.lower() if model_or_part_query else ''
+        original_brand_query = brand_query.lower() if brand_query else ''
+
+        # Аннотация для нормализованных полей
+        parts = parts.annotate(
+            normalized_model=Lower(Replace(F('model'), Value(' '), Value(''))),
+            lower_model=Lower(F('model')),
+            lower_part_number=Lower(F('part_number')),
+            lower_brand=Lower(F('brand'))
+        )
+
+        # Фильтрация
+        filter_conditions = Q()
+        if brand_query and model_or_part_query:
+            # Если указаны и бренд, и модель, требуем совпадения обоих
+            filter_conditions = (
+                Q(lower_brand__icontains=original_brand_query) &
+                (Q(normalized_model__icontains=normalized_model_query) |
+                 Q(lower_model__icontains=original_model_query) |
+                 Q(lower_part_number__icontains=original_model_query))
+            )
+        elif brand_query:
+            # Если указан только бренд
+            filter_conditions = Q(lower_brand__icontains=original_brand_query)
+        elif model_or_part_query:
+            # Если указана только модель или номер запчасти
+            filter_conditions = (
+                Q(normalized_model__icontains=normalized_model_query) |
+                Q(lower_model__icontains=original_model_query) |
+                Q(lower_part_number__icontains=original_model_query)
+            )
+
+        if filter_conditions:
+            parts = parts.filter(filter_conditions)
+
+            # Аннотация для приоритизации
+            parts = parts.annotate(
+                match_priority=Case(
+                    # Точное совпадение модели или номера запчасти
+                    When(lower_model=original_model_query, then=Value(3)),
+                    When(normalized_model=normalized_model_query, then=Value(3)),
+                    When(lower_part_number=original_model_query, then=Value(3)),
+                    # Точное совпадение бренда
+                    When(lower_brand=original_brand_query, then=Value(2)),
+                    # Частичное совпадение модели или номера запчасти
+                    When(normalized_model__contains=normalized_model_query, then=Value(2)),
+                    When(lower_part_number__contains=original_model_query, then=Value(2)),
+                    # Частичное совпадение бренда
+                    When(lower_brand__contains=original_brand_query, then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            )
+        else:
+            parts = parts.annotate(match_priority=Value(0, output_field=IntegerField()))
+
+        # Фильтрация по типу запчасти
+        if part_type_query:
+            parts = parts.filter(part_type__icontains=part_type_query)
+            parts = parts.annotate(
+                part_type_match=Case(
+                    When(part_type__iexact=part_type_query, then=Value(2)),
+                    When(part_type__icontains=part_type_query, then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            )
+        else:
+            parts = parts.annotate(part_type_match=Value(0, output_field=IntegerField()))
+    else:
+        # Если запроса нет, все записи имеют нулевой приоритет
+        parts = parts.annotate(
+            match_priority=Value(0, output_field=IntegerField()),
+            part_type_match=Value(0, output_field=IntegerField())
+        )
+
+    # Дополнительные фильтры из GET-параметров
     if brand:
         parts = parts.filter(brand__icontains=brand)
-
     if model:
         parts = parts.filter(model__icontains=model)
-
     if part_type:
         parts = parts.filter(part_type__icontains=part_type)
 
-    parts = parts.order_by('-created_at')
-    total_parts = parts.count()
+    # Сортировка: сначала по совпадению модели/номера/бренда, затем по совпадению типа запчасти, затем по дате
+    parts = parts.order_by('-match_priority', '-part_type_match', '-created_at')
 
+    # Пагинация
+    total_parts = parts.count()
     paginator = Paginator(parts, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Уникальные устройства и бренды
     devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
     brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct()
 
@@ -92,14 +197,10 @@ def warehouse_view(request):
         'total_parts': total_parts,
     })
 
-
 def logout_view(request):
     logout(request)
     return redirect('home')  # Перенаправление на главную страницу после выхода
 
-
-from django.db.models import Q
-import re
 
 def search(request):
     query = request.GET.get('q', '').strip()
@@ -111,21 +212,132 @@ def search(request):
     city = request.GET.get('city', '').strip()
 
     # Исключаем запчасти с количеством 0
-    results = Part.objects.filter(quantity__gt=0).order_by('-created_at')
+    results = Part.objects.filter(quantity__gt=0)
 
-    # === УМНЫЙ ПОИСК ТОЛЬКО ПО device, brand, model, part_type ===
+    # Список известных типов запчастей (можно расширить)
+    known_part_types = [
+        'дисплей', 'аккумулятор', 'Вибромотор', 'Датчик', 'приближения', 'полифонический', 'музыкальный', 'Buzzer',
+        'слуховой', 'speaker', 'основная', 'фронтальная', 'Катушка', 'беспроводной', 'зарядки', 'Коннектор', 'АКБ', 'дисплея',
+        'межплатный', 'Крышка', 'задняя',  'Пластина', 'прижимная', 'зарядки', 'Плата', 'SUB', 'системная', 'Разъем', 'гарнитуры', 'зарядки', 'Рама', 'Рамка', 'дисплея', 'Резинка', 'датчика', 'приближения', 'Сетка', 'Сеточка', 'динамика',
+        'Сим-лоток', 'Сим', 'Лоток', 'Сим-считыватель', 'считыватель', 'Сканер', 'отпечатка', 'сенсорный', 'оптический', 'отпечаток', 'Стекло', 'камеры', 'для', 'переклейки', 'Тачскрин', 'Микросхема', 'Микрофон', 'Шлейф', 'антенна', 'Wi-Fi', 'беспроводной', 'зарядка',
+        'боковых', 'кнопок',  'кнопка', 'вспышки', 'вспышка', 'дисплея', 'межплатный', 'сканера', 'NFC', 'камера',
+        'корпус', 'динамик', 'микрофон',
+        'материнская плата', 'шлейф', 'стекло', 'модуль', 'экран', 'зарядное устройство'
+    ]
+
+    # Список известных брендов (можно расширить)
+    known_brands = [
+        'xiaomi', 'samsung', 'apple', 'huawei', 'honor', 'oppo', 'vivo', 'realme',
+        'nokia', 'lg', 'sony', 'asus', 'lenovo', 'meizu', 'tecno', 'infinix', 'oppo',
+        'TCL', 'Google', 'OnePlus', 'Alcatel', 'Amigoo', 'Archos', 'Asus', 'Black Shark', 'BlackBerry',
+        'BLU', 'Cat', 'Caterpillar',  'Coolpad', 'Cubot',  'Doogee', 'Elephone',  'HTC', 'Lenovo',
+        'LG', 'Micromax', 'Motorola', 'Nothing',  'Nubia', 'Oukitel',  'Sharp', 'Sony', 'Amazfit',
+        'Chuwi', 'Hotwav', 'Teclast', 'UMiDIGI', 'UMiDIGI', 'Garmin', 'Wiko', 'ZTE', 'Poco'
+    ]
+
+    def normalize_text(text):
+        """Нормализация текста: убираем пробелы и приводим к нижнему регистру."""
+        return ''.join(text.split()).lower()
+
+    def split_query(query):
+        """Разделение запроса на бренд, модель/номер запчасти и тип запчасти."""
+        query_words = query.lower().split()
+        brand_words = []
+        model_or_part_words = []
+        part_type_words = []
+
+        for word in query_words:
+            if any(pt.lower() in word.lower() for pt in known_part_types):
+                part_type_words.append(word)
+            elif any(b.lower() in word.lower() for b in known_brands):
+                brand_words.append(word)
+            else:
+                model_or_part_words.append(word)
+
+        return ' '.join(brand_words).strip(), ' '.join(model_or_part_words).strip(), ' '.join(part_type_words).strip()
+
+    # Обработка поискового запроса
     if query:
-        keywords = query.lower().split()
-        for word in keywords:
-            regex = rf'\m{re.escape(word)}'  # граница начала слова
-            results = results.filter(
-                Q(device__iregex=regex) |
-                Q(brand__iregex=regex) |
-                Q(model__iregex=regex) |
-                Q(part_type__iregex=regex)
+        # Разделяем запрос на бренд, модель/номер запчасти и тип запчасти
+        brand_query, model_or_part_query, part_type_query = split_query(query)
+        normalized_model_query = normalize_text(model_or_part_query) if model_or_part_query else ''
+        original_model_query = model_or_part_query.lower() if model_or_part_query else ''
+        original_brand_query = brand_query.lower() if brand_query else ''
+
+        # Аннотация для нормализованных полей
+        results = results.annotate(
+            normalized_model=Lower(Replace(F('model'), Value(' '), Value(''))),
+            lower_model=Lower(F('model')),
+            lower_part_number=Lower(F('part_number')),
+            lower_brand=Lower(F('brand'))
+        )
+
+        # Фильтрация
+        filter_conditions = Q()
+        if brand_query and model_or_part_query:
+            # Если указаны и бренд, и модель, требуем совпадения обоих
+            filter_conditions = (
+                Q(lower_brand__icontains=original_brand_query) &
+                (Q(normalized_model__icontains=normalized_model_query) |
+                 Q(lower_model__icontains=original_model_query) |
+                 Q(lower_part_number__icontains=original_model_query))
+            )
+        elif brand_query:
+            # Если указан только бренд
+            filter_conditions = Q(lower_brand__icontains=original_brand_query)
+        elif model_or_part_query:
+            # Если указана только модель или номер запчасти
+            filter_conditions = (
+                Q(normalized_model__icontains=normalized_model_query) |
+                Q(lower_model__icontains=original_model_query) |
+                Q(lower_part_number__icontains=original_model_query)
             )
 
-    # === Остальные фильтры ===
+        if filter_conditions:
+            results = results.filter(filter_conditions)
+
+            # Аннотация для приоритизации
+            results = results.annotate(
+                match_priority=Case(
+                    # Точное совпадение модели или номера запчасти
+                    When(lower_model=original_model_query, then=Value(3)),
+                    When(normalized_model=normalized_model_query, then=Value(3)),
+                    When(lower_part_number=original_model_query, then=Value(3)),
+                    # Точное совпадение бренда
+                    When(lower_brand=original_brand_query, then=Value(2)),
+                    # Частичное совпадение модели или номера запчасти
+                    When(normalized_model__contains=normalized_model_query, then=Value(2)),
+                    When(lower_part_number__contains=original_model_query, then=Value(2)),
+                    # Частичное совпадение бренда
+                    When(lower_brand__contains=original_brand_query, then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            )
+        else:
+            results = results.annotate(match_priority=Value(0, output_field=IntegerField()))
+
+        # Фильтрация по типу запчасти
+        if part_type_query:
+            results = results.filter(part_type__icontains=part_type_query)
+            results = results.annotate(
+                part_type_match=Case(
+                    When(part_type__iexact=part_type_query, then=Value(2)),
+                    When(part_type__icontains=part_type_query, then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            )
+        else:
+            results = results.annotate(part_type_match=Value(0, output_field=IntegerField()))
+    else:
+        # Если запроса нет, все записи имеют нулевой приоритет
+        results = results.annotate(
+            match_priority=Value(0, output_field=IntegerField()),
+            part_type_match=Value(0, output_field=IntegerField())
+        )
+
+    # Остальные фильтры
     if device:
         results = results.filter(device__icontains=device)
     if brand:
@@ -139,7 +351,7 @@ def search(request):
     if city:
         results = results.filter(user__profile__city__icontains=city)
 
-    # === Ограничения по подписке ===
+    # Ограничения по подписке
     now = timezone.now()
     active_paid = Q(user__profile__tariff__in=[
         'lite', 'standard', 'standard2', 'standard3', 'premium'
@@ -149,7 +361,10 @@ def search(request):
     subquery = Part.objects.filter(user=OuterRef('user_id'), quantity__gt=0).order_by('-created_at').values('pk')[:30]
     results = results.filter(active_paid | Q(pk__in=Subquery(subquery)))
 
-    # === Пагинация ===
+    # Сортировка: сначала по совпадению, затем по дате
+    results = results.order_by('-match_priority', '-part_type_match', '-created_at')
+
+    # Пагинация
     paginator = Paginator(results, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -164,7 +379,6 @@ def search(request):
         'region': region,
         'city': city,
     })
-
 
 
 @login_required
