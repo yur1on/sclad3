@@ -48,5 +48,7 @@ jobs:
           # port: 22
           script: |
             cd /opt/sclad3test
-            docker compose down --rmi local django-app
+            docker build -t sclad3test-django-app .
+            docker compose down
             docker compose up -d
+            docker image prune --filter="dangling=true

@@ -35,7 +35,8 @@ services:
 
   django-app:
     container_name: my_docker_blog
-    build: .
+    image: sclad3test-django-app
+    # build: .
     ports:
       - 8000:8000
     depends_on:
