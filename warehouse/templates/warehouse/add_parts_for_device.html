@@ -1,0 +1,74 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Добавить запчасти для {{ selected_device.model }}{% endblock %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/add_part.css' %}">
+<div class="container mt-3 mb-4">
+    <h2 class="mb-3 text-center">Добавить запчасти для {{ selected_device.model }}</h2>
+
+    <!-- Изображение устройства в центре -->
+    <div class="text-center mb-4">
+        <img src="{% static 'images/default_device_image.jpg' %}" alt="{{ selected_device.model }}" class="img-fluid" style="max-width: 300px;">
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            {% for part_type in part_types %}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ part_type }}</h5>
+                        <div class="form-check">
+                            <input type="checkbox" name="part_{{ part_type }}" id="part_{{ part_type }}" class="form-check-input part-checkbox">
+                            <label for="part_{{ part_type }}" class="form-check-label">Добавить эту запчасть</label>
+                        </div>
+                        <div class="part-details" style="display: none;">
+                            <div class="mt-2">
+                                <label for="condition_{{ part_type }}">Состояние:</label>
+                                <input type="text" name="condition_{{ part_type }}" id="condition_{{ part_type }}" class="form-control shadow-sm" list="conditions" placeholder="Выберите состояние">
+                                <datalist id="conditions">
+                                    <option value="Новое">
+                                    <option value="Б/У">
+                                    <option value="Неисправное">
+                                </datalist>
+                            </div>
+                            <div class="mt-2">
+                                <label for="color_{{ part_type }}">Цвет (если нужно):</label>
+                                <input type="text" name="color_{{ part_type }}" id="color_{{ part_type }}" class="form-control shadow-sm" list="colors" placeholder="Введите цвет">
+                                <datalist id="colors"></datalist>
+                            </div>
+                            <div class="mt-2">
+                                <label for="quantity_{{ part_type }}">Количество:</label>
+                                <input type="number" name="quantity_{{ part_type }}" id="quantity_{{ part_type }}" class="form-control shadow-sm" min="1" placeholder="Введите количество">
+                            </div>
+                            <div class="mt-2">
+                                <label for="price_{{ part_type }}">Цена:</label>
+                                <div class="input-group">
+                                    <input type="number" name="price_{{ part_type }}" id="price_{{ part_type }}" class="form-control shadow-sm" step="0.01" min="0" placeholder="Введите цену">
+                                    <span class="input-group-text">бел.руб.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg px-5">Добавить запчасти</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.part-checkbox').forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            const details = this.closest('.card-body').querySelector('.part-details');
+            details.style.display = this.checked ? 'block' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

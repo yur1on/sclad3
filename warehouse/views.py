@@ -32,6 +32,8 @@ def home(request):
     return render(request, 'warehouse/home.html')
 
 
+from django.db.models import Sum
+
 
 @login_required
 def warehouse_view(request):
@@ -42,6 +44,10 @@ def warehouse_view(request):
 
     # Базовый фильтр по пользователю
     parts = Part.objects.filter(user=request.user)
+
+    # Вычисляем общее количество просмотров всех запчастей пользователя
+    all_parts = Part.objects.filter(user=request.user)
+    total_views = all_parts.aggregate(total_views=Sum('views'))['total_views'] or 0
 
     # Список типов запчастей
     known_part_types = [
@@ -220,6 +226,7 @@ def warehouse_view(request):
         'devices': devices,
         'brands': brands,
         'total_parts': total_parts,
+        'total_views': total_views,  # Добавляем общее количество просмотров
     })
 
 def logout_view(request):
@@ -612,9 +619,16 @@ def filter_parts(request):
     return JsonResponse({'parts': parts_data})
 
 
+from django.db.models import F
+
+
 @login_required
 def part_detail(request, part_id):
     part = get_object_or_404(Part, id=part_id)
+
+    # Увеличиваем счетчик просмотров, только если текущий пользователь не является владельцем запчасти
+    if request.user != part.user:
+        Part.objects.filter(id=part_id).update(views=F('views') + 1)
 
     # Проверяем, есть ли эта запчасть в закладках у текущего пользователя
     is_bookmarked = request.user.bookmarks.filter(part=part).exists()
