@@ -16,37 +16,37 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 #
-# Для работы https.
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-#
-#
-# DEBUG = False
-# ALLOWED_HOSTS = ['mobirazbor.by']
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'django-app-db',
-#         'USER': 'app_user',
-#         'PASSWORD': '89U1JKpkBQVTErtpIgfi',
-#         'HOST': 'postgres',
-#         'PORT': '5432',
-#     }
-# }
+Для работы https.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ['mobirazbor.by']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sklad_new',
-        'USER': 'yura',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'NAME': 'django-app-db',
+        'USER': 'app_user',
+        'PASSWORD': '89U1JKpkBQVTErtpIgfi',
+        'HOST': 'postgres',
         'PORT': '5432',
     }
 }
+
+
+# DEBUG = True
+# ALLOWED_HOSTS = []
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'sklad_new',
+#         'USER': 'yura',
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 
 LOGIN_URL = 'login'
