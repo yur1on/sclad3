@@ -1,0 +1,40 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Выбор устройства{% endblock %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/add_part.css' %}">
+<div class="container mt-3 mb-4">
+    <h2 class="mb-3 text-center">Выбор устройства</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group mb-3 row">
+            <label for="id_device" class="col-sm-2 col-form-label">Устройство:</label>
+            <div class="col-sm-8">
+                {{ form.device }}
+                <datalist id="devices">
+                    <option value="Телефон">
+                    <option value="Планшет">
+                    <option value="Смарт-часы">
+                </datalist>
+            </div>
+        </div>
+        <div class="form-group mb-3 row">
+            <label for="id_brand" class="col-sm-2 col-form-label">Бренд:</label>
+            <div class="col-sm-8">
+                {{ form.brand }}
+                <datalist id="brands"></datalist>
+            </div>
+        </div>
+        <div class="form-group mb-3 row">
+            <label for="id_model" class="col-sm-2 col-form-label">Модель:</label>
+            <div class="col-sm-8">
+                {{ form.model }}
+                <datalist id="models"></datalist>
+            </div>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg px-5">Далее</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

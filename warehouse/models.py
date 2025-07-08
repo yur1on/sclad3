@@ -7,24 +7,25 @@ import uuid  # для генерации уникального кода
 class Part(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     device = models.CharField(max_length=100)
-    brand = models.CharField(max_length=100, db_index=True)  # Индекс добавлен миграцией
-    model = models.CharField(max_length=200, db_index=True)  # Индекс добавлен миграцией
+    brand = models.CharField(max_length=100, db_index=True)
+    model = models.CharField(max_length=200, db_index=True)
     part_type = models.CharField(max_length=100)
     condition = models.CharField(max_length=50, blank=True, null=True)
     color = models.CharField(max_length=50, blank=True, null=True)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     note = models.TextField(blank=True, null=True)
-    chip_label = models.CharField(max_length=200, blank=True, null=True, db_index=True)  # Индекс добавлен миграцией
+    chip_label = models.CharField(max_length=200, blank=True, null=True, db_index=True)
     part_number = models.CharField(
         "Номер запчасти",
         max_length=100,
         blank=True,
         null=True,
         unique=True,
-        db_index=True  # Индекс добавлен миграцией
+        db_index=True
     )
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)  # Индекс добавлен миграцией
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    views = models.IntegerField(default=0)  # Новое поле для подсчета просмотров
 
     class Meta:
         indexes = [

@@ -6,6 +6,13 @@
 {% block content %}
 {% load static %}
     <link rel="stylesheet" href="{% static 'css/warehouse.css' %}">
+    <style>
+        .total-views {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
 <div class="wrapper">
     <!-- Боковая панель -->
     <div class="sidebar" id="sidebar">
@@ -48,9 +55,13 @@
                     </p>
                 {% endif %}
             </div>
+            <div class="total-views">
+                <span class="badge bg-info text-dark">Всего просмотров: {{ total_views }}</span>
+            </div>
             <div class="total-parts">
                 <span class="badge bg-info text-dark">Всего запчастей: {{ total_parts }}</span>
             </div>
+
         </div>
     </div>
 
@@ -117,6 +128,9 @@
                         <th>Тип запчасти</th>
                         <th class="desktop-only">Прочее</th>
                         <th class="desktop-only">Фото</th>
+                        <th class="desktop-only">
+                            <i class="bi bi-eye" data-bs-toggle="tooltip" title="Просмотры"></i>
+                        </th>
                         <th class="desktop-only">Действия</th>
                     </tr>
                 </thead>
@@ -156,6 +170,7 @@
                             Нет фото
                             {% endif %}
                         </td>
+                        <td class="desktop-only">{{ part.views }}</td>
                         <td class="desktop-only" data-label="Действия">
                             <div class="d-flex gap-2">
                                 <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm action-btn" onclick="event.stopPropagation();">✏️</a>
@@ -165,7 +180,7 @@
                     </tr>
                     <!-- Строка с подробной информацией (мобильная версия) -->
                     <tr class="mobile-only {% if part.quantity == 0 %}table-danger{% endif %}">
-                        <td colspan="6" class="p-0">
+                        <td colspan="7" class="p-0">
                             <div id="collapse-{{ part.id }}" class="collapse">
                                 <div class="p-2 bg-light">
                                     <strong>Номер запчасти:</strong> {{ part.part_number|default:"-" }}<br>
@@ -176,6 +191,7 @@
                                     <strong>Цена:</strong> {{ part.price }}<br>
                                     <strong>Количество:</strong> {{ part.quantity }}<br>
                                     <strong>Состояние:</strong> {{ part.condition|default:"Не указано" }}<br>
+                                    <strong>Просмотры:</strong> {{ part.views }}<br>
                                     {% if part.note %}
                                         <strong>Примечание:</strong> {{ part.note }}<br>
                                     {% else %}
@@ -232,7 +248,7 @@
                     {% endif %}
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center">Запчасти не найдены</td>
+                        <td colspan="7" class="text-center">Запчасти не найдены</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -319,7 +335,6 @@
 
 <!-- Передача URL для JavaScript -->
 <script>
-    // Передаём Django URL в JavaScript для динамической генерации ссылок
     const editPartUrl = "{% url 'edit_part' 0 %}".replace('0', '{id}');
     const deletePartUrl = "{% url 'delete_part' 0 %}".replace('0', '{id}');
 </script>
@@ -534,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (parts.length === 0) {
             const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `<td colspan="6" class="text-center">Запчасти не найдены</td>`;
+            emptyRow.innerHTML = `<td colspan="7" class="text-center">Запчасти не найдены</td>`;
             tbody.appendChild(emptyRow);
             return;
         }
@@ -578,6 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </a>
                     ` : 'Нет фото'}
                 </td>
+                <td class="desktop-only">${part.views}</td>
                 <td class="desktop-only" data-label="Действия">
                     <div class="d-flex gap-2">
                         <a href="${editPartUrl.replace('{id}', part.id)}" class="btn btn-warning btn-sm action-btn" onclick="event.stopPropagation();">✏️</a>
@@ -593,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 detailsRow.classList.add('table-danger');
             }
             detailsRow.innerHTML = `
-                <td colspan="6" class="p-0">
+                <td colspan="7" class="p-0">
                     <div id="${collapseId}" class="collapse">
                         <div class="p-2 bg-light">
                             <strong>Номер запчасти:</strong> ${part.part_number || '-'}<br>
@@ -604,6 +620,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <strong>Цена:</strong> ${part.price}<br>
                             <strong>Количество:</strong> ${part.quantity}<br>
                             <strong>Состояние:</strong> ${part.condition || 'Не указано'}<br>
+                            <strong>Просмотры:</strong> ${part.views}<br>
                             ${part.note ? `<strong>Примечание:</strong> ${part.note}<br>` : `<strong>Примечание:</strong> Нет примечаний<br>`}
                             ${part.images && part.images.length ? `<div class="mt-2">
                                 <strong>Фото:</strong><br>
