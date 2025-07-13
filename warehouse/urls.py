@@ -2,7 +2,7 @@ from .views import logout_view
 from .views import add_part, get_dynamic_data
 from . import views
 from .views import add_image
-
+from .views import analytics_view
 from django.urls import path
 from .views import get_regions_and_cities
 from .views import user_agreement_view, privacy_policy_view
@@ -38,6 +38,7 @@ urlpatterns = [
     path('user/<int:user_id>/parts/search/', views.search_user_parts, name='search_user_parts'),
     path('user-agreement/', user_agreement_view, name='user_agreement'),
     path('privacy-policy/', privacy_policy_view, name='privacy_policy'),
+    path('analytics/', analytics_view, name='analytics'),
 
 
 

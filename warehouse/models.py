@@ -16,6 +16,7 @@ class Part(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     note = models.TextField(blank=True, null=True)
     chip_label = models.CharField(max_length=200, blank=True, null=True, db_index=True)
+    last_viewed = models.DateTimeField(null=True, blank=True)
     part_number = models.CharField(
         "Номер запчасти",
         max_length=100,

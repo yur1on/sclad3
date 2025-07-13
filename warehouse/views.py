@@ -1032,3 +1032,38 @@ def user_agreement_view(request):
 
 def privacy_policy_view(request):
     return render(request, 'warehouse/privacy_policy.html')
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Part
+from datetime import datetime, timedelta
+from django.db.models import Sum
+
+@login_required
+def analytics_view(request):
+    # Получаем текущего пользователя
+    user = request.user
+
+    # Общее количество просмотров
+    total_views = Part.objects.filter(user=user).aggregate(Sum('views'))['views__sum'] or 0
+
+    # Просмотры за день (сегодня)
+    today = datetime.now().date()
+    daily_views = Part.objects.filter(
+        user=user,
+        last_viewed__date=today
+    ).aggregate(Sum('views'))['views__sum'] or 0
+
+    # Просмотры за месяц
+    month_ago = today - timedelta(days=30)
+    monthly_views = Part.objects.filter(
+        user=user,
+        last_viewed__gte=month_ago
+    ).aggregate(Sum('views'))['views__sum'] or 0
+
+    context = {
+        'total_views': total_views,
+        'daily_views': daily_views,
+        'monthly_views': monthly_views,
+    }
+    return render(request, 'warehouse/analytics.html', context)
