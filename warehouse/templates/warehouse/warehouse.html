@@ -12,6 +12,10 @@
             padding: 10px;
             margin-top: 10px;
         }
+        .total-views .btn {
+            width: 100%;
+            text-align: left;
+        }
     </style>
 <div class="wrapper">
     <!-- Боковая панель -->
@@ -55,13 +59,14 @@
                     </p>
                 {% endif %}
             </div>
-            <div class="total-views">
-                <span class="badge bg-info text-dark">Всего просмотров: {{ total_views }}</span>
-            </div>
             <div class="total-parts">
                 <span class="badge bg-info text-dark">Всего запчастей: {{ total_parts }}</span>
             </div>
-
+            <div class="total-views">
+                <a href="{% url 'analytics' %}" class="btn btn-info mb-2">
+                    <i class="bi bi-eye me-2"></i>Всего просмотров: {{ total_views }}
+                </a>
+            </div>
         </div>
     </div>
 

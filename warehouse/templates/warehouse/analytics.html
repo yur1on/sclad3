@@ -1,0 +1,195 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Аналитика просмотров{% endblock %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/warehouse.css' %}">
+<style>
+    .analytics-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .analytics-card {
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .analytics-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    .analytics-card h5 {
+        margin-bottom: 10px;
+        color: #343a40;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    .analytics-card h5 i {
+        margin-right: 10px;
+        color: #007bff;
+    }
+    .analytics-card p {
+        margin: 0;
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #212529;
+    }
+    .analytics-card .small-text {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+    .back-button {
+        margin-bottom: 20px;
+        border-radius: 50px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+    }
+    .back-button:hover {
+        background-color: #0056b3;
+    }
+    .analytics-header {
+        color: #343a40;
+        font-weight: 700;
+        margin-bottom: 30px;
+    }
+    .chart-container {
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        animation: fadeInUp 0.5s ease forwards;
+        animation-delay: 0.4s;
+    }
+    @media (max-width: 576px) {
+        .analytics-container {
+            padding: 10px;
+        }
+        .analytics-card {
+            padding: 15px;
+        }
+        .analytics-card p {
+            font-size: 1.2em;
+        }
+        .back-button {
+            width: 100%;
+            text-align: center;
+        }
+        .chart-container {
+            padding: 10px;
+        }
+    }
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .analytics-card, .chart-container {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+    .analytics-card:nth-child(1) { animation-delay: 0.1s; }
+    .analytics-card:nth-child(2) { animation-delay: 0.2s; }
+    .analytics-card:nth-child(3) { animation-delay: 0.3s; }
+</style>
+
+<div class="container my-4">
+    <h2 class="text-center analytics-header">Аналитика просмотров</h2>
+    <a href="{% url 'warehouse' %}" class="btn btn-primary back-button">
+        <i class="bi bi-arrow-left me-2"></i>Вернуться в склад
+    </a>
+    <div class="analytics-container">
+        <div class="analytics-card">
+            <h5><i class="bi bi-eye-fill"></i>Всего просмотров</h5>
+            <p>{{ total_views }}</p>
+            <p class="small-text">Общее количество просмотров всех ваших объявлений</p>
+        </div>
+        <div class="analytics-card">
+            <h5><i class="bi bi-calendar-day"></i>Просмотры за день</h5>
+            <p>{{ daily_views }}</p>
+            <p class="small-text">Просмотры за {{ today|date:"d M Y" }}</p>
+        </div>
+
+        <div class="chart-container">
+            <h5><i class="bi bi-graph-up"></i>График просмотров за 30 дней</h5>
+            <canvas id="viewsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Подключение Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Анимация карточек
+        document.querySelectorAll('.analytics-card, .chart-container').forEach(card => {
+            card.style.opacity = 0;
+            setTimeout(() => {
+                card.style.opacity = 1;
+            }, 100);
+        });
+
+        // Инициализация графика
+        const ctx = document.getElementById('viewsChart').getContext('2d');
+        const viewsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [{
+                    label: 'Просмотры по дням',
+                    data: {{ chart_data|safe }},
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#007bff',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#007bff'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Количество просмотров'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Дата'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Просмотры: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

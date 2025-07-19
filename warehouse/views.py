@@ -2,7 +2,6 @@
 from django.db.models import Value, IntegerField, F
 from django.db.models.functions import Lower, Replace
 from django.db.models import Case, When, Q
-import re
 from django.contrib.auth import logout
 from pathlib import Path
 import json
@@ -16,7 +15,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q, OuterRef, Subquery
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import PartForm, PartImageFormSet
 from .models import Part, PartImage
@@ -25,9 +23,11 @@ from .utils import compress_image
 from warehouse.utils import add_watermark_to_image
 import os
 from django.conf import settings
-
-
-
+from django.contrib.auth.decorators import login_required
+from datetime import datetime, timedelta
+from django.shortcuts import render, get_object_or_404
+from warehouse.models import Part
+from django.db.models import F
 def home(request):
     return render(request, 'warehouse/home.html')
 
@@ -619,23 +619,26 @@ def filter_parts(request):
     return JsonResponse({'parts': parts_data})
 
 
-from django.db.models import F
 
 
-@login_required
+
+from django.utils.timezone import now
+
 def part_detail(request, part_id):
     part = get_object_or_404(Part, id=part_id)
 
-    # Увеличиваем счетчик просмотров, только если текущий пользователь не является владельцем запчасти
-    if request.user != part.user:
-        Part.objects.filter(id=part_id).update(views=F('views') + 1)
+    if request.user.is_authenticated and request.user != part.user:
+        part.views += 1
+        part.last_viewed = now()
+        part.save(update_fields=['views', 'last_viewed'])
 
-    # Проверяем, есть ли эта запчасть в закладках у текущего пользователя
-    is_bookmarked = request.user.bookmarks.filter(part=part).exists()
+    is_bookmarked = False
+    if request.user.is_authenticated:
+        is_bookmarked = request.user.bookmarks.filter(part=part).exists()
 
     return render(request, 'warehouse/part_detail.html', {
         'part': part,
-        'is_bookmarked': is_bookmarked
+        'is_bookmarked': is_bookmarked,
     })
 
 
@@ -1032,3 +1035,62 @@ def user_agreement_view(request):
 
 def privacy_policy_view(request):
     return render(request, 'warehouse/privacy_policy.html')
+
+
+from django.utils.timezone import now
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum, DateField
+from django.db.models.functions import TruncDate
+from .models import Part
+
+@login_required
+def analytics_view(request):
+    user = request.user
+    today = timezone.now().date()
+    month_ago = today - timedelta(days=30)
+
+    # Общие метрики
+    total_views = Part.objects.filter(user=user).aggregate(Sum('views'))['views__sum'] or 0
+    daily_views = Part.objects.filter(
+        user=user,
+        last_viewed__date=today
+    ).aggregate(Sum('views'))['views__sum'] or 0
+    monthly_views = Part.objects.filter(
+        user=user,
+        last_viewed__date__gte=month_ago
+    ).aggregate(Sum('views'))['views__sum'] or 0
+
+    # Данные для графика (просмотры по дням за последние 30 дней)
+    views_by_day = (
+        Part.objects.filter(user=user, last_viewed__date__gte=month_ago)
+        .annotate(date=TruncDate('last_viewed', output_field=DateField()))
+        .values('date')
+        .annotate(views=Sum('views'))
+        .order_by('date')
+    )
+
+    # Форматируем данные для Chart.js
+    labels = []
+    data = []
+    current_date = month_ago
+    while current_date <= today:
+        labels.append(current_date.strftime('%d %b'))
+        # Ищем просмотры для текущей даты
+        views = next((item['views'] for item in views_by_day if item['date'] == current_date), 0)
+        data.append(views or 0)
+        current_date += timedelta(days=1)
+
+    context = {
+        'total_views': total_views,
+        'daily_views': daily_views,
+        'monthly_views': monthly_views,
+        'today': today,
+        'month_ago': month_ago,
+        'chart_labels': labels,  # Даты для осей X
+        'chart_data': data,     # Просмотры для осей Y
+    }
+    return render(request, 'warehouse/analytics.html', context)
