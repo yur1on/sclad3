@@ -15,12 +15,12 @@
     }
     .how-it-works li strong {
         font-size: 1.1rem;
-        color: #212529;  /* Изменено для лучшего контраста */
+        color: #212529;
         font-family: 'Roboto', sans-serif;
     }
     .how-it-works li {
         font-size: 1rem;
-        color: #343a40;  /* Изменено для лучшего контраста */
+        color: #343a40;
         font-family: 'Roboto', sans-serif;
         display: flex;
         align-items: center;
@@ -30,10 +30,8 @@
     h1, h2 {
         font-family: 'Roboto', sans-serif;
         font-weight: 700;
-        color: #212529;  /* Изменено для лучшего контраста */
+        color: #212529;
     }
-    p {
-
     /* Стили для кнопок */
     .btn-primary, .btn-dark {
         border-radius: 10px;
@@ -46,14 +44,44 @@
     .btn-dark:hover {
         background-color: #1d2124;
     }
-    /* Адаптивность для списка */
-    @media (max-width: 768px) {
+    /* Стили для поля ввода */
+    .form-control {
+        border-radius: 20px; /* Скругленные углы */
+        padding: 12px 20px; /* Увеличенный внутренний отступ */
+        font-size: 1rem; /* Увеличенный размер шрифта */
+        font-family: 'Roboto', sans-serif;
+        border: 1px solid #ced4da;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+        outline: none;
+    }
+    /* Адаптивность для списка и поля ввода */
+    @media (max-width: 576px) {
         .how-it-works li {
             flex-direction: column;
             align-items: flex-start;
         }
         .main-icon {
             margin-bottom: 10px;
+        }
+        .form-control {
+            width: 100% !important; /* Полная ширина на мобильных */
+            font-size: 0.9rem; /* Чуть меньший шрифт для мобильных */
+            padding: 10px 15px; /* Уменьшенный отступ для мобильных */
+            border-radius: 15px; /* Меньший радиус для мобильных */
+        }
+        .d-flex {
+            flex-direction: column; /* Вертикальное расположение на мобильных */
+            align-items: center;
+        }
+        .d-flex .btn-dark {
+            margin-top: 10px; /* Отступ для кнопки */
+            width: 100%; /* Кнопка на всю ширину */
+            padding: 10px; /* Увеличенный отступ */
         }
     }
 </style>
@@ -70,7 +98,7 @@
     </div>
 
     <form method="GET" action="{% url 'search' %}" class="d-flex justify-content-center mb-5">
-        <input type="text" name="q" id="search" class="form-control w-50 me-2"
+        <input type="text" name="q" id="search" class="form-control me-2"
                placeholder="Введите запрос" value="{{ request.GET.q }}">
         <button type="submit" class="btn btn-dark">
             <i class="bi bi-search me-1"></i>Поиск
