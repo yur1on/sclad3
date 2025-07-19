@@ -46,13 +46,14 @@
     }
     /* Стили для поля ввода */
     .form-control {
-        border-radius: 20px; /* Скругленные углы */
-        padding: 12px 20px; /* Увеличенный внутренний отступ */
-        font-size: 1rem; /* Увеличенный размер шрифта */
+        border-radius: 12px; /* Скругленные углы */
+        padding: 10px 15px; /* Уменьшенный отступ для пропорциональности */
+        font-size: 1rem; /* Размер шрифта */
         font-family: 'Roboto', sans-serif;
         border: 1px solid #ced4da;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        max-width: 500px; /* Ограничение ширины для веб-версии */
     }
     .form-control:focus {
         border-color: #007bff;
@@ -71,8 +72,8 @@
         .form-control {
             width: 100% !important; /* Полная ширина на мобильных */
             font-size: 0.9rem; /* Чуть меньший шрифт для мобильных */
-            padding: 10px 15px; /* Уменьшенный отступ для мобильных */
-            border-radius: 15px; /* Меньший радиус для мобильных */
+            padding: 10px 15px; /* Удобный отступ для мобильных */
+            border-radius: 13px; /* Скругленные углы для мобильных */
         }
         .d-flex {
             flex-direction: column; /* Вертикальное расположение на мобильных */
@@ -82,6 +83,19 @@
             margin-top: 10px; /* Отступ для кнопки */
             width: 100%; /* Кнопка на всю ширину */
             padding: 10px; /* Увеличенный отступ */
+        }
+    }
+    /* Адаптивность для десктопной версии */
+    @media (min-width: 577px) {
+        .form-control {
+            width: 500px; /* Фиксированная ширина для веб-версии */
+        }
+        .d-flex {
+            flex-direction: row; /* Горизонтальное расположение для веб-версии */
+            align-items: center;
+        }
+        .d-flex .btn-dark {
+            margin-left: 10px; /* Отступ между полем и кнопкой */
         }
     }
 </style>
