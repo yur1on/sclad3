@@ -9,107 +9,102 @@
 <link rel="stylesheet" href="{% static 'css/search.css' %}">
 
 <style>
-    :root {
-        --primary: #007bff;
-        --dark: #212529;
-        --border-radius: 14px;
-        --transition: all .3s ease;
-        --gap: 1rem;
-        --table-max: 1600px; /* при желании 1800/2000px */
+    :root{
+        --primary:#007bff;
+        --dark:#212529;
+        --radius:14px;
+        --transition:all .3s ease;
+        --table-max:1600px;
     }
 
-    * { box-sizing: border-box; }
-    body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; }
+    /* 🔒 ГЛОБАЛЬНО: запрещаем горизонтальный скролл и любые «выпирания» */
+    html,body{max-width:100%; overflow-x:hidden;}
+    body{font-family:'Roboto',sans-serif;margin:0;padding:0;}
 
-    /* ---------- HERO (как было) ---------- */
-    .hero { padding: 1.8rem 1rem; text-align: center; }
-    .hero h1 { font-size: 1.7rem; font-weight: 700; margin: 0 0 .35rem; line-height: 1.2; color: #1a1a1a; }
-    .hero p { font-size: .88rem; opacity: .92; margin: 0 0 .9rem; line-height: 1.4; color: #555; }
-    .btn-warehouse {
-        background: var(--primary); color: #fff; border: none; border-radius: var(--border-radius);
-        padding: .55rem 1.1rem; font-size: .84rem; font-weight: 500;
-        box-shadow: 0 3px 10px rgba(0,123,255,.3);
-        display: inline-flex; align-items: center; gap: .4rem; transition: var(--transition);
+    /* ---------- HERO ---------- */
+    .hero{padding:1.6rem 1rem;text-align:center}
+    .hero h1{font-size:1.7rem;font-weight:700;margin:0 0 .35rem;line-height:1.2;color:#1a1a1a}
+    .hero p{font-size:.9rem;opacity:.92;margin:0 0 .9rem;line-height:1.4;color:#555}
+    .btn-warehouse{
+        background:var(--primary);color:#fff;border:none;border-radius:var(--radius);
+        padding:.55rem 1.1rem;font-size:.84rem;font-weight:500;
+        box-shadow:0 3px 10px rgba(0,123,255,.3);
+        display:inline-flex;align-items:center;gap:.4rem;transition:var(--transition)
     }
-    .btn-warehouse:hover { background:#0056b3; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(0,123,255,.4); }
+    .btn-warehouse:hover{background:#0056b3;transform:translateY(-1px);box-shadow:0 5px 14px rgba(0,123,255,.4)}
 
-    .content-grid { display: grid; gap: var(--gap); margin-top: 0; padding: 0 .5rem; }
+    .content-grid{display:grid;gap:.9rem;padding:0 .5rem}
 
-    /* ---------- “Как это работает” (как было) ---------- */
-    .how-it-works { padding: 0 1.1rem; font-size: .79rem; line-height: 1.48; color: #444; }
-    .how-it-works ul {
-        list-style: none; padding: 0; margin: 0 0 1rem;
-        display: grid; grid-template-columns: 1fr; gap: .75rem;
+    /* ---------- Инфо-блок ---------- */
+    .how-it-works{padding:0 1rem;font-size:.8rem;line-height:1.48;color:#444}
+    .how-it-works ul{list-style:none;padding:0;margin:0 0 1rem;display:grid;grid-template-columns:1fr;gap:.7rem}
+    .how-it-works li{display:flex;align-items:flex-start;gap:.6rem}
+    .how-it-works i{font-size:1.1rem;color:var(--primary);flex-shrink:0;margin-top:.12rem}
+    .how-it-works strong{display:block;font-size:.86rem;color:var(--dark);margin-bottom:.05rem}
+    .how-it-works a{color:var(--primary);text-decoration:underline}
+
+    /* ---------- Поиск ---------- */
+    .search-bar{max-width:100%;padding:0 1rem}
+    .form-control{
+        border-radius:var(--radius);padding:.62rem .9rem;font-size:.92rem;
+        border:1px solid #e0e4e8;box-shadow:0 2px 6px rgba(0,0,0,.04);transition:var(--transition);width:100%
     }
-    .how-it-works li { display: flex; align-items: flex-start; gap: .6rem; }
-    .how-it-works i { font-size: 1.1rem; color: var(--primary); flex-shrink: 0; margin-top: .15rem; }
-    .how-it-works strong { display: block; font-size: .84rem; color: var(--dark); margin-bottom: .05rem; }
-    .how-it-works a { color: var(--primary); text-decoration: underline; }
-
-    /* ---------- Поиск (как было) ---------- */
-    .search-bar { max-width: 100%; margin: 0; padding: 0 1.1rem; }
-    .form-control {
-        border-radius: var(--border-radius); padding: .62rem .9rem; font-size: .92rem;
-        border: 1px solid #e0e4e8; box-shadow: 0 2px 6px rgba(0,0,0,.04); transition: var(--transition); width: 100%;
+    .form-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,123,255,.16)}
+    .btn-search{
+        background:var(--dark);color:#fff;border:none;border-radius:var(--radius);
+        padding:.62rem 1.2rem;font-weight:600;font-size:.9rem;white-space:nowrap;flex-shrink:0;
+        transition:var(--transition);box-shadow:0 2px 6px rgba(0,0,0,.1)
     }
-    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,123,255,.16); }
-    .btn-search {
-        background: var(--dark); color: #fff; border: none; border-radius: var(--border-radius);
-        padding: .62rem 1.2rem; font-weight: 600; font-size: .9rem; white-space: nowrap; flex-shrink: 0;
-        transition: var(--transition); box-shadow: 0 2px 6px rgba(0,0,0,.1);
-    }
-    .btn-search:hover { background: #000; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,.15); }
-    .search-form .d-flex { gap: .6rem; flex-wrap: nowrap; }
+    .btn-search:hover{background:#000;transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.15)}
+    .search-form .d-flex{gap:.6rem;flex-wrap:nowrap}
+    /* 🧊 Воздух под поиском */
+    .search-form{margin-bottom:1.8rem}
 
-    /* ✅ Воздух между поиском и таблицей */
-    .search-form { margin-bottom: 2rem; } /* можно 1.5rem/3rem по вкусу */
+    /* ---------- ТАБЛИЦА НА ГЛАВНОЙ ---------- */
+    .home-table{width:100%;padding:0 8px 24px}
+    .home-table__inner{width:100%;max-width:var(--table-max);margin:0 auto}
+    /* «Прижимаем» bootstrap-строки, чтобы не было горизонтального скролла из-за отрицательных отступов .row */
+    .home-table__inner .container{width:100%!important;max-width:100%!important;padding-left:0!important;padding-right:0!important;margin:0!important}
+    .home-table__inner .row{margin-left:0;margin-right:0}
+    .home-table__inner [class*="col-"]{padding-left:.5rem;padding-right:.5rem}
+    /* На главной: показываем только саму таблицу (на всю ширину), рекламу убираем */
+    .home-table__inner .col-md-9{flex:0 0 100%;max-width:100%}
+    .home-table__inner .col-md-3{display:none!important}
 
-    /* ---------- Таблица по центру, без “блока” вокруг ---------- */
-    .home-table { width: 100%; padding: 0 8px 24px; }
-    .home-table__inner {
-        width: 100%;
-        max-width: var(--table-max);
-        margin: 0 auto; /* центрирование */
+    /* ---------- ФИКСЫ МОБИЛЬНОЙ ВЁРСТКИ ---------- */
+    @media (max-width: 768px){
+        /* Карточки результатов должны занимать всю ширину экрана и не вылезать за границы */
+        .d-block.d-md-none{width:100%;margin:0}
+        .card{border-radius:10px}
+        .card .row{margin-left:0;margin-right:0}
+        .card .col-4,.card .col-8{padding-left:.5rem;padding-right:.5rem}
+        .image-container{max-width:100%;height:auto}
+        .img-thumbnail{max-width:100%;height:auto}
+        /* Пагинация: перенос строк, адекватные отступы */
+        .pagination{flex-wrap:wrap;gap:.25rem}
+        .page-link{padding:.4rem .6rem;font-size:.9rem;min-width:2.25rem;text-align:center}
+        /* Без горизонтальной прокрутки вообще */
+        body, .home-table, .home-table__inner{overflow-x:hidden}
+        /* Форма поиска в колонку */
+        .search-form .d-flex{flex-direction:column}
+        .btn-search{width:100%}
     }
 
-    /* Переопределяем сетку ТОЛЬКО внутри home-table__inner,
-       чтобы не трогать страницу глобального поиска */
-    .home-table__inner .container {
-        width: 100% !important; max-width: 100% !important;
-        padding-left: 0 !important; padding-right: 0 !important; margin: 0 !important;
-    }
-    .home-table__inner .row.d-none.d-md-flex { margin-left: 0; margin-right: 0; }
-    .home-table__inner .col-md-9 { flex: 0 0 100%; max-width: 100%; } /* таблица на всю доступную ширину */
-    .home-table__inner .col-md-3 { display: none !important; }       /* скрыть рекламу на главной */
-
-    /* ---------- Адаптив ---------- */
-    @media (max-width: 576px) {
-        .hero { padding: 1.5rem 1rem; }
-        .hero h1 { font-size: 1.55rem; }
-        .hero p { font-size: .84rem; }
-        .content-grid { padding: 0 .4rem; }
-        .how-it-works, .search-bar { padding: 0 .9rem; }
-        .how-it-works ul { gap: .65rem; }
-        .how-it-works li { flex-direction: row; text-align: left; }
-        .how-it-works i { font-size: 1.05rem; margin-top: .1rem; }
-        .search-form .d-flex { flex-direction: column; }
-        .btn-search { width: 100%; justify-content: center; }
-    }
-    @media (min-width: 577px) {
-        .how-it-works ul { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-        .search-form .d-flex { flex-direction: row; }
+    @media (min-width: 577px){
+        .how-it-works ul{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+        .search-form .d-flex{flex-direction:row}
     }
 </style>
 
 <div class="container-fluid px-0">
-    <!-- Хедер -->
+    <!-- HERO -->
     <div class="hero">
         <h1>Разбирай, сохраняй, находи на MobiRazbor.by!</h1>
         <p>Управляйте своим складом и находите запчасти легко и быстро.</p>
         <a href="{% url 'warehouse' %}" class="btn btn-warehouse">Мой склад</a>
     </div>
 
-    <!-- Текст + Поиск (как у вас было) -->
+    <!-- Информация + Поиск -->
     <div class="container content-grid">
         <div class="how-it-works">
             <ul>
@@ -120,7 +115,7 @@
                 <li><i class="bi bi-hand-thumbs-up"></i><div><strong>Помогайте друг другу</strong><br>Даже самая мелкая запчасть у вас может кому-то пригодиться.</div></li>
             </ul>
 
-            <!-- Поиск под текстом — ведёт на глобальный поиск -->
+            <!-- Поиск: отправляет на глобальный -->
             <form method="GET" action="{% url 'search' %}" class="search-bar search-form">
                 <div class="d-flex">
                     <input
@@ -137,7 +132,7 @@
         </div>
     </div>
 
-    <!-- Таблица по центру, без визуального блока вокруг -->
+    <!-- Таблица/карточки результатов -->
     <section class="home-table">
         <div class="home-table__inner">
             {% include 'warehouse/search_table.html' %}
