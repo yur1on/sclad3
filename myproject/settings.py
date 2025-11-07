@@ -34,7 +34,7 @@ DATABASES = {
     }
 }
 
-#
+
 # DEBUG = True
 # ALLOWED_HOSTS = []
 # DATABASES = {
@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'warehouse',
+    'warehouse.apps.WarehouseConfig',
     'user_profile',
     'crispy_forms',
     'user_registration',

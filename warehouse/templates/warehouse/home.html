@@ -1,161 +1,149 @@
 {% extends 'warehouse/base.html' %}
+{% load static %}
+
 {% block title %}Главная{% endblock %}
+
 {% block content %}
-<!-- Подключение шрифта Roboto (если не подключен в base.html) -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-<!-- Подключение Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/search.css' %}">
 
 <style>
-    /* Стили для иконок и списка */
-    .main-icon {
-        font-size: 1.5rem;
-        color: #007bff;
-        margin-right: 10px;
+    :root {
+        --primary: #007bff;
+        --dark: #212529;
+        --border-radius: 14px;
+        --transition: all .3s ease;
+        --gap: 1rem;
+        --table-max: 1600px; /* при желании 1800/2000px */
     }
-    .how-it-works li strong {
-        font-size: 1.1rem;
-        color: #212529;
-        font-family: 'Roboto', sans-serif;
+
+    * { box-sizing: border-box; }
+    body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; }
+
+    /* ---------- HERO (как было) ---------- */
+    .hero { padding: 1.8rem 1rem; text-align: center; }
+    .hero h1 { font-size: 1.7rem; font-weight: 700; margin: 0 0 .35rem; line-height: 1.2; color: #1a1a1a; }
+    .hero p { font-size: .88rem; opacity: .92; margin: 0 0 .9rem; line-height: 1.4; color: #555; }
+    .btn-warehouse {
+        background: var(--primary); color: #fff; border: none; border-radius: var(--border-radius);
+        padding: .55rem 1.1rem; font-size: .84rem; font-weight: 500;
+        box-shadow: 0 3px 10px rgba(0,123,255,.3);
+        display: inline-flex; align-items: center; gap: .4rem; transition: var(--transition);
     }
-    .how-it-works li {
-        font-size: 1rem;
-        color: #343a40;
-        font-family: 'Roboto', sans-serif;
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
+    .btn-warehouse:hover { background:#0056b3; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(0,123,255,.4); }
+
+    .content-grid { display: grid; gap: var(--gap); margin-top: 0; padding: 0 .5rem; }
+
+    /* ---------- “Как это работает” (как было) ---------- */
+    .how-it-works { padding: 0 1.1rem; font-size: .79rem; line-height: 1.48; color: #444; }
+    .how-it-works ul {
+        list-style: none; padding: 0; margin: 0 0 1rem;
+        display: grid; grid-template-columns: 1fr; gap: .75rem;
     }
-    /* Стили для заголовков */
-    h1, h2 {
-        font-family: 'Roboto', sans-serif;
-        font-weight: 700;
-        color: #212529;
-    }
-    /* Стили для кнопок */
-    .btn-primary, .btn-dark {
-        border-radius: 10px;
-        transition: background-color 0.3s ease, color 0.3s ease;
-        font-family: 'Roboto', sans-serif;
-    }
-    .btn-primary:hover {
-        background-color: #0056b3;
-    }
-    .btn-dark:hover {
-        background-color: #1d2124;
-    }
-    /* Стили для поля ввода */
+    .how-it-works li { display: flex; align-items: flex-start; gap: .6rem; }
+    .how-it-works i { font-size: 1.1rem; color: var(--primary); flex-shrink: 0; margin-top: .15rem; }
+    .how-it-works strong { display: block; font-size: .84rem; color: var(--dark); margin-bottom: .05rem; }
+    .how-it-works a { color: var(--primary); text-decoration: underline; }
+
+    /* ---------- Поиск (как было) ---------- */
+    .search-bar { max-width: 100%; margin: 0; padding: 0 1.1rem; }
     .form-control {
-        border-radius: 12px; /* Скругленные углы */
-        padding: 10px 15px; /* Уменьшенный отступ для пропорциональности */
-        font-size: 1rem; /* Размер шрифта */
-        font-family: 'Roboto', sans-serif;
-        border: 1px solid #ced4da;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        max-width: 500px; /* Ограничение ширины для веб-версии */
+        border-radius: var(--border-radius); padding: .62rem .9rem; font-size: .92rem;
+        border: 1px solid #e0e4e8; box-shadow: 0 2px 6px rgba(0,0,0,.04); transition: var(--transition); width: 100%;
     }
-    .form-control:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
-        outline: none;
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,123,255,.16); }
+    .btn-search {
+        background: var(--dark); color: #fff; border: none; border-radius: var(--border-radius);
+        padding: .62rem 1.2rem; font-weight: 600; font-size: .9rem; white-space: nowrap; flex-shrink: 0;
+        transition: var(--transition); box-shadow: 0 2px 6px rgba(0,0,0,.1);
     }
-    /* Адаптивность для списка и поля ввода */
+    .btn-search:hover { background: #000; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,.15); }
+    .search-form .d-flex { gap: .6rem; flex-wrap: nowrap; }
+
+    /* ✅ Воздух между поиском и таблицей */
+    .search-form { margin-bottom: 2rem; } /* можно 1.5rem/3rem по вкусу */
+
+    /* ---------- Таблица по центру, без “блока” вокруг ---------- */
+    .home-table { width: 100%; padding: 0 8px 24px; }
+    .home-table__inner {
+        width: 100%;
+        max-width: var(--table-max);
+        margin: 0 auto; /* центрирование */
+    }
+
+    /* Переопределяем сетку ТОЛЬКО внутри home-table__inner,
+       чтобы не трогать страницу глобального поиска */
+    .home-table__inner .container {
+        width: 100% !important; max-width: 100% !important;
+        padding-left: 0 !important; padding-right: 0 !important; margin: 0 !important;
+    }
+    .home-table__inner .row.d-none.d-md-flex { margin-left: 0; margin-right: 0; }
+    .home-table__inner .col-md-9 { flex: 0 0 100%; max-width: 100%; } /* таблица на всю доступную ширину */
+    .home-table__inner .col-md-3 { display: none !important; }       /* скрыть рекламу на главной */
+
+    /* ---------- Адаптив ---------- */
     @media (max-width: 576px) {
-        .how-it-works li {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .main-icon {
-            margin-bottom: 10px;
-        }
-        .form-control {
-            width: 100% !important; /* Полная ширина на мобильных */
-            font-size: 0.9rem; /* Чуть меньший шрифт для мобильных */
-            padding: 10px 15px; /* Удобный отступ для мобильных */
-            border-radius: 13px; /* Скругленные углы для мобильных */
-        }
-        .d-flex {
-            flex-direction: column; /* Вертикальное расположение на мобильных */
-            align-items: center;
-        }
-        .d-flex .btn-dark {
-            margin-top: 10px; /* Отступ для кнопки */
-            width: 100%; /* Кнопка на всю ширину */
-            padding: 10px; /* Увеличенный отступ */
-        }
+        .hero { padding: 1.5rem 1rem; }
+        .hero h1 { font-size: 1.55rem; }
+        .hero p { font-size: .84rem; }
+        .content-grid { padding: 0 .4rem; }
+        .how-it-works, .search-bar { padding: 0 .9rem; }
+        .how-it-works ul { gap: .65rem; }
+        .how-it-works li { flex-direction: row; text-align: left; }
+        .how-it-works i { font-size: 1.05rem; margin-top: .1rem; }
+        .search-form .d-flex { flex-direction: column; }
+        .btn-search { width: 100%; justify-content: center; }
     }
-    /* Адаптивность для десктопной версии */
     @media (min-width: 577px) {
-        .form-control {
-            width: 500px; /* Фиксированная ширина для веб-версии */
-        }
-        .d-flex {
-            flex-direction: row; /* Горизонтальное расположение для веб-версии */
-            align-items: center;
-        }
-        .d-flex .btn-dark {
-            margin-left: 10px; /* Отступ между полем и кнопкой */
-        }
+        .how-it-works ul { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+        .search-form .d-flex { flex-direction: row; }
     }
 </style>
 
-<div class="container py-5">
-    <h1 class="fw-bold text-center mb-4" style="font-size: 2rem;">Разбирай, сохраняй, находи на MobiRazbor.by!</h1>
-    <p class="text-center mb-4" style="font-size: 1rem;">
-        Управляйте своим складом и находите запчасти легко и быстро.
-    </p>
-    <div class="text-center mb-4">
-        <a href="{% url 'warehouse' %}" class="btn btn-primary px-4 py-2 shadow-sm">
-            <i class="bi bi-box-seam me-2"></i>Перейти в склад
-        </a>
+<div class="container-fluid px-0">
+    <!-- Хедер -->
+    <div class="hero">
+        <h1>Разбирай, сохраняй, находи на MobiRazbor.by!</h1>
+        <p>Управляйте своим складом и находите запчасти легко и быстро.</p>
+        <a href="{% url 'warehouse' %}" class="btn btn-warehouse">Мой склад</a>
     </div>
 
-    <form method="GET" action="{% url 'search' %}" class="d-flex justify-content-center mb-5">
-        <input type="text" name="q" id="search" class="form-control me-2"
-               placeholder="Введите запрос" value="{{ request.GET.q }}">
-        <button type="submit" class="btn btn-dark">
-            <i class="bi bi-search me-1"></i>Поиск
-        </button>
-    </form>
+    <!-- Текст + Поиск (как у вас было) -->
+    <div class="container content-grid">
+        <div class="how-it-works">
+            <ul>
+                <li><i class="bi bi-box-seam"></i><div><strong>Создайте свой склад</strong><br>Зарегистрируйтесь и заполните свой профиль.</div></li>
+                <li><i class="bi bi-wrench"></i><div><strong>Добавляйте запчасти</strong><br>Разбирайте ненужные устройства и добавляйте запчасти на свой склад.</div></li>
+                <li><i class="bi bi-search"></i><div><strong>Ищите нужную запчасть</strong><br>Нужна запчасть? Используйте <a href="{% url 'search' %}">глобальный поиск</a>.</div></li>
+                <li><i class="bi bi-chat-dots"></i><div><strong>Свяжитесь с продавцом</strong><br>Нашли запчасть? Договоритесь о покупке напрямую с владельцем.</div></li>
+                <li><i class="bi bi-hand-thumbs-up"></i><div><strong>Помогайте друг другу</strong><br>Даже самая мелкая запчасть у вас может кому-то пригодиться.</div></li>
+            </ul>
 
-    <h2 class="text-center mb-4" style="font-size: 1.5rem;">Как это работает</h2>
-    <ul class="list-unstyled how-it-works">
-        <li>
-            <i class="bi bi-box-seam main-icon"></i>
-            <div>
-                <strong>Создайте свой склад</strong><br>
-                Зарегистрируйтесь и заполните свой профиль.
-            </div>
-        </li>
-        <li>
-            <i class="bi bi-wrench main-icon"></i>
-            <div>
-                <strong>Добавляйте запчасти</strong><br>
-                Разбирайте ненужные устройства и добавляйте запчасти на свой склад.
-            </div>
-        </li>
-        <li>
-            <i class="bi bi-search main-icon"></i>
-            <div>
-                <strong>Ищите нужную запчасть</strong><br>
-                Нужна запчасть? Используйте <a href="{% url 'search' %}" class="text-primary">глобальный поиск</a> — система найдёт её на складах всех пользователей.
-            </div>
-        </li>
-        <li>
-            <i class="bi bi-chat-dots main-icon"></i>
-            <div>
-                <strong>Свяжитесь с продавцом</strong><br>
-                Нашли запчасть? Договоритесь о покупке напрямую с владельцем.
-            </div>
-        </li>
-        <li>
-            <i class="bi bi-hand-thumbs-up main-icon"></i>
-            <div>
-                <strong>Помогайте друг другу</strong><br>
-                Даже самую мелкую запчасть, которая пылится у вас в коробках, возможно, сейчас кто-то ищет.
-            </div>
-        </li>
-    </ul>
+            <!-- Поиск под текстом — ведёт на глобальный поиск -->
+            <form method="GET" action="{% url 'search' %}" class="search-bar search-form">
+                <div class="d-flex">
+                    <input
+                        type="text"
+                        name="q"
+                        class="form-control"
+                        placeholder="iPhone 13 камера, Samsung динамик..."
+                        value="{{ query|default:'' }}"
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="btn btn-search">Поиск</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Таблица по центру, без визуального блока вокруг -->
+    <section class="home-table">
+        <div class="home-table__inner">
+            {% include 'warehouse/search_table.html' %}
+        </div>
+    </section>
 </div>
+
+<script src="{% static 'js/search.js' %}"></script>
 {% endblock %}
