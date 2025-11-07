@@ -1,10 +1,43 @@
+{# Единый include: десктоп-таблица + мобильные карточки + компактная пагинация #}
 
-<div class="container">
-  <div class="row d-none d-md-flex">
-    <!-- Таблица результатов (9 колонок) -->
+<style>
+  /* Безопасные стили только для инклюда */
+  .results-container.container{padding-left:0.5rem;padding-right:0.5rem}
+  .results-row{margin-left:0;margin-right:0}
+
+  /* Изображения в таблице */
+  .image-container{
+    width:100px;height:100px;position:relative;display:flex;align-items:center;justify-content:center;
+    background-color:#e9ecef;border-radius:8px;overflow:hidden
+  }
+  .img-thumbnail{width:100%;height:100%;object-fit:cover;border:none;border-radius:8px}
+  .extra-images{
+    position:absolute;bottom:5px;right:5px;background-color:rgba(0,0,0,.6);color:#fff;
+    padding:2px 6px;border-radius:4px;font-size:12px
+  }
+  .no-image-text{
+    font-size:14px;color:#6c757d;text-align:center;width:100%;height:100%;
+    display:flex;align-items:center;justify-content:center;background-color:#e9ecef;border-radius:8px
+  }
+
+  /* Мобильные карточки */
+  @media (max-width: 768px){
+    .mobile-card .card-header{padding:10px;background-color:#f8f9fa;border-bottom:1px solid #ddd}
+    .image-container{width:80px;height:80px}
+    .no-image-text{font-size:12px}
+  }
+
+  /* Компактная пагинация */
+  .pagination{flex-wrap:wrap;gap:.25rem}
+  .page-link{padding:.45rem .7rem;font-size:.95rem;min-width:2.25rem;text-align:center}
+</style>
+
+<div class="container results-container">
+  <div class="row results-row d-none d-md-flex">
+    <!-- Таблица результатов -->
     <div class="col-md-9">
       <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover mb-3">
           <thead class="table-dark">
             <tr>
               <th>Фото</th>
@@ -15,8 +48,8 @@
             </tr>
           </thead>
           <tbody>
-            {% for result in page_obj %}
-            <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer; background-color: #fff; transition: background-color 0.3s;">
+          {% for result in page_obj %}
+            <tr onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer; background-color:#fff; transition:background-color .3s;">
               <td>
                 <div class="image-container">
                   {% if result.images.all %}
@@ -24,9 +57,7 @@
                       <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail">
                     </a>
                     {% if result.images.count > 1 %}
-                    <div class="extra-images">
-                      <span>+{{ result.images.count|add:"-1" }} еще</span>
-                    </div>
+                      <div class="extra-images"><span>+{{ result.images.count|add:"-1" }} еще</span></div>
                     {% endif %}
                   {% else %}
                     <span class="no-image-text">Нет фото</span>
@@ -34,49 +65,49 @@
                 </div>
               </td>
               <td>
-                <strong style="font-size: 16px; color: #333;">{{ result.part_type }}</strong>
-                {% if result.condition %}
-                  <span style="color: #6c757d;"> ({{ result.condition }})</span>
-                {% endif %}
+                <strong style="font-size:16px;color:#333">{{ result.part_type }}</strong>
+                {% if result.condition %}<span style="color:#6c757d;"> ({{ result.condition }})</span>{% endif %}
                 <br>
-                <span style="font-size: 14px;">{{ result.device }} {{ result.brand }} {{ result.display_model }}</span>
+                <span style="font-size:14px;">{{ result.device }} {{ result.brand }} {{ result.display_model }}</span>
                 {% if result.note %}
-                  <br>
-                  <span style="font-size: 13px; color: #868e96;">{{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>
+                  <br><span style="font-size:13px;color:#868e96;">{{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</span>
                 {% endif %}
               </td>
-              <td style="font-weight: 600; color: #28a745;">{{ result.price|floatformat:0 }} BYN</td>
-              <td style="color: #495057;">{{ result.user.profile.workshop_name|default:"Частное лицо" }}</td>
-              <td style="color: #495057;">{{ result.user.profile.city }}</td>
+              <td style="font-weight:600;color:#28a745">{{ result.price|floatformat:0 }} BYN</td>
+              <td style="color:#495057">{{ result.user.profile.workshop_name|default:"Частное лицо" }}</td>
+              <td style="color:#495057">{{ result.user.profile.city }}</td>
             </tr>
-            {% empty %}
-            <tr>
-              <td colspan="5" class="text-center py-4">Ничего не найдено.</td>
-            </tr>
-            {% endfor %}
+          {% empty %}
+            <tr><td colspan="5" class="text-center py-4">Ничего не найдено.</td></tr>
+          {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
-    <!-- Рекламные блоки (3 колонки) -->
+
+    <!-- Правая колонка (реклама). На главной мы её скрываем стилями из home.html -->
     <div class="col-md-3">
-      {% for ad in advertisements %}
-      <div class="advertisement-block {% if not forloop.first %}mt-4{% endif %}">
-        <a href="{{ ad.url }}" target="_blank">
-          <img src="{{ ad.image.url }}" alt="Рекламный баннер {{ ad.partner_name }}" class="img-fluid">
-        </a>
-      </div>
-      {% endfor %}
+      {% if advertisements %}
+        {% for ad in advertisements %}
+          <div class="advertisement-block {% if not forloop.first %}mt-4{% endif %}">
+            <a href="{{ ad.url }}" target="_blank">
+              <img src="{{ ad.image.url }}" alt="Рекламный баннер {{ ad.partner_name }}" class="img-fluid">
+            </a>
+          </div>
+        {% endfor %}
+      {% endif %}
     </div>
   </div>
 
-    <!-- Мобильная версия (отображается на экранах меньше 768px) -->
-    <div class="d-block d-md-none">
-      {% for result in page_obj %}
-      <div class="card mb-3" onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
+  <!-- Мобильная версия -->
+  <div class="d-block d-md-none">
+    {% for result in page_obj %}
+      <div class="card mobile-card mb-3" onclick="window.location.href='{% url 'part_detail' result.id %}'" style="cursor:pointer;">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <strong style="font-size: 18px; color: #333; flex: 1; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ result.part_type }}</strong>
-          <span style="font-size: 18px; color: #28a745; white-space: nowrap;">{{ result.price|floatformat:0 }} BYN</span>
+          <strong style="font-size:18px;color:#333;flex:1;margin-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            {{ result.part_type }}
+          </strong>
+          <span style="font-size:18px;color:#28a745;white-space:nowrap;">{{ result.price|floatformat:0 }} BYN</span>
         </div>
         <div class="row g-0">
           <div class="col-4 d-flex align-items-center justify-content-center p-2">
@@ -86,9 +117,7 @@
                   <img src="{{ result.images.first.image.url }}" alt="Изображение запчасти" class="img-thumbnail">
                 </a>
                 {% if result.images.count > 1 %}
-                <div class="extra-images">
-                  <span>+{{ result.images.count|add:"-1" }} еще</span>
-                </div>
+                  <div class="extra-images"><span>+{{ result.images.count|add:"-1" }} еще</span></div>
                 {% endif %}
               {% else %}
                 <span class="no-image-text">Нет фото</span>
@@ -97,179 +126,84 @@
           </div>
           <div class="col-8">
             <div class="card-body">
-              <p class="mb-1" style="font-size: 14px;">{{ result.device }} {{ result.brand }} {{ result.display_model }}</p>
+              <p class="mb-1" style="font-size:14px;">{{ result.device }} {{ result.brand }} {{ result.display_model }}</p>
               {% if result.condition %}
-              <p class="mb-1" style="font-size: 14px; color: #6c757d;">Состояние: {{ result.condition }}</p>
+                <p class="mb-1" style="font-size:14px;color:#6c757d;">Состояние: {{ result.condition }}</p>
               {% endif %}
-              <p class="mb-1" style="font-size: 14px;"><strong>Продавец:</strong> {{ result.user.profile.workshop_name|default:"Частное лицо" }}</p>
-              <p class="mb-1" style="font-size: 14px;"><strong>Город:</strong> {{ result.user.profile.city }}</p>
+              <p class="mb-1" style="font-size:14px;"><strong>Продавец:</strong> {{ result.user.profile.workshop_name|default:"Частное лицо" }}</p>
+              <p class="mb-1" style="font-size:14px;"><strong>Город:</strong> {{ result.user.profile.city }}</p>
               {% if result.note %}
-              <p class="mb-0" style="font-size: 13px; color: #868e96;">{{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</p>
+                <p class="mb-0" style="font-size:13px;color:#868e96;">{{ result.note|slice:":90" }}{% if result.note|length > 90 %}...{% endif %}</p>
               {% endif %}
             </div>
           </div>
         </div>
       </div>
-      {% empty %}
-      <div class="text-center py-4">
-        <p>Ничего не найдено.</p>
-      </div>
-      {% endfor %}
-    </div>
-
-    <!-- Пагинация -->
-    {% if page_obj.has_previous or page_obj.has_next %}
-    <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-          <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="First">
-            <span aria-hidden="true">«</span>
-          </a>
-        </li>
-        <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Previous">
-            <span aria-hidden="true">‹</span>
-          </a>
-        </li>
-        {% endif %}
-        {% for num in page_obj.paginator.page_range %}
-          {% if page_obj.number == num %}
-          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-          {% else %}
-          <li class="page-item"><a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">{{ num }}</a></li>
-          {% endif %}
-        {% endfor %}
-        {% if page_obj.has_next %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Next">
-            <span aria-hidden="true">›</span>
-          </a>
-        </li>
-        <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Last">
-            <span aria-hidden="true">»</span>
-          </a>
-        </li>
-        {% endif %}
-      </ul>
-    </nav>
-    {% endif %}
+    {% empty %}
+      <div class="text-center py-4"><p>Ничего не найдено.</p></div>
+    {% endfor %}
   </div>
 
-  <!-- Подключение Bootstrap JS (если требуется для пагинации) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  {# ---------- Компактная пагинация: окно по 5 страниц с многоточиями ---------- #}
+  {% if page_obj.has_previous or page_obj.has_next %}
+    {% with total=page_obj.paginator.num_pages current=page_obj.number start=page_obj.number|add:"-2" end=page_obj.number|add:"2" %}
+      {% if start < 1 %}{% with diff=1|add:"-"|add:start %}{% endwith %}{% endif %}
+      {% if end > total %}{% with end=total %}{% endwith %}{% endif %}
 
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center my-3">
+          {# К первой и к предыдущей #}
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="First">«</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Previous">‹</a>
+            </li>
+          {% endif %}
 
-<!-- Стили для улучшения внешнего вида (без изменений) -->
+          {# Первая страница + многоточие, если окно начинается не с 1 #}
+          {% if page_obj.number|add:"-2" > 1 %}
+            <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">1</a></li>
+            {% if page_obj.number|add:"-3" > 1 %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endif %}
 
-<style>
-    /* Общие стили для карточек и таблицы */
-body {
-    display: flex;
-<!--    justify-content: center; /* Центрирование по горизонтали */-->
-}
-.table-responsive.d-none.d-md-block {
-    width: 80%;
-    margin-left: 20px; /* Можно комбинировать с другими отступами, если нужно */
-}
+          {# Окно из 5 страниц вокруг текущей #}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+              {% if num == page_obj.number %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
 
-    .card {
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
-    }
+          {# Многоточие + последняя, если окно заканчивается не последней #}
+          {% if page_obj.number|add:"2" < page_obj.paginator.num_pages %}
+            {% if page_obj.number|add:"3" < page_obj.paginator.num_pages %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">{{ page_obj.paginator.num_pages }}</a>
+            </li>
+          {% endif %}
 
-    .card:hover {
-        transform: scale(1.02);
-    }
-
-    /* Изображения */
-    .image-container {
-      width: 100px;
-      height: 100px;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #e9ecef;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .img-thumbnail {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border: none;
-      border-radius: 8px;
-    }
-    .extra-images {
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      background-color: rgba(0, 0, 0, 0.6);
-      color: #fff;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 12px;
-    }
-    .no-image-text {
-      font-size: 14px;
-      color: #6c757d;
-      text-align: center;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #e9ecef;
-      border-radius: 8px;
-    }
-
-    .card-body {
-        padding: 12px;
-    }
-
-    .card-body p {
-        margin-bottom: 4px;
-    }
-
-    .card-body strong {
-        color: #333;
-    }
-
-    /* Адаптация для мобильных устройств */
-    @media (max-width: 768px) {
-        .card-header {
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #ddd;
-        }
-
-
-    .no-image-text {
-        font-size: 12px;
-    }
-
-
-
-        .card-body {
-            padding: 10px;
-        }
-
-        .card-body p {
-            font-size: 14px;
-        }
-
-        .card-body strong {
-            font-size: 16px;
-        }
-
-        .image-container {
-            width: 80px; /* Уменьшенный размер для мобильных */
-            height: 80px;
-        }
-    }
-</style>
+          {# К следующей и к последней #}
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Next">›</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}" aria-label="Last">»</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endwith %}
+  {% endif %}
+</div>
