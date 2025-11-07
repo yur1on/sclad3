@@ -29,8 +29,31 @@ from django.shortcuts import render, get_object_or_404
 from warehouse.models import Part
 from django.db.models import F
 def home(request):
-    return render(request, 'warehouse/home.html')
+    # последние запчасти с количеством > 0
+    results = (
+        Part.objects.filter(quantity__gt=0)
+        .select_related("user", "user__profile")
+        .prefetch_related("images")
+        .order_by("-created_at")
+    )
 
+    # По желанию — ограничение/приоритизация как в search():
+    now = timezone.now()
+    active_paid = Q(user__profile__tariff__in=['lite','standard','standard2','standard3','premium']) & \
+                  Q(user__profile__subscription_end__isnull=False, user__profile__subscription_end__gte=now)
+    subquery = Part.objects.filter(user=OuterRef('user_id'), quantity__gt=0).order_by('-created_at').values('pk')[:30]
+    results = results.filter(active_paid | Q(pk__in=subquery))
+
+    paginator = Paginator(results, 30)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    context = {
+        "page_obj": page_obj,
+        # "advertisements": Advertisement.objects.all()[:4],  # если есть
+        "advertisements": [],
+        "query": "",  # для безопасной подстановки в инпут
+    }
+    return render(request, "warehouse/home.html", context)
 
 from django.db.models import Sum
 
