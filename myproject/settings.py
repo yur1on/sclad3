@@ -123,6 +123,9 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+WAREHOUSE_USE_TG_SIGNAL = False
+
+
 # Настройки для статических файлов
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]

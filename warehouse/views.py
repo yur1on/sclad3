@@ -11,23 +11,31 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from django.http import HttpResponse
 from itertools import groupby
-from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q, OuterRef, Subquery
 from django.core.paginator import Paginator
+from .telegram_utils import delete_telegram_message_for_part
+import os
+from django.conf import settings
+from django.db.models import F
 from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum, DateField
+from django.db.models.functions import TruncDate
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.db import transaction
 from .forms import PartForm, PartImageFormSet
 from .models import Part, PartImage
 from tariff.utils import check_parts_limit, check_image_limit
 from .utils import compress_image
 from warehouse.utils import add_watermark_to_image
-import os
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from datetime import datetime, timedelta
+from .telegram_utils import send_new_part_notification
 from django.shortcuts import render, get_object_or_404
-from warehouse.models import Part
-from django.db.models import F
+from django.contrib.auth.decorators import login_required
+from .models import Part
+from django.utils.timezone import now
+from django.db.models import Sum
+
 def home(request):
     # последние запчасти с количеством > 0
     results = (
@@ -55,7 +63,7 @@ def home(request):
     }
     return render(request, "warehouse/home.html", context)
 
-from django.db.models import Sum
+
 
 
 @login_required
@@ -489,13 +497,25 @@ def edit_part(request, part_id):
     return render(request, 'warehouse/edit_part.html', {'part': part})
 
 
+
 @login_required
 def delete_part(request, part_id):
     part = get_object_or_404(Part, id=part_id, user=request.user)
+
     if request.method == 'POST':
+        # 1) Пытаемся удалить сообщение в Telegram (если есть сохранённый message_id)
+        try:
+            delete_telegram_message_for_part(part.id)
+        except Exception as e:
+            # Не ломаем UX, просто лог
+            print(f"[telegram] delete on part remove failed: {e}")
+
+        # 2) Удаляем саму запчасть
         part.delete()
         return redirect('warehouse')
+
     return render(request, 'warehouse/delete_part.html', {'part': part})
+
 
 
 @login_required(login_url='login')
@@ -645,7 +665,6 @@ def filter_parts(request):
 
 
 
-from django.utils.timezone import now
 
 def part_detail(request, part_id):
     part = get_object_or_404(Part, id=part_id)
@@ -663,8 +682,6 @@ def part_detail(request, part_id):
         'part': part,
         'is_bookmarked': is_bookmarked,
     })
-
-
 
 
 def add_part_success(request):
@@ -713,8 +730,6 @@ def add_image(request):
 
         return JsonResponse({'status': 'success', 'images': image_responses})
     return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса.'})
-
-
 
 
 @login_required
@@ -823,9 +838,6 @@ def get_dynamic_data(request):
 
 
 
-
-
-
 # Регистрация pillow-heif для поддержки HEIC-формата
 try:
     from pillow_heif import register_heif_opener
@@ -836,14 +848,14 @@ except ImportError:
 
 @login_required
 def add_part(request):
-    """Добавление запчасти с обработкой формы и изображений, с учетом тарифных ограничений."""
+    """Добавление запчасти + отправка уведомления в Telegram (после сохранения изображений)."""
     profile = getattr(request.user, 'profile', None)
     if not profile or not profile.city or not profile.phone:
         messages.error(request, 'Перед началом создания склада, укажите, пожалуйста, город и номер телефона в вашем профиле.')
         return redirect('profile')
 
     if request.method == 'POST':
-        # Проверка лимита запчастей по тарифу
+        # Лимит запчастей по тарифу
         if check_parts_limit(request.user):
             tariff = request.user.profile.tariff
             if tariff == 'free':
@@ -861,7 +873,7 @@ def add_part(request):
             messages.error(request, error_message)
             return redirect('profile')
 
-        # Сохранение данных формы и файлов в сессии, если они есть
+        # Восстановление сохранённых данных (если был confirm-диалог)
         if 'form_data' in request.session:
             form_data = request.session.pop('form_data')
             form_files = request.session.pop('form_files', {})
@@ -871,82 +883,7 @@ def add_part(request):
             form = PartForm(request.POST, request.FILES)
             formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
 
-        if form.is_valid() and formset.is_valid():
-            images = [img_form for img_form in formset if img_form.cleaned_data and img_form.cleaned_data.get('image')]
-            if request.user.profile.tariff == 'free' and check_image_limit(request.user, len(images)):
-                messages.error(request, "На бесплатном тарифе можно загрузить только 1 изображение для запчасти.")
-                return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
-
-            # Обработка данных формы
-            part_type = form.cleaned_data['part_type']
-            chip_marking = request.POST.get('chip_marking', '').strip()
-            if part_type == "Микросхема" and chip_marking:
-                form.cleaned_data['part_type'] = f"{part_type} {chip_marking}"
-
-            device = form.cleaned_data['device']
-            brand = form.cleaned_data['brand']
-            model = form.cleaned_data['model']
-            part_type = form.cleaned_data['part_type']
-            condition = form.cleaned_data['condition']
-            color = form.cleaned_data.get('color')
-            if color == '':
-                color = None
-
-            # Проверка на существование запчасти с учетом цвета
-            existing_part = Part.objects.filter(
-                user=request.user,
-                device=device,
-                brand=brand,
-                model=model,
-                part_type=part_type,
-                condition=condition,
-                color=color
-            ).first()
-
-            if existing_part and 'confirm_add' in request.POST:
-                # Добавление дубликата, если пользователь подтвердил
-                new_part = form.save(commit=False)
-                new_part.user = request.user
-                new_part.save()
-                for image_form in formset:
-                    if image_form.cleaned_data and image_form.cleaned_data.get('image'):
-                        image_obj = image_form.save(commit=False)
-                        compressed = compress_image(image_obj.image)
-                        watermarked = add_watermark_to_image(compressed)
-                        image_obj.image = watermarked
-                        image_obj.part = new_part
-                        image_obj.save()
-
-                return render(request, 'warehouse/success.html')
-
-            if existing_part:
-                # Сохранение данных формы и файлов в сессии
-                request.session['form_data'] = request.POST.dict()
-                request.session['form_files'] = request.FILES.dict()
-                return render(request, 'warehouse/confirm_add_part.html', {
-                    'form': form,
-                    'formset': formset,
-                    'existing_part': existing_part
-                })
-
-            # Сохранение новой запчасти
-            part = form.save(commit=False)
-            part.user = request.user
-            part.save()
-            for image_form in formset:
-                if image_form.cleaned_data and image_form.cleaned_data.get('image'):
-                    image_obj = image_form.save(commit=False)
-                    compressed = compress_image(image_obj.image)
-                    watermarked = add_watermark_to_image(compressed)
-                    image_obj.image = watermarked
-                    image_obj.part = part
-                    image_obj.save()
-
-
-            return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена!'})
-
-        else:
-            # Отладка ошибок валидации
+        if not (form.is_valid() and formset.is_valid()):
             messages.error(request, 'Ошибка валидации формы. Проверьте введенные данные.')
             if form.errors:
                 messages.error(request, f'Ошибки формы: {form.errors}')
@@ -954,10 +891,61 @@ def add_part(request):
                 messages.error(request, f'Ошибки formset: {formset.errors}')
             return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
 
-    else:
-        form = PartForm()
-        formset = PartImageFormSet(queryset=PartImage.objects.none())
+        # Проверка лимита картинок для бесплатного тарифа
+        images_forms = [f for f in formset if f.cleaned_data and f.cleaned_data.get('image')]
+        if request.user.profile.tariff == 'free' and check_image_limit(request.user, len(images_forms)):
+            messages.error(request, "На бесплатном тарифе можно загрузить только 1 изображение для запчасти.")
+            return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
 
+        # Обработка микросхем (добавляем маркировку к типу)
+        part_type_value = form.cleaned_data['part_type']
+        chip_marking = (request.POST.get('chip_marking') or '').strip()
+        if part_type_value == "Микросхема" and chip_marking:
+            form.cleaned_data['part_type'] = f"{part_type_value} {chip_marking}"
+
+        device = form.cleaned_data['device']
+        brand = form.cleaned_data['brand']
+        model = form.cleaned_data['model']
+        part_type = form.cleaned_data['part_type']
+        condition = form.cleaned_data['condition']
+        color = form.cleaned_data.get('color') or None
+
+        # Проверка на дубликат (с учётом цвета)
+        existing_part = Part.objects.filter(
+            user=request.user, device=device, brand=brand, model=model,
+            part_type=part_type, condition=condition, color=color
+        ).first()
+
+        if existing_part and 'confirm_add' not in request.POST:
+            request.session['form_data'] = request.POST.dict()
+            request.session['form_files'] = request.FILES.dict()
+            return render(request, 'warehouse/confirm_add_part.html', {
+                'form': form, 'formset': formset, 'existing_part': existing_part
+            })
+
+        # Сохраняем всё атомарно и шлём уведомление ПОСЛЕ коммита
+        with transaction.atomic():
+            new_part = form.save(commit=False)
+            new_part.user = request.user
+            new_part.save()
+
+            for img_form in formset:
+                if img_form.cleaned_data and img_form.cleaned_data.get('image'):
+                    image_obj = img_form.save(commit=False)
+                    compressed = compress_image(image_obj.image)
+                    watermarked = add_watermark_to_image(compressed)
+                    image_obj.image = watermarked
+                    image_obj.part = new_part
+                    image_obj.save()
+
+            # Телеграм — после коммита (фото уже сохранены)
+            transaction.on_commit(lambda: send_new_part_notification(new_part, request=request))
+
+        return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена!'})
+
+    # GET — пустая форма
+    form = PartForm()
+    formset = PartImageFormSet(queryset=PartImage.objects.none())
     return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
 
 def get_regions_and_cities(request):
@@ -998,8 +986,6 @@ def user_parts(request, user_id, template_name='warehouse/user_parts.html'):
         'viewed_user': user,
         'viewed_user_full_name': user.profile.full_name,
     })
-
-
 
 
 @login_required
@@ -1059,16 +1045,6 @@ def user_agreement_view(request):
 def privacy_policy_view(request):
     return render(request, 'warehouse/privacy_policy.html')
 
-
-from django.utils.timezone import now
-
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Sum, DateField
-from django.db.models.functions import TruncDate
-from .models import Part
 
 @login_required
 def analytics_view(request):
