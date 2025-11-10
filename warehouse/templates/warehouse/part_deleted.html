@@ -1,0 +1,16 @@
+{% extends 'warehouse/base.html' %}
+{% block title %}Объявление снято{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="alert alert-warning">
+    <h4 class="alert-heading mb-2">Это объявление снято с публикации</h4>
+    <p class="mb-0">
+      Запчасть: <strong>{{ part.part_type }}</strong> для
+      <strong>{{ part.brand }} {{ part.model }}</strong>.
+    </p>
+  </div>
+  <a href="{% url 'home' %}" class="btn btn-primary">Вернуться на главную</a>
+  <a href="{% url 'search' %}" class="btn btn-outline-secondary ms-2">К поиску</a>
+</div>
+{% endblock %}
