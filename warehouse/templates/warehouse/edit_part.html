@@ -11,7 +11,7 @@
     <form method="post" enctype="multipart/form-data" id="edit-part-form">
         {% csrf_token %}
 
-                <!-- Номер запчасти (readonly) -->
+        <!-- Номер запчасти (readonly) -->
         <div class="form-group mb-3 row">
             <label for="part_number" class="col-sm-2 col-form-label">Номер запчасти:</label>
             <div class="col-sm-8">
@@ -51,13 +51,11 @@
             </div>
         </div>
 
-
-
         <!-- Цвет (readonly) -->
         <div class="form-group mb-3 row">
             <label for="color" class="col-sm-2 col-form-label">Цвет:</label>
             <div class="col-sm-8">
-                <input type="text" name="color" id="color" class="form-control shadow-sm" value="{{ part.color|default:"не выбран" }}" readonly>
+                <input type="text" name="color" id="color" class="form-control shadow-sm" value="{{ part.color|default:'не выбран' }}" readonly>
             </div>
         </div>
 
@@ -74,6 +72,14 @@
             <label for="price" class="col-sm-2 col-form-label">Цена:</label>
             <div class="col-sm-8">
                 <input type="number" name="price" id="price" class="form-control shadow-sm" value="{{ part.price }}" required>
+            </div>
+        </div>
+
+        <!-- Примечание (НОВОЕ, редактируемое) -->
+        <div class="form-group mb-3 row">
+            <label for="note" class="col-sm-2 col-form-label">Примечание:</label>
+            <div class="col-sm-8">
+                <textarea name="note" id="note" class="form-control shadow-sm" rows="3" placeholder="Введите примечание">{{ part.note }}</textarea>
             </div>
         </div>
 
