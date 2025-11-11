@@ -474,7 +474,7 @@ def edit_part(request, part_id):
     part = get_object_or_404(Part, id=part_id)
 
     if request.method == 'POST':
-        # Обновляем поля запчасти
+
         part.device = request.POST.get('device')
         part.brand = request.POST.get('brand')
         part.model = request.POST.get('model')
@@ -482,17 +482,17 @@ def edit_part(request, part_id):
         part.color = request.POST.get('color')
         part.quantity = request.POST.get('quantity')
         part.price = request.POST.get('price')
+        part.note = request.POST.get('note')
         part.save()
 
-        # Обрабатываем изображения
+        # Обрабатываем новые изображения (если загружены)
         if 'images' in request.FILES:
-            images = request.FILES.getlist('images')  # Получаем список загруженных изображений
+            images = request.FILES.getlist('images')
             for image in images:
-                # Проверьте, что не больше 5 изображений
                 if part.images.count() < 5:
-                    part.images.create(image=image)  # Создаем объект изображения
+                    part.images.create(image=image)
 
-        return redirect('warehouse')  # Перенаправляем после успешного сохранения
+        return redirect('warehouse')
 
     return render(request, 'warehouse/edit_part.html', {'part': part})
 
