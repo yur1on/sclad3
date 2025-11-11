@@ -16,11 +16,9 @@
     --table-max:1600px;
   }
 
-  /* Глобально убираем горизонтальный скролл */
   html,body{max-width:100%; overflow-x:hidden;}
   body{font-family:'Roboto',sans-serif;margin:0;padding:0;}
 
-  /* ---------- HERO ---------- */
   .hero{padding:1.6rem 1rem;text-align:center}
   .hero h1{font-size:1.7rem;font-weight:700;margin:0 0 .35rem;line-height:1.2;color:#1a1a1a}
   .hero p{font-size:.9rem;opacity:.92;margin:0 0 .9rem;line-height:1.4;color:#555}
@@ -34,7 +32,6 @@
 
   .content-grid{display:grid;gap:.9rem;padding:0 .5rem}
 
-  /* ---------- Инфо-блок ---------- */
   .how-it-works{padding:0 1rem;font-size:.8rem;line-height:1.48;color:#444}
   .how-it-works ul{list-style:none;padding:0;margin:0 0 1rem;display:grid;grid-template-columns:1fr;gap:.7rem}
   .how-it-works li{display:flex;align-items:flex-start;gap:.6rem}
@@ -42,7 +39,6 @@
   .how-it-works strong{display:block;font-size:.86rem;color:var(--dark);margin-bottom:.05rem}
   .how-it-works a{color:var(--primary);text-decoration:underline}
 
-  /* ---------- Поиск ---------- */
   .search-bar{max-width:100%;padding:0 1rem}
   .form-control{
     border-radius:var(--radius);padding:.62rem .9rem;font-size:.92rem;
@@ -56,102 +52,23 @@
   }
   .btn-search:hover{background:#000;transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.15)}
   .search-form .d-flex{gap:.6rem;flex-wrap:nowrap}
-  /* Воздух под поиском */
   .search-form{margin-bottom:1.8rem}
 
-  /* ---------- Обёртка таблицы на главной ---------- */
   .home-table{width:100%;padding:0 8px 24px}
   .home-table__inner{width:100%;max-width:var(--table-max);margin:0 auto}
-
-  /* На главной скрываем правую колонку с рекламой (если она есть в include).
-     Это безопасный и независимый от других страниц оверрайд. */
   .home-table__inner .col-md-9{flex:0 0 100%;max-width:100%}
   .home-table__inner .col-md-3{display:none!important}
 
-  /* Анимации для плавного появления */
-  .fade-in {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
+  .fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+  .fade-in.visible{opacity:1;transform:translateY(0)}
 
-  .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
+  .scroll-to-top{
+    position:fixed;bottom:20px;right:20px;width:50px;height:50px;background:var(--primary);
+    color:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0;visibility:hidden;transition:all .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:99
   }
-
-  /* Стили для уведомлений */
-  .notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    background: var(--primary);
-    color: white;
-    border-radius: var(--radius);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 1000;
-    transform: translateX(150%);
-    transition: transform 0.3s ease;
-  }
-
-  .notification.show {
-    transform: translateX(0);
-  }
-
-  /* Стили для лоадера */
-  .loader {
-    display: none;
-    text-align: center;
-    padding: 20px;
-  }
-
-  .loader-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(0, 123, 255, 0.2);
-    border-left: 4px solid var(--primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  /* Стили для кнопки прокрутки наверх */
-  .scroll-to-top {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 99;
-  }
-
-  .scroll-to-top.visible {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .scroll-to-top:hover {
-    background: #0056b3;
-    transform: translateY(-3px);
-  }
+  .scroll-to-top.visible{opacity:1;visibility:visible}
+  .scroll-to-top:hover{background:#0056b3;transform:translateY(-3px)}
 
   @media (max-width: 768px){
     .search-form .d-flex{flex-direction:column}
@@ -171,7 +88,7 @@
     <a href="{% url 'warehouse' %}" class="btn btn-warehouse">Мой склад</a>
   </div>
 
-  <!-- Информация + Поиск (как у вас было) -->
+  <!-- Информация + Поиск -->
   <div class="container content-grid">
     <div class="how-it-works fade-in">
       <ul>
@@ -182,183 +99,61 @@
         <li><i class="bi bi-hand-thumbs-up"></i><div><strong>Помогайте друг другу</strong><br>Даже самая мелкая запчасть у вас может кому-то пригодиться.</div></li>
       </ul>
 
-      <!-- Поиск: отправляет на глобальный -->
-      <form method="GET" action="{% url 'search' %}" class="search-bar search-form" id="searchForm">
+      <!-- Форма: переходит на глобальный поиск -->
+      <form method="GET" action="{% url 'search' %}" class="search-bar search-form">
         <div class="d-flex">
           <input type="text"
                  name="q"
                  class="form-control"
                  placeholder="iPhone 13 камера, Samsung динамик..."
                  value="{{ query|default:'' }}"
-                 autocomplete="off"
-                 id="searchInput">
-          <button type="submit" class="btn btn-search" id="searchButton">Поиск</button>
+                 autocomplete="off">
+          <button type="submit" class="btn btn-search">Поиск</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Лоадер для загрузки контента -->
-  <div class="loader" id="contentLoader">
-    <div class="loader-spinner"></div>
-    <p class="mt-2">Загрузка...</p>
-  </div>
-
-  <!-- Таблица/карточки результатов из инклюда -->
+  <!-- На главной можно показывать последние добавления (по желанию) -->
   <section class="home-table">
-    <div class="home-table__inner" id="searchResults">
+    <div class="home-table__inner">
       {% include 'warehouse/search_table.html' %}
     </div>
   </section>
 </div>
 
-<!-- Кнопка прокрутки наверх -->
 <button class="scroll-to-top" id="scrollToTop">
   <i class="bi bi-chevron-up"></i>
 </button>
 
 <script>
-  // Современный JavaScript с использованием ES6+
+  // Только анимации и кнопка вверх — НЕТ перехвата submit!
   document.addEventListener('DOMContentLoaded', () => {
-    // Элементы DOM
-    const searchForm = document.getElementById('searchForm');
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
-    const searchResults = document.getElementById('searchResults');
-    const contentLoader = document.getElementById('contentLoader');
     const scrollToTop = document.getElementById('scrollToTop');
     const fadeElements = document.querySelectorAll('.fade-in');
 
-    // Уведомления
-    const showNotification = (message, type = 'info') => {
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      notification.textContent = message;
-      document.body.appendChild(notification);
-
-      // Показываем уведомление
-      setTimeout(() => notification.classList.add('show'), 100);
-
-      // Убираем через 4 секунды
-      setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-      }, 4000);
-    };
-
-    // Анимация появления элементов при скролле
     const handleScrollAnimation = () => {
-      fadeElements.forEach(element => {
-        const elementTop = element.getBoundingClientRect().top;
-        const windowHeight = window.innerHeight;
-
-        if (elementTop < windowHeight - 100) {
-          element.classList.add('visible');
-        }
+      fadeElements.forEach(el => {
+        const top = el.getBoundingClientRect().top;
+        if (top < window.innerHeight - 100) el.classList.add('visible');
       });
     };
 
-    // Показать/скрыть кнопку прокрутки наверх
     const handleScrollToTop = () => {
-      if (window.pageYOffset > 300) {
-        scrollToTop.classList.add('visible');
-      } else {
-        scrollToTop.classList.remove('visible');
-      }
+      if (window.pageYOffset > 300) scrollToTop.classList.add('visible');
+      else scrollToTop.classList.remove('visible');
     };
 
-    // Прокрутка наверх
     scrollToTop.addEventListener('click', () => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // AJAX-поиск (если нужно реализовать без перезагрузки страницы)
-    const handleSearch = async (e) => {
-      e.preventDefault();
-
-      const query = searchInput.value.trim();
-      if (!query) return;
-
-      try {
-        // Показываем лоадер
-        contentLoader.style.display = 'block';
-        searchResults.style.opacity = '0.5';
-
-        // Имитация AJAX-запроса (замените на реальный запрос к вашему API)
-        // const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        // const data = await response.json();
-
-        // Временная имитация задержки
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        // Обновляем результаты (в реальном приложении здесь будет обновление DOM)
-        // searchResults.innerHTML = data.html;
-
-        // Показываем уведомление
-        showNotification(`Найдено результатов по запросу: "${query}"`, 'info');
-
-      } catch (error) {
-        console.error('Ошибка поиска:', error);
-        showNotification('Произошла ошибка при поиске', 'error');
-      } finally {
-        // Скрываем лоадер
-        contentLoader.style.display = 'none';
-        searchResults.style.opacity = '1';
-      }
-    };
-
-    // Автодополнение поиска (если нужно)
-    const setupAutocomplete = () => {
-      // Здесь можно добавить логику для автодополнения
-      // Например, fetch запросы к API при вводе текста
-
-      let timeoutId;
-      searchInput.addEventListener('input', () => {
-        clearTimeout(timeoutId);
-
-        // Дебаунс для уменьшения количества запросов
-        timeoutId = setTimeout(() => {
-          const query = searchInput.value.trim();
-          if (query.length > 2) {
-            // Запрос для автодополнения
-            // fetchAutocompleteSuggestions(query);
-          }
-        }, 300);
-      });
-    };
-
-    // Инициализация
-    const init = () => {
-      // Запускаем анимации при загрузке
+    handleScrollAnimation();
+    handleScrollToTop();
+    window.addEventListener('scroll', () => {
       handleScrollAnimation();
-
-      // Назначаем обработчики событий
-      window.addEventListener('scroll', () => {
-        handleScrollAnimation();
-        handleScrollToTop();
-      });
-
-      // Обработчик поиска
-      searchForm.addEventListener('submit', handleSearch);
-
-      // Настройка автодополнения
-      setupAutocomplete();
-
-      // Показываем элементы с задержкой для лучшего UX
-      setTimeout(() => {
-        fadeElements.forEach(el => {
-          if (el.getBoundingClientRect().top < window.innerHeight) {
-            el.classList.add('visible');
-          }
-        });
-      }, 100);
-    };
-
-    // Запускаем инициализацию
-    init();
+      handleScrollToTop();
+    });
   });
 </script>
 {% endblock %}
