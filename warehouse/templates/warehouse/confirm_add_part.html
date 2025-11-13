@@ -1,32 +1,78 @@
 {% extends 'warehouse/base.html' %}
 {% load static %}
+
 {% block title %}Подтвердите добавление запчасти{% endblock %}
+
 {% block content %}
 <div class="container mt-4 mb-5">
-    <h2 class="page-title text-center" style="color: #333; font-weight: 600;">Повторное добавление запчасти</h2>
-    <div class="alert alert-warning p-3" style="border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <p class="text-center" style="color: #666;">Запчасть <strong>{{ existing_part.part_type }} {{ existing_part.brand }} {{ existing_part.model }}{% if existing_part.color %} (цвет: {{ existing_part.color }}){% endif %}</strong> уже существует на складе.</p>
-        <p class="text-center" style="color: #666;">Вы можете редактировать существующую запчасть или добавить новую с другими характеристиками (например, ценой или фото).</p>
+    <h2 class="page-title text-center mb-4"
+        style="color: #333; font-weight: 600;">
+        Повторное добавление запчасти
+    </h2>
+
+    <div class="alert alert-warning p-3"
+         style="border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.08);">
+        <p class="text-center mb-2" style="color: #555;">
+            Запчасть
+            <strong>
+                {{ existing_part.part_type }}
+                {{ existing_part.brand }}
+                {{ existing_part.model }}
+                {% if existing_part.color %}(цвет: {{ existing_part.color }}){% endif %}
+            </strong>
+            уже существует на складе.
+        </p>
+        <p class="text-center mb-3" style="color: #666;">
+            Вы можете отредактировать уже существующую запчасть
+            или всё равно добавить ещё одну (например, с другой ценой или фото).
+        </p>
+
         <form method="post" action="{% url 'add_part' %}">
             {% csrf_token %}
             <input type="hidden" name="confirm_add" value="true">
-            <div class="d-flex flex-column flex-md-row justify-content-center mt-3">
-                <button type="submit" class="btn btn-success mb-2 mb-md-0 me-md-2" style="background-color: #28a745; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 20px;">Все равно добавить</button>
-                <a href="{% url 'edit_part' existing_part.id %}" class="btn btn-primary mb-2 mb-md-0 me-md-2" style="background-color: #007bff; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 20px;">Редактировать</a>
-                <a href="{% url 'warehouse' %}" class="btn btn-secondary" style="background-color: #6c757d; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 20px;">Склад</a>
+
+            <div class="d-flex flex-column flex-md-row justify-content-center mt-2">
+                <button type="submit"
+                        class="btn btn-success mb-2 mb-md-0 me-md-2"
+                        style="border-radius: 20px; min-width: 180px;">
+                    Всё равно добавить
+                </button>
+
+                <a href="{% url 'edit_part' existing_part.id %}"
+                   class="btn btn-primary mb-2 mb-md-0 me-md-2"
+                   style="border-radius: 20px; min-width: 180px;">
+                    Редактировать существующую
+                </a>
+
+                <a href="{% url 'warehouse' %}"
+                   class="btn btn-secondary"
+                   style="border-radius: 20px; min-width: 180px;">
+                    Вернуться на склад
+                </a>
             </div>
+
+            <p class="text-center mt-3 mb-0" style="color:#777; font-size: 0.9rem;">
+                Объявление будет отправлено в Telegram, только если вы ставили галочку при добавлении запчасти.
+            </p>
         </form>
     </div>
 </div>
 
-<style>
-    @media (max-width: 768px) {
-        .page-title { font-size: 1.5rem; }
-        .alert p { font-size: 0.9rem; }
-        .btn { width: 100%; margin-bottom: 10px; }
-    }
-</style>
-
 <link rel="stylesheet" href="{% static 'css/add_part.css' %}">
 <script src="{% static 'js/add_part.js' %}"></script>
+
+<style>
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.5rem;
+        }
+        .alert p {
+            font-size: 0.9rem;
+        }
+        .btn {
+            width: 100%;
+            margin-bottom: 10px !important;
+        }
+    }
+</style>
 {% endblock %}
