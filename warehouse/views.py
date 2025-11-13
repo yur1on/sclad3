@@ -848,14 +848,21 @@ except ImportError:
 
 @login_required
 def add_part(request):
-    """Добавление запчасти + отправка уведомления в Telegram (после сохранения изображений)."""
+    """
+    Добавление запчасти.
+    При отмеченной галочке "send_to_telegram" дублируем объявление в Telegram
+    (после сохранения изображений и коммита транзакции).
+    """
     profile = getattr(request.user, 'profile', None)
     if not profile or not profile.city or not profile.phone:
-        messages.error(request, 'Перед началом создания склада, укажите, пожалуйста, город и номер телефона в вашем профиле.')
+        messages.error(
+            request,
+            'Перед началом создания склада, укажите, пожалуйста, город и номер телефона в вашем профиле.'
+        )
         return redirect('profile')
 
     if request.method == 'POST':
-        # Лимит запчастей по тарифу
+        # --- Лимит запчастей по тарифу ---
         if check_parts_limit(request.user):
             tariff = request.user.profile.tariff
             if tariff == 'free':
@@ -873,31 +880,45 @@ def add_part(request):
             messages.error(request, error_message)
             return redirect('profile')
 
-        # Восстановление сохранённых данных (если был confirm-диалог)
+        # --- Восстановление сохранённых данных (если уже был confirm-диалог) ---
         if 'form_data' in request.session:
             form_data = request.session.pop('form_data')
             form_files = request.session.pop('form_files', {})
+
+            # галочка берётся из сохранённых данных
+            send_to_telegram = form_data.get('send_to_telegram') == 'on'
+
             form = PartForm(form_data, form_files)
             formset = PartImageFormSet(form_data, form_files, queryset=PartImage.objects.none())
         else:
+            # обычный первый POST с формы
+            send_to_telegram = request.POST.get('send_to_telegram') == 'on'
+
             form = PartForm(request.POST, request.FILES)
             formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
 
+        # --- Валидация формы и формсета ---
         if not (form.is_valid() and formset.is_valid()):
             messages.error(request, 'Ошибка валидации формы. Проверьте введенные данные.')
             if form.errors:
                 messages.error(request, f'Ошибки формы: {form.errors}')
             if formset.errors:
                 messages.error(request, f'Ошибки formset: {formset.errors}')
-            return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
+            return render(request, 'warehouse/add_part.html', {
+                'form': form,
+                'formset': formset,
+            })
 
-        # Проверка лимита картинок для бесплатного тарифа
+        # --- Проверка лимита картинок для бесплатного тарифа ---
         images_forms = [f for f in formset if f.cleaned_data and f.cleaned_data.get('image')]
         if request.user.profile.tariff == 'free' and check_image_limit(request.user, len(images_forms)):
             messages.error(request, "На бесплатном тарифе можно загрузить только 1 изображение для запчасти.")
-            return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
+            return render(request, 'warehouse/add_part.html', {
+                'form': form,
+                'formset': formset,
+            })
 
-        # Обработка микросхем (добавляем маркировку к типу)
+        # --- Обработка микросхем (добавляем маркировку к типу) ---
         part_type_value = form.cleaned_data['part_type']
         chip_marking = (request.POST.get('chip_marking') or '').strip()
         if part_type_value == "Микросхема" and chip_marking:
@@ -910,25 +931,36 @@ def add_part(request):
         condition = form.cleaned_data['condition']
         color = form.cleaned_data.get('color') or None
 
-        # Проверка на дубликат (с учётом цвета)
+        # --- Проверка на дубликат (с учётом цвета) ---
         existing_part = Part.objects.filter(
-            user=request.user, device=device, brand=brand, model=model,
-            part_type=part_type, condition=condition, color=color
+            user=request.user,
+            device=device,
+            brand=brand,
+            model=model,
+            part_type=part_type,
+            condition=condition,
+            color=color,
         ).first()
 
+        # Если нашли дубликат и ещё не было подтверждения — показываем confirm-страницу
         if existing_part and 'confirm_add' not in request.POST:
+            # складываем весь POST и FILES в сессию (включая галочку send_to_telegram)
             request.session['form_data'] = request.POST.dict()
-            request.session['form_files'] = request.FILES.dict()
+            request.session['form_files'] = {k: v for k, v in request.FILES.lists()}
+
             return render(request, 'warehouse/confirm_add_part.html', {
-                'form': form, 'formset': formset, 'existing_part': existing_part
+                'form': form,
+                'formset': formset,
+                'existing_part': existing_part,
             })
 
-        # Сохраняем всё атомарно и шлём уведомление ПОСЛЕ коммита
+        # --- Сохраняем всё атомарно ---
         with transaction.atomic():
             new_part = form.save(commit=False)
             new_part.user = request.user
             new_part.save()
 
+            # сохранение изображений с компрессией и водяным знаком
             for img_form in formset:
                 if img_form.cleaned_data and img_form.cleaned_data.get('image'):
                     image_obj = img_form.save(commit=False)
@@ -938,15 +970,23 @@ def add_part(request):
                     image_obj.part = new_part
                     image_obj.save()
 
-            # Телеграм — после коммита (фото уже сохранены)
-            transaction.on_commit(lambda: send_new_part_notification(new_part, request=request))
+            # --- Отправка в Telegram только если отмечена галочка ---
+            if send_to_telegram:
+                transaction.on_commit(
+                    lambda: send_new_part_notification(new_part, request=request)
+                )
 
-        return render(request, 'warehouse/success.html', {'message': 'Запчасть успешно добавлена!'})
+        return render(request, 'warehouse/success.html', {
+            'message': 'Запчасть успешно добавлена!'
+        })
 
-    # GET — пустая форма
+    # --- GET — пустая форма ---
     form = PartForm()
     formset = PartImageFormSet(queryset=PartImage.objects.none())
-    return render(request, 'warehouse/add_part.html', {'form': form, 'formset': formset})
+    return render(request, 'warehouse/add_part.html', {
+        'form': form,
+        'formset': formset,
+    })
 
 def get_regions_and_cities(request):
     file_path = os.path.join(settings.BASE_DIR, 'static/json/belarus_regions_and_cities.json')
