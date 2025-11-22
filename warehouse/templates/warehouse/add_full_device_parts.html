@@ -1,0 +1,1021 @@
+{% extends 'warehouse/base.html' %}
+{% load static %}
+
+{% block title %}Добавить все запчасти устройства{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/add_part.css' %}">
+
+<div class="container mt-3 mb-4">
+  <h2 class="mb-3 text-center">Добавить все запчасти устройства</h2>
+
+  <form method="post" enctype="multipart/form-data" id="full-device-form">
+    {% csrf_token %}
+
+    {# ШАГ 1 — устройство / бренд / модель (БЕЗ цвета) #}
+    <div class="device-section mb-4">
+      <div class="device-section-header">
+        <div class="device-section-title">Шаг 1. Устройство</div>
+        <div class="device-section-subtitle">
+          Укажите базовые параметры, затем выберите нужные запчасти.
+        </div>
+      </div>
+
+      <div class="device-section-body">
+        <div class="device-grid">
+          <div class="device-field">
+            <label for="id_device" class="device-label">Устройство</label>
+            <input list="devices"
+                   id="id_device"
+                   name="device"
+                   class="form-control shadow-sm device-input"
+                   placeholder="Телефон, планшет..."
+                   value="{{ device }}"
+                   required>
+            <datalist id="devices">
+              <option value="Телефон">
+              <option value="Планшет">
+              <option value="Смарт-часы">
+            </datalist>
+          </div>
+
+          <div class="device-field">
+            <label for="id_brand" class="device-label">Бренд</label>
+            <input list="brands"
+                   id="id_brand"
+                   name="brand"
+                   class="form-control shadow-sm device-input"
+                   placeholder="Apple, Samsung..."
+                   value="{{ brand }}"
+                   required>
+            <datalist id="brands"></datalist>
+          </div>
+
+          <div class="device-field">
+            <label for="id_model" class="device-label">Модель</label>
+            <input list="models"
+                   id="id_model"
+                   name="model"
+                   class="form-control shadow-sm device-input"
+                   placeholder="Например: iPhone 11"
+                   value="{{ model }}"
+                   required>
+            <datalist id="models"></datalist>
+          </div>
+        </div>
+
+        <div class="text-center mt-3">
+          <button type="button"
+                  class="btn btn-outline-primary px-4"
+                  id="btn-load-parts">
+            Показать список запчастей
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {# ШАГ 2 — карточки запчастей #}
+    <input type="hidden" name="parts_total" id="id_parts_total" value="0">
+
+    <div class="device-section mb-4 d-none" id="parts-card">
+      <div class="device-section-header">
+        <div class="device-section-title">Шаг 2. Отметьте, что есть в наличии</div>
+        <div class="device-section-subtitle">
+          Поставьте галочку «Есть» напротив нужных запчастей. Откроется окно,
+          где можно указать количество, цену, состояние, цвет, фото, примечания,
+           и нужно ли дублировать
+          эту запчасть в Telegram.
+        </div>
+      </div>
+
+      <div class="device-section-body">
+        <div class="row" id="parts-container">
+          {# Заполняется динамически через JS #}
+        </div>
+      </div>
+    </div>
+
+    {# Глобального переключателя Telegram НЕТ — всё в модалке #}
+
+    {# Кнопка отправки #}
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary btn-lg px-5">
+        Добавить запчасти
+      </button>
+    </div>
+
+    {# МОДАЛЬНОЕ ОКНО ДЛЯ ЗАПЧАСТИ #}
+    <div id="part-modal-overlay" class="part-modal-overlay d-none">
+      <div class="part-modal">
+        <div class="part-modal-header">
+          <div class="part-modal-title-wrap">
+            <span class="part-modal-title-label">Запчасть:</span>
+            <span id="part-modal-title" class="part-modal-title-value">—</span>
+          </div>
+          <button type="button" class="part-modal-close" id="part-modal-close">&times;</button>
+        </div>
+
+        <div class="part-modal-body">
+          <div class="mb-2">
+            <label class="form-label mb-0 small">Количество</label>
+            <input type="number"
+                   class="form-control form-control-sm"
+                   id="modal-quantity"
+                   min="1"
+                   value="1">
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label mb-0 small">Цена (бел.руб.)</label>
+            <input type="number"
+                   class="form-control form-control-sm"
+                   id="modal-price"
+                   min="0"
+                   step="1"
+                   value="0">
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label mb-0 small">Состояние</label>
+            <input type="text"
+                   class="form-control form-control-sm"
+                   id="modal-condition"
+                   value="оригинал б/у">
+          </div>
+
+          <div class="mb-2" id="modal-color-wrapper" style="display:none;">
+            <label class="form-label mb-0 small">Цвет</label>
+            <input type="text"
+                   class="form-control form-control-sm"
+                   id="modal-color"
+                   list="modal-color-list"
+                   placeholder="Выберите цвет (если есть)">
+            <datalist id="modal-color-list"></datalist>
+          </div>
+
+          {# Маркировка микросхемы — только для типа "Микросхема" #}
+          <div class="mb-2" id="modal-chip-wrapper" style="display:none;">
+            <label class="form-label mb-0 small">Маркировка микросхемы</label>
+            <input type="text"
+                   class="form-control form-control-sm"
+                   id="modal-chip-marking"
+                   placeholder="Например: SN61280">
+          </div>
+
+          {# Переключатель Telegram для КОНКРЕТНОЙ запчасти #}
+          <div class="mb-2">
+            <label class="form-label mb-0 small d-block">Telegram</label>
+            <label class="tg-switch-wrapper tg-switch-wrapper-sm">
+              <input
+                type="checkbox"
+                id="modal-send-tg"
+                class="tg-switch-input"
+              >
+              <span class="tg-switch-slider"></span>
+              <span class="tg-switch-label small">
+                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png"
+                     alt="TG"
+                     class="tg-icon">
+                Дублировать эту запчасть в Telegram
+              </span>
+            </label>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label mb-0 small d-block">Фото</label>
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    id="modal-image-btn">
+              Выбрать фото
+            </button>
+            <span class="small text-muted ms-2" id="modal-image-filename">
+              Файл не выбран
+            </span>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label mb-0 small">Примечание</label>
+            <textarea class="form-control form-control-sm"
+                      id="modal-note"
+                      rows="2"
+                      placeholder="любой комментарий"></textarea>
+          </div>
+        </div>
+
+        <div class="part-modal-footer">
+          <button type="button" class="btn btn-light btn-sm" id="part-modal-cancel">
+            Отменить
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="part-modal-save">
+            Сохранить
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<style>
+/* --------- Красивый блок для шагов 1 и 2 --------- */
+.device-section {
+  border-radius: 18px;
+  padding: 18px 20px 20px;
+  background: linear-gradient(135deg, #f7f9fc 0%, #ffffff 60%, #f3f6ff 100%);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.device-section-header {
+  margin-bottom: 14px;
+}
+
+.device-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.device-section-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.device-section-body {
+  margin-top: 6px;
+}
+
+/* Сетка полей шага 1 */
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 18px;
+}
+
+.device-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.device-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
+.device-input {
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.device-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35);
+}
+
+/* Адаптив для блока устройства */
+@media (max-width: 992px) {
+  .device-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 576px) {
+  .device-grid {
+    grid-template-columns: 1fr;
+  }
+  .device-section {
+    padding: 14px 12px 16px;
+  }
+}
+
+/* Чуть компактнее общий контейнер на телефоне */
+@media (max-width: 576px) {
+  .container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+/* Telegram-переключатель (используем внутри модалки) */
+.tg-switch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tg-switch-wrapper-sm .tg-switch-label {
+  font-size: 13px;
+}
+
+.tg-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+  opacity: 0.9;
+}
+
+/* Скрытый чекбокс */
+.tg-switch-input {
+  display: none;
+}
+
+/* Ползунок */
+.tg-switch-slider {
+  width: 42px;
+  height: 22px;
+  background: #cdd5df;
+  border-radius: 50px;
+  position: relative;
+  transition: 0.25s;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.15);
+}
+
+/* Круг внутри */
+.tg-switch-slider::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: 0.25s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Активное состояние */
+.tg-switch-input:checked + .tg-switch-slider {
+  background: #2AABEE;
+}
+
+.tg-switch-input:checked + .tg-switch-slider::before {
+  transform: translateX(20px);
+}
+
+/* Текст */
+.tg-switch-label {
+  font-size: 14px;
+  color: #2a2a2a;
+  display: flex;
+  align-items: center;
+}
+
+/* Карточки запчастей */
+.part-pin-card {
+  border-radius: 14px;
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+
+.part-pin-card:hover {
+  box-shadow: 0 7px 16px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+
+/* Модалка */
+.part-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.part-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modal-fade-in 0.18s ease-out;
+}
+
+.part-modal-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.part-modal-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.part-modal-title-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #8e8e93;
+}
+
+.part-modal-title-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+}
+
+.part-modal-close {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+}
+
+.part-modal-close:hover {
+  color: #333;
+}
+
+.part-modal-body {
+  padding: 12px 14px 6px;
+  overflow-y: auto;
+}
+
+.part-modal-footer {
+  padding: 8px 14px 12px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Скрыть overlay */
+.d-none {
+  display: none !important;
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Маленькие поля в модалке */
+.part-modal-body .form-control-sm {
+  font-size: 0.86rem;
+}
+
+/* Полноэкранная модалка на телефонах / планшетах */
+@media (max-width: 768px) {
+  .part-modal-overlay {
+    align-items: stretch;
+    justify-content: stretch;
+  }
+  .part-modal {
+    border-radius: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    box-shadow: none;
+  }
+  .part-modal-header {
+    padding-top: 14px;
+    padding-bottom: 10px;
+  }
+  .part-modal-body {
+    padding: 12px 12px 6px;
+  }
+  .part-modal-footer {
+    padding: 8px 12px 14px;
+  }
+}
+
+/* подсветка для уже слитых (merged) пинов */
+.part-merged {
+  border: 1px dashed #28a745;
+  box-shadow: 0 0 0 1px rgba(40,167,69,.3);
+}
+.part-merged-badge {
+  font-size: 11px;
+  color: #28a745;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form        = document.getElementById('full-device-form');
+  const deviceInput = document.getElementById('id_device');
+  const brandInput  = document.getElementById('id_brand');
+  const modelInput  = document.getElementById('id_model');
+
+  const brandsDatalist = document.getElementById('brands');
+  const modelsDatalist = document.getElementById('models');
+
+  const btnLoadParts    = document.getElementById('btn-load-parts');
+  const partsCard       = document.getElementById('parts-card');
+  const partsContainer  = document.getElementById('parts-container');
+  const partsTotalInput = document.getElementById('id_parts_total');
+
+  const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+
+  // Модалка
+  const modalOverlay   = document.getElementById('part-modal-overlay');
+  const modalCloseBtn  = document.getElementById('part-modal-close');
+  const modalCancelBtn = document.getElementById('part-modal-cancel');
+  const modalSaveBtn   = document.getElementById('part-modal-save');
+  const modalTitle     = document.getElementById('part-modal-title');
+
+  const modalQuantity     = document.getElementById('modal-quantity');
+  const modalPrice        = document.getElementById('modal-price');
+  const modalCondition    = document.getElementById('modal-condition');
+  const modalNote         = document.getElementById('modal-note');
+  const modalColorWrapper = document.getElementById('modal-color-wrapper');
+  const modalColor        = document.getElementById('modal-color');
+  const modalColorList    = document.getElementById('modal-color-list');
+
+  const modalChipWrapper  = document.getElementById('modal-chip-wrapper');
+  const modalChipMarking  = document.getElementById('modal-chip-marking');
+
+  const modalSendTg       = document.getElementById('modal-send-tg');
+
+  const modalImageBtn      = document.getElementById('modal-image-btn');
+  const modalImageFilename = document.getElementById('modal-image-filename');
+
+  let currentIndex = null;
+
+  function fetchDynamicData(params, callback) {
+    const query = new URLSearchParams(params).toString();
+    fetch(`/get_dynamic_data/?${query}`)
+      .then(resp => resp.json())
+      .then(data => callback(data))
+      .catch(err => console.error('get_dynamic_data error', err));
+  }
+
+  deviceInput.addEventListener('change', function () {
+    const device = deviceInput.value.trim();
+    if (!device) return;
+
+    fetchDynamicData({device: device}, function (data) {
+      brandsDatalist.innerHTML = '';
+      (data.brands || []).forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b;
+        brandsDatalist.appendChild(opt);
+      });
+    });
+  });
+
+  brandInput.addEventListener('change', function () {
+    const device = deviceInput.value.trim();
+    const brand  = brandInput.value.trim();
+    if (!device || !brand) return;
+
+    fetchDynamicData({device: device, brand: brand}, function (data) {
+      modelsDatalist.innerHTML = '';
+      (data.models || []).forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        modelsDatalist.appendChild(opt);
+      });
+    });
+  });
+
+  function loadColorsForPart(idx, partType) {
+    const device = deviceInput.value.trim();
+    const brand  = brandInput.value.trim();
+    const model  = modelInput.value.trim();
+
+    if (!device || !brand || !model) {
+      modalColorWrapper.style.display = 'none';
+      modalColor.value = '';
+      modalColorList.innerHTML = '';
+      return;
+    }
+
+    fetchDynamicData(
+      {device: device, brand: brand, model: model, part_type: partType},
+      function (data) {
+        modalColorList.innerHTML = '';
+
+        const colors = data.colors || [];
+        if (!colors.length) {
+          modalColorWrapper.style.display = 'none';
+          modalColor.value = '';
+          return;
+        }
+
+        colors.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          modalColorList.appendChild(opt);
+        });
+
+        const hiddenColor = document.getElementById(`parts-${idx}-color`);
+        if (hiddenColor && hiddenColor.value) {
+          modalColor.value = hiddenColor.value;
+        } else {
+          modalColor.value = '';
+        }
+
+        modalColorWrapper.style.display = '';
+      }
+    );
+  }
+
+  function openPartModal(idx) {
+    currentIndex = idx;
+
+    const cb = document.querySelector(`#parts-card [data-index="${idx}"]`);
+    const cardBody = cb ? cb.closest('.card-body') || cb.closest('.part-pin-card') || cb.closest('.card') : null;
+
+    const titleText = cardBody
+      ? cardBody.querySelector('.form-check-label').textContent.trim()
+      : `Запчасть #${idx + 1}`;
+
+    modalTitle.textContent = titleText;
+
+    const hiddenQty    = document.getElementById(`parts-${idx}-quantity`);
+    const hiddenPrice  = document.getElementById(`parts-${idx}-price`);
+    const hiddenCond   = document.getElementById(`parts-${idx}-condition`);
+    const hiddenNote   = document.getElementById(`parts-${idx}-note`);
+    const hiddenColor  = document.getElementById(`parts-${idx}-color`);
+    const hiddenSendTg = document.getElementById(`parts-${idx}-send_tg`);
+    const hiddenChip   = document.getElementById(`parts-${idx}-chip_marking`);
+
+    modalQuantity.value  = hiddenQty   ? (hiddenQty.value   || 1)              : 1;
+    modalPrice.value     = hiddenPrice ? (hiddenPrice.value || 0)              : 0;
+    modalCondition.value = hiddenCond  ? (hiddenCond.value  || 'оригинал б/у') : 'оригинал б/у';
+    modalNote.value      = hiddenNote  ? (hiddenNote.value  || '')             : '';
+
+    if (hiddenSendTg) {
+      modalSendTg.checked = (hiddenSendTg.value === "1");
+    } else {
+      modalSendTg.checked = false;
+    }
+
+    modalColorWrapper.style.display = 'none';
+    modalColor.value = hiddenColor && hiddenColor.value ? hiddenColor.value : '';
+    modalColorList.innerHTML = '';
+
+    const partTypeInput = document.querySelector(`input[name="parts-${idx}-part_type"]`);
+    const partType = partTypeInput ? partTypeInput.value.trim() : '';
+
+    // Маркировка микросхемы — показываем только для типа "Микросхема"
+    if (partType === 'Микросхема') {
+      modalChipWrapper.style.display = '';
+      modalChipMarking.value = hiddenChip && hiddenChip.value ? hiddenChip.value : '';
+    } else {
+      modalChipWrapper.style.display = 'none';
+      modalChipMarking.value = '';
+    }
+
+    if (partType) {
+      loadColorsForPart(idx, partType);
+    }
+
+    const fileInput = document.getElementById(`parts-${idx}-image`);
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+      modalImageFilename.textContent = fileInput.files[0].name;
+    } else {
+      modalImageFilename.textContent = 'Файл не выбран';
+    }
+
+    modalOverlay.classList.remove('d-none');
+  }
+
+  function closePartModal() {
+    modalOverlay.classList.add('d-none');
+    currentIndex = null;
+  }
+
+  modalImageBtn.addEventListener('click', function () {
+    if (currentIndex === null) return;
+    const fileInput = document.getElementById(`parts-${currentIndex}-image`);
+    if (fileInput) {
+      fileInput.click();
+    }
+  });
+
+  function attachFileChangeListeners() {
+    document.querySelectorAll('.part-file-input').forEach(input => {
+      input.addEventListener('change', function () {
+        const idx = this.dataset.index;
+        if (parseInt(idx) === currentIndex) {
+          if (this.files && this.files.length > 0) {
+            modalImageFilename.textContent = this.files[0].name;
+          } else {
+            modalImageFilename.textContent = 'Файл не выбран';
+          }
+        }
+      });
+    });
+  }
+
+  modalCloseBtn.addEventListener('click', function () {
+    closePartModal();
+  });
+
+  modalCancelBtn.addEventListener('click', function () {
+    if (currentIndex !== null) {
+      const cb = document.getElementById(`parts-${currentIndex}-selected`);
+      const mergedField = document.getElementById(`parts-${currentIndex}-merged`);
+      if (cb && (!mergedField || mergedField.value !== "1")) {
+        cb.checked = false;
+      }
+    }
+    closePartModal();
+  });
+
+  modalOverlay.addEventListener('click', function (e) {
+    if (e.target === modalOverlay) {
+      modalCancelBtn.click();
+    }
+  });
+
+  function saveModalValuesToHidden(idx) {
+    const hiddenQty    = document.getElementById(`parts-${idx}-quantity`);
+    const hiddenPrice  = document.getElementById(`parts-${idx}-price`);
+    const hiddenCond   = document.getElementById(`parts-${idx}-condition`);
+    const hiddenNote   = document.getElementById(`parts-${idx}-note`);
+    const hiddenColor  = document.getElementById(`parts-${idx}-color`);
+    const hiddenSendTg = document.getElementById(`parts-${idx}-send_tg`);
+    const hiddenChip   = document.getElementById(`parts-${idx}-chip_marking`);
+    const cb           = document.getElementById(`parts-${idx}-selected`);
+
+    if (hiddenQty)   hiddenQty.value   = modalQuantity.value || 1;
+    if (hiddenPrice) hiddenPrice.value = modalPrice.value || 0;
+    if (hiddenCond)  hiddenCond.value  = modalCondition.value || 'оригинал б/у';
+    if (hiddenNote)  hiddenNote.value  = modalNote.value || '';
+    if (hiddenColor) hiddenColor.value = modalColor.value.trim() || '';
+
+    if (hiddenSendTg) hiddenSendTg.value = modalSendTg.checked ? "1" : "0";
+    if (hiddenChip)   hiddenChip.value   = modalChipMarking.value.trim() || '';
+
+    if (cb) cb.checked = true;
+  }
+
+  // Сохранить в модалке с проверкой на дубликат
+  modalSaveBtn.addEventListener('click', function () {
+    if (currentIndex === null) return;
+    const idx = currentIndex;
+
+    const device = deviceInput.value.trim();
+    const brand  = brandInput.value.trim();
+    const model  = modelInput.value.trim();
+    const color  = modalColor.value.trim();
+
+    const partTypeInput = document.querySelector(`input[name="parts-${idx}-part_type"]`);
+    const partType = partTypeInput ? partTypeInput.value.trim() : '';
+
+    const condValue  = modalCondition.value.trim() || 'оригинал б/у';
+    const qtyValue   = parseInt(modalQuantity.value || '1', 10) || 1;
+    const priceValue = modalPrice.value || '';
+
+    // эффективный тип для микросхем (с маркировкой)
+    let effectivePartType = partType;
+    let chipMarkingValue  = '';
+
+    if (partType === 'Микросхема') {
+      chipMarkingValue = modalChipMarking.value.trim();
+      if (chipMarkingValue) {
+        effectivePartType = partType + ' ' + chipMarkingValue;
+      }
+    }
+
+    if (!device || !brand || !model || !effectivePartType) {
+      alert('Не хватает данных устройства или типа запчасти.');
+      return;
+    }
+
+    fetch("{% url 'ajax_check_full_device_part_duplicate' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'X-CSRFToken': csrfToken
+      },
+      body: new URLSearchParams({
+        device: device,
+        brand: brand,
+        model: model,
+        color: color,
+        part_type: effectivePartType,
+        condition: condValue
+      })
+    })
+    .then(resp => resp.json())
+    .then(data => {
+      if (!data.exists) {
+        // сохраняем значения модалки в hidden-поля и закрываем
+        saveModalValuesToHidden(idx);
+        closePartModal();
+        return;
+      }
+
+      const msg =
+        `Такая запчасть уже есть на складе.\n` +
+        `Текущее количество: ${data.quantity}.\n\n` +
+        `Нажмите "ОК", чтобы увеличить количество существующей на ${qtyValue} (без создания новой),\n` +
+        `или "Отмена", чтобы всё равно добавить новую запчасть.`;
+
+      if (confirm(msg)) {
+        fetch("{% url 'ajax_merge_full_device_part' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'X-CSRFToken': csrfToken
+          },
+          body: new URLSearchParams({
+            part_id: data.part_id,
+            add_quantity: qtyValue,
+            price: priceValue
+          })
+        })
+        .then(r => r.json())
+        .then(rdata => {
+          if (!rdata.ok) {
+            alert('Не удалось обновить количество. Попробуйте позже.');
+          } else {
+            alert(`Количество обновлено: теперь ${rdata.new_quantity} шт.`);
+          }
+
+          const cb = document.getElementById(`parts-${idx}-selected`);
+          const mergedField = document.getElementById(`parts-${idx}-merged`);
+          const card = cb ? cb.closest('.card') || cb.closest('.part-pin-card') : null;
+
+          if (mergedField) mergedField.value = "1";
+
+          if (cb) {
+            cb.checked = true;
+            cb.disabled = true;
+          }
+          if (card) {
+            card.classList.add('part-merged');
+            const badge = document.createElement('div');
+            badge.className = 'part-merged-badge mt-1';
+            badge.innerText = 'Количество обновлено на складе';
+            const body = card.querySelector('.card-body');
+            if (body) body.appendChild(badge);
+          }
+
+          closePartModal();
+        })
+        .catch(err => {
+          console.error('merge error', err);
+          alert('Ошибка при обновлении запчасти.');
+        });
+
+      } else {
+        saveModalValuesToHidden(idx);
+        closePartModal();
+      }
+    })
+    .catch(err => {
+      console.error('duplicate check error', err);
+      saveModalValuesToHidden(idx);
+      closePartModal();
+    });
+  });
+
+  // Кнопка "Показать список запчастей"
+  btnLoadParts.addEventListener('click', function () {
+    const device = deviceInput.value.trim();
+    const brand  = brandInput.value.trim();
+    const model  = modelInput.value.trim();
+
+    if (!device || !brand || !model) {
+      alert('Сначала заполните устройство, бренд и модель.');
+      return;
+    }
+
+    fetchDynamicData({device: device}, function (data) {
+      const partTypes = data.part_types || [];
+      partsContainer.innerHTML = '';
+      partsTotalInput.value = partTypes.length;
+
+      if (!partTypes.length) {
+        partsCard.classList.remove('d-none');
+        partsContainer.innerHTML =
+          '<div class="col-12 text-muted">Для этого устройства в справочнике пока нет типовых запчастей.</div>';
+        return;
+      }
+
+      partTypes.forEach(function (pt, idx) {
+        const col = document.createElement('div');
+        col.className = 'col-md-4 mb-3';
+
+        col.innerHTML = `
+          <div class="card part-pin-card">
+            <div class="card-body">
+
+              <div class="form-check mb-1">
+                <input class="form-check-input part-select-checkbox"
+                       type="checkbox"
+                       id="parts-${idx}-selected"
+                       name="parts-${idx}-selected"
+                       data-index="${idx}">
+                <label class="form-check-label fw-semibold" for="parts-${idx}-selected">
+                  ${pt}
+                </label>
+              </div>
+
+              <input type="hidden"
+                     name="parts-${idx}-part_type"
+                     value="${pt}">
+
+              <input type="hidden"
+                     id="parts-${idx}-quantity"
+                     name="parts-${idx}-quantity"
+                     value="1">
+
+              <input type="hidden"
+                     id="parts-${idx}-price"
+                     name="parts-${idx}-price"
+                     value="0">
+
+              <input type="hidden"
+                     id="parts-${idx}-condition"
+                     name="parts-${idx}-condition"
+                     value="оригинал б/у">
+
+              <input type="hidden"
+                     id="parts-${idx}-note"
+                     name="parts-${idx}-note"
+                     value="">
+
+              <input type="hidden"
+                     id="parts-${idx}-color"
+                     name="parts-${idx}-color"
+                     value="">
+
+              <input type="hidden"
+                     id="parts-${idx}-merged"
+                     name="parts-${idx}-merged"
+                     value="0">
+
+              <input type="hidden"
+                     id="parts-${idx}-send_tg"
+                     name="parts-${idx}-send_tg"
+                     value="0">
+
+              <input type="hidden"
+                     id="parts-${idx}-chip_marking"
+                     name="parts-${idx}-chip_marking"
+                     value="">
+
+              <input type="file"
+                     class="d-none part-file-input"
+                     id="parts-${idx}-image"
+                     name="parts-${idx}-image"
+                     data-index="${idx}"
+                     accept="image/*">
+
+            </div>
+          </div>
+        `;
+
+        partsContainer.appendChild(col);
+      });
+
+      partsContainer.querySelectorAll('.part-select-checkbox').forEach(cb => {
+        cb.addEventListener('change', function () {
+          const idx = parseInt(this.dataset.index);
+
+          if (this.checked) {
+            const mergedField = document.getElementById(`parts-${idx}-merged`);
+            if (mergedField && mergedField.value === "1") {
+              this.checked = true;
+              return;
+            }
+
+            if (currentIndex !== null && currentIndex !== idx) {
+              const prevCb = document.getElementById(`parts-${currentIndex}-selected`);
+              if (prevCb) prevCb.checked = false;
+            }
+            openPartModal(idx);
+          } else {
+            if (currentIndex === idx) {
+              closePartModal();
+            }
+          }
+        });
+      });
+
+      attachFileChangeListeners();
+      partsCard.classList.remove('d-none');
+    });
+  });
+
+  // Доп. действий при submit не требуется (цвет, TG и маркировка уже в hidden).
+});
+</script>
+
+{% endblock %}

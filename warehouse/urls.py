@@ -27,6 +27,10 @@ urlpatterns = [
     path('get-part-types/', views.get_part_types, name='get_part_types'),
     path('get-parts/', views.get_parts, name='get_parts'),
 
+
+    path('ajax/check-full-part-duplicate/', views.ajax_check_full_device_part_duplicate, name='ajax_check_full_device_part_duplicate'),
+    path('ajax/merge-full-part/', views.ajax_merge_full_device_part, name='ajax_merge_full_device_part'),
+
     path('', views.base_view, name='home'),
     path('user/<int:user_id>/parts/', views.user_parts, name='user_parts'),
     path('user_parts2/<int:user_id>/', views.user_parts, {'template_name': 'warehouse/user_parts2.html'}, name='user_parts2'),
@@ -40,9 +44,11 @@ urlpatterns = [
     path('privacy-policy/', privacy_policy_view, name='privacy_policy'),
     path('analytics/', analytics_view, name='analytics'),
 
-
-
+    path('add-full-device/', views.add_full_device_parts, name='add_full_device_parts'),
 ]
+
+
+
 
 
 
