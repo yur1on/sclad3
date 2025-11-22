@@ -5,7 +5,6 @@ from django.db.models import Case, When, Q
 from django.contrib.auth import logout
 from pathlib import Path
 import json
-from django.http import JsonResponse
 from django.contrib.auth.models import User
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
@@ -21,20 +20,23 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Sum, DateField
 from django.db.models.functions import TruncDate
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.db import transaction
 from .forms import PartForm, PartImageFormSet
-from .models import Part, PartImage
 from tariff.utils import check_parts_limit, check_image_limit
 from .utils import compress_image
 from warehouse.utils import add_watermark_to_image
 from .telegram_utils import send_new_part_notification
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Part
 from django.utils.timezone import now
 from django.db.models import Sum
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.db import transaction
+from django.contrib import messages
+from .models import Part, PartImage
+
+
 
 def home(request):
     # последние запчасти с количеством > 0
@@ -662,10 +664,6 @@ def filter_parts(request):
     return JsonResponse({'parts': parts_data})
 
 
-
-
-
-
 def part_detail(request, part_id):
     part = get_object_or_404(Part, id=part_id)
 
@@ -846,6 +844,7 @@ except ImportError:
     # Если библиотека не установлена, HEIC-формат не будет поддерживаться
     pass
 
+
 @login_required
 def add_part(request):
     """
@@ -931,8 +930,8 @@ def add_part(request):
         condition = form.cleaned_data['condition']
         color = form.cleaned_data.get('color') or None
 
-        # --- Проверка на дубликат (с учётом цвета) ---
-        existing_part = Part.objects.filter(
+        # --- Проверка на дубликат (через общий helper) ---
+        existing_part = find_existing_part_for_user(
             user=request.user,
             device=device,
             brand=brand,
@@ -940,7 +939,7 @@ def add_part(request):
             part_type=part_type,
             condition=condition,
             color=color,
-        ).first()
+        )
 
         # Если нашли дубликат и ещё не было подтверждения — показываем confirm-страницу
         if existing_part and 'confirm_add' not in request.POST:
@@ -1133,3 +1132,300 @@ def analytics_view(request):
         'chart_data': data,     # Просмотры для осей Y
     }
     return render(request, 'warehouse/analytics.html', context)
+
+
+
+@login_required
+def add_full_device_parts(request):
+    """
+    Массовое добавление запчастей для одного устройства.
+
+    ВАЖНО:
+    - Проверка на дубликаты и слияние количеств происходит на фронтенде,
+      в модальном окне, через AJAX:
+        * ajax_check_full_device_part_duplicate
+        * ajax_merge_full_device_part
+    - Эта вьюха на POST просто создаёт НОВЫЕ запчасти по всем частям,
+      у которых стоит чекбокс parts-*-selected == "on" И parts-*-merged == "0".
+      Для тех, которые были слиты с уже существующими, JS ставит merged = "1",
+      и мы их пропускаем.
+    """
+
+    profile = getattr(request.user, "profile", None)
+    if not profile or not profile.city or not profile.phone:
+        messages.error(
+            request,
+            "Перед началом создания склада, укажите, пожалуйста, город и номер телефона в вашем профиле.",
+        )
+        return redirect("profile")
+
+    # -------- GET: просто отрисовать пустую форму --------
+    if request.method == "GET":
+        return render(
+            request,
+            "warehouse/add_full_device_parts.html",
+            {
+                "device": "",
+                "brand": "",
+                "model": "",
+            },
+        )
+
+    # -------- POST: массовое сохранение выбранных запчастей --------
+
+    # 1. Проверка лимита по количеству запчастей
+    if check_parts_limit(request.user):
+        tariff = request.user.profile.tariff
+        if tariff == "free":
+            error_message = "Вы достигли лимита в 30 запчастей для бесплатного тарифа. Для добавления новых запчастей обновите тариф."
+        elif tariff == "lite":
+            error_message = "Вы достигли лимита в 500 запчастей для тарифа Lite. Для добавления новых запчастей обновите тариф."
+        elif tariff == "standard":
+            error_message = "Вы достигли лимита в 2000 запчастей для тарифа Стандарт. Для добавления новых запчастей обновите тариф."
+        elif tariff == "standard2":
+            error_message = "Вы достигли лимита в 7000 запчастей для тарифа Стандарт 2. Для добавления новых запчастей обновите тариф."
+        elif tariff == "standard3":
+            error_message = "Вы достигли лимита в 15000 запчастей для тарифа Стандарт 3. Для добавления новых запчастей обновите тариф."
+        else:
+            error_message = "Лимит запчастей достигнут."
+        messages.error(request, error_message)
+        return redirect("profile")
+
+    # 2. Базовые данные устройства (БЕЗ общего цвета и БЕЗ общего send_to_telegram)
+    device = (request.POST.get("device") or "").strip()
+    brand = (request.POST.get("brand") or "").strip()
+    model = (request.POST.get("model") or "").strip()
+
+    if not (device and brand and model):
+        messages.error(request, "Заполните устройство, бренд и модель.")
+        return render(
+            request,
+            "warehouse/add_full_device_parts.html",
+            {
+                "device": device,
+                "brand": brand,
+                "model": model,
+            },
+        )
+
+    # 3. Общее количество "пинов" (типов запчастей)
+    try:
+        total_parts = int(request.POST.get("parts_total", "0"))
+    except ValueError:
+        total_parts = 0
+
+    if total_parts <= 0:
+        messages.error(request, "Не выбрано ни одной запчасти.")
+        return render(
+            request,
+            "warehouse/add_full_device_parts.html",
+            {
+                "device": device,
+                "brand": brand,
+                "model": model,
+            },
+        )
+
+    created_parts = []
+
+    # 4. Сохраняем всё одной транзакцией
+    with transaction.atomic():
+        for i in range(total_parts):
+            # чекбокс "Есть"
+            if request.POST.get(f"parts-{i}-selected") != "on":
+                continue
+
+            # если эта запчасть уже была объединена (merged) с существующей — пропускаем
+            merged_flag = request.POST.get(f"parts-{i}-merged", "0")
+            if merged_flag == "1":
+                continue
+
+            part_type = (request.POST.get(f"parts-{i}-part_type") or "").strip()
+            if not part_type:
+                continue
+
+            chip_marking = (request.POST.get(f"parts-{i}-chip_marking") or "").strip()
+
+            # для микросхем добавляем маркировку в тип (как в одиночном add_part)
+            if part_type == "Микросхема" and chip_marking:
+                part_type_for_save = f"{part_type} {chip_marking}"
+            else:
+                part_type_for_save = part_type
+
+            quantity_raw = request.POST.get(f"parts-{i}-quantity") or "1"
+            price_raw    = request.POST.get(f"parts-{i}-price")    or "0"
+            color        = (request.POST.get(f"parts-{i}-color") or "").strip() or None
+            condition    = (request.POST.get(f"parts-{i}-condition") or "").strip()
+            note         = (request.POST.get(f"parts-{i}-note") or "").strip()
+
+            # флаг "отправлять эту запчасть в Telegram"
+            send_to_telegram_flag = request.POST.get(f"parts-{i}-send_tg") == "1"
+
+            if not condition:
+                condition = "оригинал б/у"
+
+            try:
+                quantity = int(quantity_raw)
+            except ValueError:
+                quantity = 1
+
+            price = price_raw  # DecimalField сам приведёт строку
+
+            # файл картинки: максимум 1 на запчасть
+            image_file = request.FILES.get(f"parts-{i}-image")
+
+            # проверка лимита картинок для бесплатного тарифа
+            if image_file and request.user.profile.tariff == "free":
+                if check_image_limit(request.user, 1):
+                    messages.warning(
+                        request,
+                        f"Для запчасти «{part_type_for_save}» превышен лимит изображений на бесплатном тарифе. "
+                        f"Она будет создана без фото.",
+                    )
+                    image_file = None
+
+            # создаём Part
+            new_part = Part(
+                user=request.user,
+                device=device,
+                brand=brand,
+                model=model,
+                part_type=part_type_for_save,
+                quantity=quantity,
+                price=price,
+                color=color,
+                condition=condition,
+                note=note,
+            )
+            new_part.save()
+
+            # если есть картинка — сжимаем + водяной знак
+            if image_file:
+                compressed  = compress_image(image_file)
+                watermarked = add_watermark_to_image(compressed)
+                PartImage.objects.create(part=new_part, image=watermarked)
+
+            created_parts.append(new_part)
+
+            # Отправка в Telegram именно для ЭТОЙ запчасти, если включен флаг
+            if send_to_telegram_flag:
+                transaction.on_commit(
+                    lambda part=new_part: send_new_part_notification(part, request=request)
+                )
+
+    return render(
+        request,
+        "warehouse/success.html",
+        {
+            "message": f"Запчасти ({len(created_parts)} шт.) успешно добавлены!",
+        },
+    )
+
+
+
+@login_required
+def ajax_check_full_device_part_duplicate(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "method_not_allowed"}, status=405)
+
+    device    = request.POST.get("device")
+    brand     = request.POST.get("brand")
+    model     = request.POST.get("model")
+    part_type = request.POST.get("part_type")
+    condition = request.POST.get("condition")
+    color     = request.POST.get("color")
+
+    if not (device and brand and model and part_type):
+        return JsonResponse({"error": "missing_fields"}, status=400)
+
+    existing = find_existing_part_for_user(
+        user=request.user,
+        device=device,
+        brand=brand,
+        model=model,
+        part_type=part_type,
+        condition=condition,
+        color=color,
+    )
+
+    if not existing:
+        return JsonResponse({"exists": False})
+
+    return JsonResponse({
+        "exists": True,
+        "part_id": existing.id,
+        "quantity": existing.quantity,
+        "price": str(existing.price) if existing.price is not None else "",
+        "edit_url": reverse("edit_part", args=[existing.id]),
+    })
+
+
+@login_required
+def ajax_merge_full_device_part(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'method_not_allowed'}, status=405)
+
+    try:
+        part_id = int(request.POST.get('part_id', '0'))
+    except ValueError:
+        return JsonResponse({'error': 'bad_part_id'}, status=400)
+
+    try:
+        add_quantity = int(request.POST.get('add_quantity', '0'))
+    except ValueError:
+        add_quantity = 0
+
+    new_price = (request.POST.get('price') or '').strip()
+
+    part = get_object_or_404(Part, id=part_id, user=request.user)
+
+    if add_quantity > 0:
+        part.quantity = (part.quantity or 0) + add_quantity
+
+    if new_price:
+        try:
+            part.price = new_price
+        except Exception:
+            pass
+
+    part.save(update_fields=['quantity', 'price'])
+
+    return JsonResponse({
+        'ok': True,
+        'new_quantity': part.quantity,
+        'price': str(part.price) if part.price is not None else '',
+    })
+
+
+
+def find_existing_part_for_user(user, device, brand, model, part_type, condition, color):
+    """
+    Унифицированный поиск "такой же" запчасти.
+
+    - Сравнение по user/device/brand/model/part_type/condition — через __iexact.
+    - По цвету:
+        * если color не передан (None или пустая строка) — цвет игнорируем
+          и ищем среди всех цветов;
+        * если color есть — фильтруем по нему (__iexact).
+    """
+
+    device    = (device or "").strip()
+    brand     = (brand or "").strip()
+    model     = (model or "").strip()
+    part_type = (part_type or "").strip()
+    condition = (condition or "").strip() or "оригинал б/у"
+    color     = (color or "").strip() or None
+
+    qs = Part.objects.filter(
+        user=user,
+        device__iexact=device,
+        brand__iexact=brand,
+        model__iexact=model,
+        part_type__iexact=part_type,
+        condition__iexact=condition,
+    )
+
+    if color is not None:
+        qs = qs.filter(color__iexact=color)
+
+    return qs.first()
