@@ -1,335 +1,197 @@
-{# Единый include: карточки результатов + компактная пагинация #}
+{# Вариант 2 (обновлённый): убраны ✨ возле цены (бейдж) и штриховка #}
 
 <style>
-  /* Контейнер результатов */
-  .results-container {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
+  .results-container { padding-left: .5rem; padding-right: .5rem; }
 
-  /* Общая карточка */
-  .result-card {
+  .result-card{
+    position: relative;
     border-radius: 18px;
-    background: linear-gradient(135deg, #f7f9fc 0%, #ffffff 60%, #f3f6ff 100%);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
-    border: 1px solid rgba(148, 163, 184, 0.18);
     margin-bottom: 12px;
     cursor: pointer;
-    transition: box-shadow 0.2s ease, transform 0.1s ease;
+
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(135deg, #f7f9fc 0%, #ffffff 60%, #f3f6ff 100%) padding-box,
+      linear-gradient(135deg, rgba(37,99,235,.55), rgba(34,197,94,.45), rgba(99,102,241,.45)) border-box;
+
+    box-shadow: 0 10px 22px rgba(15,23,42,.08);
+    transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
+    overflow: hidden;
   }
 
-  .result-card:hover {
-    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.14);
+  /* убрали штриховку: оставили только мягкие пятна */
+  .result-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(900px 240px at 10% -10%, rgba(37,99,235,.12), transparent 60%),
+      radial-gradient(760px 240px at 110% 0%, rgba(34,197,94,.10), transparent 55%);
+    opacity:.75;
+    pointer-events:none;
+  }
+
+  /* убрали “звёздочку/бейдж” */
+  .result-card::after{ content:none; }
+
+  .result-card:hover{
     transform: translateY(-1px);
+    box-shadow: 0 14px 34px rgba(15,23,42,.14);
+    filter: saturate(1.03);
   }
 
-  /* ---- ШАПКА ДЛЯ МОБИЛКИ (над фото) ---- */
-  .result-header-mobile {
-    display: none;
-    padding: 8px 12px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  .result-header-mobile{
+    display:none;
+    padding:8px 12px;
+    border-bottom: 1px solid rgba(148,163,184,.25);
+    position:relative;
+    z-index:1;
+  }
+  .result-header-mobile-inner{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .result-title-mobile{
+    font-size:17px; font-weight:600; color:#111827;
+    flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .result-price-mobile{ font-size:17px; font-weight:600; color:#16a34a; white-space:nowrap; }
+
+  .result-body{
+    display:flex;
+    gap:10px;
+    padding:10px 14px 12px;
+    position:relative;
+    z-index:1;
   }
 
-  .result-header-mobile-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+  .result-image-col{ flex:0 0 80px; display:flex; align-items:center; justify-content:center; }
+  .result-main-col{ flex:1; min-width:0; }
+
+  .result-seller-col, .result-city-col, .result-price-col{
+    display:none;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
 
-  .result-title-mobile {
-    font-size: 17px;
-    font-weight: 600;
-    color: #111827;
-    flex: 1;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .result-seller-col, .result-city-col{
+    font-size:15px;
+    font-weight:400;
+    color:inherit;
   }
 
-  .result-price-mobile {
-    font-size: 17px;
-    font-weight: 600;
-    color: #16a34a;
-    white-space: nowrap;
+  .result-price-col{
+    font-weight:800;
+    color:#16a34a;
+    text-shadow: 0 10px 24px rgba(34,197,94,.20);
   }
 
-  /* ---- Основная часть карточки ---- */
-  .result-body {
-    display: flex; /* мобилка/по умолчанию */
-    gap: 10px;
-    padding: 10px 14px 12px;
+  .result-title-desktop{ font-size:17px; font-weight:600; color:#111827; margin-bottom:2px; }
+  .result-device-line{ font-size:14px; color:#111827; margin-bottom:2px; }
+  .result-condition{ font-size:13px; color:#6b7280; margin-bottom:0; }
+
+  .result-seller-city-mobile{ font-size:13px; color:#4b5563; }
+  .result-seller-city-mobile div{ margin-bottom:2px; }
+  .result-seller-city-mobile strong{ font-weight:600; }
+
+  .image-container{
+    width:80px; height:80px; position:relative;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:14px; overflow:hidden;
+
+    background: rgba(229,237,247,.85);
+    box-shadow: 0 12px 26px rgba(15,23,42,.10);
+  }
+  .image-container::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,0) 45%);
+    pointer-events:none;
+    opacity:.9;
+  }
+  .img-thumbnail{ width:100%; height:100%; object-fit:cover; border:none; border-radius:14px; display:block; }
+
+  .extra-images{
+    position:absolute; bottom:6px; right:6px;
+    background: rgba(15,23,42,.78);
+    color:#fff;
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:11px;
+    backdrop-filter: blur(8px);
+  }
+  .no-image-text{
+    font-size:13px; color:#6b7280;
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    background-color:#e5edf7;
+    border-radius:14px;
+    padding:4px;
   }
 
-  /* Колонка с фото */
-  .result-image-col {
-    flex: 0 0 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center; /* мобилка — оставляем центр */
+  .results-empty{ text-align:center; padding:2rem 0; color:#6b7280; }
+
+  @media (max-width:768px){
+    .result-card{ border-radius:16px; margin-bottom:10px; }
+    .result-header-mobile{ display:block; }
+    .result-title-desktop, .result-seller-col, .result-city-col, .result-price-col{ display:none; }
   }
 
-  /* Основной текстовый блок */
-  .result-main-col {
-    flex: 1;
-    min-width: 0;
-  }
+  @media (min-width:769px){
+    .result-header-mobile{ display:none; }
 
-  /* Десктопные колонки */
-  .result-seller-col,
-  .result-city-col,
-  .result-price-col {
-    display: none; /* мобилка */
-    color: #111827;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* продавец и город — просто чуть крупнее (без утяжеления/почернения) */
-  .result-seller-col,
-  .result-city-col {
-    font-size: 15px;   /* было 13px */
-    font-weight: 400;  /* обычный */
-    color: inherit;    /* не задаём черный принудительно */
-  }
-
-  /* цена */
-  .result-price-col {
-    font-weight: 800;
-    color: #16a34a;
-    white-space: nowrap;
-  }
-
-  /* Содержимое main-col */
-  .result-title-desktop {
-    font-size: 17px;
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 2px;
-  }
-
-  .result-device-line {
-    font-size: 14px;
-    color: #111827;
-    margin-bottom: 2px;
-  }
-
-  .result-condition {
-    font-size: 13px;
-    color: #6b7280;
-    margin-bottom: 0;
-  }
-
-  /* Продавец/город для МОБИЛКИ */
-  .result-seller-city-mobile {
-    font-size: 13px;
-    color: #4b5563;
-  }
-
-  .result-seller-city-mobile div {
-    margin-bottom: 2px;
-  }
-
-  .result-seller-city-mobile strong {
-    font-weight: 600;
-  }
-
-  /* Изображения */
-  .image-container {
-    width: 80px;
-    height: 80px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e5edf7;
-    border-radius: 14px;
-    overflow: hidden;
-  }
-
-  .img-thumbnail {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border: none;
-    border-radius: 14px;
-  }
-
-  .extra-images {
-    position: absolute;
-    bottom: 6px;
-    right: 6px;
-    background-color: rgba(15, 23, 42, 0.75);
-    color: #ffffff;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 11px;
-  }
-
-  .no-image-text {
-    font-size: 13px;
-    color: #6b7280;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e5edf7;
-    border-radius: 14px;
-    padding: 4px;
-  }
-
-  /* Пустой результат */
-  .results-empty {
-    text-align: center;
-    padding: 2rem 0;
-    color: #6b7280;
-  }
-
-  /* ---- МОБИЛКА ---- */
-  @media (max-width: 768px) {
-    .result-card {
-      margin-bottom: 10px;
-      border-radius: 16px;
+    .result-body{
+      display:grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      column-gap:14px;
+      padding:12px 18px;
+      align-items:center;
+      justify-items:stretch;
     }
 
-    .result-header-mobile {
-      display: block;
+    .result-image-col{ grid-column:1; justify-self:start; justify-content:flex-start; align-items:flex-start; }
+    .result-main-col { grid-column:2; justify-self:start; text-align:left; }
+
+    .result-seller-col, .result-city-col, .result-price-col{ display:block; }
+
+    .result-seller-col{ grid-column:3; }
+    .result-city-col  { grid-column:4; }
+    .result-price-col { grid-column:5; justify-self:end; text-align:right; font-size:19px; overflow:visible; text-overflow:clip; }
+
+    .result-seller-col, .result-city-col{
+      justify-self:center;
+      text-align:center;
+      position:relative;
+      padding-top:18px;
     }
 
-    .result-device-line {
-      font-size: 14px;
-    }
-
-    .result-condition,
-    .result-seller-city-mobile {
-      font-size: 13px;
-    }
-
-    /* на мобилке прячем десктопные колонки */
-    .result-title-desktop,
-    .result-seller-col,
-    .result-city-col,
-    .result-price-col {
-      display: none;
-    }
-  }
-
-  /* ---- ДЕСКТОП: 5 равных колонок + выравнивание ---- */
-  @media (min-width: 769px) {
-    .result-header-mobile { display: none; }
-
-    .result-body {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr)); /* равные */
-      column-gap: 14px;
-      padding: 12px 18px;
-      align-items: center;
-      justify-items: stretch;
-    }
-
-    .result-image-col { grid-column: 1; }
-    .result-main-col  { grid-column: 2; }
-
-    .result-seller-col,
-    .result-city-col,
-    .result-price-col {
-      display: block;
-    }
-
-    .result-seller-col { grid-column: 3; }
-    .result-city-col   { grid-column: 4; }
-    .result-price-col  { grid-column: 5; }
-
-    /* фото и описание — к левому краю */
-    .result-image-col {
-      justify-self: start;
-      justify-content: flex-start;
-      align-items: flex-start;
-    }
-
-    .result-main-col {
-      justify-self: start;
-      text-align: left;
-    }
-
-    /* продавец и город — по центру, с еле заметной подписью */
-    .result-seller-col,
-    .result-city-col {
-      justify-self: center;
-      text-align: center;
-      max-width: 100%;
-      position: relative;
-      padding-top: 14px;
-    }
-
-    .result-seller-col::before { content: "Продавец"; }
-    .result-city-col::before   { content: "Город"; }
+    .result-seller-col::before{ content:"👤 Продавец"; }
+    .result-city-col::before  { content:"📍 Город"; }
 
     .result-seller-col::before,
-    .result-city-col::before {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      font-size: 11px;
-      font-weight: 600;
-      color: rgba(17, 24, 39, 0.38);
-      letter-spacing: 0.02em;
-      pointer-events: none;
+    .result-city-col::before{
+      position:absolute; top:0; left:0; width:100%;
+      text-align:center;
+      font-size:11px; font-weight:600;
+      color: rgba(17,24,39,.40);
+      letter-spacing:.02em;
+      pointer-events:none;
     }
 
-    /* цена — вправо, чуть меньше */
-    .result-price-col {
-      justify-self: end;
-      text-align: right;
-      font-size: 19px;
-      overflow: visible;
-      text-overflow: clip;
-    }
-
-    /* на десктопе продавец/город не внутри main-col */
-    .result-seller-city-mobile { display: none; }
+    .result-seller-city-mobile{ display:none; }
   }
 
-  @media (max-width: 576px) {
-    .results-container {
-      padding-left: 8px;
-      padding-right: 8px;
-    }
+  @media (max-width:576px){
+    .results-container{ padding-left:8px; padding-right:8px; }
   }
 
-  /* Компактная пагинация */
-  .pagination {
-    flex-wrap: wrap;
-    gap: 0.25rem;
+  .pagination{ flex-wrap:wrap; gap:.25rem; }
+  .page-link{
+    padding:.4rem .7rem;
+    font-size:.95rem;
+    min-width:2.25rem;
+    text-align:center;
+    border-radius:999px !important;
   }
-
-  .page-link {
-    padding: 0.4rem 0.7rem;
-    font-size: 0.95rem;
-    min-width: 2.25rem;
-    text-align: center;
-    border-radius: 999px !important;
-  }
-
-  .page-item.active .page-link {
-    background-color: #2563eb;
-    border-color: #2563eb;
-  }
-
-  .page-item .page-link {
-    border-color: rgba(148, 163, 184, 0.7);
-    color: #1f2933;
-  }
-
-  .page-item.disabled .page-link {
-    color: #9ca3af;
-  }
+  .page-item.active .page-link{ background-color:#2563eb; border-color:#2563eb; }
+  .page-item .page-link{ border-color: rgba(148,163,184,.7); color:#1f2933; }
+  .page-item.disabled .page-link{ color:#9ca3af; }
 </style>
 
 <div class="container results-container">
@@ -339,29 +201,21 @@
       <div class="result-card"
            onclick="window.location.href='{% url 'part_detail' result.id %}'">
 
-        {# Мобильная шапка (не меняем) #}
         <div class="result-header-mobile">
           <div class="result-header-mobile-inner">
-            <div class="result-title-mobile">
-              {{ result.part_type }}
-            </div>
-            <div class="result-price-mobile">
-              {{ result.price|floatformat:0 }} BYN
-            </div>
+            <div class="result-title-mobile">{{ result.part_type }}</div>
+            <div class="result-price-mobile">{{ result.price|floatformat:0 }} BYN</div>
           </div>
         </div>
 
         <div class="result-body">
 
-          {# 1) Фото #}
           <div class="result-image-col">
             <div class="image-container">
               {% if result.images.all %}
-                <a href="{{ result.images.first.image.url }}" target="_blank" onclick="event.stopPropagation();">
-                  <img src="{{ result.images.first.image.url }}"
-                       alt="Изображение запчасти"
-                       class="img-thumbnail">
-                </a>
+                <img src="{{ result.images.first.image.url }}"
+                     alt="Изображение запчасти"
+                     class="img-thumbnail">
                 {% if result.images.count > 1 %}
                   <div class="extra-images">
                     +{{ result.images.count|add:"-1" }} ещё
@@ -373,45 +227,27 @@
             </div>
           </div>
 
-          {# 2) Описание #}
           <div class="result-main-col">
-            <div class="result-title-desktop">
-              {{ result.part_type }}
-            </div>
-
-            <div class="result-device-line">
-              {{ result.device }} {{ result.brand }} {{ result.display_model }}
-            </div>
-
+            <div class="result-title-desktop">{{ result.part_type }}</div>
+            <div class="result-device-line">{{ result.device }} {{ result.brand }} {{ result.display_model }}</div>
             {% if result.condition %}
-              <div class="result-condition">
-                <strong>Состояние:</strong> {{ result.condition }}
-              </div>
+              <div class="result-condition"><strong>Состояние:</strong> {{ result.condition }}</div>
             {% endif %}
 
-            {# Продавец/город для мобильной версии #}
             <div class="result-seller-city-mobile">
-              <div>
-                <strong>Продавец:</strong>
-                {{ result.user.profile.workshop_name|default:"Частное лицо" }}
-              </div>
-              <div>
-                <strong>Город:</strong> {{ result.user.profile.city }}
-              </div>
+              <div><strong>Продавец:</strong> {{ result.user.profile.workshop_name|default:"Частное лицо" }}</div>
+              <div><strong>Город:</strong> {{ result.user.profile.city }}</div>
             </div>
           </div>
 
-          {# 3) Продавец #}
           <div class="result-seller-col">
             {{ result.user.profile.workshop_name|default:"Частное лицо" }}
           </div>
 
-          {# 4) Город #}
           <div class="result-city-col">
             {{ result.user.profile.city }}
           </div>
 
-          {# 5) Цена #}
           <div class="result-price-col">
             {{ result.price|floatformat:0 }} BYN
           </div>
@@ -426,7 +262,6 @@
     <div class="results-empty">Ничего не найдено.</div>
   {% endif %}
 
-  {# ---------- Компактная пагинация ---------- #}
   {% if page_obj.has_previous or page_obj.has_next %}
     {% with total=page_obj.paginator.num_pages current=page_obj.number %}
       <nav aria-label="Page navigation">
@@ -447,9 +282,7 @@
           {% if page_obj.number|add:"-2" > 1 %}
             <li class="page-item">
               <a class="page-link"
-                 href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">
-                1
-              </a>
+                 href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">1</a>
             </li>
             {% if page_obj.number|add:"-3" > 1 %}
               <li class="page-item disabled"><span class="page-link">…</span></li>
@@ -463,9 +296,7 @@
               {% else %}
                 <li class="page-item">
                   <a class="page-link"
-                     href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">
-                    {{ num }}
-                  </a>
+                     href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">{{ num }}</a>
                 </li>
               {% endif %}
             {% endif %}
@@ -477,9 +308,7 @@
             {% endif %}
             <li class="page-item">
               <a class="page-link"
-                 href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">
-                {{ page_obj.paginator.num_pages }}
-              </a>
+                 href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}{% if request.GET.part_type %}&part_type={{ request.GET.part_type }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}">{{ page_obj.paginator.num_pages }}</a>
             </li>
           {% endif %}
 

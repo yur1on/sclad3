@@ -1,710 +1,904 @@
 {% extends 'warehouse/base.html' %}
 {% block title %}Мой склад{% endblock %}
-{% block footer %}
-    <!-- Переопределяем блок подвала, чтобы он был пустым -->
-{% endblock %}
+{% block footer %}{% endblock %}
 {% block content %}
 {% load static %}
-    <link rel="stylesheet" href="{% static 'css/warehouse.css' %}">
-    <style>
-        .total-views {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-top: 10px;
-        }
-        .total-views .btn {
-            width: 100%;
-            text-align: left;
-        }
-    </style>
+<link rel="stylesheet" href="{% static 'css/warehouse.css' %}">
+
+<style>
+  .total-views { border: 1px solid #ccc; padding: 10px; margin-top: 10px; }
+  .total-views .btn { width: 100%; text-align: left; }
+
+  /* ====== МОБИЛКА: вместо таблицы — компактные "строчки" ====== */
+  @media (max-width: 768px){
+    .warehouse-content.container{
+      max-width: 100% !important;
+      padding-left: 8px !important;
+      padding-right: 8px !important;
+    }
+    #parts-table-container{ display:none !important; }
+    #parts-cards-container{ display:block !important; }
+
+    .mrows{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+
+    .mrow-card{
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f7f9fc 0%, #ffffff 60%, #f3f6ff 100%);
+      border: 1px solid rgba(0,0,0,.14);
+      box-shadow: 0 8px 18px rgba(15,23,42,.07);
+      overflow: hidden;
+    }
+    .mrow-card.is-empty{
+      border-color: rgba(220,53,69,.55);
+      background: linear-gradient(135deg, rgba(255,245,245,1) 0%, #ffffff 60%, rgba(255,240,240,1) 100%);
+    }
+
+    .mrow{
+      width:100%;
+      border:0;
+      background:transparent;
+      padding:10px;
+      text-align:left;
+      display:grid;
+      grid-template-columns: 64px minmax(0,1fr) auto;
+      gap:10px;
+      align-items:center;
+    }
+
+    .mrow__img{
+      width:64px; height:64px;
+      border-radius: 12px;
+      overflow:hidden;
+      background:#e5edf7;
+      position:relative;
+      box-shadow: 0 10px 16px rgba(15,23,42,.08);
+    }
+    .mrow__img img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .mrow__img-badge{
+      position:absolute; right:6px; bottom:6px;
+      background: rgba(15,23,42,.78); color:#fff;
+      padding:2px 7px; border-radius:999px;
+      font-size:11px; backdrop-filter: blur(8px);
+    }
+    .mrow__noimg{
+      width:100%; height:100%;
+      display:flex; align-items:center; justify-content:center;
+      color:#6b7280; font-size:12px; padding:6px; text-align:center;
+    }
+
+    .mrow__main{ min-width:0; }
+    .mrow__title{
+      font-weight:700;
+      font-size:14px;
+      color:#111827;
+      line-height:1.2;
+      margin:0 0 2px;
+      display:-webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+    .mrow__sub{
+      font-size:12.5px;
+      color:#374151;
+      line-height:1.25;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+    .mrow__muted{ color:#6b7280; }
+
+    .mrow__right{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:4px;
+      white-space:nowrap;
+    }
+    .mrow__price{
+      font-weight:800;
+      color:#16a34a;
+      font-size:15px;
+      line-height:1;
+    }
+    .mrow__badges{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      font-size:11.5px;
+      color:#6b7280;
+    }
+    .mrow__pill{
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.35);
+      background: rgba(255,255,255,.7);
+    }
+
+    .mrow-details{
+      border-top:1px solid rgba(148,163,184,.18);
+      background: rgba(255,255,255,.65);
+      padding:10px;
+    }
+    .mrow-details .line{ font-size:12.8px; color:#374151; margin-bottom:6px; }
+    .mrow-details .label{
+      font-size:11px; font-weight:700;
+      color: rgba(17,24,39,.46);
+      letter-spacing:.02em;
+      display:inline-block;
+      min-width: 92px;
+    }
+    .mrow-actions{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+    }
+    .mrow-actions .btn{ flex:1 1 auto; white-space:nowrap; }
+
+    /* пагинация на моб. — можно листать вширину */
+    .pagination{
+      flex-wrap: nowrap !important;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      justify-content: flex-start !important;
+      gap: .35rem;
+      padding: 0 .25rem;
+      margin-bottom: .25rem;
+    }
+    .pagination::-webkit-scrollbar{ height: 6px; }
+    .pagination::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.18); border-radius: 999px; }
+    .page-link{ white-space: nowrap; border-radius: 999px !important; min-width: 40px; text-align: center; }
+  }
+
+  /* ====== ДЕСКТОП: делаем таблицу "богаче" и читабельнее ====== */
+  @media (min-width: 769px){
+    #parts-cards-container{ display:none !important; }
+
+    #parts-table-container{ display:block !important; }
+
+    /* чуть более плотная таблица */
+    #parts-table{ font-size: 13.5px; }
+    #parts-table thead th{ vertical-align: middle; white-space: nowrap; }
+    #parts-table td{ vertical-align: top; }
+
+    .dt-title{
+      font-weight: 800;
+      color:#111827;
+      font-size: 14.5px;
+      line-height: 1.15;
+      margin: 0 0 2px;
+    }
+    .dt-sub{
+      color:#6b7280;
+      font-size: 12.5px;
+      line-height: 1.25;
+    }
+
+    .dt-meta{
+      font-size: 12.8px;
+      color:#374151;
+      line-height: 1.25;
+      margin: 0 0 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+    .dt-label{
+      color: rgba(17,24,39,.45);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: .02em;
+      margin-right: 6px;
+    }
+    .dt-mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12.5px;
+    }
+
+    .dt-price{
+      font-weight: 900;
+      color:#16a34a;
+      font-size: 16px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .dt-pills{ display:flex; gap:6px; flex-wrap: wrap; }
+    .dt-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(148,163,184,.35);
+      background: rgba(255,255,255,.7);
+      color:#6b7280;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .dt-note{
+      color:#374151;
+      font-size: 12.8px;
+      line-height: 1.25;
+      max-width: 320px;
+    }
+
+    .dt-photo{
+      position: relative;
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      overflow: hidden;
+      background:#e5edf7;
+      box-shadow: 0 10px 16px rgba(15,23,42,.08);
+    }
+    .dt-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .dt-photo-badge{
+      position:absolute; right:6px; bottom:6px;
+      background: rgba(15,23,42,.78); color:#fff;
+      padding:2px 7px; border-radius:999px;
+      font-size:11px; backdrop-filter: blur(8px);
+    }
+  }
+</style>
+
 <div class="wrapper">
-    <!-- Боковая панель -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-content">
-            <h4 class="sidebar-header">Управление складом</h4>
-            <div class="button-group">
-                <a href="{% url 'add_part' %}" class="btn btn-success mb-2">
-                    <i class="bi bi-plus-circle me-2"></i>Добавить запчасть
-                </a>
-                <a href="{% url 'add_full_device_parts' %}" class="btn btn-success mb-2">
-                    <i class="bi bi-plus-circle me-2"></i>Добавить запчасти
-                </a>
+  <!-- Боковая панель -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-content">
+      <h4 class="sidebar-header">Управление складом</h4>
+      <div class="button-group">
+        <a href="{% url 'add_part' %}" class="btn btn-success mb-2">
+          <i class="bi bi-plus-circle me-2"></i>Добавить запчасть
+        </a>
+        <a href="{% url 'add_full_device_parts' %}" class="btn btn-success mb-2">
+          <i class="bi bi-plus-circle me-2"></i>Добавить запчасти
+        </a>
 
-                <a href="{% url 'payments:choose_subscription' %}" class="btn btn-primary mb-2">
-                    <i class="bi bi-credit-card me-2"></i>Выбрать подписку
-                </a>
-                <a href="{% url 'user_parts2' user.id %}" class="btn btn-primary mb-2">
-                    <i class="bi bi-list-ul me-2"></i>Все запчасти (Сортированные)
-                </a>
-                <a href="{% url 'export_excel' %}" class="btn btn-primary mb-2">
-                    <i class="bi bi-file-earmark-spreadsheet me-2"></i>Экспорт в Excel
-                </a>
-                <a href="{% url 'delete_all_parts' %}" class="btn btn-danger mb-2">
-                    <i class="bi bi-trash me-2"></i>Удалить все запчасти
-                </a>
-            </div>
-            <!-- Информация о тарифе -->
-            <div class="tariff-info mb-3">
-                <h6 class="fw-bold">Ваш тариф</h6>
-                <p class="mb-1">
-                    <strong>
-                        {% if user.profile.tariff == 'free' %}Бесплатный (до 30 запчастей)
-                        {% elif user.profile.tariff == 'lite' %}Базовый (до 500 запчастей)
-                        {% elif user.profile.tariff == 'standard' %}Стандартный (до 2000 запчастей)
-                        {% elif user.profile.tariff == 'standard2' %}Продвинутый (до 7000 запчастей)
-                        {% elif user.profile.tariff == 'standard3' %}Профессиональный (до 15000 запчастей)
-                        {% elif user.profile.tariff == 'premium' %}Неограниченный (без ограничений)
-                        {% endif %}
-                    </strong>
-                </p>
-                {% if subscription_period %}
-                    <p class="small text-muted">
-                        Срок: {{ subscription_period.0|date:"d M Y" }} – {{ subscription_period.1|date:"d M Y" }}
-                    </p>
-                {% endif %}
-            </div>
-            <div class="total-parts">
-                <span class="badge bg-info text-dark">Всего запчастей: {{ total_parts }}</span>
-            </div>
-            <div class="total-views">
-                <a href="{% url 'analytics' %}" class="btn btn-info mb-2">
-                    <i class="bi bi-eye me-2"></i>Всего просмотров: {{ total_views }}
-                </a>
-            </div>
-        </div>
+        <a href="{% url 'payments:choose_subscription' %}" class="btn btn-primary mb-2">
+          <i class="bi bi-credit-card me-2"></i>Выбрать подписку
+        </a>
+        <a href="{% url 'user_parts2' user.id %}" class="btn btn-primary mb-2">
+          <i class="bi bi-list-ul me-2"></i>Все запчасти (Сортированные)
+        </a>
+        <a href="{% url 'export_excel' %}" class="btn btn-primary mb-2">
+          <i class="bi bi-file-earmark-spreadsheet me-2"></i>Экспорт в Excel
+        </a>
+        <a href="{% url 'delete_all_parts' %}" class="btn btn-danger mb-2">
+          <i class="bi bi-trash me-2"></i>Удалить все запчасти
+        </a>
+      </div>
+
+      <div class="tariff-info mb-3">
+        <h6 class="fw-bold">Ваш тариф</h6>
+        <p class="mb-1">
+          <strong>
+            {% if user.profile.tariff == 'free' %}Бесплатный (до 30 запчастей)
+            {% elif user.profile.tariff == 'lite' %}Базовый (до 500 запчастей)
+            {% elif user.profile.tariff == 'standard' %}Стандартный (до 2000 запчастей)
+            {% elif user.profile.tariff == 'standard2' %}Продвинутый (до 7000 запчастей)
+            {% elif user.profile.tariff == 'standard3' %}Профессиональный (до 15000 запчастей)
+            {% elif user.profile.tariff == 'premium' %}Неограниченный (без ограничений)
+            {% endif %}
+          </strong>
+        </p>
+        {% if subscription_period %}
+          <p class="small text-muted">
+            Срок: {{ subscription_period.0|date:"d M Y" }} – {{ subscription_period.1|date:"d M Y" }}
+          </p>
+        {% endif %}
+      </div>
+
+      <div class="total-parts">
+        <span class="badge bg-info text-dark">Всего запчастей: {{ total_parts }}</span>
+      </div>
+      <div class="total-views">
+        <a href="{% url 'analytics' %}" class="btn btn-info mb-2">
+          <i class="bi bi-eye me-2"></i>Всего просмотров: {{ total_views }}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Основное содержимое -->
+  <div class="container my-4 warehouse-content">
+    <button class="btn btn-primary d-md-none mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-expanded="false" aria-controls="sidebar">
+      <i class="bi bi-list"></i> Меню
+    </button>
+
+    <div class="row mb-3">
+      <div class="col-12">
+        <h2 class="text-center">Мои запчасти</h2>
+      </div>
     </div>
 
-    <!-- Основное содержимое непосредственно в wrapper -->
-    <div class="container my-4 warehouse-content">
-        <!-- Кнопка для мобильного меню -->
-        <button class="btn btn-primary d-md-none mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-expanded="false" aria-controls="sidebar">
-            <i class="bi bi-list"></i> Меню
-        </button>
+    <div class="row mb-4">
+      <div class="col-12">
+        <form method="get" class="d-flex" style="max-width: 800px;">
+          <input type="text" name="q" class="form-control me-2" placeholder="Введите ключевые слова для поиска" value="{{ query|default_if_none:'' }}">
+          <button type="submit" class="btn btn-primary">Поиск</button>
+        </form>
+      </div>
+    </div>
 
-        <!-- Заголовок "Мои запчасти" -->
-        <div class="row mb-3">
-            <div class="col-12">
-                <h2 class="text-center">Мои запчасти</h2>
-            </div>
-        </div>
+    <!-- Контейнеры для кнопочного поиска -->
+    <div id="device-buttons-container" class="mb-4">
+      <h4 class="small-header">Устройства на складе</h4>
+      <div id="device-buttons" class="mb-3">
+        {% for device in devices %}
+          <button class="btn btn-primary btn-compact" onclick="filterByDevice('{{ device }}')">{{ device }}</button>
+        {% endfor %}
+      </div>
+    </div>
 
-        <!-- Форма поиска -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <form method="get" class="d-flex" style="max-width: 800px;">
-                    <input type="text" name="q" class="form-control me-2" placeholder="Введите ключевые слова для поиска" value="{{ query|default_if_none:'' }}">
-                    <button type="submit" class="btn btn-primary">Поиск</button>
-                </form>
-            </div>
-        </div>
+    <div id="brand-buttons-container" class="mb-4" style="display: none;">
+      <h4 class="small-header">Бренд</h4>
+      <div id="brand-buttons" class="mb-3">
+        {% for brand in brands %}
+          <button class="btn btn-primary btn-compact" onclick="filterByBrand('{{ brand }}')">{{ brand }}</button>
+        {% endfor %}
+      </div>
+    </div>
 
-        <!-- Контейнеры для кнопочного поиска -->
-        <div id="device-buttons-container" class="mb-4">
-            <h4 class="small-header">Устройства на складе</h4>
-            <div id="device-buttons" class="mb-3">
-                {% for device in devices %}
-                    <button class="btn btn-primary btn-compact" onclick="filterByDevice('{{ device }}')">{{ device }}</button>
-                {% endfor %}
-            </div>
-        </div>
+    <div id="model-buttons-container" class="mb-4" style="display: none;">
+      <h4 class="small-header">Модель</h4>
+      <div id="model-buttons" class="mb-3"></div>
+    </div>
 
-        <div id="brand-buttons-container" class="mb-4" style="display: none;">
-            <h4 class="small-header">Бренд</h4>
-            <div id="brand-buttons" class="mb-3">
-                {% for brand in brands %}
-                    <button class="btn btn-primary btn-compact" onclick="filterByBrand('{{ brand }}')">{{ brand }}</button>
-                {% endfor %}
-            </div>
-        </div>
+    <div id="part-type-buttons-container" class="mb-4" style="display: none;">
+      <h4 class="small-header">Тип запчасти</h4>
+      <div id="part-type-buttons" class="mb-3"></div>
+    </div>
 
-        <div id="model-buttons-container" class="mb-4" style="display: none;">
-            <h4 class="small-header">Модель</h4>
-            <div id="model-buttons" class="mb-3"></div>
-        </div>
+    <!-- ====== МОБИЛЬНЫЙ СПИСОК-СТРОЧКИ ====== -->
+    <div id="parts-cards-container" style="display:none;">
+      <div class="mrows" id="parts-cards">
+        {% for part in page_obj %}
+          <div class="mrow-card {% if part.quantity == 0 %}is-empty{% endif %}">
+            <button class="mrow" type="button" data-bs-toggle="collapse" data-bs-target="#mrow-{{ part.id }}">
+              <div class="mrow__img">
+                {% if part.images.all %}
+                  <a href="#" onclick="enlargeImage('{{ part.images.all.0.image.url }}', event);">
+                    <img src="{{ part.images.all.0.image.url }}" alt="{{ part.display_model }}">
+                  </a>
+                  {% if part.images.count > 1 %}
+                    <div class="mrow__img-badge">+{{ part.images.count|add:"-1" }}</div>
+                  {% endif %}
+                {% else %}
+                  <div class="mrow__noimg">Нет фото</div>
+                {% endif %}
+              </div>
 
-        <div id="part-type-buttons-container" class="mb-4" style="display: none;">
-            <h4 class="small-header">Тип запчасти</h4>
-            <div id="part-type-buttons" class="mb-3"></div>
-        </div>
+              <div class="mrow__main">
+                <div class="mrow__title">{{ part.part_type }}</div>
+                <div class="mrow__sub">
+                  <span class="mrow__muted">{{ part.device }}</span> · {{ part.brand }} {{ part.display_model }}
+                  {% if part.condition %}<br><span class="mrow__muted">Сост.:</span> {{ part.condition }}{% endif %}
+                </div>
+              </div>
 
-        <!-- Таблица запчастей -->
-        <div id="parts-table-container" class="table-responsive">
-            <table id="parts-table" class="table table-striped table-hover table-bordered w-100">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Устройство</th>
-                        <th>Модель</th>
-                        <th>Тип запчасти</th>
-                        <th class="desktop-only">Прочее</th>
-                        <th class="desktop-only">Фото</th>
-                        <th class="desktop-only">
-                            <i class="bi bi-eye" data-bs-toggle="tooltip" title="Просмотры"></i>
-                        </th>
-                        <th class="desktop-only">Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="parts-table-body">
-                    {% for part in page_obj %}
-                    <!-- Строка с краткой информацией -->
-                    <tr class="accordion-toggle {% if part.quantity == 0 %}table-danger{% endif %}" data-bs-toggle="collapse" data-bs-target="#collapse-{{ part.id }}">
-                        <td data-label="Устройство">{{ part.device }}</td>
-                        <td data-label="Модель">{{ part.brand }} {{ part.display_model }}</td>
-                        <td data-label="Тип запчасти">{{ part.part_type }}</td>
-                        <td class="desktop-only" data-label="Прочее">
-                            <div>
-                                <strong>Номер запчасти:</strong> {{ part.part_number|default:"-" }}
-                            </div>
-                            <div>
-                                <strong>Цвет:</strong> {{ part.color|default:"Не указан" }},
-                                <strong>Цена:</strong> {{ part.price }},
-                                <strong>Кол-во:</strong> {{ part.quantity }}
-                            </div>
-                            <div>
-                                {% if part.condition %}
-                                    <strong>Состояние:</strong> {{ part.condition }}
-                                {% endif %}
-                                {% if part.note %}
-                                    <strong>, Примечание:</strong> {{ part.note }}
-                                {% else %}
-                                    <strong>, Примечание:</strong> Нет примечаний
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td class="desktop-only" data-label="Фото">
-                            {% if part.images.all %}
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal-{{ part.id }}" onclick="event.stopPropagation();">
-                                <img src="{{ part.images.all.0.image.url }}" alt="{{ part.display_model }}" class="img-thumbnail">
-                            </a>
-                            {% else %}
-                            Нет фото
-                            {% endif %}
-                        </td>
-                        <td class="desktop-only">{{ part.views }}</td>
-                        <td class="desktop-only" data-label="Действия">
-                            <div class="d-flex gap-2">
-                                <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm action-btn" onclick="event.stopPropagation();">✏️</a>
-                                <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm action-btn" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️</a>
-                            </div>
-                        </td>
-                    </tr>
-                    <!-- Строка с подробной информацией (мобильная версия) -->
-                    <tr class="mobile-only {% if part.quantity == 0 %}table-danger{% endif %}">
-                        <td colspan="7" class="p-0">
-                            <div id="collapse-{{ part.id }}" class="collapse">
-                                <div class="p-2 bg-light">
-                                    <strong>Номер запчасти:</strong> {{ part.part_number|default:"-" }}<br>
-                                    <strong>Устройство:</strong> {{ part.device }}<br>
-                                    <strong>Модель:</strong> {{ part.brand }} {{ part.display_model }}<br>
-                                    <strong>Тип запчасти:</strong> {{ part.part_type }}<br>
-                                    <strong>Цвет:</strong> {{ part.color|default:"Не указан" }}<br>
-                                    <strong>Цена:</strong> {{ part.price }}<br>
-                                    <strong>Количество:</strong> {{ part.quantity }}<br>
-                                    <strong>Состояние:</strong> {{ part.condition|default:"Не указано" }}<br>
-                                    <strong>Просмотры:</strong> {{ part.views }}<br>
-                                    {% if part.note %}
-                                        <strong>Примечание:</strong> {{ part.note }}<br>
-                                    {% else %}
-                                        <strong>Примечание:</strong> Нет примечаний<br>
-                                    {% endif %}
-                                    {% if part.images.all %}
-                                        <div class="mt-2">
-                                            <strong>Фото:</strong><br>
-                                            {% for image in part.images.all %}
-                                                <a href="#" onclick="enlargeImage('{{ image.image.url }}', event);">
-                                                    <img src="{{ image.image.url }}" alt="{{ part.display_model }}" class="img-thumbnail mb-2" style="max-width:100px; max-height:100px;">
-                                                </a>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    <div class="mt-2">
-                                        <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm" onclick="event.stopPropagation();">✏️ Редактировать</a>
-                                        <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️ Удалить</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    <!-- Модальное окно для фото (веб-версия) -->
-                    {% if part.images.all %}
-                    <div class="modal fade" id="imageModal-{{ part.id }}" tabindex="-1" aria-labelledby="imageModalLabel-{{ part.id }}" aria-hidden="true">
-                        <div class="modal-dialog modal-lg modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-body">
-                                    <div id="carouselPartImages-{{ part.id }}" class="carousel slide" data-bs-ride="carousel">
-                                        <div class="carousel-inner">
-                                            {% for image in part.images.all %}
-                                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                                <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ part.display_model }}" style="max-height: 500px; object-fit: contain;">
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPartImages-{{ part.id }}" data-bs-slide="prev">
-                                            <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: black; padding: 10px;"></span>
-                                            <span class="visually-hidden">Предыдущий</span>
-                                        </button>
-                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselPartImages-{{ part.id }}" data-bs-slide="next">
-                                            <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: black; padding: 10px;"></span>
-                                            <span class="visually-hidden">Следующий</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                                </div>
-                            </div>
-                        </div>
+              <div class="mrow__right">
+                <div class="mrow__price">{{ part.price }}</div>
+                <div class="mrow__badges">
+                  <span class="mrow__pill">x{{ part.quantity }}</span>
+                  <span class="mrow__pill">👁 {{ part.views }}</span>
+                </div>
+              </div>
+            </button>
+
+            <div id="mrow-{{ part.id }}" class="collapse">
+              <div class="mrow-details">
+                <div class="line"><span class="label">Номер:</span> {{ part.part_number|default:"-" }}</div>
+                <div class="line"><span class="label">Цвет:</span> {{ part.color|default:"Не указан" }}</div>
+                <div class="line"><span class="label">Примечание:</span> {{ part.note|default:"Нет примечаний" }}</div>
+
+                {% if part.images.all %}
+                  <div class="line" style="margin-top:10px;">
+                    <span class="label">Фото:</span>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                      {% for image in part.images.all %}
+                        <a href="#" onclick="enlargeImage('{{ image.image.url }}', event);">
+                          <img src="{{ image.image.url }}" class="img-thumbnail" style="max-width:84px; max-height:84px;">
+                        </a>
+                      {% endfor %}
                     </div>
-                    {% endif %}
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center">Запчасти не найдены</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                  </div>
+                {% endif %}
 
-        <!-- Пагинация -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1{% if query %}&q={{ query }}{% endif %}{% if selectedDevice %}&device={{ selectedDevice }}{% endif %}{% if selectedBrand %}&brand={{ selectedBrand }}{% endif %}{% if selectedModel %}&model={{ selectedModel }}{% endif %}{% if selectedPartType %}&part_type={{ selectedPartType }}{% endif %}" aria-label="First">
-                            <span aria-hidden="true">«</span>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selectedDevice %}&device={{ selectedDevice }}{% endif %}{% if selectedBrand %}&brand={{ selectedBrand }}{% endif %}{% if selectedModel %}&model={{ selectedModel }}{% endif %}{% if selectedPartType %}&part_type={{ selectedPartType }}{% endif %}" aria-label="Previous">
-                            <span aria-hidden="true">‹</span>
-                        </a>
-                    </li>
-                {% endif %}
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                    {% else %}
-                        <li class="page-item"><a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selectedDevice %}&device={{ selectedDevice }}{% endif %}{% if selectedBrand %}&brand={{ selectedBrand }}{% endif %}{% if selectedModel %}&model={{ selectedModel }}{% endif %}{% if selectedPartType %}&part_type={{ selectedPartType }}{% endif %}">{{ num }}</a></li>
-                    {% endif %}
-                {% endfor %}
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selectedDevice %}&device={{ selectedDevice }}{% endif %}{% if selectedBrand %}&brand={{ selectedBrand }}{% endif %}{% if selectedModel %}&model={{ selectedModel }}{% endif %}{% if selectedPartType %}&part_type={{ selectedPartType }}{% endif %}" aria-label="Next">
-                            <span aria-hidden="true">›</span>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if selectedDevice %}&device={{ selectedDevice }}{% endif %}{% if selectedBrand %}&brand={{ selectedBrand }}{% endif %}{% if selectedModel %}&model={{ selectedModel }}{% endif %}{% if selectedPartType %}&part_type={{ selectedPartType }}{% endif %}" aria-label="Last">
-                            <span aria-hidden="true">»</span>
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
-        </nav>
+                <div class="mrow-actions">
+                  <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm" onclick="event.stopPropagation();">✏️ Редактировать</a>
+                  <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️ Удалить</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-center text-muted py-3">Запчасти не найдены</div>
+        {% endfor %}
+      </div>
     </div>
+
+    <!-- ====== ТАБЛИЦА (ДЕСКТОП) — более информативная ====== -->
+    <div id="parts-table-container" class="table-responsive">
+      <table id="parts-table" class="table table-striped table-hover table-bordered w-100">
+        <thead class="table-dark">
+          <tr>
+            <th>Запчасть</th>
+            <th>Параметры</th>
+            <th>Цена / Кол-во</th>
+            <th>Примечание</th>
+            <th>Фото</th>
+            <th><i class="bi bi-eye" data-bs-toggle="tooltip" title="Просмотры"></i></th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+
+        <tbody id="parts-table-body">
+          {% for part in page_obj %}
+            <tr class="{% if part.quantity == 0 %}table-danger{% endif %}">
+              <td>
+                <div class="dt-title">{{ part.part_type }}</div>
+                <div class="dt-sub">{{ part.device }} · {{ part.brand }} {{ part.display_model }}</div>
+              </td>
+
+              <td>
+                <div class="dt-meta"><span class="dt-label">Сост.:</span> {{ part.condition|default:"—" }}</div>
+                <div class="dt-meta"><span class="dt-label">Цвет:</span> {{ part.color|default:"Не указан" }}</div>
+                <div class="dt-meta" title="{{ part.part_number|default:'' }}">
+                  <span class="dt-label">№:</span> <span class="dt-mono">{{ part.part_number|default:"-" }}</span>
+                </div>
+              </td>
+
+              <td>
+                <div class="dt-price">{{ part.price }}</div>
+                <div class="dt-pills">
+                  <span class="dt-pill">x{{ part.quantity }}</span>
+                  {% if part.quantity == 0 %}
+                    <span class="dt-pill" style="border-color: rgba(220,53,69,.35); color: rgba(220,53,69,.85);">нет</span>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td>
+                <div class="dt-note" title="{{ part.note|default:'' }}">
+                  {% if part.note %}{{ part.note|truncatechars:60 }}{% else %}—{% endif %}
+                </div>
+              </td>
+
+              <td>
+                {% if part.images.all %}
+                  <div class="dt-photo">
+                    <a href="#" onclick="enlargeImage('{{ part.images.all.0.image.url }}', event);" style="display:block;">
+                      <img src="{{ part.images.all.0.image.url }}" alt="{{ part.display_model }}">
+                    </a>
+                    {% if part.images.count > 1 %}
+                      <div class="dt-photo-badge">+{{ part.images.count|add:"-1" }}</div>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <span class="text-muted">Нет фото</span>
+                {% endif %}
+              </td>
+
+              <td>{{ part.views }}</td>
+
+              <td>
+                <div class="d-flex gap-2">
+                  <a href="{% url 'edit_part' part.id %}" class="btn btn-warning btn-sm" onclick="event.stopPropagation();">✏️</a>
+                  <a href="{% url 'delete_part' part.id %}" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️</a>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="text-center">Запчасти не найдены</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Пагинация (серверная; при фильтрах будет заменяться JS) -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1{% if query %}&q={{ query }}{% endif %}">«</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">‹</a>
+          </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">›</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}">»</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+
+  </div>
 </div>
 
-<!-- Модальное окно для увеличения фото (лайтбокс) для мобильной версии -->
-<div class="modal fade" id="imageEnlargeModal" tabindex="-1" aria-labelledby="imageEnlargeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body p-0">
-                <img id="enlargedImage" src="" class="img-fluid" alt="Увеличенное изображение">
-            </div>
-            <div class="modal-footer p-2">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
-            </div>
-        </div>
+<!-- Лайтбокс -->
+<div class="modal fade" id="imageEnlargeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <img id="enlargedImage" src="" class="img-fluid" alt="Увеличенное изображение">
+      </div>
+      <div class="modal-footer p-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- Скрипты -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Инициализация tooltip
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
-        // Управление боковой панелью на мобильных
-        const sidebar = document.getElementById('sidebar');
-        const toggleButton = document.querySelector('[data-bs-target="#sidebar"]');
-        toggleButton.addEventListener('click', function () {
-            sidebar.classList.toggle('show');
-        });
-
-        // Закрытие панели при клике вне её
-        document.addEventListener('click', function (e) {
-            if (window.innerWidth <= 768 && sidebar.classList.contains('show') && !sidebar.contains(e.target) && !toggleButton.contains(e.target)) {
-                sidebar.classList.remove('show');
-            }
-        });
-    });
-</script>
-
-<!-- Передача URL для JavaScript -->
-<script>
-    const editPartUrl = "{% url 'edit_part' 0 %}".replace('0', '{id}');
-    const deletePartUrl = "{% url 'delete_part' 0 %}".replace('0', '{id}');
-</script>
-
-<!-- Скрипты для динамического фильтра и обновления таблицы -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    if(window.innerWidth >= 768){
-        document.querySelectorAll('.accordion-toggle').forEach(function(el){
-            el.removeAttribute('data-bs-toggle');
-            el.removeAttribute('data-bs-target');
-        });
-    }
-
-    const deviceButtonsContainer = document.getElementById('device-buttons-container');
-    const brandButtonsContainer = document.getElementById('brand-buttons-container');
-    const modelButtonsContainer = document.getElementById('model-buttons-container');
-    const partTypeButtonsContainer = document.getElementById('part-type-buttons-container');
-
-    const deviceButtons = document.getElementById('device-buttons');
-    const brandButtons = document.getElementById('brand-buttons');
-    const modelButtons = document.getElementById('model-buttons');
-    const partTypeButtons = document.getElementById('part-type-buttons');
-
-    let selectedDevice = '';
-    let selectedBrand = '';
-    let selectedModel = '';
-    let selectedPartType = '';
-
-    function removeParenthesesText(text) {
-        return text.replace(/\s*\(.*?\)\s*/g, '');
-    }
-
-    window.filterByDevice = function(device) {
-        handleDeviceClick(device);
-    };
-
-    window.filterByBrand = function(brand) {
-        handleBrandClick(brand);
-    };
-
-    window.filterByModel = function(model) {
-        handleModelClick(model);
-    };
-
-    window.filterByPartType = function(partType) {
-        handlePartTypeClick(partType);
-    };
-
-    window.updateTable = function(page = 1) {
-        updateTableData(page);
-    };
-
-    fetch('/get-devices/')
-        .then(response => response.json())
-        .then(data => {
-            populateButtons(deviceButtons, data.devices, handleDeviceClick);
-        })
-        .catch(error => console.error('Error fetching devices:', error));
-
-    function handleDeviceClick(device) {
-        selectedDevice = device;
-        selectedBrand = '';
-        selectedModel = '';
-        selectedPartType = '';
-
-        brandButtons.innerHTML = '';
-        modelButtons.innerHTML = '';
-        partTypeButtons.innerHTML = '';
-        modelButtonsContainer.style.display = 'none';
-        partTypeButtonsContainer.style.display = 'none';
-
-        fetch(`/get-brands/?device=${encodeURIComponent(device)}`)
-            .then(response => response.json())
-            .then(data => {
-                brandButtonsContainer.style.display = 'block';
-                populateButtons(brandButtons, data.brands, handleBrandClick);
-            })
-            .catch(error => console.error('Error fetching brands:', error));
-
-        setActiveButton(deviceButtons, device);
-        updateTableData();
-    }
-
-    function handleBrandClick(brand) {
-        selectedBrand = brand;
-        selectedModel = '';
-        selectedPartType = '';
-
-        modelButtons.innerHTML = '';
-        partTypeButtons.innerHTML = '';
-        partTypeButtonsContainer.style.display = 'none';
-
-        fetch(`/get-models/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(brand)}`)
-            .then(response => response.json())
-            .then(data => {
-                modelButtonsContainer.style.display = 'block';
-                populateButtons(modelButtons, data.models, handleModelClick, true);
-            })
-            .catch(error => console.error('Error fetching models:', error));
-
-        setActiveButton(brandButtons, brand);
-        updateTableData();
-    }
-
-    function handleModelClick(model) {
-        selectedModel = model;
-        selectedPartType = '';
-
-        partTypeButtons.innerHTML = '';
-
-        fetch(`/get-part-types/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(selectedBrand)}&model=${encodeURIComponent(model)}`)
-            .then(response => response.json())
-            .then(data => {
-                partTypeButtonsContainer.style.display = 'block';
-                populateButtons(partTypeButtons, data.part_types, handlePartTypeClick, true);
-            })
-            .catch(error => console.error('Error fetching part types:', error));
-
-        setActiveButton(modelButtons, model);
-        updateTableData();
-    }
-
-    function handlePartTypeClick(partType) {
-        selectedPartType = partType;
-        setActiveButton(partTypeButtons, partType);
-        updateTableData();
-    }
-
-    function populateButtons(container, items, clickHandler, isCompact = false) {
-        container.innerHTML = '';
-        items.sort((a, b) => a.localeCompare(b));
-        items.forEach(item => {
-            const button = document.createElement('button');
-            button.classList.add('btn', 'btn-primary', 'me-2', 'mb-2');
-            if (isCompact) {
-                button.classList.add('btn-compact');
-            }
-            button.textContent = removeParenthesesText(item);
-            button.addEventListener('click', () => clickHandler(item));
-            container.appendChild(button);
-        });
-    }
-
-    function setActiveButton(container, selectedItem) {
-        Array.from(container.children).forEach(button => {
-            button.classList.remove('btn-active');
-            button.classList.add('btn-primary');
-        });
-        const selectedButton = Array.from(container.children).find(button =>
-            removeParenthesesText(button.textContent) === removeParenthesesText(selectedItem)
-        );
-        if (selectedButton) {
-            selectedButton.classList.remove('btn-primary');
-            selectedButton.classList.add('btn-active');
-        }
-    }
-
-    function updateTableData(page = 1) {
-        const url = `/get-parts/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(selectedBrand)}&model=${encodeURIComponent(selectedModel)}&part_type=${encodeURIComponent(selectedPartType)}&page=${page}`;
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                displayParts(data.parts);
-                updatePagination(data.paginator);
-            })
-            .catch(error => console.error('Error fetching parts:', error));
-    }
-
-    function updatePagination(paginator) {
-        const pagination = document.querySelector('.pagination');
-        if (!pagination) return;
-
-        pagination.innerHTML = '';
-
-        if (paginator.has_previous) {
-            pagination.innerHTML += `
-                <li class="page-item">
-                    <a class="page-link" href="#" onclick="updateTable(1); return false;" aria-label="First">«</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#" onclick="updateTable(${paginator.previous_page_number}); return false;" aria-label="Previous">‹</a>
-                </li>
-            `;
-        }
-
-        paginator.page_range.forEach(num => {
-            pagination.innerHTML += `
-                <li class="page-item ${paginator.current_page === num ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="updateTable(${num}); return false;">${num}</a>
-                </li>
-            `;
-        });
-
-        if (paginator.has_next) {
-            pagination.innerHTML += `
-                <li class="page-item">
-                    <a class="page-link" href="#" onclick="updateTable(${paginator.next_page_number}); return false;" aria-label="Next">›</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#" onclick="updateTable(${paginator.num_pages}); return false;" aria-label="Last">»</a>
-                </li>
-            `;
-        }
-    }
-
-    function displayParts(parts) {
-        const tbody = document.getElementById('parts-table-body');
-        if (!tbody) return;
-
-        tbody.innerHTML = '';
-
-        if (parts.length === 0) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `<td colspan="7" class="text-center">Запчасти не найдены</td>`;
-            tbody.appendChild(emptyRow);
-            return;
-        }
-
-        parts.forEach(part => {
-            const collapseId = `collapse-dyn-${part.id}`;
-
-            const summaryRow = document.createElement('tr');
-            summaryRow.classList.add('accordion-toggle');
-            if (part.quantity == 0) {
-                summaryRow.classList.add('table-danger');
-            }
-
-            if(window.innerWidth < 768) {
-                summaryRow.setAttribute('data-bs-toggle', 'collapse');
-                summaryRow.setAttribute('data-bs-target', `#${collapseId}`);
-            }
-
-            summaryRow.innerHTML = `
-                <td data-label="Устройство">${removeParenthesesText(part.device)}</td>
-                <td data-label="Модель">${removeParenthesesText(part.brand)} ${removeParenthesesText(part.model)}</td>
-                <td data-label="Тип запчасти">${removeParenthesesText(part.part_type)}</td>
-                <td class="desktop-only" data-label="Прочее">
-                    <div>
-                        <strong>Номер запчасти:</strong> ${part.part_number || '-'}
-                    </div>
-                    <div>
-                        <strong>Цвет:</strong> ${part.color || 'Не указан'},
-                        <strong>Цена:</strong> ${part.price},
-                        <strong>Кол-во:</strong> ${part.quantity}
-                    </div>
-                    <div>
-                        ${part.condition ? `<strong>Состояние:</strong> ${part.condition}` : ''}
-                        ${part.note ? `<strong>, Примечание:</strong> ${part.note}` : '<strong>, Примечание:</strong> Нет примечаний'}
-                    </div>
-                </td>
-                <td class="desktop-only" data-label="Фото">
-                    ${part.images && part.images.length ? `
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal-dyn-${part.id}" onclick="event.stopPropagation();">
-                            <img src="${part.images[0].image_url}" alt="${part.model}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
-                        </a>
-                    ` : 'Нет фото'}
-                </td>
-                <td class="desktop-only">${part.views}</td>
-                <td class="desktop-only" data-label="Действия">
-                    <div class="d-flex gap-2">
-                        <a href="${editPartUrl.replace('{id}', part.id)}" class="btn btn-warning btn-sm action-btn" onclick="event.stopPropagation();">✏️</a>
-                        <a href="${deletePartUrl.replace('{id}', part.id)}" class="btn btn-danger btn-sm action-btn" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️</a>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(summaryRow);
-
-            const detailsRow = document.createElement('tr');
-            detailsRow.classList.add('mobile-only');
-            if (part.quantity == 0) {
-                detailsRow.classList.add('table-danger');
-            }
-            detailsRow.innerHTML = `
-                <td colspan="7" class="p-0">
-                    <div id="${collapseId}" class="collapse">
-                        <div class="p-2 bg-light">
-                            <strong>Номер запчасти:</strong> ${part.part_number || '-'}<br>
-                            <strong>Устройство:</strong> ${part.device}<br>
-                            <strong>Модель:</strong> ${part.brand} ${part.model}<br>
-                            <strong>Тип запчасти:</strong> ${part.part_type}<br>
-                            <strong>Цвет:</strong> ${part.color || 'Не указан'}<br>
-                            <strong>Цена:</strong> ${part.price}<br>
-                            <strong>Количество:</strong> ${part.quantity}<br>
-                            <strong>Состояние:</strong> ${part.condition || 'Не указано'}<br>
-                            <strong>Просмотры:</strong> ${part.views}<br>
-                            ${part.note ? `<strong>Примечание:</strong> ${part.note}<br>` : `<strong>Примечание:</strong> Нет примечаний<br>`}
-                            ${part.images && part.images.length ? `<div class="mt-2">
-                                <strong>Фото:</strong><br>
-                                ${part.images.map(image => `
-                                    <a href="#" onclick="enlargeImage('${image.image_url}', event);">
-                                        <img src="${image.image_url}" alt="${part.model}" class="img-thumbnail mb-2" style="max-width:100px; max-height:100px;">
-                                    </a>
-                                `).join('')}
-                            </div>` : ''}
-                            <div class="mt-2">
-                                <a href="${editPartUrl.replace('{id}', part.id)}" class="btn btn-warning btn-sm" onclick="event.stopPropagation();">✏️ Редактировать</a>
-                                <a href="${deletePartUrl.replace('{id}', part.id)}" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️ Удалить</a>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(detailsRow);
-
-            if (part.images && part.images.length) {
-                const modal = document.createElement('div');
-                modal.classList.add('modal', 'fade');
-                modal.id = `imageModal-dyn-${part.id}`;
-                modal.setAttribute('tabindex', '-1');
-                modal.setAttribute('aria-labelledby', `imageModalLabel-dyn-${part.id}`);
-                modal.setAttribute('aria-hidden', 'true');
-
-                modal.innerHTML = `
-                    <div class="modal-dialog modal-lg modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body">
-                                <div id="carouselPartImages-dyn-${part.id}" class="carousel slide" data-bs-ride="carousel">
-                                    <div class="carousel-inner">
-                                        ${part.images.map((image, index) => `
-                                            <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                                <img src="${image.image_url}" class="d-block w-100" alt="${part.model}" style="max-height: 500px; object-fit: contain;">
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                    ${part.images.length > 1 ? `
-                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPartImages-dyn-${part.id}" data-bs-slide="prev">
-                                            <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: black; padding: 10px;"></span>
-                                            <span class="visually-hidden">Предыдущий</span>
-                                        </button>
-                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselPartImages-dyn-${part.id}" data-bs-slide="next">
-                                            <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: black; padding: 10px;"></span>
-                                            <span class="visually-hidden">Следующий</span>
-                                        </button>
-                                    ` : ''}
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                document.body.appendChild(modal);
-            }
-        });
-    }
-});
-</script>
-
-<!-- Функция для увеличения изображения (лайтбокс) для мобильной версии -->
 <script>
 function enlargeImage(imageSrc, event) {
-    event.preventDefault();
-    event.stopPropagation();
-    document.getElementById("enlargedImage").src = imageSrc;
-    var modalEl = document.getElementById("imageEnlargeModal");
-    var modal = new bootstrap.Modal(modalEl);
-    modal.show();
+  event.preventDefault();
+  event.stopPropagation();
+  document.getElementById("enlargedImage").src = imageSrc;
+  const modalEl = document.getElementById("imageEnlargeModal");
+  new bootstrap.Modal(modalEl).show();
 }
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // sidebar mobile
+    const sidebar = document.getElementById('sidebar');
+    const toggleButton = document.querySelector('[data-bs-target="#sidebar"]');
+    if (toggleButton) {
+      toggleButton.addEventListener('click', function () {
+        sidebar.classList.toggle('show');
+      });
+
+      document.addEventListener('click', function (e) {
+        if (window.innerWidth <= 768 && sidebar.classList.contains('show') && !sidebar.contains(e.target) && !toggleButton.contains(e.target)) {
+          sidebar.classList.remove('show');
+        }
+      });
+    }
+
+    // включаем моб. список
+    if (window.innerWidth <= 768) {
+      const cards = document.getElementById('parts-cards-container');
+      if (cards) cards.style.display = 'block';
+    }
+  });
+</script>
+
+<script>
+  const editPartUrl = "{% url 'edit_part' 0 %}".replace('0', '{id}');
+  const deletePartUrl = "{% url 'delete_part' 0 %}".replace('0', '{id}');
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let selectedDevice = '';
+  let selectedBrand = '';
+  let selectedModel = '';
+  let selectedPartType = '';
+
+  function safe(v){ return String(v ?? ''); }
+  function removeParenthesesText(text) { return safe(text).replace(/\s*\(.*?\)\s*/g, ''); }
+
+  window.filterByDevice = (device) => handleDeviceClick(device);
+  window.filterByBrand  = (brand)  => handleBrandClick(brand);
+  window.filterByModel  = (model)  => handleModelClick(model);
+  window.filterByPartType = (pt)   => handlePartTypeClick(pt);
+  window.updateTable = (page = 1)  => updateTableData(page);
+
+  const deviceButtons = document.getElementById('device-buttons');
+  const brandButtons = document.getElementById('brand-buttons');
+  const modelButtons = document.getElementById('model-buttons');
+  const partTypeButtons = document.getElementById('part-type-buttons');
+
+  const brandButtonsContainer = document.getElementById('brand-buttons-container');
+  const modelButtonsContainer = document.getElementById('model-buttons-container');
+  const partTypeButtonsContainer = document.getElementById('part-type-buttons-container');
+
+  fetch('/get-devices/')
+    .then(r => r.json())
+    .then(data => populateButtons(deviceButtons, data.devices, handleDeviceClick))
+    .catch(console.error);
+
+  function handleDeviceClick(device) {
+    selectedDevice = device;
+    selectedBrand = ''; selectedModel = ''; selectedPartType = '';
+
+    brandButtons.innerHTML = '';
+    modelButtons.innerHTML = '';
+    partTypeButtons.innerHTML = '';
+    modelButtonsContainer.style.display = 'none';
+    partTypeButtonsContainer.style.display = 'none';
+
+    fetch(`/get-brands/?device=${encodeURIComponent(device)}`)
+      .then(r => r.json())
+      .then(data => { brandButtonsContainer.style.display = 'block'; populateButtons(brandButtons, data.brands, handleBrandClick); })
+      .catch(console.error);
+
+    setActiveButton(deviceButtons, device);
+    updateTableData(1);
+  }
+
+  function handleBrandClick(brand) {
+    selectedBrand = brand;
+    selectedModel = ''; selectedPartType = '';
+
+    modelButtons.innerHTML = '';
+    partTypeButtons.innerHTML = '';
+    partTypeButtonsContainer.style.display = 'none';
+
+    fetch(`/get-models/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(brand)}`)
+      .then(r => r.json())
+      .then(data => { modelButtonsContainer.style.display = 'block'; populateButtons(modelButtons, data.models, handleModelClick, true); })
+      .catch(console.error);
+
+    setActiveButton(brandButtons, brand);
+    updateTableData(1);
+  }
+
+  function handleModelClick(model) {
+    selectedModel = model;
+    selectedPartType = '';
+    partTypeButtons.innerHTML = '';
+
+    fetch(`/get-part-types/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(selectedBrand)}&model=${encodeURIComponent(model)}`)
+      .then(r => r.json())
+      .then(data => { partTypeButtonsContainer.style.display = 'block'; populateButtons(partTypeButtons, data.part_types, handlePartTypeClick, true); })
+      .catch(console.error);
+
+    setActiveButton(modelButtons, model);
+    updateTableData(1);
+  }
+
+  function handlePartTypeClick(pt) {
+    selectedPartType = pt;
+    setActiveButton(partTypeButtons, pt);
+    updateTableData(1);
+  }
+
+  function populateButtons(container, items, clickHandler, isCompact = false) {
+    if (!container) return;
+    container.innerHTML = '';
+    (items || []).sort((a,b)=>safe(a).localeCompare(safe(b)));
+    (items || []).forEach(item => {
+      const button = document.createElement('button');
+      button.classList.add('btn','btn-primary','me-2','mb-2');
+      if (isCompact) button.classList.add('btn-compact');
+      button.textContent = removeParenthesesText(item);
+      button.addEventListener('click', () => clickHandler(item));
+      container.appendChild(button);
+    });
+  }
+
+  function setActiveButton(container, selectedItem) {
+    if (!container) return;
+    Array.from(container.children).forEach(btn => { btn.classList.remove('btn-active'); btn.classList.add('btn-primary'); });
+    const selectedButton = Array.from(container.children).find(btn => removeParenthesesText(btn.textContent) === removeParenthesesText(selectedItem));
+    if (selectedButton) { selectedButton.classList.remove('btn-primary'); selectedButton.classList.add('btn-active'); }
+  }
+
+  function updateTableData(page = 1) {
+    const url = `/get-parts/?device=${encodeURIComponent(selectedDevice)}&brand=${encodeURIComponent(selectedBrand)}&model=${encodeURIComponent(selectedModel)}&part_type=${encodeURIComponent(selectedPartType)}&page=${page}`;
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        displayPartsDesktopTable(data.parts);
+        displayPartsMobileRows(data.parts);
+        updatePagination(data.paginator);
+      })
+      .catch(console.error);
+  }
+
+  function updatePagination(p) {
+    const pagination = document.querySelector('.pagination');
+    if (!pagination) return;
+
+    const cur = p.current_page;
+    const total = p.num_pages;
+
+    const makeLi = (html, cls='page-item') => {
+      const li = document.createElement('li');
+      li.className = cls;
+      li.innerHTML = html;
+      return li;
+    };
+
+    const addPage = (num, active=false) => {
+      if (active) pagination.appendChild(makeLi(`<span class="page-link">${num}</span>`, 'page-item active'));
+      else pagination.appendChild(makeLi(`<a class="page-link" href="#" onclick="updateTable(${num}); return false;">${num}</a>`));
+    };
+
+    const addDots = () => pagination.appendChild(makeLi(`<span class="page-link">…</span>`, 'page-item disabled'));
+
+    pagination.innerHTML = '';
+
+    if (p.has_previous) {
+      pagination.appendChild(makeLi(`<a class="page-link" href="#" onclick="updateTable(1); return false;">«</a>`));
+      pagination.appendChild(makeLi(`<a class="page-link" href="#" onclick="updateTable(${p.previous_page_number}); return false;">‹</a>`));
+    }
+
+    if (cur - 2 > 1) { addPage(1,false); if (cur - 3 > 1) addDots(); }
+
+    const start = Math.max(1, cur - 2);
+    const end = Math.min(total, cur + 2);
+    for (let i = start; i <= end; i++) addPage(i, i === cur);
+
+    if (cur + 2 < total) { if (cur + 3 < total) addDots(); addPage(total,false); }
+
+    if (p.has_next) {
+      pagination.appendChild(makeLi(`<a class="page-link" href="#" onclick="updateTable(${p.next_page_number}); return false;">›</a>`));
+      pagination.appendChild(makeLi(`<a class="page-link" href="#" onclick="updateTable(${total}); return false;">»</a>`));
+    }
+  }
+
+  function displayPartsMobileRows(parts){
+    const wrap = document.getElementById('parts-cards');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+
+    if (!parts || parts.length === 0){
+      wrap.innerHTML = `<div class="text-center text-muted py-3">Запчасти не найдены</div>`;
+      return;
+    }
+
+    parts.forEach(part => {
+      const imgs = part.images || [];
+      const firstImg = imgs.length ? imgs[0].image_url : null;
+      const more = imgs.length > 1 ? (imgs.length - 1) : 0;
+
+      const card = document.createElement('div');
+      card.className = `mrow-card ${Number(part.quantity) === 0 ? 'is-empty' : ''}`;
+
+      card.innerHTML = `
+        <button class="mrow" type="button" data-bs-toggle="collapse" data-bs-target="#mrow-dyn-${part.id}">
+          <div class="mrow__img">
+            ${firstImg ? `
+              <a href="#" onclick="enlargeImage('${firstImg}', event);">
+                <img src="${firstImg}" alt="">
+              </a>
+              ${more ? `<div class="mrow__img-badge">+${more}</div>` : ``}
+            ` : `<div class="mrow__noimg">Нет фото</div>`}
+          </div>
+
+          <div class="mrow__main">
+            <div class="mrow__title">${safe(part.part_type)}</div>
+            <div class="mrow__sub">
+              <span class="mrow__muted">${safe(part.device)}</span> · ${safe(part.brand)} ${safe(part.model)}
+              ${part.condition ? `<br><span class="mrow__muted">Сост.:</span> ${safe(part.condition)}` : ``}
+            </div>
+          </div>
+
+          <div class="mrow__right">
+            <div class="mrow__price">${safe(part.price)}</div>
+            <div class="mrow__badges">
+              <span class="mrow__pill">x${safe(part.quantity)}</span>
+              <span class="mrow__pill">👁 ${safe(part.views)}</span>
+            </div>
+          </div>
+        </button>
+
+        <div id="mrow-dyn-${part.id}" class="collapse">
+          <div class="mrow-details">
+            <div class="line"><span class="label">Номер:</span> ${safe(part.part_number) || '-'}</div>
+            <div class="line"><span class="label">Цвет:</span> ${safe(part.color) || 'Не указан'}</div>
+            <div class="line"><span class="label">Примечание:</span> ${safe(part.note) || 'Нет примечаний'}</div>
+
+            ${imgs.length ? `
+              <div class="line" style="margin-top:10px;">
+                <span class="label">Фото:</span>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                  ${imgs.map(im => `
+                    <a href="#" onclick="enlargeImage('${im.image_url}', event);">
+                      <img src="${im.image_url}" class="img-thumbnail" style="max-width:84px; max-height:84px;">
+                    </a>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ``}
+
+            <div class="mrow-actions">
+              <a href="${editPartUrl.replace('{id}', part.id)}" class="btn btn-warning btn-sm" onclick="event.stopPropagation();">✏️ Редактировать</a>
+              <a href="${deletePartUrl.replace('{id}', part.id)}" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️ Удалить</a>
+            </div>
+          </div>
+        </div>
+      `;
+      wrap.appendChild(card);
+    });
+  }
+
+  function cut(s, n){ s = safe(s); return s.length > n ? (s.slice(0,n-1) + '…') : s; }
+
+  function displayPartsDesktopTable(parts){
+    const tbody = document.getElementById('parts-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (!parts || parts.length === 0){
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center">Запчасти не найдены</td></tr>`;
+      return;
+    }
+
+    parts.forEach(part => {
+      const imgs = part.images || [];
+      const firstImg = imgs.length ? imgs[0].image_url : null;
+      const more = imgs.length > 1 ? (imgs.length - 1) : 0;
+
+      const tr = document.createElement('tr');
+      if (Number(part.quantity) === 0) tr.classList.add('table-danger');
+
+      tr.innerHTML = `
+        <td>
+          <div class="dt-title">${safe(part.part_type)}</div>
+          <div class="dt-sub">${safe(part.device)} · ${safe(part.brand)} ${safe(part.model)}</div>
+        </td>
+
+        <td>
+          <div class="dt-meta" title="${safe(part.condition)}"><span class="dt-label">Сост.:</span> ${safe(part.condition) || '—'}</div>
+          <div class="dt-meta" title="${safe(part.color)}"><span class="dt-label">Цвет:</span> ${safe(part.color) || 'Не указан'}</div>
+          <div class="dt-meta" title="${safe(part.part_number)}"><span class="dt-label">№:</span> <span class="dt-mono">${safe(part.part_number) || '-'}</span></div>
+        </td>
+
+        <td>
+          <div class="dt-price">${safe(part.price)}</div>
+          <div class="dt-pills">
+            <span class="dt-pill">x${safe(part.quantity)}</span>
+            ${Number(part.quantity) === 0 ? `<span class="dt-pill" style="border-color: rgba(220,53,69,.35); color: rgba(220,53,69,.85);">нет</span>` : ``}
+          </div>
+        </td>
+
+        <td>
+          <div class="dt-note" title="${safe(part.note)}">${part.note ? cut(part.note, 60) : '—'}</div>
+        </td>
+
+        <td>
+          ${firstImg ? `
+            <div class="dt-photo">
+              <a href="#" onclick="enlargeImage('${firstImg}', event);" style="display:block;">
+                <img src="${firstImg}" alt="">
+              </a>
+              ${more ? `<div class="dt-photo-badge">+${more}</div>` : ``}
+            </div>
+          ` : `<span class="text-muted">Нет фото</span>`}
+        </td>
+
+        <td>${safe(part.views)}</td>
+
+        <td>
+          <div class="d-flex gap-2">
+            <a href="${editPartUrl.replace('{id}', part.id)}" class="btn btn-warning btn-sm" onclick="event.stopPropagation();">✏️</a>
+            <a href="${deletePartUrl.replace('{id}', part.id)}" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить эту запчасть?');">🗑️</a>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+});
 </script>
 
 {% endblock %}

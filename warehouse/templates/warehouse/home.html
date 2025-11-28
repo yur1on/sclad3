@@ -73,7 +73,11 @@
   @media (max-width: 768px){
     .search-form .d-flex{flex-direction:column}
     .btn-search{width:100%}
+
+    /* СКРЫВАЕМ ИНФО-БЛОК (от "Создайте свой склад" до "Помогайте друг другу") */
+    .how-steps { display: none !important; }
   }
+
   @media (min-width: 577px){
     .how-it-works ul{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
     .search-form .d-flex{flex-direction:row}
@@ -91,13 +95,17 @@
   <!-- Информация + Поиск -->
   <div class="container content-grid">
     <div class="how-it-works fade-in">
-      <ul>
-        <li><i class="bi bi-box-seam"></i><div><strong>Создайте свой склад</strong><br>Зарегистрируйтесь и заполните свой профиль.</div></li>
-        <li><i class="bi bi-wrench"></i><div><strong>Добавляйте запчасти</strong><br>Разбирайте ненужные устройства и добавляйте запчасти на свой склад.</div></li>
-        <li><i class="bi bi-search"></i><div><strong>Ищите нужную запчасть</strong><br>Нужна запчасть? Используйте <a href="{% url 'search' %}">глобальный поиск</a>.</div></li>
-        <li><i class="bi bi-chat-dots"></i><div><strong>Свяжитесь с продавцом</strong><br>Нашли запчасть? Договоритесь о покупке напрямую с владельцем.</div></li>
-        <li><i class="bi bi-hand-thumbs-up"></i><div><strong>Помогайте друг другу</strong><br>Даже самая мелкая запчасть у вас может кому-то пригодиться.</div></li>
-      </ul>
+
+      {# Этот блок скрываем на мобильной версии #}
+      <div class="how-steps">
+        <ul>
+          <li><i class="bi bi-box-seam"></i><div><strong>Создайте свой склад</strong><br>Зарегистрируйтесь и заполните свой профиль.</div></li>
+          <li><i class="bi bi-wrench"></i><div><strong>Добавляйте запчасти</strong><br>Разбирайте ненужные устройства и добавляйте запчасти на свой склад.</div></li>
+          <li><i class="bi bi-search"></i><div><strong>Ищите нужную запчасть</strong><br>Нужна запчасть? Используйте <a href="{% url 'search' %}">глобальный поиск</a>.</div></li>
+          <li><i class="bi bi-chat-dots"></i><div><strong>Свяжитесь с продавцом</strong><br>Нашли запчасть? Договоритесь о покупке напрямую с владельцем.</div></li>
+          <li><i class="bi bi-hand-thumbs-up"></i><div><strong>Помогайте друг другу</strong><br>Даже самая мелкая запчасть у вас может кому-то пригодиться.</div></li>
+        </ul>
+      </div>
 
       <!-- Форма: переходит на глобальный поиск -->
       <form method="GET" action="{% url 'search' %}" class="search-bar search-form">
@@ -111,6 +119,7 @@
           <button type="submit" class="btn btn-search">Поиск</button>
         </div>
       </form>
+
     </div>
   </div>
 
