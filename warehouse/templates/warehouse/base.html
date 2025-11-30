@@ -12,25 +12,28 @@
       gtag('config', 'G-WXRLTEVR3S');
     </script>
     {% endif %}
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Склад{% endblock %}</title>
-    <!-- Подключаем Bootstrap 5 CSS (локально) -->
+
+    <!-- Bootstrap / Icons / Fonts -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Подключаем пользовательские стили -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
-    <!-- Подключение шрифта Roboto -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
+    <!-- FAVICONS (для Google лучше PNG + обязательно ico) -->
+    <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
+    <link rel="icon" type="image/png" sizes="48x48" href="{% static 'img/favicon-48.png' %}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'img/favicon-192.png' %}">
+    <!-- Дополнительно (можно оставить SVG как запасной) -->
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon-mobirazbor.svg' %}">
     <link rel="alternate icon" href="{% static 'img/favicon-mobirazbor.svg' %}">
-    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
 
     <style>
-        /* Главный контейнер */
         body {
             display: flex;
             flex-direction: column;
@@ -42,7 +45,6 @@
             font-family: 'Roboto', sans-serif;
         }
 
-        /* Шапка */
         .header {
             background-color: #343a40;
             color: #ffffff;
@@ -71,12 +73,8 @@
             align-items: center;
         }
 
-        /* Основной контент растягивается */
-        main {
-            flex-grow: 1;
-        }
+        main { flex-grow: 1; }
 
-        /* Подвал */
         .footer {
             background-color: #343a40;
             color: #fff;
@@ -84,20 +82,10 @@
             text-align: center;
         }
 
-        .footer .counter {
-            font-size: 1.4rem;
-        }
+        .footer .counter { font-size: 1.4rem; }
+        .footer .counter span { font-size: 1.6rem; }
+        .footer p { margin-top: 10px; font-size: 0.9rem; }
 
-        .footer .counter span {
-            font-size: 1.6rem;
-        }
-
-        .footer p {
-            margin-top: 10px;
-            font-size: 0.9rem;
-        }
-
-        /* Стили навигации */
         .navbar-nav .nav-link, .navbar-brand, .navbar-text {
             color: #ffffff !important;
             font-family: 'Roboto', sans-serif;
@@ -108,7 +96,6 @@
             transform: scale(1.05);
         }
 
-        /* Стили кнопок */
         .btn-outline-primary, .btn-outline-secondary {
             border-radius: 8px;
             transition: background-color 0.3s ease, color 0.3s ease;
@@ -119,12 +106,8 @@
             color: #fff !important;
         }
 
-        /* Отступ для контента */
-        .content-padding {
-            padding-top: 80px;
-        }
+        .content-padding { padding-top: 80px; }
 
-        /* Стили для таблиц */
         .table {
             width: 100%;
             border-collapse: collapse;
@@ -148,56 +131,30 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
-        /* Анимация пульсации для бейджа */
         @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 0.7;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
         }
+        .subscription-badge { animation: pulse 1.5s infinite; }
 
-        .subscription-badge {
-            animation: pulse 1.5s infinite;
-        }
-
-        /* Адаптация для мобильных устройств */
         @media (max-width: 768px) {
-.navbar-collapse {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    right: 0;
-    bottom: auto; /* или просто убрать эту строку */
-    background-color: #343a40;
-    overflow-y: auto;
-    padding: 20px;
-    z-index: 999;
-}
-
-
-@media (max-width: 768px) {
-    .org-info {
-        font-size: 0.4rem !important;
-    }
-}
-
-
-            .navbar-nav {
-                flex-direction: column;
+            .navbar-collapse {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                bottom: auto;
+                background-color: #343a40;
+                overflow-y: auto;
+                padding: 20px;
+                z-index: 999;
             }
 
-            .navbar-nav .nav-item {
-                width: 100%;
-                margin: 5px 0;
-            }
+            .org-info { font-size: 0.4rem !important; }
+
+            .navbar-nav { flex-direction: column; }
+            .navbar-nav .nav-item { width: 100%; margin: 5px 0; }
 
             .navbar-nav .nav-link {
                 padding: 10px 15px;
@@ -206,9 +163,7 @@
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
 
-            .navbar-nav .nav-item:last-child .nav-link {
-                border-bottom: none;
-            }
+            .navbar-nav .nav-item:last-child .nav-link { border-bottom: none; }
 
             .navbar-nav .btn {
                 width: 100%;
@@ -216,45 +171,22 @@
                 text-align: left;
             }
 
-            .notification-icon, .navbar-text {
-                display: block;
-                padding: 10px 15px;
-            }
+            .notification-icon, .navbar-text { display: block; padding: 10px 15px; }
 
-            .footer .row {
-                flex-direction: column;
-            }
+            .footer .row { flex-direction: column; }
+            .footer .col-md-6 { margin-bottom: 20px; }
 
-            .footer .col-md-6 {
-                margin-bottom: 20px;
-            }
+            .content-padding { padding-top: 60px; }
+            .table { font-size: 14px; }
 
-            .content-padding {
-                padding-top: 60px;
-            }
-
-            .table {
-                font-size: 14px;
-            }
-
-            /* Адаптация картинки в подвале */
-            .payment-image {
-                max-width: 100%;
-                width: 100%;
-            }
-
-            .payment-image-wrapper {
-                padding: 5px;
-            }
-
-            .payment-section {
-                padding: 10px 0;
-            }
+            .payment-image { max-width: 100%; width: 100%; }
+            .payment-image-wrapper { padding: 5px; }
+            .payment-section { padding: 10px 0; }
         }
     </style>
 </head>
+
 <body>
-    <!-- Шапка сайта -->
     <header class="header py-3 fixed-top">
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-light">
@@ -262,6 +194,7 @@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         {% if user.is_authenticated %}
@@ -271,22 +204,26 @@
                                     <span id="message-notification" class="badge bg-danger" style="display:none;"></span>
                                 </a>
                             </li>
+
                             <li class="nav-item position-relative">
                                 <a class="nav-link" href="{% url 'profile' %}">
                                     <i class="fas fa-user"></i> Профиль
                                     {% if subscription_notification %}
-                                        <span class="badge bg-{% if subscription_expired %}danger{% else %}warning{% endif %} ms-2 subscription-badge" data-bs-toggle="tooltip" title="{{ subscription_notification }}">
+                                        <span class="badge bg-{% if subscription_expired %}danger{% else %}warning{% endif %} ms-2 subscription-badge"
+                                              data-bs-toggle="tooltip" title="{{ subscription_notification }}">
                                             <i class="fas fa-exclamation-triangle"></i>
                                         </span>
                                     {% endif %}
                                 </a>
                             </li>
+
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'warehouse' %}">
                                     <i class="fas fa-box"></i> Мой склад
                                 </a>
                             </li>
                         {% endif %}
+
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'search' %}">
                                 <i class="fas fa-search"></i> Поиск глобальный
@@ -301,10 +238,15 @@
                                 {{ unread_notifications_count }}
                             </span>
                         </a>
+
                         <span class="navbar-text ms-3">{{ user.username }}</span>
+
                         {% if user.is_superuser %}
-                            <a class="btn btn-outline-secondary ms-2" href="{% url 'custom_admin:admin_panel' %}">Панель администратора</a>
+                            <a class="btn btn-outline-secondary ms-2" href="{% url 'custom_admin:admin_panel' %}">
+                                Панель администратора
+                            </a>
                         {% endif %}
+
                         <a class="btn btn-outline-danger ms-2" href="{% url 'logout' %}">Выход</a>
                     {% else %}
                         <a class="btn btn-outline-primary ms-2" href="{% url 'login' %}">Вход</a>
@@ -315,9 +257,7 @@
         </div>
     </header>
 
-    <!-- Основной контент с отступом сверху -->
     <main class="content-padding">
-        <!-- Toast для уведомления о подписке -->
         {% if subscription_notification %}
         <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
             <div id="subscriptionToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
@@ -354,54 +294,45 @@
         </div>
     </main>
 
-    <!-- Нижний колонтитул -->
     <footer class="footer">
+        <div class="container"></div>
+        <hr class="my-4">
 
-  <div class="container">
-<!--    &lt;!&ndash; Первый ряд: Счётчики &ndash;&gt;-->
-<!--    <div class="row mb-4">-->
-<!--        <div class="col-md-6 text-center">-->
-<!--            <div class="counter bordered" style="font-size: 1.2rem;">-->
-<!--                <i class="fas fa-cogs"></i>-->
-<!--                <strong>Запчастей:</strong> <span class="text-danger">{{ part_count }}</span>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="col-md-6 text-center">-->
-<!--            <div class="counter bordered" style="font-size: 1.2rem;">-->
-<!--                <i class="fas fa-users"></i>-->
-<!--                <strong>Пользователей:</strong> <span class="text-danger">{{ user_count }}</span>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-</div>
-            <hr class="my-4">
-<!-- Второй ряд: три колонки -->
-<div class="row">
-    <!-- Левый блок: контакты -->
-<div class="col-md-4 text-center">
-    <h6 style="color: #adb5bd;">Контакты</h6>
-    <p style="color: #adb5bd; line-height: 1; margin-bottom: 0.3rem;"><i class="fas fa-phone"></i> <a href="tel:+375293069555" style="color: #adb5bd;">+375 (25) 9604871</a></p>
-    <p style="color: #adb5bd; line-height: 1; margin-bottom: 0.3rem;"><i class="fas fa-envelope"></i> <a href="mailto:info@example.com" style="color: #adb5bd;">help@mobirazbor.by</a></p>
-</div>
-    <!-- Средний блок: ссылки -->
-    <div class="col-md-4 text-center">
-        <p style="color: #adb5bd; font-size: 0.8rem; line-height: 1; margin-bottom: 0.5rem;"><a href="{% url 'about_project' %}" style="color: #adb5bd;">Общая информация</a></p>
-        <p style="color: #adb5bd; font-size: 0.8rem; line-height: 1; margin-bottom: 0.5rem;"><a href="{% url 'user_agreement' %}" style="color: #adb5bd;">Пользовательское соглашение</a></p>
-        <p style="color: #adb5bd; font-size: 0.8rem; line-height: 1; margin-bottom: 0.5rem;"><a href="{% url 'privacy_policy' %}" style="color: #adb5bd;">Политика конфиденциальности</a></p>
-    </div>
-<!-- Правый блок: реквизиты организации -->
-<div class="col-md-4 text-center">
-    <div class="org-info" style="font-size: 0.6rem; line-height: 0.6; color: #adb5bd;">
-        <p class="mb-1">Индивидуальный предприниматель </p>
-        <p class="mb-1">Антонов Юрий Евгеньевич, УНП 490788687</p>
-        <p class="mb-1">Пн-Сб: 10:00 - 18:00, Вс - Выходной.</p>
-        <p class="mb-1">Республика Беларусь, г. Гомель, ул. Гагарина, д. 55, каб. 50</p>
-        <p class="mb-1"></p>
-    </div>
-</div>
-</div>
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <h6 style="color: #adb5bd;">Контакты</h6>
+                <p style="color: #adb5bd; line-height: 1; margin-bottom: 0.3rem;">
+                    <i class="fas fa-phone"></i>
+                    <a href="tel:+375293069555" style="color: #adb5bd;">+375 (25) 9604871</a>
+                </p>
+                <p style="color: #adb5bd; line-height: 1; margin-bottom: 0.3rem;">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:info@example.com" style="color: #adb5bd;">help@mobirazbor.by</a>
+                </p>
+            </div>
 
-        <!-- Блок с картинкой платежных систем на всю ширину страницы -->
+            <div class="col-md-4 text-center">
+                <p style="color: #adb5bd; font-size: 0.8rem; line-height: 1; margin-bottom: 0.5rem;">
+                    <a href="{% url 'about_project' %}" style="color: #adb5bd;">Общая информация</a>
+                </p>
+                <p style="color: #adb5bd; font-size: 0.8rem; line-height: 1; margin-bottom: 0.5rem;">
+                    <a href="{% url 'user_agreement' %}" style="color: #adb5bd;">Пользовательское соглашение</a>
+                </p>
+                <p style="color: #adb5bd; font-size: 0.8rem; line-height: 1; margin-bottom: 0.5rem;">
+                    <a href="{% url 'privacy_policy' %}" style="color: #adb5bd;">Политика конфиденциальности</a>
+                </p>
+            </div>
+
+            <div class="col-md-4 text-center">
+                <div class="org-info" style="font-size: 0.6rem; line-height: 0.6; color: #adb5bd;">
+                    <p class="mb-1">Индивидуальный предприниматель</p>
+                    <p class="mb-1">Антонов Юрий Евгеньевич, УНП 490788687</p>
+                    <p class="mb-1">Пн-Сб: 10:00 - 18:00, Вс - Выходной.</p>
+                    <p class="mb-1">Республика Беларусь, г. Гомель, ул. Гагарина, д. 55, каб. 50</p>
+                </div>
+            </div>
+        </div>
+
         <div class="payment-section" style="background-color: #adb5bd; width: 100%;">
             <div class="container">
                 <div class="row mt-4">
@@ -415,37 +346,29 @@
         </div>
     </footer>
 
-    <!-- Подключаем jQuery (если используется) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Подключаем Bootstrap 5 JS (локальная копия) -->
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <!-- Подключаем пользовательские скрипты -->
     <script src="{% static 'js/scripts.js' %}" defer></script>
 
     <script>
-        // Инициализация tooltip и Toast
         document.addEventListener('DOMContentLoaded', function () {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.forEach(function (tooltipTriggerEl) {
                 new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            // Инициализация Toast, если он есть и не скрыт в текущей сессии
             var toastEl = document.getElementById('subscriptionToast');
             if (toastEl && !sessionStorage.getItem('hideSubscriptionToast')) {
                 var toast = new bootstrap.Toast(toastEl);
                 toast.show();
             }
 
-            // Обработка кнопки "Больше не показывать"
             var hideButton = document.getElementById('hideSubscriptionToast');
             if (hideButton) {
                 hideButton.addEventListener('click', function () {
                     sessionStorage.setItem('hideSubscriptionToast', 'true');
                     var toast = bootstrap.Toast.getInstance(toastEl);
-                    if (toast) {
-                        toast.hide();
-                    }
+                    if (toast) toast.hide();
                 });
             }
         });
@@ -465,10 +388,8 @@
                     }
                 });
         }
-
-        // Запуск проверки каждые 10 секунд
         setInterval(checkMessages, 10000);
-        checkMessages();  // Проверить сразу при загрузке
+        checkMessages();
     </script>
 </body>
 </html>
