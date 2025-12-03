@@ -25,11 +25,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <!-- FAVICONS (для Google лучше PNG + обязательно ico) -->
+    <!-- FAVICONS -->
     <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
     <link rel="icon" type="image/png" sizes="48x48" href="{% static 'img/favicon-48.png' %}">
     <link rel="icon" type="image/png" sizes="192x192" href="{% static 'img/favicon-192.png' %}">
-    <!-- Дополнительно (можно оставить SVG как запасной) -->
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon-mobirazbor.svg' %}">
     <link rel="alternate icon" href="{% static 'img/favicon-mobirazbor.svg' %}">
 
@@ -60,51 +59,29 @@
             font-family: 'Roboto', sans-serif;
         }
 
-        .navbar {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .navbar .navbar-brand,
-        .navbar .navbar-nav {
-            display: flex;
-            align-items: center;
-        }
-
+        .navbar { flex-grow: 1; display: flex; align-items: center; justify-content: space-between; }
+        .navbar .navbar-brand, .navbar .navbar-nav { display: flex; align-items: center; }
         main { flex-grow: 1; }
 
         .footer {
             background-color: #343a40;
             color: #fff;
-            padding: 10px 0;
+            padding: 10px 0 0;
             text-align: center;
         }
-
-        .footer .counter { font-size: 1.4rem; }
-        .footer .counter span { font-size: 1.6rem; }
-        .footer p { margin-top: 10px; font-size: 0.9rem; }
 
         .navbar-nav .nav-link, .navbar-brand, .navbar-text {
             color: #ffffff !important;
             font-family: 'Roboto', sans-serif;
         }
 
-        .navbar-nav .nav-link:hover {
-            color: #007bff !important;
-            transform: scale(1.05);
-        }
+        .navbar-nav .nav-link:hover { color: #007bff !important; transform: scale(1.05); }
 
         .btn-outline-primary, .btn-outline-secondary {
             border-radius: 8px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-
-        .btn-outline-primary:hover, .btn-outline-secondary:hover {
-            background-color: #007bff !important;
-            color: #fff !important;
-        }
+        .btn-outline-primary:hover, .btn-outline-secondary:hover { background-color: #007bff !important; color: #fff !important; }
 
         .content-padding { padding-top: 80px; }
 
@@ -120,23 +97,63 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .footer .bordered {
-            border: 2px solid #007bff;
-            border-radius: 8px;
-            padding: 10px;
-            margin: 10px 0;
-            display: inline-block;
-            background-color: #2c2c2c;
-            color: #ffffff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.7; }
             100% { transform: scale(1); opacity: 1; }
         }
         .subscription-badge { animation: pulse 1.5s infinite; }
+
+        /* ===== Соц. кнопки (яркие) ===== */
+        .social-row {
+            padding: 12px 0 8px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .social-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff !important;
+            text-decoration: none;
+            padding: 9px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            line-height: 1;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+            border: 1px solid rgba(255,255,255,0.14);
+            transform: translateY(0);
+            transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
+            user-select: none;
+        }
+        .social-btn i { font-size: 1.05rem; }
+        .social-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px rgba(0,0,0,0.26);
+            filter: brightness(1.05);
+        }
+        .social-telegram { background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%); }
+        .social-instagram { background: linear-gradient(135deg, #f58529 0%, #dd2a7b 45%, #8134af 75%, #515bd4 100%); }
+
+        /* ===== Нижняя часть футера ===== */
+        .footer-inner {
+            padding: 14px 0 6px;
+        }
+
+        /* Организация: меньше + полупрозрачнее */
+        .org-info {
+            font-size: 0.75rem;
+            line-height: 1.05;
+            color: rgba(173, 181, 189, 0.68);
+        }
+        .org-info p { margin-bottom: 0.2rem; }
 
         @media (max-width: 768px) {
             .navbar-collapse {
@@ -150,8 +167,6 @@
                 padding: 20px;
                 z-index: 999;
             }
-
-            .org-info { font-size: 0.4rem !important; }
 
             .navbar-nav { flex-direction: column; }
             .navbar-nav .nav-item { width: 100%; margin: 5px 0; }
@@ -173,92 +188,96 @@
 
             .notification-icon, .navbar-text { display: block; padding: 10px 15px; }
 
-            .footer .row { flex-direction: column; }
-            .footer .col-md-6 { margin-bottom: 20px; }
-
             .content-padding { padding-top: 60px; }
             .table { font-size: 14px; }
 
             .payment-image { max-width: 100%; width: 100%; }
             .payment-image-wrapper { padding: 5px; }
             .payment-section { padding: 10px 0; }
+
+            .social-btn { width: 100%; justify-content: center; }
+
+            /* на мобилке ещё чуть меньше */
+            .org-info { font-size: 0.52rem; color: rgba(173, 181, 189, 0.62); }
         }
     </style>
 </head>
 
 <body>
-    <header class="header py-3 fixed-top">
-        <div class="container">
-            <nav class="navbar navbar-expand-lg navbar-light">
-                <a class="navbar-brand" href="{% url 'home' %}">MobiRazbor.by</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+<header class="header py-3 fixed-top">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <a class="navbar-brand" href="{% url 'home' %}">MobiRazbor.by</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        {% if user.is_authenticated %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'chat_list' %}">
-                                    <i class="fas fa-envelope"></i> Сообщения
-                                    <span id="message-notification" class="badge bg-danger" style="display:none;"></span>
-                                </a>
-                            </li>
-
-                            <li class="nav-item position-relative">
-                                <a class="nav-link" href="{% url 'profile' %}">
-                                    <i class="fas fa-user"></i> Профиль
-                                    {% if subscription_notification %}
-                                        <span class="badge bg-{% if subscription_expired %}danger{% else %}warning{% endif %} ms-2 subscription-badge"
-                                              data-bs-toggle="tooltip" title="{{ subscription_notification }}">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                        </span>
-                                    {% endif %}
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'warehouse' %}">
-                                    <i class="fas fa-box"></i> Мой склад
-                                </a>
-                            </li>
-                        {% endif %}
-
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'search' %}">
-                                <i class="fas fa-search"></i> Поиск глобальный
+                            <a class="nav-link" href="{% url 'chat_list' %}">
+                                <i class="fas fa-envelope"></i> Сообщения
+                                <span id="message-notification" class="badge bg-danger" style="display:none;"></span>
                             </a>
                         </li>
-                    </ul>
 
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'notifications_list' %}" class="notification-icon text-decoration-none">
-                            <span class="badge bg-warning text-dark">🔔 Уведомления</span>
-                            <span id="notification-badge" class="badge bg-danger" {% if unread_notifications_count == 0 %}style="display:none;"{% endif %}>
-                                {{ unread_notifications_count }}
-                            </span>
-                        </a>
-
-                        <span class="navbar-text ms-3">{{ user.username }}</span>
-
-                        {% if user.is_superuser %}
-                            <a class="btn btn-outline-secondary ms-2" href="{% url 'custom_admin:admin_panel' %}">
-                                Панель администратора
+                        <li class="nav-item position-relative">
+                            <a class="nav-link" href="{% url 'profile' %}">
+                                <i class="fas fa-user"></i> Профиль
+                                {% if subscription_notification %}
+                                    <span class="badge bg-{% if subscription_expired %}danger{% else %}warning{% endif %} ms-2 subscription-badge"
+                                          data-bs-toggle="tooltip" title="{{ subscription_notification }}">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </span>
+                                {% endif %}
                             </a>
-                        {% endif %}
+                        </li>
 
-                        <a class="btn btn-outline-danger ms-2" href="{% url 'logout' %}">Выход</a>
-                    {% else %}
-                        <a class="btn btn-outline-primary ms-2" href="{% url 'login' %}">Вход</a>
-                        <a class="btn btn-outline-secondary ms-2" href="{% url 'register' %}">Регистрация</a>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'warehouse' %}">
+                                <i class="fas fa-box"></i> Мой склад
+                            </a>
+                        </li>
                     {% endif %}
-                </div>
-            </nav>
-        </div>
-    </header>
 
-    <main class="content-padding">
-        {% if subscription_notification %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'search' %}">
+                            <i class="fas fa-search"></i> Поиск глобальный
+                        </a>
+                    </li>
+                </ul>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'notifications_list' %}" class="notification-icon text-decoration-none">
+                        <span class="badge bg-warning text-dark">🔔 Уведомления</span>
+                        <span id="notification-badge" class="badge bg-danger"
+                              {% if unread_notifications_count == 0 %}style="display:none;"{% endif %}>
+                            {{ unread_notifications_count }}
+                        </span>
+                    </a>
+
+                    <span class="navbar-text ms-3">{{ user.username }}</span>
+
+                    {% if user.is_superuser %}
+                        <a class="btn btn-outline-secondary ms-2" href="{% url 'custom_admin:admin_panel' %}">
+                            Панель администратора
+                        </a>
+                    {% endif %}
+
+                    <a class="btn btn-outline-danger ms-2" href="{% url 'logout' %}">Выход</a>
+                {% else %}
+                    <a class="btn btn-outline-primary ms-2" href="{% url 'login' %}">Вход</a>
+                    <a class="btn btn-outline-secondary ms-2" href="{% url 'register' %}">Регистрация</a>
+                {% endif %}
+            </div>
+        </nav>
+    </div>
+</header>
+
+<main class="content-padding">
+    {% if subscription_notification %}
         <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
             <div id="subscriptionToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
                 <div class="toast-header {% if subscription_expired %}bg-danger text-white{% else %}bg-warning text-dark{% endif %}">
@@ -276,27 +295,52 @@
                 </div>
             </div>
         </div>
+    {% endif %}
+
+    <div class="container mt-4">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    {% if "chat" not in message.tags %}
+                        <div class="alert alert-warning" role="alert">
+                            <p>{{ message }}</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
         {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</main>
 
-        <div class="container mt-4">
-            {% if messages %}
-                <div class="messages">
-                    {% for message in messages %}
-                        {% if "chat" not in message.tags %}
-                            <div class="alert alert-warning" role="alert">
-                                <p>{{ message }}</p>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            {% endif %}
-            {% block content %}{% endblock %}
+<footer class="footer">
+    {# === ДРУГОЕ РАСПОЛОЖЕНИЕ: соцсети СРАЗУ после main, над контактами === #}
+    <div class="social-row">
+        <div class="container">
+            <div class="social-buttons">
+                <a class="social-btn social-telegram"
+                   href="https://t.me/MobiraRazbor" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-telegram"></i>
+                    Телеграм канал
+                </a>
+
+                <a class="social-btn social-telegram"
+                   href="https://t.me/mobirazbor_chat" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-chat-dots-fill"></i>
+                    Телеграм чат
+                </a>
+
+                <a class="social-btn social-instagram"
+                   href="https://www.instagram.com/mobirazbor.by/" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-instagram"></i>
+                    Instagram
+                </a>
+            </div>
         </div>
-    </main>
+    </div>
 
-    <footer class="footer">
-        <div class="container"></div>
-        <hr class="my-4">
+    <div class="container footer-inner">
+        <hr class="my-3">
 
         <div class="row">
             <div class="col-md-4 text-center">
@@ -307,7 +351,7 @@
                 </p>
                 <p style="color: #adb5bd; line-height: 1; margin-bottom: 0.3rem;">
                     <i class="fas fa-envelope"></i>
-                    <a href="mailto:info@example.com" style="color: #adb5bd;">help@mobirazbor.by</a>
+                    <a href="mailto:help@mobirazbor.by" style="color: #adb5bd;">help@mobirazbor.by</a>
                 </p>
             </div>
 
@@ -324,7 +368,7 @@
             </div>
 
             <div class="col-md-4 text-center">
-                <div class="org-info" style="font-size: 0.6rem; line-height: 0.6; color: #adb5bd;">
+                <div class="org-info">
                     <p class="mb-1">Индивидуальный предприниматель</p>
                     <p class="mb-1">Антонов Юрий Евгеньевич, УНП 490788687</p>
                     <p class="mb-1">Пн-Сб: 10:00 - 18:00, Вс - Выходной.</p>
@@ -332,64 +376,68 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="payment-section" style="background-color: #adb5bd; width: 100%;">
-            <div class="container">
-                <div class="row mt-4">
-                    <div class="col text-center">
-                        <div class="payment-image-wrapper" style="display: inline-block; padding: 10px;">
-                            <img src="{% static 'images/payment_systems.png' %}" alt="Платежные системы" class="img-fluid payment-image" style="max-width: 500px;">
-                        </div>
+    <div class="payment-section" style="background-color: #adb5bd; width: 100%;">
+        <div class="container">
+            <div class="row mt-3">
+                <div class="col text-center">
+                    <div class="payment-image-wrapper" style="display: inline-block; padding: 10px;">
+                        <img src="{% static 'images/payment_systems.png' %}"
+                             alt="Платежные системы"
+                             class="img-fluid payment-image"
+                             style="max-width: 500px;">
                     </div>
                 </div>
             </div>
         </div>
-    </footer>
+    </div>
+</footer>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/scripts.js' %}" defer></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/scripts.js' %}" defer></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-                new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-
-            var toastEl = document.getElementById('subscriptionToast');
-            if (toastEl && !sessionStorage.getItem('hideSubscriptionToast')) {
-                var toast = new bootstrap.Toast(toastEl);
-                toast.show();
-            }
-
-            var hideButton = document.getElementById('hideSubscriptionToast');
-            if (hideButton) {
-                hideButton.addEventListener('click', function () {
-                    sessionStorage.setItem('hideSubscriptionToast', 'true');
-                    var toast = bootstrap.Toast.getInstance(toastEl);
-                    if (toast) toast.hide();
-                });
-            }
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
         });
-    </script>
 
-    <script>
-        function checkMessages() {
-            fetch("{% url 'check_new_messages' %}")
-                .then(response => response.json())
-                .then(data => {
-                    let notificationBadge = document.getElementById("message-notification");
-                    if (data.new_messages > 0) {
-                        notificationBadge.style.display = "inline-block";
-                        notificationBadge.textContent = data.new_messages;
-                    } else {
-                        notificationBadge.style.display = "none";
-                    }
-                });
+        var toastEl = document.getElementById('subscriptionToast');
+        if (toastEl && !sessionStorage.getItem('hideSubscriptionToast')) {
+            var toast = new bootstrap.Toast(toastEl);
+            toast.show();
         }
-        setInterval(checkMessages, 10000);
-        checkMessages();
-    </script>
+
+        var hideButton = document.getElementById('hideSubscriptionToast');
+        if (hideButton) {
+            hideButton.addEventListener('click', function () {
+                sessionStorage.setItem('hideSubscriptionToast', 'true');
+                var toast = bootstrap.Toast.getInstance(toastEl);
+                if (toast) toast.hide();
+            });
+        }
+    });
+</script>
+
+<script>
+    function checkMessages() {
+        fetch("{% url 'check_new_messages' %}")
+            .then(response => response.json())
+            .then(data => {
+                let notificationBadge = document.getElementById("message-notification");
+                if (data.new_messages > 0) {
+                    notificationBadge.style.display = "inline-block";
+                    notificationBadge.textContent = data.new_messages;
+                } else {
+                    notificationBadge.style.display = "none";
+                }
+            });
+    }
+    setInterval(checkMessages, 10000);
+    checkMessages();
+</script>
 </body>
 </html>
