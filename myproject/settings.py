@@ -167,10 +167,36 @@ MEDIA_URL = "https://s3-website-minsk-dc2.cloud.mts.by/parts-images/"
 
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.mail.ru'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.mail.ru'
+# EMAIL_PORT = 465
+# EMAIL_USE_SSL = True
+# EMAIL_HOST_USER = 'mobirazbor@mail.ru'
+# EMAIL_HOST_PASSWORD = 'j4Cy2rgYCj70K6SWcnU3'
+# DEFAULT_FROM_EMAIL = 'mobirazbor@mail.ru'
+
+
+
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+#
+# EMAIL_HOST_USER = "mobirazbor@gmail.com"
+# EMAIL_HOST_PASSWORD = "basa knjz pilv bary"
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'mobirazbor@mail.ru'
-EMAIL_HOST_PASSWORD = 'j4Cy2rgYCj70K6SWcnU3'
-DEFAULT_FROM_EMAIL = 'mobirazbor@mail.ru'
+EMAIL_USE_TLS = False
+
+EMAIL_HOST_USER = "mobirazbor@gmail.com"
+EMAIL_HOST_PASSWORD = "basa knjz pilv bary"
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
