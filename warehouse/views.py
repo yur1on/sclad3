@@ -35,6 +35,8 @@ from django.shortcuts import render, redirect
 from django.db import transaction
 from django.contrib import messages
 from .models import Part, PartImage
+from decimal import Decimal, InvalidOperation
+from django.db.models import Count, Min, Max
 
 
 
@@ -66,409 +68,443 @@ def home(request):
     return render(request, "warehouse/home.html", context)
 
 
+from decimal import Decimal, InvalidOperation
+
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import (
+    Q, F, Value, IntegerField, OuterRef, Subquery,
+    Count, Min, Max, Sum, Case, When
+)
+from django.db.models.functions import Lower, Replace
+from django.shortcuts import render
+from django.utils import timezone
+
+from .models import Part
+from .search_utils import split_search_q, note_regex_from_text, normalize_compact
+
+
+def _annotate_search_fields(qs):
+    """
+    Общие аннотации для поиска.
+    normalized_* убирают пробелы и дефисы (чтобы SM-A536B находилось по A536B).
+    """
+    return qs.annotate(
+        lower_brand=Lower(F("brand")),
+        lower_model=Lower(F("model")),
+        lower_chip_label=Lower(F("chip_label")),
+
+        # model: убираем пробелы и дефисы
+        normalized_model=Lower(
+            Replace(
+                Replace(F("model"), Value(" "), Value("")),
+                Value("-"), Value("")
+            )
+        ),
+
+        # part_number: ТОЛЬКО ПОЛНОЕ совпадение (тоже нормализуем пробелы/дефисы)
+        normalized_part_number=Lower(
+            Replace(
+                Replace(F("part_number"), Value(" "), Value("")),
+                Value("-"), Value("")
+            )
+        ),
+    )
+
+
+def search(request):
+    q_raw = (request.GET.get("q") or "").strip()
+
+    # совместимость со старыми ссылками
+    brand_in = (request.GET.get("brand") or "").strip()
+    model_in = (request.GET.get("model") or "").strip()
+
+    brand, model, single_term, term, q = split_search_q(q_raw, brand_in, model_in)
+
+    # -------- Фильтры UI --------
+    part_types = [p.strip() for p in request.GET.getlist("part_type") if p.strip()]
+    region = (request.GET.get("region") or "").strip()
+    city = (request.GET.get("city") or "").strip()
+    condition = (request.GET.get("condition") or "").strip()
+    color = (request.GET.get("color") or "").strip()
+    sort = (request.GET.get("sort") or "relevance").strip()
+
+    price_min_raw = (request.GET.get("price_min") or "").strip()
+    price_max_raw = (request.GET.get("price_max") or "").strip()
+    has_images = (request.GET.get("has_images") == "1")
+
+    # -------- База queryset --------
+    results = (
+        Part.objects
+        .filter(quantity__gt=0)
+        .select_related("user", "user__profile")
+        .prefetch_related("images")
+    )
+    results = _annotate_search_fields(results)
+
+    brand_l = (brand or "").strip().lower()
+    model_l = (model or "").strip().lower()
+
+    term_l = (term or "").strip().lower()
+
+    model_norm = normalize_compact(model)
+    term_norm = normalize_compact(term)
+
+    # note: только модельные токены (с цифрами) и как отдельные слова
+    note_pat_term = note_regex_from_text(term) if term else None
+    note_pat_model = note_regex_from_text(model) if model else None
+
+    # -------- Поиск + приоритет --------
+    if single_term and term:
+        base_q = (
+            # model / chip
+            Q(normalized_model__icontains=term_norm) |
+            Q(lower_model__icontains=term_l) |
+            Q(lower_chip_label__icontains=term_l) |
+            # part_number — ТОЛЬКО полное
+            Q(normalized_part_number=term_norm) |
+            # brand
+            Q(lower_brand__icontains=term_l)
+        )
+        if note_pat_term:
+            base_q = base_q | Q(note__iregex=note_pat_term)
+
+        results = results.filter(base_q)
+
+        whens = [
+            When(normalized_part_number=term_norm, then=Value(120)),     # part_number full
+            When(normalized_model=term_norm, then=Value(95)),            # model exact (compact)
+            When(lower_model=term_l, then=Value(90)),                    # model exact text
+            When(normalized_model__icontains=term_norm, then=Value(75)), # model contains
+            When(lower_model__icontains=term_l, then=Value(70)),
+            When(lower_chip_label__icontains=term_l, then=Value(60)),
+            When(lower_brand__icontains=term_l, then=Value(40)),
+        ]
+        if note_pat_term:
+            whens.append(When(note__iregex=note_pat_term, then=Value(25)))  # note ниже модели/бренда
+
+        results = results.annotate(
+            match_priority=Case(*whens, default=Value(0), output_field=IntegerField())
+        )
+
+    else:
+        # бренд (если есть)
+        if brand:
+            results = results.filter(lower_brand__icontains=brand_l)
+
+        if model:
+            model_q = (
+                Q(normalized_model__icontains=model_norm) |
+                Q(lower_model__icontains=model_l) |
+                Q(lower_chip_label__icontains=model_l) |
+                Q(normalized_part_number=model_norm)   # part_number full
+            )
+            if note_pat_model:
+                model_q = model_q | Q(note__iregex=note_pat_model)
+
+            results = results.filter(model_q)
+
+        whens = []
+        if model:
+            whens.extend([
+                When(normalized_part_number=model_norm, then=Value(115)),  # part_number full
+                When(lower_brand=brand_l, normalized_model=model_norm, then=Value(100)),
+                When(lower_brand=brand_l, lower_model=model_l, then=Value(95)),
+                When(normalized_model=model_norm, then=Value(85)),
+                When(lower_model=model_l, then=Value(80)),
+                When(normalized_model__icontains=model_norm, then=Value(65)),
+                When(lower_model__icontains=model_l, then=Value(60)),
+                When(lower_chip_label__icontains=model_l, then=Value(55)),
+            ])
+            if note_pat_model:
+                whens.append(When(note__iregex=note_pat_model, then=Value(25)))
+
+        if brand:
+            whens.append(When(lower_brand=brand_l, then=Value(30)))
+
+        results = results.annotate(
+            match_priority=Case(*whens, default=Value(0), output_field=IntegerField())
+        )
+
+    # -------- Ограничения подписки (как у тебя было) --------
+    now = timezone.now()
+    active_paid = (
+        Q(user__profile__tariff__in=["lite", "standard", "standard2", "standard3", "premium"]) &
+        Q(user__profile__subscription_end__isnull=False, user__profile__subscription_end__gte=now)
+    )
+    last_30_pk = (
+        Part.objects
+        .filter(user=OuterRef("user_id"), quantity__gt=0)
+        .order_by("-created_at")
+        .values("pk")[:30]
+    )
+    results = results.filter(active_paid | Q(pk__in=Subquery(last_30_pk)))
+
+    # -------- Фильтры --------
+    if part_types:
+        results = results.filter(part_type__in=part_types)
+    if region:
+        results = results.filter(user__profile__region__icontains=region)
+    if city:
+        results = results.filter(user__profile__city__icontains=city)
+    if condition:
+        results = results.filter(condition__icontains=condition)
+    if color:
+        results = results.filter(color__icontains=color)
+    if has_images:
+        results = results.filter(images__isnull=False).distinct()
+
+    try:
+        if price_min_raw:
+            results = results.filter(price__gte=Decimal(price_min_raw.replace(",", ".")))
+    except (InvalidOperation, ValueError):
+        pass
+
+    try:
+        if price_max_raw:
+            results = results.filter(price__lte=Decimal(price_max_raw.replace(",", ".")))
+    except (InvalidOperation, ValueError):
+        pass
+
+    # -------- Фасеты --------
+    facets_base = results
+
+    facet_part_types = list(
+        facets_base.exclude(part_type__isnull=True).exclude(part_type="")
+        .values("part_type").annotate(count=Count("id")).order_by("part_type")
+    )
+    facet_conditions = list(
+        facets_base.exclude(condition__isnull=True).exclude(condition="")
+        .values("condition").annotate(count=Count("id")).order_by("condition")
+    )
+    facet_colors = list(
+        facets_base.exclude(color__isnull=True).exclude(color="")
+        .values("color").annotate(count=Count("id")).order_by("color")
+    )
+    facet_cities = list(
+        facets_base.exclude(user__profile__city__isnull=True).exclude(user__profile__city="")
+        .values(city=F("user__profile__city")).annotate(count=Count("id")).order_by("city")
+    )
+    facet_regions = list(
+        facets_base.exclude(user__profile__region__isnull=True).exclude(user__profile__region="")
+        .values(region=F("user__profile__region")).annotate(count=Count("id")).order_by("region")
+    )
+    price_bounds = facets_base.aggregate(min_price=Min("price"), max_price=Max("price"))
+
+    # -------- Сортировка --------
+    if sort == "new":
+        results = results.order_by("-created_at")
+    elif sort == "price_asc":
+        results = results.order_by("price", "-match_priority", "-created_at")
+    elif sort == "price_desc":
+        results = results.order_by("-price", "-match_priority", "-created_at")
+    elif sort == "qty_desc":
+        results = results.order_by("-quantity", "-match_priority", "-created_at")
+    else:
+        results = results.order_by("-match_priority", "-created_at")
+
+    # -------- Пагинация --------
+    total_results = results.count()
+    paginator = Paginator(results, 30)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    qs = request.GET.copy()
+    qs.pop("page", None)
+    base_qs = qs.urlencode()
+
+    has_filters = any([
+        part_types, region, city, condition, color, price_min_raw, price_max_raw, has_images,
+        (sort and sort != "relevance")
+    ])
+
+    return render(request, "warehouse/search.html", {
+        "page_obj": page_obj,
+        "total_results": total_results,
+        "base_qs": base_qs,
+        "q": q,
+
+        "part_types_selected": part_types,
+        "region": region,
+        "city": city,
+        "condition": condition,
+        "color": color,
+        "price_min": price_min_raw,
+        "price_max": price_max_raw,
+        "has_images": has_images,
+        "sort": sort,
+        "has_filters": has_filters,
+
+        "facet_part_types": facet_part_types,
+        "facet_conditions": facet_conditions,
+        "facet_colors": facet_colors,
+        "facet_cities": facet_cities,
+        "facet_regions": facet_regions,
+        "price_bounds": price_bounds,
+    })
+
 
 
 @login_required
 def warehouse_view(request):
-    query = request.GET.get('q', '').strip()
-    brand = request.GET.get('brand', '')
-    model = request.GET.get('model', '')
-    part_type = request.GET.get('part_type', '')
+    q_raw = (request.GET.get("q") or "").strip()
 
-    # Базовый фильтр по пользователю
-    parts = Part.objects.filter(user=request.user)
+    # совместимость со старыми полями
+    brand_in = (request.GET.get("brand") or "").strip()
+    model_in = (request.GET.get("model") or "").strip()
 
-    # Вычисляем общее количество просмотров всех запчастей пользователя
-    all_parts = Part.objects.filter(user=request.user)
-    total_views = all_parts.aggregate(total_views=Sum('views'))['total_views'] or 0
+    # ✅ новый фильтр (мульти-чекбоксы)
+    part_types = [p.strip() for p in request.GET.getlist("part_type") if p.strip()]
 
-    # Список типов запчастей
-    known_part_types = [
-        'дисплей', 'аккумулятор', 'Вибромотор', 'Датчик', 'приближения', 'полифонический', 'музыкальный', 'Buzzer',
-        'слуховой', 'speaker', 'основная', 'фронтальная', 'Катушка', 'беспроводной', 'зарядки', 'Коннектор', 'АКБ', 'дисплея',
-        'межплатный', 'Крышка', 'задняя', 'Пластина', 'прижимная', 'зарядки', 'Плата', 'SUB', 'системная', 'Разъем', 'гарнитуры', 'зарядки', 'Рама', 'Рамка', 'дисплея', 'Резинка', 'датчика', 'приближения', 'Сетка', 'Сеточка', 'динамика',
-        'Сим-лоток', 'Сим', 'Лоток', 'Сим-считыватель', 'считыватель', 'Сканер', 'отпечатка', 'сенсорный', 'оптический', 'отпечаток', 'Стекло', 'камеры', 'для', 'переклейки', 'Тачскрин', 'Микросхема', 'Микрофон', 'Шлейф', 'антенна', 'Wi-Fi', 'беспроводной', 'зарядка',
-        'боковых', 'кнопок', 'кнопка', 'вспышки', 'вспышка', 'дисплея', 'межплатный', 'сканера', 'NFC', 'камера',
-        'корпус', 'динамик', 'микрофон', 'материнская плата', 'шлейф', 'стекло', 'модуль', 'экран', 'зарядное устройство'
-    ]
+    # если где-то остались старые ссылки ?part_type=... (одним значением) — поддержим
+    legacy_part_type = (request.GET.get("part_type") or "").strip()
+    if legacy_part_type and legacy_part_type not in part_types:
+        part_types.append(legacy_part_type)
 
-    # Список брендов
-    known_brands = [
-        'xiaomi', 'samsung', 'apple', 'huawei', 'honor', 'oppo', 'vivo', 'realme',
-        'nokia', 'lg', 'sony', 'asus', 'lenovo', 'meizu', 'tecno', 'infinix', 'oppo',
-        'TCL', 'Google', 'OnePlus', 'Alcatel', 'Amigoo', 'Archos', 'Asus', 'Black Shark', 'BlackBerry',
-        'BLU', 'Cat', 'Caterpillar', 'Coolpad', 'Cubot', 'Doogee', 'Elephone', 'HTC', 'Lenovo',
-        'LG', 'Micromax', 'Motorola', 'Nothing', 'Nubia', 'Oukitel', 'Sharp', 'Sony', 'Amazfit',
-        'Chuwi', 'Hotwav', 'Teclast', 'UMiDIGI', 'UMiDIGI', 'Garmin', 'Wiko', 'ZTE', 'Poco'
-    ]
+    brand, model, single_term, term, q = split_search_q(q_raw, brand_in, model_in)
 
-    def normalize_text(text):
-        """Нормализация текста: убираем пробелы и приводим к нижнему регистру."""
-        return ''.join(text.split()).lower()
+    qs = (
+        Part.objects
+        .filter(user=request.user)
+        .prefetch_related("images")
+    )
+    qs = _annotate_search_fields(qs)
 
-    def split_query(query):
-        """Разделение запроса на бренд, модель/номер запчасти/маркировку и тип запчасти."""
-        query_words = query.lower().split()
-        brand_words = []
-        model_or_part_words = []
-        part_type_words = []
+    # метрики
+    total_views = (
+        Part.objects
+        .filter(user=request.user)
+        .aggregate(total_views=Sum("views"))
+        .get("total_views") or 0
+    )
 
-        # Проверяем каждое слово
-        for word in query_words:
-            # Если слово полностью совпадает с типом запчасти (например, "микросхема")
-            if word in [pt.lower() for pt in known_part_types]:
-                part_type_words.append(word)
-            # Если слово содержит бренд
-            elif any(b.lower() in word for b in known_brands):
-                brand_words.append(word)
-            # Остальные слова считаем моделью, номером или маркировкой
-            else:
-                model_or_part_words.append(word)
+    brand_l = (brand or "").lower()
+    model_l = (model or "").lower()
+    term_l = (term or "").lower()
 
-        # Если в part_type_words есть "микросхема", проверяем, не содержит ли part_type маркировку
-        if 'микросхема' in part_type_words and len(query_words) > 1:
-            # Например, запрос "Микросхема 334R5T" -> "334R5T" должно попасть в model_or_part_words
-            for word in query_words:
-                if word != 'микросхема' and word not in brand_words:
-                    if word not in model_or_part_words:
-                        model_or_part_words.append(word)
-            part_type_words = ['микросхема']  # Оставляем только "микросхема" в part_type
+    model_norm = normalize_compact(model)
+    term_norm = normalize_compact(term)
 
-        return ' '.join(brand_words).strip(), ' '.join(model_or_part_words).strip(), ' '.join(part_type_words).strip()
+    note_pat_term = note_regex_from_text(term) if term else None
+    note_pat_model = note_regex_from_text(model) if model else None
 
-    # Обработка поискового запроса
-    if query:
-        # Разделяем запрос на бренд, модель/номер запчасти/маркировку и тип запчасти
-        brand_query, model_or_part_query, part_type_query = split_query(query)
-        normalized_model_query = normalize_text(model_or_part_query) if model_or_part_query else ''
-        original_model_query = model_or_part_query.lower() if model_or_part_query else ''
-        original_brand_query = brand_query.lower() if brand_query else ''
-
-        # Аннотация для нормализованных полей
-        parts = parts.annotate(
-            normalized_model=Lower(Replace(F('model'), Value(' '), Value(''))),
-            lower_model=Lower(F('model')),
-            lower_part_number=Lower(F('part_number')),
-            lower_brand=Lower(F('brand')),
-            lower_chip_label=Lower(F('chip_label')),  # Добавляем chip_label
-            lower_part_type=Lower(F('part_type'))  # Добавляем part_type для поиска маркировки
+    # --- тот же поиск, что и в search() ---
+    if single_term and term:
+        base_q = (
+            Q(normalized_model__icontains=term_norm) |
+            Q(lower_model__icontains=term_l) |
+            Q(lower_chip_label__icontains=term_l) |
+            Q(normalized_part_number=term_norm) |
+            Q(lower_brand__icontains=term_l)
         )
+        if note_pat_term:
+            base_q = base_q | Q(note__iregex=note_pat_term)
 
-        # Фильтрация
-        filter_conditions = Q()
-        if brand_query and model_or_part_query:
-            # Если указаны и бренд, и модель/номер/маркировка
-            filter_conditions = (
-                Q(lower_brand__icontains=original_brand_query) &
-                (
-                    Q(normalized_model__icontains=normalized_model_query) |
-                    Q(lower_model__icontains=original_model_query) |
-                    Q(lower_part_number__icontains=original_model_query) |
-                    Q(lower_chip_label__icontains=original_model_query) |
-                    Q(lower_part_type__icontains=original_model_query)
-                )
-            )
-        elif brand_query:
-            # Если указан только бренд
-            filter_conditions = Q(lower_brand__icontains=original_brand_query)
-        elif model_or_part_query:
-            # Если указана только модель, номер запчасти или маркировка
-            filter_conditions = (
-                Q(normalized_model__icontains=normalized_model_query) |
-                Q(lower_model__icontains=original_model_query) |
-                Q(lower_part_number__icontains=original_model_query) |
-                Q(lower_chip_label__icontains=original_model_query) |
-                Q(lower_part_type__icontains=original_model_query)
-            )
+        qs = qs.filter(base_q)
 
-        if filter_conditions:
-            parts = parts.filter(filter_conditions)
+        whens = [
+            When(normalized_part_number=term_norm, then=Value(120)),
+            When(normalized_model=term_norm, then=Value(95)),
+            When(lower_model=term_l, then=Value(90)),
+            When(normalized_model__icontains=term_norm, then=Value(75)),
+            When(lower_model__icontains=term_l, then=Value(70)),
+            When(lower_chip_label__icontains=term_l, then=Value(60)),
+            When(lower_brand__icontains=term_l, then=Value(40)),
+        ]
+        if note_pat_term:
+            whens.append(When(note__iregex=note_pat_term, then=Value(25)))
 
-            # Аннотация для приоритизации
-            parts = parts.annotate(
-                match_priority=Case(
-                    # Точное совпадение модели, номера запчасти, маркировки или part_type
-                    When(lower_model=original_model_query, then=Value(3)),
-                    When(normalized_model=normalized_model_query, then=Value(3)),
-                    When(lower_part_number=original_model_query, then=Value(3)),
-                    When(lower_chip_label=original_model_query, then=Value(3)),
-                    When(lower_part_type=original_model_query, then=Value(3)),
-                    # Точное совпадение бренда
-                    When(lower_brand=original_brand_query, then=Value(2)),
-                    # Частичное совпадение модели, номера запчасти, маркировки или part_type
-                    When(normalized_model__contains=normalized_model_query, then=Value(2)),
-                    When(lower_part_number__contains=original_model_query, then=Value(2)),
-                    When(lower_chip_label__contains=original_model_query, then=Value(2)),
-                    When(lower_part_type__contains=original_model_query, then=Value(2)),
-                    # Частичное совпадение бренда
-                    When(lower_brand__contains=original_brand_query, then=Value(1)),
-                    default=Value(0),
-                    output_field=IntegerField()
-                )
-            )
-        else:
-            parts = parts.annotate(match_priority=Value(0, output_field=IntegerField()))
+        qs = qs.annotate(match_priority=Case(*whens, default=Value(0), output_field=IntegerField()))
 
-        # Фильтрация по типу запчасти
-        if part_type_query:
-            parts = parts.filter(part_type__icontains=part_type_query)
-            parts = parts.annotate(
-                part_type_match=Case(
-                    When(part_type__iexact=part_type_query, then=Value(2)),
-                    When(part_type__icontains=part_type_query, then=Value(1)),
-                    default=Value(0),
-                    output_field=IntegerField()
-                )
-            )
-        else:
-            parts = parts.annotate(part_type_match=Value(0, output_field=IntegerField()))
     else:
-        # Если запроса нет, все записи имеют нулевой приоритет
-        parts = parts.annotate(
-            match_priority=Value(0, output_field=IntegerField()),
-            part_type_match=Value(0, output_field=IntegerField())
-        )
+        if brand:
+            qs = qs.filter(lower_brand__icontains=brand_l)
 
-    # Дополнительные фильтры из GET-параметров
-    if brand:
-        parts = parts.filter(brand__icontains=brand)
-    if model:
-        parts = parts.filter(model__icontains=model)
-    if part_type:
-        parts = parts.filter(part_type__icontains=part_type)
+        if model:
+            model_q = (
+                Q(normalized_model__icontains=model_norm) |
+                Q(lower_model__icontains=model_l) |
+                Q(lower_chip_label__icontains=model_l) |
+                Q(normalized_part_number=model_norm)
+            )
+            if note_pat_model:
+                model_q = model_q | Q(note__iregex=note_pat_model)
 
-    # Сортировка: сначала по совпадению модели/номера/бренда/маркировки, затем по совпадению типа запчасти, затем по дате
-    parts = parts.order_by('-match_priority', '-part_type_match', '-created_at')
+            qs = qs.filter(model_q)
 
-    # Пагинация
-    total_parts = parts.count()
-    paginator = Paginator(parts, 30)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        whens = []
+        if model:
+            whens.extend([
+                When(normalized_part_number=model_norm, then=Value(115)),
+                When(normalized_model=model_norm, then=Value(85)),
+                When(lower_model=model_l, then=Value(80)),
+                When(normalized_model__icontains=model_norm, then=Value(65)),
+                When(lower_model__icontains=model_l, then=Value(60)),
+                When(lower_chip_label__icontains=model_l, then=Value(55)),
+            ])
+            if brand:
+                whens.insert(1, When(lower_brand=brand_l, normalized_model=model_norm, then=Value(100)))
+                whens.insert(2, When(lower_brand=brand_l, lower_model=model_l, then=Value(95)))
+            if note_pat_model:
+                whens.append(When(note__iregex=note_pat_model, then=Value(25)))
 
-    # Уникальные устройства и бренды
-    devices = Part.objects.filter(user=request.user).values_list('device', flat=True).distinct()
-    brands = Part.objects.filter(user=request.user).values_list('brand', flat=True).distinct()
+        if brand:
+            whens.append(When(lower_brand=brand_l, then=Value(30)))
 
-    return render(request, 'warehouse/warehouse.html', {
-        'page_obj': page_obj,
-        'query': query,
-        'brand': brand,
-        'model': model,
-        'part_type': part_type,
-        'devices': devices,
-        'brands': brands,
-        'total_parts': total_parts,
-        'total_views': total_views,  # Добавляем общее количество просмотров
+        qs = qs.annotate(match_priority=Case(*whens, default=Value(0), output_field=IntegerField()))
+
+    # ✅ фасеты по типам (после поиска, но ДО применения выбранных типов)
+    facets_base = qs
+    facet_part_types = list(
+        facets_base.exclude(part_type__isnull=True).exclude(part_type="")
+        .values("part_type").annotate(count=Count("id")).order_by("part_type")
+    )
+
+    # ✅ применяем выбранные типы (точное совпадение по значению чекбокса)
+    if part_types:
+        qs = qs.filter(part_type__in=part_types)
+
+    qs = qs.order_by("-match_priority", "-created_at")
+
+    total_parts = qs.count()
+    paginator = Paginator(qs, 30)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    # ✅ base_qs для пагинации (сохраняет q + part_type + всё остальное)
+    get_copy = request.GET.copy()
+    get_copy.pop("page", None)
+    base_qs = get_copy.urlencode()
+
+    devices = (
+        Part.objects.filter(user=request.user)
+        .values_list("device", flat=True).distinct().order_by("device")
+    )
+    brands = (
+        Part.objects.filter(user=request.user)
+        .values_list("brand", flat=True).distinct().order_by("brand")
+    )
+
+    return render(request, "warehouse/warehouse.html", {
+        "page_obj": page_obj,
+        "base_qs": base_qs,
+
+        "query": q,  # строка поиска
+        "total_parts": total_parts,
+        "total_views": total_views,
+
+        # фильтр part_type
+        "facet_part_types": facet_part_types,
+        "part_types_selected": part_types,
+
+        # твои кнопки
+        "devices": devices,
+        "brands": brands,
     })
-
 def logout_view(request):
     logout(request)
     return redirect('home')  # Перенаправление на главную страницу после выхода
 
 
 
-def search(request):
-    query = request.GET.get('q', '').strip()
-    device = request.GET.get('device', '').strip()
-    brand = request.GET.get('brand', '').strip()
-    model = request.GET.get('model', '').strip()
-    part_type = request.GET.get('part_type', '').strip()
-    region = request.GET.get('region', '').strip()
-    city = request.GET.get('city', '').strip()
-
-    # Исключаем запчасти с количеством 0
-    results = Part.objects.filter(quantity__gt=0)
-
-    # Список известных типов запчастей
-    known_part_types = [
-        'дисплей', 'аккумулятор', 'Вибромотор', 'Датчик', 'приближения', 'полифонический', 'музыкальный', 'Buzzer',
-        'слуховой', 'speaker', 'основная', 'фронтальная', 'Катушка', 'беспроводной', 'зарядки', 'Коннектор', 'АКБ', 'дисплея',
-        'межплатный', 'Крышка', 'задняя', 'Пластина', 'прижимная', 'зарядки', 'Плата', 'SUB', 'системная', 'Разъем', 'гарнитуры', 'зарядки', 'Рама', 'Рамка', 'дисплея', 'Резинка', 'датчика', 'приближения', 'Сетка', 'Сеточка', 'динамика',
-        'Сим-лоток', 'Сим', 'Лоток', 'Сим-считыватель', 'считыватель', 'Сканер', 'отпечатка', 'сенсорный', 'оптический', 'отпечаток', 'Стекло', 'камеры', 'для', 'переклейки', 'Тачскрин', 'Микросхема', 'Микрофон', 'Шлейф', 'антенна', 'Wi-Fi', 'беспроводной', 'зарядка',
-        'боковых', 'кнопок', 'кнопка', 'вспышки', 'вспышка', 'дисплея', 'межплатный', 'сканера', 'NFC', 'камера',
-        'корпус', 'динамик', 'микрофон', 'материнская плата', 'шлейф', 'стекло', 'модуль', 'экран', 'зарядное устройство'
-    ]
-
-    # Список известных брендов
-    known_brands = [
-        'xiaomi', 'samsung', 'apple', 'huawei', 'honor', 'oppo', 'vivo', 'realme',
-        'nokia', 'lg', 'sony', 'asus', 'lenovo', 'meizu', 'tecno', 'infinix', 'oppo',
-        'TCL', 'Google', 'OnePlus', 'Alcatel', 'Amigoo', 'Archos', 'Asus', 'Black Shark', 'BlackBerry',
-        'BLU', 'Cat', 'Caterpillar', 'Coolpad', 'Cubot', 'Doogee', 'Elephone', 'HTC', 'Lenovo',
-        'LG', 'Micromax', 'Motorola', 'Nothing', 'Nubia', 'Oukitel', 'Sharp', 'Sony', 'Amazfit',
-        'Chuwi', 'Hotwav', 'Teclast', 'UMiDIGI', 'UMiDIGI', 'Garmin', 'Wiko', 'ZTE', 'Poco'
-    ]
-
-    def normalize_text(text):
-        """Нормализация текста: убираем пробелы и приводим к нижнему регистру."""
-        return ''.join(text.split()).lower()
-
-    def split_query(query):
-        """Разделение запроса на бренд, модель/номер запчасти/маркировку и тип запчасти."""
-        query_words = query.lower().split()
-        brand_words = []
-        model_or_part_words = []
-        part_type_words = []
-
-        # Проверяем каждое слово
-        for word in query_words:
-            # Если слово полностью совпадает с типом запчасти (например, "микросхема")
-            if word in [pt.lower() for pt in known_part_types]:
-                part_type_words.append(word)
-            # Если слово содержит бренд
-            elif any(b.lower() in word for b in known_brands):
-                brand_words.append(word)
-            # Остальные слова считаем моделью, номером или маркировкой
-            else:
-                model_or_part_words.append(word)
-
-        # Если в part_type_words есть "микросхема", проверяем, не содержит ли part_type маркировку
-        if 'микросхема' in part_type_words and len(query_words) > 1:
-            # Например, запрос "Микросхема 334R5T" -> "334R5T" должно попасть в model_or_part_words
-            for word in query_words:
-                if word != 'микросхема' and word not in brand_words:
-                    if word not in model_or_part_words:
-                        model_or_part_words.append(word)
-            part_type_words = ['микросхема']  # Оставляем только "микросхема" в part_type
-
-        return ' '.join(brand_words).strip(), ' '.join(model_or_part_words).strip(), ' '.join(part_type_words).strip()
-
-    # Обработка поискового запроса
-    if query:
-        # Разделяем запрос на бренд, модель/номер запчасти/маркировку и тип запчасти
-        brand_query, model_or_part_query, part_type_query = split_query(query)
-        normalized_model_query = normalize_text(model_or_part_query) if model_or_part_query else ''
-        original_model_query = model_or_part_query.lower() if model_or_part_query else ''
-        original_brand_query = brand_query.lower() if brand_query else ''
-
-        # Аннотация для нормализованных полей
-        results = results.annotate(
-            normalized_model=Lower(Replace(F('model'), Value(' '), Value(''))),
-            lower_model=Lower(F('model')),
-            lower_part_number=Lower(F('part_number')),
-            lower_brand=Lower(F('brand')),
-            lower_chip_label=Lower(F('chip_label')),  # Добавляем chip_label
-            lower_part_type=Lower(F('part_type'))  # Добавляем part_type для поиска маркировки
-        )
-
-        # Фильтрация
-        filter_conditions = Q()
-        if brand_query and model_or_part_query:
-            # Если указаны и бренд, и модель/номер/маркировка
-            filter_conditions = (
-                Q(lower_brand__icontains=original_brand_query) &
-                (
-                    Q(normalized_model__icontains=normalized_model_query) |
-                    Q(lower_model__icontains=original_model_query) |
-                    Q(lower_part_number__icontains=original_model_query) |
-                    Q(lower_chip_label__icontains=original_model_query) |
-                    Q(lower_part_type__icontains=original_model_query)
-                )
-            )
-        elif brand_query:
-            # Если указан только бренд
-            filter_conditions = Q(lower_brand__icontains=original_brand_query)
-        elif model_or_part_query:
-            # Если указана только модель, номер запчасти или маркировка
-            filter_conditions = (
-                Q(normalized_model__icontains=normalized_model_query) |
-                Q(lower_model__icontains=original_model_query) |
-                Q(lower_part_number__icontains=original_model_query) |
-                Q(lower_chip_label__icontains=original_model_query) |
-                Q(lower_part_type__icontains=original_model_query)
-            )
-
-        if filter_conditions:
-            results = results.filter(filter_conditions)
-
-            # Аннотация для приоритизации
-            results = results.annotate(
-                match_priority=Case(
-                    # Точное совпадение модели, номера запчасти, маркировки или part_type
-                    When(lower_model=original_model_query, then=Value(3)),
-                    When(normalized_model=normalized_model_query, then=Value(3)),
-                    When(lower_part_number=original_model_query, then=Value(3)),
-                    When(lower_chip_label=original_model_query, then=Value(3)),
-                    When(lower_part_type=original_model_query, then=Value(3)),
-                    # Точное совпадение бренда
-                    When(lower_brand=original_brand_query, then=Value(2)),
-                    # Частичное совпадение модели, номера запчасти, маркировки или part_type
-                    When(normalized_model__contains=normalized_model_query, then=Value(2)),
-                    When(lower_part_number__contains=original_model_query, then=Value(2)),
-                    When(lower_chip_label__contains=original_model_query, then=Value(2)),
-                    When(lower_part_type__contains=original_model_query, then=Value(2)),
-                    # Частичное совпадение бренда
-                    When(lower_brand__contains=original_brand_query, then=Value(1)),
-                    default=Value(0),
-                    output_field=IntegerField()
-                )
-            )
-        else:
-            results = results.annotate(match_priority=Value(0, output_field=IntegerField()))
-
-        # Фильтрация по типу запчасти
-        if part_type_query:
-            results = results.filter(part_type__icontains=part_type_query)
-            results = results.annotate(
-                part_type_match=Case(
-                    When(part_type__iexact=part_type_query, then=Value(2)),
-                    When(part_type__icontains=part_type_query, then=Value(1)),
-                    default=Value(0),
-                    output_field=IntegerField()
-                )
-            )
-        else:
-            results = results.annotate(part_type_match=Value(0, output_field=IntegerField()))
-    else:
-        # Если запроса нет, все записи имеют нулевой приоритет
-        results = results.annotate(
-            match_priority=Value(0, output_field=IntegerField()),
-            part_type_match=Value(0, output_field=IntegerField())
-        )
-
-    # Остальные фильтры
-    if device:
-        results = results.filter(device__icontains=device)
-    if brand:
-        results = results.filter(brand__icontains=brand)
-    if model:
-        results = results.filter(model__icontains=model)
-    if part_type:
-        results = results.filter(part_type__icontains=part_type)
-    if region:
-        results = results.filter(user__profile__region__icontains=region)
-    if city:
-        results = results.filter(user__profile__city__icontains=city)
-
-    # Ограничения по подписке
-    now = timezone.now()
-    active_paid = Q(user__profile__tariff__in=[
-        'lite', 'standard', 'standard2', 'standard3', 'premium'
-    ]) & Q(user__profile__subscription_end__isnull=False) & Q(user__profile__subscription_end__gte=now)
-
-    # Подзапроцесс для выбора последних 30 запчастей с количеством > 0
-    subquery = Part.objects.filter(user=OuterRef('user_id'), quantity__gt=0).order_by('-created_at').values('pk')[:30]
-    results = results.filter(active_paid | Q(pk__in=subquery))
-
-    # Сортировка: сначала по совпадению, затем по дате
-    results = results.order_by('-match_priority', '-part_type_match', '-created_at')
-
-    # Пагинация
-    paginator = Paginator(results, 30)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    return render(request, 'warehouse/search.html', {
-        'page_obj': page_obj,
-        'query': query,
-        'device': device,
-        'brand': brand,
-        'model': model,
-        'part_type': part_type,
-        'region': region,
-        'city': city,
-    })
 
 
 @login_required
@@ -845,147 +881,267 @@ except ImportError:
     pass
 
 
+import os
+import uuid
+import time
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.db import transaction
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+
+from .forms import PartForm, PartImageFormSet
+from .models import Part, PartImage
+from tariff.utils import check_parts_limit, check_image_limit
+from .utils import compress_image
+from warehouse.utils import add_watermark_to_image
+from .telegram_utils import send_new_part_notification
+
+# куда складываем временные картинки
+ADD_PART_TMP_DIR = "tmp/add_part"
+
+
+def _cleanup_draft_files(file_names: list[str]):
+    for name in file_names or []:
+        try:
+            default_storage.delete(name)
+        except Exception:
+            pass
+
+
+def _save_uploaded_files_to_tmp(request, draft_token: str) -> list[str]:
+    """
+    Сохраняем ВСЕ файлы из request.FILES во временное хранилище.
+    В сессию кладём только имена файлов (строки).
+    """
+    saved = []
+    user_id = request.user.id
+
+    # request.FILES может содержать несколько ключей (form-0-image, form-1-image, ...)
+    for field_name in request.FILES:
+        for f in request.FILES.getlist(field_name):
+            # уникальное имя
+            safe_name = f"{uuid.uuid4().hex}_{os.path.basename(getattr(f, 'name', 'upload'))}"
+            path = f"{ADD_PART_TMP_DIR}/{user_id}/{draft_token}/{safe_name}"
+            saved_name = default_storage.save(path, f)
+            saved.append(saved_name)
+
+    return saved
+
+
+def _get_draft_from_session(request):
+    draft = request.session.get("add_part_draft")
+    if not isinstance(draft, dict):
+        return None
+    return draft
+
+
+def _pop_draft_from_session(request):
+    draft = request.session.pop("add_part_draft", None)
+    if not isinstance(draft, dict):
+        return None
+    return draft
+
+
 @login_required
 def add_part(request):
     """
-    Добавление запчасти.
-    При отмеченной галочке "send_to_telegram" дублируем объявление в Telegram
-    (после сохранения изображений и коммита транзакции).
+    Добавление запчасти + обработка дубля:
+    - если дубль найден -> показываем confirm_add_part.html
+      и сохраняем фото во временную папку (в session только пути)
+    - если confirm_add -> создаём новую запчасть и переносим фото из tmp
     """
-    profile = getattr(request.user, 'profile', None)
+
+    profile = getattr(request.user, "profile", None)
     if not profile or not profile.city or not profile.phone:
         messages.error(
             request,
-            'Перед началом создания склада, укажите, пожалуйста, город и номер телефона в вашем профиле.'
+            "Перед началом создания склада, укажите, пожалуйста, город и номер телефона в вашем профиле."
         )
-        return redirect('profile')
+        return redirect("profile")
 
-    if request.method == 'POST':
-        # --- Лимит запчастей по тарифу ---
-        if check_parts_limit(request.user):
-            tariff = request.user.profile.tariff
-            if tariff == 'free':
-                error_message = "Вы достигли лимита в 30 запчастей для бесплатного тарифа. Для добавления новых запчастей обновите тариф."
-            elif tariff == 'lite':
-                error_message = "Вы достигли лимита в 500 запчастей для тарифа Lite. Для добавления новых запчастей обновите тариф."
-            elif tariff == 'standard':
-                error_message = "Вы достигли лимита в 2000 запчастей для тарифа Стандарт. Для добавления новых запчастей обновите тариф."
-            elif tariff == 'standard2':
-                error_message = "Вы достигли лимита в 7000 запчастей для тарифа Стандарт 2. Для добавления новых запчастей обновите тариф."
-            elif tariff == 'standard3':
-                error_message = "Вы достигли лимита в 15000 запчастей для тарифа Стандарт 3. Для добавления новых запчастей обновите тариф."
-            else:
-                error_message = "Лимит запчастей достигнут."
-            messages.error(request, error_message)
-            return redirect('profile')
+    # --- GET ---
+    if request.method == "GET":
+        # (необязательно) чистим очень старый черновик, если завис
+        draft = _get_draft_from_session(request)
+        if draft and isinstance(draft.get("created_ts"), (int, float)):
+            if time.time() - draft["created_ts"] > 60 * 60:  # 1 час
+                _cleanup_draft_files(draft.get("tmp_files", []))
+                request.session.pop("add_part_draft", None)
 
-        # --- Восстановление сохранённых данных (если уже был confirm-диалог) ---
-        if 'form_data' in request.session:
-            form_data = request.session.pop('form_data')
-            form_files = request.session.pop('form_files', {})
+        form = PartForm()
+        formset = PartImageFormSet(queryset=PartImage.objects.none())
+        return render(request, "warehouse/add_part.html", {"form": form, "formset": formset})
 
-            # галочка берётся из сохранённых данных
-            send_to_telegram = form_data.get('send_to_telegram') == 'on'
+    # --- POST ---
 
-            form = PartForm(form_data, form_files)
-            formset = PartImageFormSet(form_data, form_files, queryset=PartImage.objects.none())
-        else:
-            # обычный первый POST с формы
-            send_to_telegram = request.POST.get('send_to_telegram') == 'on'
+    # 0) пользователь нажал "Отмена" на confirm-странице
+    if request.POST.get("discard_draft") == "1":
+        draft = _pop_draft_from_session(request)
+        if draft:
+            _cleanup_draft_files(draft.get("tmp_files", []))
+        return redirect("add_part")
 
-            form = PartForm(request.POST, request.FILES)
-            formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
+    # 1) пользователь нажал "Добавить как новую" на confirm-странице
+    if request.POST.get("confirm_add") == "1":
+        draft = _pop_draft_from_session(request)
+        if not draft:
+            messages.error(request, "Черновик добавления устарел. Пожалуйста, попробуйте ещё раз.")
+            return redirect("add_part")
 
-        # --- Валидация формы и формсета ---
-        if not (form.is_valid() and formset.is_valid()):
-            messages.error(request, 'Ошибка валидации формы. Проверьте введенные данные.')
-            if form.errors:
-                messages.error(request, f'Ошибки формы: {form.errors}')
-            if formset.errors:
-                messages.error(request, f'Ошибки formset: {formset.errors}')
-            return render(request, 'warehouse/add_part.html', {
-                'form': form,
-                'formset': formset,
-            })
+        form_data = draft.get("form_data") or {}
+        tmp_files = draft.get("tmp_files") or []
 
-        # --- Проверка лимита картинок для бесплатного тарифа ---
-        images_forms = [f for f in formset if f.cleaned_data and f.cleaned_data.get('image')]
-        if request.user.profile.tariff == 'free' and check_image_limit(request.user, len(images_forms)):
-            messages.error(request, "На бесплатном тарифе можно загрузить только 1 изображение для запчасти.")
-            return render(request, 'warehouse/add_part.html', {
-                'form': form,
-                'formset': formset,
-            })
+        send_to_telegram = (form_data.get("send_to_telegram") == "on")
 
-        # --- Обработка микросхем (добавляем маркировку к типу) ---
-        part_type_value = form.cleaned_data['part_type']
-        chip_marking = (request.POST.get('chip_marking') or '').strip()
+        # валидируем заново (без FILES, фото приделаем вручную ниже)
+        form = PartForm(form_data)
+
+        if not form.is_valid():
+            _cleanup_draft_files(tmp_files)
+            messages.error(request, "Данные формы некорректны. Заполните форму снова.")
+            formset = PartImageFormSet(queryset=PartImage.objects.none())
+            return render(request, "warehouse/add_part.html", {"form": form, "formset": formset})
+
+        # лимит картинок на free проверим ещё раз
+        if request.user.profile.tariff == "free" and tmp_files:
+            if check_image_limit(request.user, len(tmp_files)):
+                _cleanup_draft_files(tmp_files)
+                messages.error(request, "На бесплатном тарифе можно загрузить только 1 изображение для запчасти.")
+                formset = PartImageFormSet(queryset=PartImage.objects.none())
+                return render(request, "warehouse/add_part.html", {"form": form, "formset": formset})
+
+        # микросхема + маркировка
+        part_type_value = form.cleaned_data["part_type"]
+        chip_marking = (form_data.get("chip_marking") or "").strip()
         if part_type_value == "Микросхема" and chip_marking:
-            form.cleaned_data['part_type'] = f"{part_type_value} {chip_marking}"
+            form.cleaned_data["part_type"] = f"{part_type_value} {chip_marking}"
 
-        device = form.cleaned_data['device']
-        brand = form.cleaned_data['brand']
-        model = form.cleaned_data['model']
-        part_type = form.cleaned_data['part_type']
-        condition = form.cleaned_data['condition']
-        color = form.cleaned_data.get('color') or None
-
-        # --- Проверка на дубликат (через общий helper) ---
-        existing_part = find_existing_part_for_user(
-            user=request.user,
-            device=device,
-            brand=brand,
-            model=model,
-            part_type=part_type,
-            condition=condition,
-            color=color,
-        )
-
-        # Если нашли дубликат и ещё не было подтверждения — показываем confirm-страницу
-        if existing_part and 'confirm_add' not in request.POST:
-            # складываем весь POST и FILES в сессию (включая галочку send_to_telegram)
-            request.session['form_data'] = request.POST.dict()
-            request.session['form_files'] = {k: v for k, v in request.FILES.lists()}
-
-            return render(request, 'warehouse/confirm_add_part.html', {
-                'form': form,
-                'formset': formset,
-                'existing_part': existing_part,
-            })
-
-        # --- Сохраняем всё атомарно ---
         with transaction.atomic():
             new_part = form.save(commit=False)
             new_part.user = request.user
             new_part.save()
 
-            # сохранение изображений с компрессией и водяным знаком
-            for img_form in formset:
-                if img_form.cleaned_data and img_form.cleaned_data.get('image'):
-                    image_obj = img_form.save(commit=False)
-                    compressed = compress_image(image_obj.image)
+            # переносим tmp фото -> PartImage
+            # ограничим 5 фото на всякий случай
+            for name in tmp_files[:5]:
+                try:
+                    with default_storage.open(name, "rb") as f:
+                        content = f.read()
+                    original_name = os.path.basename(name).split("_", 1)[-1] or "image.jpg"
+                    cf = ContentFile(content, name=original_name)
+
+                    compressed = compress_image(cf)
                     watermarked = add_watermark_to_image(compressed)
-                    image_obj.image = watermarked
-                    image_obj.part = new_part
-                    image_obj.save()
+                    PartImage.objects.create(part=new_part, image=watermarked)
+                finally:
+                    # удаляем временный файл в любом случае
+                    try:
+                        default_storage.delete(name)
+                    except Exception:
+                        pass
 
-            # --- Отправка в Telegram только если отмечена галочка ---
             if send_to_telegram:
-                transaction.on_commit(
-                    lambda: send_new_part_notification(new_part, request=request)
-                )
+                transaction.on_commit(lambda: send_new_part_notification(new_part, request=request))
 
-        return render(request, 'warehouse/success.html', {
-            'message': 'Запчасть успешно добавлена!'
+        return render(request, "warehouse/success.html", {"message": "Запчасть успешно добавлена!"})
+
+    # 2) обычный первый POST с формы
+    if check_parts_limit(request.user):
+        tariff = request.user.profile.tariff
+        if tariff == "free":
+            msg = "Вы достигли лимита в 30 запчастей для бесплатного тарифа. Для добавления новых запчастей обновите тариф."
+        elif tariff == "lite":
+            msg = "Вы достигли лимита в 500 запчастей для тарифа Lite. Для добавления новых запчастей обновите тариф."
+        elif tariff == "standard":
+            msg = "Вы достигли лимита в 2000 запчастей для тарифа Стандарт. Для добавления новых запчастей обновите тариф."
+        elif tariff == "standard2":
+            msg = "Вы достигли лимита в 7000 запчастей для тарифа Стандарт 2. Для добавления новых запчастей обновите тариф."
+        elif tariff == "standard3":
+            msg = "Вы достигли лимита в 15000 запчастей для тарифа Стандарт 3. Для добавления новых запчастей обновите тариф."
+        else:
+            msg = "Лимит запчастей достигнут."
+        messages.error(request, msg)
+        return redirect("profile")
+
+    send_to_telegram = request.POST.get("send_to_telegram") == "on"
+
+    form = PartForm(request.POST, request.FILES)
+    formset = PartImageFormSet(request.POST, request.FILES, queryset=PartImage.objects.none())
+
+    if not (form.is_valid() and formset.is_valid()):
+        messages.error(request, "Ошибка валидации формы. Проверьте введенные данные.")
+        return render(request, "warehouse/add_part.html", {"form": form, "formset": formset})
+
+    # лимит картинок free
+    images_forms = [f for f in formset if f.cleaned_data and f.cleaned_data.get("image")]
+    if request.user.profile.tariff == "free" and check_image_limit(request.user, len(images_forms)):
+        messages.error(request, "На бесплатном тарифе можно загрузить только 1 изображение для запчасти.")
+        return render(request, "warehouse/add_part.html", {"form": form, "formset": formset})
+
+    # микросхема + маркировка
+    part_type_value = form.cleaned_data["part_type"]
+    chip_marking = (request.POST.get("chip_marking") or "").strip()
+    if part_type_value == "Микросхема" and chip_marking:
+        form.cleaned_data["part_type"] = f"{part_type_value} {chip_marking}"
+
+    device = form.cleaned_data["device"]
+    brand = form.cleaned_data["brand"]
+    model = form.cleaned_data["model"]
+    part_type = form.cleaned_data["part_type"]
+    condition = form.cleaned_data["condition"]
+    color = form.cleaned_data.get("color") or None
+
+    existing_part = find_existing_part_for_user(
+        user=request.user,
+        device=device,
+        brand=brand,
+        model=model,
+        part_type=part_type,
+        condition=condition,
+        color=color,
+    )
+
+    # если дубль — показываем confirm и сохраняем фото во временное хранилище
+    if existing_part:
+        draft_token = uuid.uuid4().hex
+        tmp_files = _save_uploaded_files_to_tmp(request, draft_token)
+
+        # ВАЖНО: в session только JSON-данные (строки/числа/списки)
+        request.session["add_part_draft"] = {
+            "created_ts": int(time.time()),
+            "form_data": request.POST.dict(),   # достаточно для PartForm
+            "tmp_files": tmp_files,
+            "existing_part_id": existing_part.id,
+        }
+
+        return render(request, "warehouse/confirm_add_part.html", {
+            "existing_part": existing_part,
+            "tmp_images_count": len(tmp_files),
         })
 
-    # --- GET — пустая форма ---
-    form = PartForm()
-    formset = PartImageFormSet(queryset=PartImage.objects.none())
-    return render(request, 'warehouse/add_part.html', {
-        'form': form,
-        'formset': formset,
-    })
+    # если не дубль — обычное сохранение
+    with transaction.atomic():
+        new_part = form.save(commit=False)
+        new_part.user = request.user
+        new_part.save()
+
+        for img_form in formset:
+            if img_form.cleaned_data and img_form.cleaned_data.get("image"):
+                image_obj = img_form.save(commit=False)
+                compressed = compress_image(image_obj.image)
+                watermarked = add_watermark_to_image(compressed)
+                image_obj.image = watermarked
+                image_obj.part = new_part
+                image_obj.save()
+
+        if send_to_telegram:
+            transaction.on_commit(lambda: send_new_part_notification(new_part, request=request))
+
+    return render(request, "warehouse/success.html", {"message": "Запчасть успешно добавлена!"})
 
 def get_regions_and_cities(request):
     file_path = os.path.join(settings.BASE_DIR, 'static/json/belarus_regions_and_cities.json')

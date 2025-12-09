@@ -5,368 +5,594 @@
 
 {% block content %}
 <style>
-    /* Общие стили для полей ввода, кнопок и формы */
-    input.form-control, select.form-control, textarea.form-control {
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 8px 12px;
-        transition: all 0.3s ease-in-out;
-        border: 0.5px solid #000;
-        font-size: 14px;
-    }
+  :root{
+    --text:#0f172a;
+    --muted:#64748b;
+    --border: rgba(15, 23, 42, .12);
+    --border2: rgba(148,163,184,.35);
+    --ring: rgba(37, 99, 235, .22);
+    --shadow2: 0 10px 24px rgba(15, 23, 42, .08);
+    --soft: rgba(2,6,23,.02);
+  }
 
-    input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-    }
+  .search-page{ padding: 22px 0 18px; background: transparent; }
 
-    /* Стили для кнопок */
-    .btn-primary {
-        background-color: #28a745;
-        border: none;
-        color: white;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.3s ease-in-out;
-    }
+  .title{
+    margin: 0 0 6px;
+    font-weight: 900;
+    letter-spacing: -.02em;
+    color: var(--text);
+    font-size: clamp(22px, 2.4vw, 32px);
+  }
+  .subtitle{ margin: 0 0 14px; color: var(--muted); font-size: 14px; }
 
-    .btn-primary:hover {
-        background-color: #218838;
-    }
+  .label{
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(15,23,42,.78);
+    letter-spacing: .02em;
+    margin-bottom: 6px;
+  }
 
-    .btn-secondary {
-        background-color: #6c757d;
-        border: none;
-        color: white;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.3s ease-in-out;
-    }
+  .input, .select{
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid var(--border2);
+    background: #fff;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text);
+    box-shadow: 0 6px 16px rgba(15,23,42,.06);
+    transition: box-shadow .18s ease, border-color .18s ease;
+  }
+  .input:focus, .select:focus{
+    outline: none;
+    border-color: rgba(37,99,235,.55);
+    box-shadow: 0 0 0 4px var(--ring), 0 10px 22px rgba(15,23,42,.10);
+  }
 
-    .btn-secondary:hover {
-        background-color: #5a6268;
-    }
+  .btnx{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-weight: 800;
+    font-size: 14px;
+    border: 1px solid transparent;
+    transition: transform .08s ease, box-shadow .18s ease, filter .18s ease;
+    user-select:none;
+    white-space: nowrap;
+  }
+  .btnx:active{ transform: translateY(1px); }
 
-    .btn-warning {
-        background-color: #ffc107;
-        border: none;
-        color: black;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.3s ease-in-out;
-    }
+  .btnx-primary{
+    color:#fff;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 14px 28px rgba(22,163,74,.22);
+  }
+  .btnx-primary:hover{ filter: saturate(1.05); box-shadow: 0 16px 34px rgba(22,163,74,.28); }
 
-    .btn-warning:hover {
-        background-color: #e0a800;
-    }
+  .btnx-ghost{
+    background: #fff;
+    border-color: var(--border);
+    color: rgba(15,23,42,.82);
+    box-shadow: var(--shadow2);
+  }
+  .btnx-ghost:hover{ box-shadow: 0 14px 30px rgba(15,23,42,.12); }
 
-    /* Стили для карточек */
-    .card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        padding: 15px;
-    }
+  .btnx-warning{
+    color:#111827;
+    background: linear-gradient(135deg, #fde047, #f59e0b);
+    box-shadow: 0 14px 28px rgba(245,158,11,.20);
+  }
 
-    .card:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
+  /* ✅ ОДНА СТРОКА: поиск + кнопки */
+  .searchbar{
+    display:flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .searchbar .searchbar-input{
+    flex: 1 1 auto;
+    min-width: 220px;
+  }
+  .searchbar .searchbar-actions{
+    display:flex;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
 
-    /* Стили для таблиц */
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-        background-color: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        overflow: hidden;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+  /* ✅ бейдж на кнопке фильтров */
+  .filters-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    margin-left: 6px;
 
-    /* Стили для заголовков */
-    h2 {
-        color: #333;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1;
+    border-radius: 999px;
 
-    /* Стили для меток */
-    .form-label {
-        color: black;
-        font-weight: bold;
-        font-size: 14px;
-    }
+    color: #0f172a;
+    background: rgba(37,99,235,.12);
+    border: 1px solid rgba(37,99,235,.25);
+  }
+  .filters-badge.is-zero{ display:none; }
 
-    /* Стили для кнопки "Расширенный поиск" */
-    .btn-outline-primary {
-        border-color: #007bff;
-        color: #007bff;
-        transition: all 0.3s ease-in-out;
-        padding: 8px 16px;
-        font-size: 14px;
-    }
+  /* контейнер фильтров */
+  .filters-wrap{
+    border-radius: 22px;
+    background: #fff;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow2);
+    overflow:hidden;
+  }
+  .filters-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(148,163,184,.22);
+    background: #fff;
+  }
+  .filters-title{
+    font-weight: 900;
+    color: rgba(15,23,42,.86);
+    margin:0;
+    font-size: 14px;
+  }
+  .status-muted{ color: var(--muted); font-size: 13px; }
+  .filters-body{ padding: 14px; }
 
-    .btn-outline-primary:hover {
-        background-color: #007bff;
-        color: white;
-    }
+  /* ✅ ЧЕТКИЕ БЛОКИ ФИЛЬТРОВ */
+  .filter-card{
+    border: 1px solid rgba(148,163,184,.40);
+    border-radius: 18px;
+    background: linear-gradient(180deg, var(--soft), #fff 55%);
+    box-shadow: 0 10px 22px rgba(15,23,42,.06);
+    overflow:hidden;
+    height: 100%;
+  }
+  .filter-card__head{
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(148,163,184,.28);
+    background: rgba(2,6,23,.02);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .filter-card__title{
+    margin:0;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .02em;
+    color: rgba(15,23,42,.85);
+    text-transform: uppercase;
+  }
+  .filter-card__body{ padding: 12px; }
 
-    /* Стили для выбора области и города */
-    .input-group .form-select {
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 8px 12px;
-        transition: all 0.3s ease-in-out;
-        border: 0.5px solid #000;
-        font-size: 14px;
-    }
+  .divider{
+    height: 1px;
+    background: rgba(148,163,184,.22);
+    margin: 12px 0;
+  }
 
-    .input-group .form-select:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-    }
+  /* part_type */
+  .pt-tools{ display:flex; gap:8px; flex-wrap:wrap; }
+  .btn-mini{
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    border: 1px solid rgba(148,163,184,.45);
+    background: #fff;
+    color: rgba(15,23,42,.78);
+  }
+  .pt-list{
+    border-radius: 16px;
+    border: 1px solid rgba(148,163,184,.35);
+    background: #fff;
+    overflow:auto;
+    max-height: 280px;
+    padding: 6px;
+  }
+  .pt-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 10px 10px;
+    border-radius: 14px;
+    transition: background-color .12s ease, transform .08s ease;
+    user-select:none;
+  }
+  .pt-item:hover{ background: rgba(37,99,235,.06); }
+  .pt-item:active{ transform: translateY(1px); }
+  .pt-badge{
+    margin-left:auto;
+    font-size: 12px;
+    color: rgba(15,23,42,.55);
+    background: rgba(148,163,184,.18);
+    border: 1px solid rgba(148,163,184,.22);
+    border-radius: 999px;
+    padding: 2px 10px;
+  }
 
-    /* Уменьшение размера блока дополнительных параметров */
-    #advancedSearchCollapse .card {
-        padding: 10px;
-    }
+  /* ✅ компактный блок "не нашли" (не на всю ширину) */
+  .help-row{
+    margin-top: 10px;
+    display:flex;
+    justify-content:flex-end;
+  }
+  .help-card{
+    width: 100%;
+    max-width: 520px;
+    border-radius: 16px;
+    border: 1px solid rgba(148,163,184,.25);
+    background: #fff;
+    box-shadow: 0 10px 22px rgba(15,23,42,.06);
+    padding: 10px 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+  }
+  .help-title{ font-weight: 900; color: rgba(15,23,42,.90); margin:0; font-size: 13px; }
+  .help-sub{ color: var(--muted); font-size: 12px; margin:0; }
 
-    #advancedSearchCollapse h5 {
-        font-size: 16px;
-        margin-bottom: 10px;
-    }
+  /* ✅ отступ перед результатами, чтобы не "липло" */
+  .results-spacer{
+    margin-top: 18px;
+  }
 
-    #advancedSearchCollapse .row {
-        margin-bottom: 10px;
-    }
-
-    #advancedSearchCollapse .form-control {
-        font-size: 13px;
-        padding: 6px 10px;
-    }
-
-    #advancedSearchCollapse .btn-secondary {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
-
-    /* Адаптация для мобильных устройств */
-    @media (max-width: 768px) {
-        #basic-search .row {
-            flex-direction: column;
-        }
-
-        #basic-search .col-md-4, #basic-search .col-md-2 {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        #basic-search .btn-primary {
-            width: 100%;
-        }
-
-        input[type="text"],
-        input[type="search"],
-        select,
-        textarea {
-            font-size: 16px !important;
-            width: 100%;
-            -webkit-appearance: none;
-        }
-
-        .form-control {
-            min-height: 38px;
-            max-height: 44px;
-        }
-    }
-
-    /* Предотвращаем сдвиг контента */
-    html, body {
-        height: 100%;
-        overflow-x: hidden;
-    }
-
-
-
-    @media (max-width: 768px) {
-        input.form-control:focus,
-        select.form-control:focus,
-        textarea.form-control:focus {
-            transition: none;
-            transform: none;
-        }
-    }
+  /* ✅ мобилка: поле сверху, кнопки в ряд снизу */
+  @media (max-width: 768px){
+    .searchbar{ flex-direction: column; }
+    .searchbar .searchbar-actions{ width: 100%; }
+    .searchbar .searchbar-actions .btnx{ flex: 1; }
+    .help-row{ justify-content:stretch; }
+    .help-card{ max-width: none; }
+  }
 </style>
 
-<div class="container">
-    <h2 class="my-5 text-center">Поиск по складам</h2>
+<div class="search-page">
+  <div class="container">
 
-    <!-- Единая форма для базового и расширенного поиска -->
+    <h2 class="title text-center">Поиск по складам</h2>
+
+
     <form method="GET" action="{% url 'search' %}" id="search-form">
-        <!-- Кнопка для переключения расширенного поиска -->
-        <div class="text-center mb-4">
-            <button class="btn btn-outline-primary btn-lg" type="button" id="toggleAdvancedSearch">
-                Расширенный поиск
-            </button>
+
+      <div class="label">Бренд и модель</div>
+      <div class="searchbar">
+        <div class="searchbar-input">
+          <input type="text"
+                 name="q"
+                 class="input"
+                 placeholder="Samsung A53 / Redmi Note 12 / iPhone 11"
+                 value="{{ q }}">
         </div>
 
-        <!-- Расширенный поиск -->
-        <div class="collapse mb-4" id="advancedSearchCollapse">
-            <div class="card p-3">
-                <h5 class="text-center mb-2">Дополнительные параметры</h5>
-                <div class="row g-2 align-items-center">
-                    <div class="col-md-3">
-                        <input type="text" name="device" id="device" class="form-control" placeholder="Устройство" value="{{ request.GET.device }}" list="device-list">
-                        <datalist id="device-list">
-                            <option value="Телефон">
-                            <option value="Планшет">
-                            <option value="Смарт-часы">
-                        </datalist>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" name="brand" id="brand" class="form-control" placeholder="Бренд" value="{{ request.GET.brand }}" list="brand-list">
-                        <datalist id="brand-list"></datalist>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" name="model" id="model" class="form-control" placeholder="Модель" value="{{ request.GET.model }}" list="model-list">
-                        <datalist id="model-list"></datalist>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" name="part_type" id="part_type" class="form-control" placeholder="Тип запчасти" value="{{ request.GET.part_type }}" list="part-type-list">
-                        <datalist id="part-type-list"></datalist>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col text-end">
-                        <button type="button" class="btn btn-secondary" id="reset-advanced-fields">Сбросить параметры</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="searchbar-actions">
+          <button type="submit" class="btnx btnx-primary">🔎 Поиск</button>
 
-        <!-- Базовый поиск -->
-        <div id="basic-search" class="mb-4">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label for="region" class="form-label">Область и город</label>
-                    <div class="input-group">
-                        <select id="id_region" name="region" class="form-select">
-                            <option value="">Вся Беларусь</option>
-                            <option value="Минская область">Минская область</option>
-                            <option value="Гомельская область">Гомельская область</option>
-                            <option value="Гродненская область">Гродненская область</option>
-                            <option value="Витебская область">Витебская область</option>
-                            <option value="Брестская область">Брестская область</option>
-                            <option value="Могилевская область">Могилёвская область</option>
-                        </select>
-                        <select id="id_city" name="city" class="form-select">
-                            <option value="">Все города</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="search" class="form-label">Поиск по ключевым словам</label>
-                    <input type="text" name="q" id="search" class="form-control" placeholder="Пример: Samsung a53 динамик" value="{{ request.GET.q }}">
-                </div>
-                <div class="col-md-2 d-flex align-items-end mb-3">
-                    <button type="submit" class="btn btn-primary btn-block">Поиск</button>
-                </div>
-            </div>
+          <button class="btnx btnx-ghost"
+                  id="filtersToggleBtn"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#filtersCollapse"
+                  aria-expanded="{% if has_filters %}true{% else %}false{% endif %}">
+            ⚙️ Фильтры
+            <span id="filtersBadge" class="filters-badge is-zero">0</span>
+          </button>
         </div>
+      </div>
+
+      <div class="collapse {% if has_filters %}show{% endif %} mt-3" id="filtersCollapse">
+        <div class="filters-wrap">
+          <div class="filters-head">
+            <p class="filters-title">Уточните результаты</p>
+            <span class="status-muted">
+              {% if total_results %}Найдено: {{ total_results }}{% else %}Сначала выполните поиск{% endif %}
+            </span>
+          </div>
+
+          <div class="filters-body">
+            <div class="row g-3">
+
+              <!-- Тип запчасти -->
+              <div class="col-md-4">
+                <div class="filter-card">
+                  <div class="filter-card__head">
+                    <p class="filter-card__title">Тип запчасти</p>
+                  </div>
+                  <div class="filter-card__body">
+
+                    <div class="pt-tools mb-2">
+                      <button type="button" class="btn-mini" id="ptSelectAll">Выбрать всё</button>
+                      <button type="button" class="btn-mini" id="ptClearAll">Снять всё</button>
+                    </div>
+
+                    <input type="text" class="input mb-2" id="ptSearch" placeholder="Поиск типа (например: дисплей)">
+
+                    <div class="pt-list" id="ptList">
+                      {% for row in facet_part_types %}
+                        <label class="pt-item" data-pt="{{ row.part_type|lower }}">
+                          <input type="checkbox"
+                                 class="form-check-input m-0 pt-checkbox"
+                                 name="part_type"
+                                 value="{{ row.part_type }}"
+                                 {% if row.part_type in part_types_selected %}checked{% endif %}>
+                          <span style="font-size:14px; color: rgba(15,23,42,.92); font-weight:700;">
+                            {{ row.part_type }}
+                          </span>
+                          <span class="pt-badge">{{ row.count }}</span>
+                        </label>
+                      {% empty %}
+                        <div class="p-2" style="color:#64748b; font-size:14px;">Нет данных по типам</div>
+                      {% endfor %}
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- Локация -->
+              <div class="col-md-4">
+                <div class="filter-card">
+                  <div class="filter-card__head">
+                    <p class="filter-card__title">Локация</p>
+                  </div>
+                  <div class="filter-card__body">
+
+                    <div class="label">Область</div>
+                    <select name="region" class="select">
+                      <option value="">Вся Беларусь</option>
+                      {% for row in facet_regions %}
+                        <option value="{{ row.region }}" {% if row.region == region %}selected{% endif %}>
+                          {{ row.region }} ({{ row.count }})
+                        </option>
+                      {% endfor %}
+                    </select>
+
+                    <div class="divider"></div>
+
+                    <div class="label">Город</div>
+                    <select name="city" class="select">
+                      <option value="">Все города</option>
+                      {% for row in facet_cities %}
+                        <option value="{{ row.city }}" {% if row.city == city %}selected{% endif %}>
+                          {{ row.city }} ({{ row.count }})
+                        </option>
+                      {% endfor %}
+                    </select>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- Параметры -->
+              <div class="col-md-4">
+                <div class="filter-card">
+                  <div class="filter-card__head">
+                    <p class="filter-card__title">Параметры</p>
+                  </div>
+                  <div class="filter-card__body">
+
+                    <div class="label">Состояние</div>
+                    <select name="condition" class="select">
+                      <option value="">Любое</option>
+                      {% for row in facet_conditions %}
+                        <option value="{{ row.condition }}" {% if row.condition == condition %}selected{% endif %}>
+                          {{ row.condition }} ({{ row.count }})
+                        </option>
+                      {% endfor %}
+                    </select>
+
+                    <div class="divider"></div>
+
+                    <div class="label">Цвет</div>
+                    <select name="color" class="select">
+                      <option value="">Любой</option>
+                      {% for row in facet_colors %}
+                        <option value="{{ row.color }}" {% if row.color == color %}selected{% endif %}>
+                          {{ row.color }} ({{ row.count }})
+                        </option>
+                      {% endfor %}
+                    </select>
+
+                    <div class="divider"></div>
+
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <div class="label">Цена от</div>
+                        <input name="price_min" class="input" value="{{ price_min }}"
+                               placeholder="{% if price_bounds.min_price %}{{ price_bounds.min_price }}{% endif %}">
+                      </div>
+                      <div class="col-6">
+                        <div class="label">до</div>
+                        <input name="price_max" class="input" value="{{ price_max }}"
+                               placeholder="{% if price_bounds.max_price %}{{ price_bounds.max_price }}{% endif %}">
+                      </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="has_images" value="1" id="hasImages" {% if has_images %}checked{% endif %}>
+                      <label class="form-check-label" for="hasImages" style="font-weight:800; color: rgba(15,23,42,.85);">
+                        Только с фото
+                      </label>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="label">Сортировка</div>
+                    <select name="sort" class="select">
+                      <option value="relevance" {% if sort == 'relevance' %}selected{% endif %}>По релевантности</option>
+                      <option value="new" {% if sort == 'new' %}selected{% endif %}>Сначала новые</option>
+                      <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Цена ↑</option>
+                      <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Цена ↓</option>
+                      <option value="qty_desc" {% if sort == 'qty_desc' %}selected{% endif %}>Количество ↓</option>
+                    </select>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-3 flex-wrap">
+              <a class="btnx btnx-ghost" href="{% url 'search' %}?q={{ q|urlencode }}">
+                ↩️ Сбросить фильтры
+              </a>
+
+              <button id="applyFiltersBtn" class="btnx btnx-primary" type="submit">
+                ✅ Применить
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
     </form>
 
-    <!-- Уведомление -->
-    <div class="text mt-4 text-center">
-        <p class="fw-bold">Не нашли нужную запчасть? Отправьте уведомление всем пользователям!</p>
-        <a href="{% url 'send_notification' %}" class="btn btn-warning">Написать уведомление</a>
+    <!-- ✅ компактно справа/под поиском, не на всю ширину -->
+    <div class="help-row">
+      <div class="help-card">
+        <div>
+          <p class="help-title">Не нашли нужную запчасть?</p>
+          <p class="help-sub">Отправьте уведомление всем пользователям.</p>
+        </div>
+        <a href="{% url 'send_notification' %}" class="btnx btnx-warning" style="white-space:nowrap;">
+          ✉️ Написать
+        </a>
+      </div>
     </div>
 
-    <hr>
+    <!-- ✅ отступ, чтобы поиск не "лип" к результатам -->
+    <div class="results-spacer">
+      {% include 'warehouse/search_table.html' %}
+    </div>
 
-    <!-- Таблица результатов -->
-    {% include 'warehouse/search_table.html' %}
+  </div>
 </div>
 
-<!-- Подключение стилей и скриптов -->
 <link rel="stylesheet" href="{% static 'css/search.css' %}">
-<script src="{% static 'js/search.js' %}"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const advancedSearch = document.getElementById("advancedSearchCollapse");
-    const toggleBtn = document.getElementById("toggleAdvancedSearch");
-    const resetAdvancedFieldsButton = document.getElementById("reset-advanced-fields");
-    const form = document.getElementById("search-form");
+  const ptSearch = document.getElementById("ptSearch");
+  const ptList = document.getElementById("ptList");
+  const ptSelectAll = document.getElementById("ptSelectAll");
+  const ptClearAll = document.getElementById("ptClearAll");
 
-    // Восстановление состояния
-    const isAdvancedSearchOpen = localStorage.getItem("advancedSearchOpen") === "true";
-    if (isAdvancedSearchOpen) {
-        advancedSearch.classList.add("show");
-        toggleBtn.textContent = "Скрыть расширенный поиск";
-    }
+  const filtersCollapseEl = document.getElementById("filtersCollapse");
+  const filtersBadge = document.getElementById("filtersBadge");
+  const applyFiltersBtn = document.getElementById("applyFiltersBtn");
 
-    // Сброс параметров
-    function resetAdvancedFields() {
-        document.getElementById("device").value = "";
-        document.getElementById("brand").value = "";
-        document.getElementById("model").value = "";
-        document.getElementById("part_type").value = "";
-    }
+  function activeFiltersCount() {
+    let count = 0;
 
-    // Переключение расширенного поиска
-    toggleBtn.addEventListener("click", function () {
-        let isExpanded = advancedSearch.classList.contains("show");
-        if (isExpanded) {
-            resetAdvancedFields();
-            toggleBtn.textContent = "Расширенный поиск";
-            localStorage.setItem("advancedSearchOpen", "false");
-        } else {
-            toggleBtn.textContent = "Скрыть расширенный поиск";
-            localStorage.setItem("advancedSearchOpen", "true");
-        }
-        new bootstrap.Collapse(advancedSearch, { toggle: true });
+    const ptChecked = document.querySelectorAll('input[name="part_type"]:checked').length;
+    if (ptChecked > 0) count += ptChecked;
+
+    const region = document.querySelector('select[name="region"]');
+    const city = document.querySelector('select[name="city"]');
+    const condition = document.querySelector('select[name="condition"]');
+    const color = document.querySelector('select[name="color"]');
+    const sort = document.querySelector('select[name="sort"]');
+
+    if (region && region.value) count++;
+    if (city && city.value) count++;
+    if (condition && condition.value) count++;
+    if (color && color.value) count++;
+
+    const priceMin = document.querySelector('input[name="price_min"]');
+    const priceMax = document.querySelector('input[name="price_max"]');
+    if (priceMin && (priceMin.value || "").trim()) count++;
+    if (priceMax && (priceMax.value || "").trim()) count++;
+
+    const hasImages = document.querySelector('input[name="has_images"]');
+    if (hasImages && hasImages.checked) count++;
+
+    if (sort && sort.value && sort.value !== "relevance") count++;
+
+    return count;
+  }
+
+  function updateFiltersBadge() {
+    if (!filtersBadge) return;
+    const n = activeFiltersCount();
+    filtersBadge.textContent = n;
+    filtersBadge.classList.toggle("is-zero", n === 0);
+  }
+
+  // part_type: поиск/выбрать всё/снять всё
+  if (ptSearch && ptList) {
+    ptSearch.addEventListener("input", function () {
+      const q = (ptSearch.value || "").trim().toLowerCase();
+      ptList.querySelectorAll("[data-pt]").forEach(el => {
+        const key = (el.getAttribute("data-pt") || "");
+        el.style.display = key.includes(q) ? "" : "none";
+      });
     });
-
-    // Сброс параметров
-    if (resetAdvancedFieldsButton) {
-        resetAdvancedFieldsButton.addEventListener("click", resetAdvancedFields);
-    }
-
-    // Предотвращение зума на мобильных
-    function preventZoom(e) {
-        if (window.innerWidth <= 768) {
-            document.body.style.position = 'fixed';
-            document.body.style.width = '100%';
-            window.scrollTo(0, 0);
-        }
-    }
-
-    function resetPosition(e) {
-        document.body.style.position = '';
-        document.body.style.width = '';
-    }
-
-    const inputs = document.querySelectorAll('input, select');
-    inputs.forEach(input => {
-        input.addEventListener('focus', preventZoom);
-        input.addEventListener('blur', resetPosition);
+  }
+  if (ptSelectAll && ptList) {
+    ptSelectAll.addEventListener("click", function () {
+      ptList.querySelectorAll(".pt-checkbox").forEach(cb => cb.checked = true);
+      updateFiltersBadge();
     });
-
-    window.addEventListener('resize', function() {
-        if (window.innerWidth <= 768) {
-            document.body.style.width = '100%';
-            document.documentElement.style.width = '100%';
-        }
+  }
+  if (ptClearAll && ptList) {
+    ptClearAll.addEventListener("click", function () {
+      ptList.querySelectorAll(".pt-checkbox").forEach(cb => cb.checked = false);
+      updateFiltersBadge();
     });
+  }
+
+  // обновляем бейдж при изменениях
+  if (filtersCollapseEl) {
+    filtersCollapseEl.addEventListener("change", updateFiltersBadge);
+    filtersCollapseEl.addEventListener("input", updateFiltersBadge);
+  }
+  updateFiltersBadge();
+
+  // при "Применить" — свернуть фильтры и запомнить, что они должны быть закрыты
+  if (applyFiltersBtn && filtersCollapseEl) {
+    applyFiltersBtn.addEventListener("click", function () {
+      try { sessionStorage.setItem("filtersCollapsed", "1"); } catch(e) {}
+      if (window.bootstrap && window.bootstrap.Collapse) {
+        const c = window.bootstrap.Collapse.getOrCreateInstance(filtersCollapseEl, { toggle: false });
+        c.hide();
+      } else {
+        filtersCollapseEl.classList.remove("show");
+      }
+    });
+  }
+
+  // после загрузки страницы: если нажимали "Применить" — держим фильтры закрытыми
+  if (filtersCollapseEl) {
+    let shouldClose = false;
+    try { shouldClose = sessionStorage.getItem("filtersCollapsed") === "1"; } catch(e) {}
+    if (shouldClose) {
+      try { sessionStorage.removeItem("filtersCollapsed"); } catch(e) {}
+      if (window.bootstrap && window.bootstrap.Collapse) {
+        const c = window.bootstrap.Collapse.getOrCreateInstance(filtersCollapseEl, { toggle: false });
+        c.hide();
+      } else {
+        filtersCollapseEl.classList.remove("show");
+      }
+    }
+  }
 });
 </script>
-
 {% endblock %}
